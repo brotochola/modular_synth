@@ -1,8 +1,8 @@
-class Amp extends Component {
+class Filter extends Component {
   constructor(app) {
-    super(app, "gainNode");
+    super(app, "filter");
 
-    this.node = new GainNode(this.app.actx);
+    this.node = new BiquadFilterNode(this.app.actx);
     this.node.parent = this;
 
     this.createInputButtons(true);

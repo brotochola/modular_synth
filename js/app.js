@@ -27,10 +27,34 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
+  addFilter() {
+    this.components.push(new Filter(this));
+  }
   addGainNode() {
     this.components.push(new Amp(this));
   }
   createOutputComponent() {
     this.components.push(new Output(this));
+  }
+
+  getAllConnections() {
+    let ret = [];
+    this.components.map((k) =>
+      k.connections.map((c) => {
+        ret.push(c);
+      })
+    );
+
+    return ret;
+  }
+
+  removeConnectionToMe(compo, audioParam) {
+    this.components.map((k) =>
+      k.connections.map((c) => {
+        if (c.to == compo && c.audioParam == audioParam) {
+          c.remove();
+        }
+      })
+    );
   }
 }

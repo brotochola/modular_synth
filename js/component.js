@@ -22,19 +22,46 @@ class Component {
     if (doesItHaveAnAudioInput) this.audioParams.push("in");
 
     for (let inp of this.audioParams) {
+      let audioParamRow = document.createElement("audioParamRow");
       let button = document.createElement("button");
       button.onclick = (e) => this.onAudioParamClicked(inp);
       button.classList.add("input");
       button.classList.add(inp);
-      this.inputElements[inp] = button;
       button.innerText = inp;
-      this.inputsDiv.appendChild(button);
+
+      let textInput;
+      if (inp != "in") {
+        textInput = document.createElement("input");
+        textInput.type = "number";
+        textInput.onchange = (e) => this.onParamChanged(e, inp);
+        textInput.max = 2000;
+        textInput.min = 0;
+        textInput.value = "200";
+        textInput.step = 1;
+      }
+
+      this.inputElements[inp] = { button, textInput };
+
+      audioParamRow.appendChild(button);
+      if (textInput) audioParamRow.appendChild(textInput);
+      this.inputsDiv.appendChild(audioParamRow);
     }
   }
-  onAudioParamClicked(audioParam) {
-    if (!this.app.lastOutputClicked) return;
-    this.app.lastOutputClicked.connect(this, audioParam);
 
+  onParamChanged(event, param) {
+    event.stopPropagation();
+
+    this.node[param].setValueAtTime(event.target.value, 0);
+  }
+  onAudioParamClicked(audioParam) {
+    //  debugger
+
+    if (this.inputElements[audioParam].button.classList.contains("connected")) {
+      this.disconnect(audioParam);
+    } else {
+      if (!this.app.lastOutputClicked) return;
+      this.app.lastOutputClicked.connect(this, audioParam);
+    }
     this.app.lastOutputClicked = null;
   }
 
@@ -42,14 +69,14 @@ class Component {
     this.icon = document.createElement("icon");
     this.container.appendChild(this.icon);
   }
-  disconnect() {
-    for (let c of this.connections) {
-      c.line.parentNode.removeChild(c.line);
-      c = null;
-    }
-    this.connections = [];
+  disconnect(audioParam) {
+    // for (let c of this.connections) {
+    //   c.line.parentNode.removeChild(c.line);
+    //   c = null;
+    // }
+    // this.connections = [];
+    this.app.removeConnectionToMe(this, audioParam);
     this.app.updateAllLines();
-    this.node.disconnect();
   }
   connect(compo, input) {
     // debugger
@@ -61,6 +88,8 @@ class Component {
       let whereToConnect = input == "in" ? conn.to.node : conn.to.node[input];
       this.node.connect(whereToConnect);
     }
+
+    compo.inputElements[input].button.classList.add("connected");
 
     this.drawLine(conn);
   }
@@ -75,6 +104,7 @@ class Component {
     this.dragStartedAt[0] = e.layerX;
     this.dragStartedAt[1] = e.layerY;
   }
+
   createContainer() {
     this.container = document.createElement("component");
     this.container.component = this;
@@ -99,7 +129,13 @@ class Component {
     this.inputsDiv = document.createElement("div");
     this.inputsDiv.classList.add("inputsDiv");
     this.container.appendChild(this.inputsDiv);
+    this.createOutputButton();
 
+    this.container.onmousedown = () => console.log(this);
+  }
+
+  createOutputButton() {
+    if (this.type == "output") return;
     this.outputButton = document.createElement("input");
     this.outputButton.type = "checkbox";
     this.outputButton.classList.add("outputButton");
@@ -107,7 +143,6 @@ class Component {
       this.onOutputClicked(e);
     };
     this.container.appendChild(this.outputButton);
-    this.container.onmousedown = () => console.log(this);
   }
   onOutputClicked(e) {
     e.preventDefault();
@@ -117,7 +152,7 @@ class Component {
   drawLine(conn) {
     let line = createLine(
       conn.from.outputButton,
-      conn.to.inputElements[conn.audioParam]
+      conn.to.inputElements[conn.audioParam].button
     );
     conn.line = line;
     this.app.container.appendChild(line);
