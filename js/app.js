@@ -6,9 +6,6 @@ class App {
     this.components = [];
     this.actx = new AudioContext();
     this.createOutputComponent();
-
-    
-
   }
 
   getOutputComponent() {
@@ -30,6 +27,11 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
+
+  addCompoWorklet() {
+    this.components.push(new CompoWorklet(this));
+  }
+
   addVisualizer() {
     this.components.push(new Visualizer(this));
   }
