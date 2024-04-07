@@ -32,6 +32,11 @@ class App {
     this.components.push(new CompoWorklet(this));
   }
 
+  addFilePlayer() {
+    this.components.push(new FilePlayer(this));
+  }
+  
+
   addVisualizer() {
     this.components.push(new Visualizer(this));
   }
@@ -83,5 +88,20 @@ class App {
         }
       })
     );
+  }
+
+  serialize(){
+    let obj={components:[], connections:[]}
+    for(let comp of this.components){
+      obj.components.push(comp.serialize())
+    }
+    for(let conn of this.getAllConnections()){
+      obj.connections.push(conn.serialize())
+    }
+    return obj
+  }
+
+  loadFromFile(){
+    
   }
 }

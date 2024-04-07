@@ -12,7 +12,8 @@
     <script src="js/delay.js"></script>
     <script src="js/mouse.js"></script>
     <script src="js/noise.js"></script>
-    
+    <script src="js/filePlayer.js"></script>
+
     <script src="js/component_that_uses_worklet.js"></script>
     <script src="js/output.js"></script>
     <script src="js/app.js"></script>
@@ -76,7 +77,7 @@
         }
 
 
-        component.mouse select {
+        component.mouse select, component.filePlayer select {
             position: absolute;
             bottom: 5px;
             left: 5px;
@@ -92,6 +93,14 @@
             border: 1px solid gray;
             width: 150px;
             height: 100px;
+            overflow: hidden;
+        }
+
+        component.filePlayer input[type="file"]{
+            position: absolute;
+            top:5px;
+            lefT:5px;
+
         }
 
         component .inputsDiv {
@@ -167,6 +176,8 @@
     <button onclick="app.addCompoWorklet()">add CompoWorklet</button>
     
     <button onclick="app.addNoise()">add noise</button>
+    <button onclick="app.addFilePlayer()">add filePlayer</button>
+
 
 
     <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>

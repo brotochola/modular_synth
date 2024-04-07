@@ -15,10 +15,9 @@ class Component {
   }
 
   createView() {
-
-    setTimeout(()=>makeChildrenStopPropagation(this.container),500)
+    setTimeout(() => makeChildrenStopPropagation(this.container), 500);
   }
-  
+
   createInputButtons() {
     this.audioParams = Object.keys(Object.getPrototypeOf(this.node)).filter(
       (k) => this.node[k] instanceof AudioParam
@@ -92,7 +91,9 @@ class Component {
     if (compo.type == "output") {
       this.node.connect(this.app.actx.destination);
     } else {
-      let whereToConnect = input.startsWith("in") ? conn.to.node : conn.to.node[input];
+      let whereToConnect = input.startsWith("in")
+        ? conn.to.node
+        : conn.to.node[input];
       this.node.connect(whereToConnect);
     }
 
@@ -172,5 +173,27 @@ class Component {
       conn.line.parentNode.removeChild(conn.line);
       this.drawLine(conn);
     }
+  }
+
+  serialize() {
+    
+    let obj = {
+      audioParams: {},
+      id: this.id,
+      type: this.type,
+      node: {},
+    };
+    if ((this.node || {}).type) {
+      obj.node.type = this.node.type;
+    }
+    for (let audioParam of this.audioParams || []) {
+      if (this.node && this.node[audioParam]) {
+        obj[audioParam] = this.node[audioParam].value;
+      }
+    }
+    obj.x = this.container.style.left;
+    obj.y = this.container.style.top;
+
+    return obj;
   }
 }

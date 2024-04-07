@@ -54,4 +54,13 @@ class Connection {
       console.log(e);
     }
   }
+
+  serialize() {
+    return {
+      from: this.from.id,
+      to: this.to.id,
+      audioParam: this.audioParam,
+      id: this.id,
+    };
+  }
 }
