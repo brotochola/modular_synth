@@ -27,6 +27,9 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
+  addVisualizer(){
+    this.components.push(new Visualizer(this))
+  }
   addFilter() {
     this.components.push(new Filter(this));
   }
@@ -49,6 +52,7 @@ class App {
   }
 
   removeConnectionToMe(compo, audioParam) {
+    // debugger
     this.components.map((k) =>
       k.connections.map((c) => {
         if (c.to == compo && c.audioParam == audioParam) {

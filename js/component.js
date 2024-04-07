@@ -131,7 +131,10 @@ class Component {
     this.container.appendChild(this.inputsDiv);
     this.createOutputButton();
 
-    this.container.onmousedown = () => console.log(this);
+    this.container.onmousedown = () => {
+      window.tc = this;
+      console.log(this);
+    };
   }
 
   createOutputButton() {

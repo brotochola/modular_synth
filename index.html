@@ -6,7 +6,7 @@
     <script src="js/component.js"></script>
     <script src="js/amp.js"></script>
     <script src="js/filter.js"></script>
-
+    <script src="js/visualizer.js"></script>
     <script src="js/oscillator.js"></script>
     <script src="js/output.js"></script>
     <script src="js/app.js"></script>
@@ -90,21 +90,27 @@
         }
 
         component .inputsDiv audioparamrow input[type="number"] {
-            width: 50px; 
-            overflow: hidden;           
-         
+            width: 50px;
+            overflow: hidden;
+
             border-radius: 5px;
         }
 
-        component.filter{
-            height:150px;
+        component.filter {
+            height: 150px;
         }
 
- 
+
 
         audioparamrow {
             display: flex;
             flex-direction: row;
+        }
+
+        component.visualizer canvas{
+            position: absolute;
+            left:2px;
+            top:2px;
         }
     </style>
 </head>
@@ -114,6 +120,8 @@
     <button onclick="app.addFilter()">add filter</button>
 
     <button onclick="app.addGainNode()">add gain node</button>
+    <button onclick="app.addVisualizer()">add visualizer</button>
+
 
     <app></app>
     <script>

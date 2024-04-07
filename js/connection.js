@@ -7,7 +7,7 @@ class Connection {
     this.id = makeid(8);
   }
   remove() {
-    this.from.node.disconnect();
+    this.from.node.disconnect(this.to.node);
     this.to.inputElements[this.audioParam].button.classList.remove("connected")
     this.line.parentNode.removeChild(this.line);
     this.line = null;
