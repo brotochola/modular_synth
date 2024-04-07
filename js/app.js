@@ -39,6 +39,9 @@ class App {
   addVisualizer() {
     this.components.push(new Visualizer(this));
   }
+  addCustomProcessor() {
+    this.components.push(new CustomProcessorComponent(this));
+  }
   addFilter() {
     this.components.push(new Filter(this));
   }
@@ -122,13 +125,21 @@ class App {
     for (let c of obj.connections) {
       this.addSerializedConnection(c);
     }
-    setTimeout(() => this.updateAllLines(), 600);
+    setTimeout(() => {
+      this.resetAllConnections()
+      this.actx.resume()
+      this.updateAllLines()
+    }, 600);
   }
   addSerializedConnection(conn) {
     let componentsFrom = app.components.filter((k) => k.id == conn.from);
     let componentsTo = app.components.filter((k) => k.id == conn.to);
     if (componentsFrom.length && componentsTo.length) {
-      componentsFrom[0].connect(componentsTo[0], conn.audioParam);
+      try {
+        componentsFrom[0].connect(componentsTo[0], conn.audioParam);
+      } catch (e) {
+        console.warn(e);
+      }
     }
   }
   addSerializedComponent(comp) {
@@ -136,15 +147,15 @@ class App {
     this.components.push(new c(this, comp));
   }
 
-  save(){
-    let name=prompt("name the instrument")
-    if(!name) return
-    localStorage[name]=JSON.stringify(this.serialize())
+  save() {
+    let name = prompt("name the instrument");
+    if (!name) return;
+    localStorage[name] = JSON.stringify(this.serialize());
   }
-  load(){
-    let name=prompt("which one")
-    if(!name)return
-    if(!localStorage[name])return
-    this.loadFromFile(JSON.parse(localStorage[name]))
+  load() {
+    let name = prompt("which one");
+    if (!name) return;
+    if (!localStorage[name]) return;
+    this.loadFromFile(JSON.parse(localStorage[name]));
   }
 }

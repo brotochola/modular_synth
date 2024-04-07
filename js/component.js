@@ -201,7 +201,7 @@ class Component {
   }
   updateMyLines() {
     for (let conn of this.connections) {
-      conn.line.parentNode.removeChild(conn.line);
+      conn.line?.parentNode?.removeChild(conn.line);
       this.drawLine(conn);
     }
   }
@@ -214,6 +214,9 @@ class Component {
       constructor: this.constructor.name,
       node: {},
     };
+    if(this.formula){
+      obj.formula = this.formula
+    }
     if ((this.node || {}).type) {
       obj.node.type = this.node.type;
     }
