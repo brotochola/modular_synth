@@ -6,6 +6,9 @@ class App {
     this.components = [];
     this.actx = new AudioContext();
     this.createOutputComponent();
+
+    
+
   }
 
   getOutputComponent() {
@@ -44,6 +47,9 @@ class App {
   }
   addMerger() {
     this.components.push(new Merger(this));
+  }
+  addNoise() {
+    this.components.push(new Noise(this));
   }
   addMouse() {
     this.components.push(new Mouse(this));

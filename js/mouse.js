@@ -2,33 +2,46 @@ class Mouse extends Component {
   constructor(app) {
     super(app, "mouse");
 
+    ////
+    //ConstantSourceNode
+
     // this.osc = new OscillatorNode(this.app.actx);
     // this.osc.type = "square";
     // this.osc.frequency.value = 0;
+
+    this.bufferSize = 2 * this.app.actx.sampleRate;
+    this.noiseBuffer = this.app.actx.createBuffer(
+      1,
+      this.bufferSize,
+      this.app.actx.sampleRate
+    );
+    this.output = this.noiseBuffer.getChannelData(0);
+    for (var i = 0; i < this.bufferSize; i++) {
+      this.output[i] = 1;
+    }
+
+    this.generator = this.app.actx.createBufferSource();
+    this.generator.buffer = this.noiseBuffer;
+    this.generator.loop = true;
+    this.generator.start(0);
+    
+
     this.node = new GainNode(this.app.actx);
+    this.node.parent = this;
+    this.node.gain.value = 1;
+    this.generator.connect(this.node)
+
     // this.osc.connect(this.node);
     this.selectedCoord = "x";
 
     this.app.container.addEventListener("mousemove", (e) => {
-      
-      let height = window.innerWidth
-      let width = window.innerHeight
+      let height = window.innerWidth;
+      let width = window.innerHeight;
       this.x = (width - e.pageX) / width;
       this.y = (height - e.pageY) / height;
 
       this.node.gain.value = this[this.selectedCoord];
     });
-
-    this.app.actx.audioWorklet
-      .addModule("js/fixedValueAudioWorklet.js")
-      .then(() => {
-        this.audioWorkletNode = new AudioWorkletNode(
-          this.app.actx,
-          "fixed-value-worklet"
-        );
-
-        this.audioWorkletNode.connect(this.node);
-      });
 
     this.createSelect();
   }
