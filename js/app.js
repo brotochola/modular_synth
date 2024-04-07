@@ -122,13 +122,13 @@ class App {
       this.addSerializedComponent(comp);
     }
 
-    for (let c of obj.connections) {
-      this.addSerializedConnection(c);
-    }
     setTimeout(() => {
-      this.resetAllConnections()
-      this.actx.resume()
-      this.updateAllLines()
+      for (let c of obj.connections) {
+        this.addSerializedConnection(c);
+      }
+      this.resetAllConnections();
+      this.actx.resume();
+      this.updateAllLines();
     }, 600);
   }
   addSerializedConnection(conn) {

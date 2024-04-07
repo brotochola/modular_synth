@@ -21,17 +21,17 @@ class Component {
       let keys = Object.keys(this.serializedData.audioParams);
       for (let key of keys) {
         this.node[key].value = this.serializedData.audioParams[key];
-        this.inputElements[key].textInput.value=this.serializedData.audioParams[key]
+        this.inputElements[key].textInput.value =
+          this.serializedData.audioParams[key];
       }
 
-      if(this.serializedData.node?.type){
-        this.node.type=this.serializedData.node.type
+      if (this.serializedData.node?.type) {
+        this.node.type = this.serializedData.node.type;
       }
-
     }
 
-    this.container.style.left=this.serializedData.x
-    this.container.style.top=this.serializedData.y
+    this.container.style.left = this.serializedData.x;
+    this.container.style.top = this.serializedData.y;
   }
 
   createView() {
@@ -109,15 +109,17 @@ class Component {
     this.app.updateAllLines();
   }
 
-  remove(){
-    this.app.removeAllConnections(this);    
+  remove() {
+    this.app.removeAllConnections(this);
     this.container.parentElement.removeChild(this.container);
-    this.app.components=this.app.components.filter(c=>c!=this)
-
+    this.app.components = this.app.components.filter((c) => c != this);
   }
   connect(compo, input) {
     // debugger
     let conn = new Connection(this, compo, input);
+    // debugger
+    compo.inputElements[input].button.classList.add("connected");
+
     this.connections.push(conn);
     if (compo.type.toLowerCase() == "output") {
       this.node.connect(this.app.actx.destination);
@@ -125,10 +127,9 @@ class Component {
       let whereToConnect = input.startsWith("in")
         ? conn.to.node
         : conn.to.node[input];
-      this.node.connect(whereToConnect);
+      let whichInput = input.split("_")[1];
+      this.node.connect(whereToConnect, undefined, whichInput);
     }
-
-    compo.inputElements[input].button.classList.add("connected");
 
     this.drawLine(conn);
   }
@@ -214,8 +215,8 @@ class Component {
       constructor: this.constructor.name,
       node: {},
     };
-    if(this.formula){
-      obj.formula = this.formula
+    if (this.formula) {
+      obj.formula = this.formula;
     }
     if ((this.node || {}).type) {
       obj.node.type = this.node.type;
