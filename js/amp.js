@@ -5,7 +5,7 @@ class Amp extends Component {
     this.node = new GainNode(this.app.actx);
     this.node.parent = this;
 
-    this.createInputButtons(true);
+    this.createInputButtons();
   }
   // creategainKnob() {
   //   this.gainKnob = document.createElement("input");

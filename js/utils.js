@@ -1,6 +1,6 @@
 function makeChildrenStopPropagation(elem) {
   Array.from(elem.children).map((child) => {
-    child.addEventListener("press", (e) => {
+    child.addEventListener("mousedown", (e) => {
       e.stopPropagation();
     });
   });
@@ -9,7 +9,7 @@ function makeChildrenStopPropagation(elem) {
 function makeid(length) {
   let result = "";
   const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    "abcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
   let counter = 0;
   while (counter < length) {

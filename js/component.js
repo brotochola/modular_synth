@@ -14,12 +14,19 @@ class Component {
     this.inputElements = {};
   }
 
-  createInputButtons(doesItHaveAnAudioInput) {
+  createView() {
+
+    setTimeout(()=>makeChildrenStopPropagation(this.container),500)
+  }
+  
+  createInputButtons() {
     this.audioParams = Object.keys(Object.getPrototypeOf(this.node)).filter(
       (k) => this.node[k] instanceof AudioParam
     );
 
-    if (doesItHaveAnAudioInput) this.audioParams.push("in");
+    for (let i = 0; i < this.node.numberOfInputs; i++) {
+      this.audioParams.push("in_" + i);
+    }
 
     for (let inp of this.audioParams) {
       let audioParamRow = document.createElement("audioParamRow");
@@ -30,7 +37,7 @@ class Component {
       button.innerText = inp;
 
       let textInput;
-      if (inp != "in") {
+      if (!inp.startsWith("in")) {
         textInput = document.createElement("input");
         textInput.type = "number";
         textInput.onchange = (e) => this.onParamChanged(e, inp);
@@ -85,7 +92,7 @@ class Component {
     if (compo.type == "output") {
       this.node.connect(this.app.actx.destination);
     } else {
-      let whereToConnect = input == "in" ? conn.to.node : conn.to.node[input];
+      let whereToConnect = input.startsWith("in") ? conn.to.node : conn.to.node[input];
       this.node.connect(whereToConnect);
     }
 

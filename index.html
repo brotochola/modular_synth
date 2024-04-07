@@ -7,7 +7,10 @@
     <script src="js/amp.js"></script>
     <script src="js/filter.js"></script>
     <script src="js/visualizer.js"></script>
+    <script src="js/channelMerger.js"></script>
     <script src="js/oscillator.js"></script>
+    <script src="js/delay.js"></script>
+    <script src="js/mouse.js"></script>
     <script src="js/output.js"></script>
     <script src="js/app.js"></script>
 
@@ -107,10 +110,15 @@
             flex-direction: row;
         }
 
-        component.visualizer canvas{
+        component.visualizer canvas {
             position: absolute;
-            left:2px;
-            top:2px;
+            left: 2px;
+            top: 2px;
+        }
+
+        .line {
+            position: fixed;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -118,9 +126,13 @@
 <body>
     <button onclick="app.addOscillator()">add osc</button>
     <button onclick="app.addFilter()">add filter</button>
-
+    <button onclick="app.addDelay()">add Delay</button>
+    <button onclick="app.addMerger()">add merger</button>
     <button onclick="app.addGainNode()">add gain node</button>
     <button onclick="app.addVisualizer()">add visualizer</button>
+    <button onclick="app.addMouse()">add mouse</button>
+
+    <button onclick="app.resetAllConnections()">!! reset all connections</button>
 
 
     <app></app>

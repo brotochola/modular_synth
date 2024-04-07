@@ -2,7 +2,8 @@ class Output extends Component {
   constructor(app) {
     super(app, "output");
     this.node = null;
-    this.createInput();
+    this.id="output"
+    this.createInput() 
   }
 
   createInput() {

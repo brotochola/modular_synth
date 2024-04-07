@@ -27,8 +27,8 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
-  addVisualizer(){
-    this.components.push(new Visualizer(this))
+  addVisualizer() {
+    this.components.push(new Visualizer(this));
   }
   addFilter() {
     this.components.push(new Filter(this));
@@ -38,6 +38,15 @@ class App {
   }
   createOutputComponent() {
     this.components.push(new Output(this));
+  }
+  addDelay() {
+    this.components.push(new Delay(this));
+  }
+  addMerger() {
+    this.components.push(new Merger(this));
+  }
+  addMouse() {
+    this.components.push(new Mouse(this));
   }
 
   getAllConnections() {
@@ -49,6 +58,12 @@ class App {
     );
 
     return ret;
+  }
+
+  resetAllConnections() {
+    for (let c of this.getAllConnections()) {
+      c.reset();
+    }
   }
 
   removeConnectionToMe(compo, audioParam) {

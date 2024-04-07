@@ -7,7 +7,7 @@ class Visualizer extends Component {
 
     this.bufferLength = this.node.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
-    this.createInputButtons(true);
+    this.createInputButtons();
     this.createCanvas();
     this.draw()
   }
@@ -52,28 +52,5 @@ class Visualizer extends Component {
 
     requestAnimationFrame(() => this.draw());
   }
-  // creategainKnob() {
-  //   this.gainKnob = document.createElement("input");
-  //   this.gainKnob.type = "number";
-  //   this.gainKnob.onchange = (e) => this.onInputChange(e);
-  //   this.gainKnob.max = 5;
-  //   this.gainKnob.min = 0;
-  //   this.gainKnob.value = "1";
-  //   this.gainKnob.step = 1;
-  //   ///appends
-  //   this.container.appendChild(this.gainKnob);
-  // }
 
-  // onInputChange(e) {
-  //   e.stopPropagation();
-  //   console.log(this.gainKnob.value);
-  //   this.node.gain.setValueAtTime(this.gainKnob.value, 0);
-  // }
-
-  createView() {
-    // this.createConnectButton();
-
-    // this.creategainKnob();
-    makeChildrenStopPropagation(this.container);
-  }
 }
