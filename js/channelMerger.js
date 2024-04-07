@@ -1,6 +1,6 @@
 class Merger extends Component {
-  constructor(app) {
-    super(app, "merger");
+  constructor(app,serializedData) {
+    super(app,serializedData);
 
     
       

@@ -1,8 +1,10 @@
 class Oscillator extends Component {
-  constructor(app) {
-    super(app, "oscillator");
+  constructor(app, serializedData) {
+    super(app, serializedData);
 
     this.node = new OscillatorNode(this.app.actx);
+    if(serializedData?.node.type) this.node.type = serializedData.node.type;
+    
     this.node.parent = this;
     this.node.frequency.value = 150 + Math.random() * 50;
     this.node.start();
@@ -25,7 +27,4 @@ class Oscillator extends Component {
   handleTypeChange(e) {
     this.node.type = this.typeSelect.value;
   }
-
-
-
 }

@@ -1,6 +1,6 @@
 class FilePlayer extends Component {
-  constructor(app) {
-    super(app, "filePlayer");
+  constructor(app,serializedData) {
+    super(app,serializedData);
 
     this.createInputFile();
     this.selectedValue="r"

@@ -1,6 +1,6 @@
 class Filter extends Component {
-  constructor(app) {
-    super(app, "filter");
+  constructor(app,serializedData) {
+    super(app,serializedData);
 
     this.node = new BiquadFilterNode(this.app.actx);
     this.node.parent = this;

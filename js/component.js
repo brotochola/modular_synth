@@ -1,21 +1,44 @@
 class Component {
-  constructor(app, type) {
+  constructor(app, serializedData) {
     this.app = app;
-    this.type = type;
+    this.type = this.constructor.name;
+    this.serializedData = serializedData;
 
     this.dragStartedAt = [0, 0];
     this.connections = [];
     this.running = false;
-    this.id = makeid(8);
+    this.id = serializedData?.id ? serializedData.id : makeid(8);
 
     this.createContainer();
     this.createIcon();
     this.createView();
     this.inputElements = {};
   }
+  loadFromSerializedData() {
+    if (!this.serializedData) return;
+
+    if (this.node) {
+      let keys = Object.keys(this.serializedData.audioParams);
+      for (let key of keys) {
+        this.node[key].value = this.serializedData.audioParams[key];
+        this.inputElements[key].textInput.value=this.serializedData.audioParams[key]
+      }
+
+      if(this.serializedData.node?.type){
+        this.node.type=this.serializedData.node.type
+      }
+
+    }
+
+    this.container.style.left=this.serializedData.x
+    this.container.style.top=this.serializedData.y
+  }
 
   createView() {
-    setTimeout(() => makeChildrenStopPropagation(this.container), 500);
+    setTimeout(() => {
+      makeChildrenStopPropagation(this.container);
+      this.loadFromSerializedData();
+    }, 500);
   }
 
   createInputButtons() {
@@ -38,6 +61,7 @@ class Component {
       let textInput;
       if (!inp.startsWith("in")) {
         textInput = document.createElement("input");
+        textInput.classList.add(inp);
         textInput.type = "number";
         textInput.onchange = (e) => this.onParamChanged(e, inp);
         textInput.max = 2000;
@@ -84,11 +108,18 @@ class Component {
     this.app.removeConnectionToMe(this, audioParam);
     this.app.updateAllLines();
   }
+
+  remove(){
+    this.app.removeAllConnections(this);    
+    this.container.parentElement.removeChild(this.container);
+    this.app.components=this.app.components.filter(c=>c!=this)
+
+  }
   connect(compo, input) {
     // debugger
     let conn = new Connection(this, compo, input);
     this.connections.push(conn);
-    if (compo.type == "output") {
+    if (compo.type.toLowerCase() == "output") {
       this.node.connect(this.app.actx.destination);
     } else {
       let whereToConnect = input.startsWith("in")
@@ -120,7 +151,7 @@ class Component {
     this.container.ondragend = (e) => this.ondragend(e);
     this.container.ondragstart = (e) => this.ondragstart(e);
 
-    if (this.type == "output") {
+    if (this.type.toLowerCase() == "output") {
       this.container.style.left = Math.floor(window.innerWidth * 0.5) + "px";
       this.container.style.top = Math.floor(window.innerHeight * 0.5) + "px";
     } else {
@@ -146,7 +177,7 @@ class Component {
   }
 
   createOutputButton() {
-    if (this.type == "output") return;
+    if (this.type.toLowerCase() == "output") return;
     this.outputButton = document.createElement("input");
     this.outputButton.type = "checkbox";
     this.outputButton.classList.add("outputButton");
@@ -176,11 +207,11 @@ class Component {
   }
 
   serialize() {
-    
     let obj = {
-      audioParams: {},
       id: this.id,
+      audioParams: {},
       type: this.type,
+      constructor: this.constructor.name,
       node: {},
     };
     if ((this.node || {}).type) {
@@ -188,7 +219,7 @@ class Component {
     }
     for (let audioParam of this.audioParams || []) {
       if (this.node && this.node[audioParam]) {
-        obj[audioParam] = this.node[audioParam].value;
+        obj.audioParams[audioParam] = this.node[audioParam].value;
       }
     }
     obj.x = this.container.style.left;

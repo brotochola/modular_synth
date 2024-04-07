@@ -1,6 +1,6 @@
 class CompoWorklet extends Component {
-  constructor(app) {
-    super(app, "worklet");
+  constructor(app,serializedData) {
+    super(app,serializedData);
 
     this.app.actx.audioWorklet.addModule("js/whiteNoiseWorklet.js").then(() => {
       this.node = new AudioWorkletNode(this.app.actx, "white-noise-processor", {

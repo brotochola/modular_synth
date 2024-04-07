@@ -10,7 +10,7 @@ class App {
 
   getOutputComponent() {
     for (let c of this.components) {
-      if (c.type == "output") {
+      if (c.type.toLowerCase() == "output") {
         return c;
       }
     }
@@ -35,7 +35,6 @@ class App {
   addFilePlayer() {
     this.components.push(new FilePlayer(this));
   }
-  
 
   addVisualizer() {
     this.components.push(new Visualizer(this));
@@ -90,18 +89,62 @@ class App {
     );
   }
 
-  serialize(){
-    let obj={components:[], connections:[]}
-    for(let comp of this.components){
-      obj.components.push(comp.serialize())
-    }
-    for(let conn of this.getAllConnections()){
-      obj.connections.push(conn.serialize())
-    }
-    return obj
+  removeAllConnections(compo) {
+    // debugger
+    this.components.map((k) =>
+      k.connections.map((c) => {
+        if (c.to == compo || c.from == compo) {
+          c.remove();
+        }
+      })
+    );
   }
 
-  loadFromFile(){
-    
+  serialize() {
+    let obj = { components: [], connections: [] };
+    for (let comp of this.components) {
+      obj.components.push(comp.serialize());
+    }
+    for (let conn of this.getAllConnections()) {
+      obj.connections.push(conn.serialize());
+    }
+    return obj;
+  }
+
+  loadFromFile(obj) {
+    for (let c of this.components) {
+      c.remove();
+    }
+    for (let comp of obj.components) {
+      this.addSerializedComponent(comp);
+    }
+
+    for (let c of obj.connections) {
+      this.addSerializedConnection(c);
+    }
+    setTimeout(() => this.updateAllLines(), 600);
+  }
+  addSerializedConnection(conn) {
+    let componentsFrom = app.components.filter((k) => k.id == conn.from);
+    let componentsTo = app.components.filter((k) => k.id == conn.to);
+    if (componentsFrom.length && componentsTo.length) {
+      componentsFrom[0].connect(componentsTo[0], conn.audioParam);
+    }
+  }
+  addSerializedComponent(comp) {
+    let c = eval(comp.constructor);
+    this.components.push(new c(this, comp));
+  }
+
+  save(){
+    let name=prompt("name the instrument")
+    if(!name) return
+    localStorage[name]=JSON.stringify(this.serialize())
+  }
+  load(){
+    let name=prompt("which one")
+    if(!name)return
+    if(!localStorage[name])return
+    this.loadFromFile(JSON.parse(localStorage[name]))
   }
 }

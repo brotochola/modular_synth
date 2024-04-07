@@ -1,6 +1,6 @@
 class Output extends Component {
-  constructor(app) {
-    super(app, "output");
+  constructor(app,serializedData) {
+    super(app,serializedData);
     this.node = null;
     this.id="output"
     this.createInput() 

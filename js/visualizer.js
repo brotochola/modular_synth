@@ -1,6 +1,6 @@
 class Visualizer extends Component {
-  constructor(app) {
-    super(app, "visualizer");
+  constructor(app,serializedData) {
+    super(app,serializedData);
     this.node = app.actx.createAnalyser();
     this.node.parent = this;
     this.node.fftSize = 1024;

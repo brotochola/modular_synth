@@ -1,6 +1,6 @@
 class Noise extends Component {
-  constructor(app) {
-    super(app, "noise");
+  constructor(app,serializedData) {
+    super(app,serializedData);
 
     // this.osc = new OscillatorNode(this.app.actx);
     // this.osc.type = "square";

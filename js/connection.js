@@ -39,7 +39,7 @@ class Connection {
       ? this.to.node
       : this.to.node[this.audioParam];
 
-    if (this.to.type == "output") {
+    if (this.to.type.toLowerCase() == "output") {
       whereToConnect = this.to.app.actx.destination;
     }
 

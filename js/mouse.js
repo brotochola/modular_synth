@@ -1,6 +1,6 @@
 class Mouse extends Component {
-  constructor(app) {
-    super(app, "mouse");
+  constructor(app,serializedData) {
+    super(app,serializedData);
 
     ////
     //ConstantSourceNode
