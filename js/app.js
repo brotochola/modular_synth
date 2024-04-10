@@ -1,7 +1,7 @@
 class App {
   constructor(elem) {
     this.container = elem;
-
+    this.SAVE_PREFIX="modular_synth_"
     // this.container.ondrop=(e)=>this.onDrop(e)
     this.components = [];
     this.actx = new AudioContext();
@@ -32,8 +32,8 @@ class App {
     this.components.push(new CompoWorklet(this));
   }
 
-  addFilePlayer() {
-    this.components.push(new FilePlayer(this));
+  addImagePlayer() {
+    this.components.push(new ImagePlayer(this));
   }
 
   addVisualizer() {
@@ -62,6 +62,10 @@ class App {
   }
   addMouse() {
     this.components.push(new Mouse(this));
+  }
+
+  addImageMaker(){
+    this.components.push(new ImageMaker(this));
   }
 
   getAllConnections() {
@@ -150,12 +154,18 @@ class App {
   save() {
     let name = prompt("name the instrument");
     if (!name) return;
-    localStorage[name] = JSON.stringify(this.serialize());
+    localStorage[this.SAVE_PREFIX+name] = JSON.stringify(this.serialize());
   }
   load() {
-    let name = prompt("which one");
+    let list=""
+    Object.keys(localStorage).forEach(key =>{
+      if(key.startsWith(this.SAVE_PREFIX)){
+        list+=key+"\n"
+      }
+    })
+    let name = prompt("which one \n"+list);
     if (!name) return;
-    if (!localStorage[name]) return;
-    this.loadFromFile(JSON.parse(localStorage[name]));
+    if (!localStorage[this.SAVE_PREFIX+name]) return;
+    this.loadFromFile(JSON.parse(localStorage[this.SAVE_PREFIX+name]));
   }
 }

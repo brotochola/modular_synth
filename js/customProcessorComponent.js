@@ -8,7 +8,7 @@ class CustomProcessorComponent extends Component {
     this.createNode();
   }
   createNode() {
-    this.app.actx.audioWorklet.addModule("js/customProcessor.js").then(() => {
+    this.app.actx.audioWorklet.addModule("js/audioWorklets/customProcessor.js").then(() => {
       this.node = new AudioWorkletNode(this.app.actx, "custom-proc", {
         numberOfInputs: 2,
         numberOfOutputs: 1,

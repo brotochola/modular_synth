@@ -115,21 +115,18 @@ class Component {
     this.app.components = this.app.components.filter((c) => c != this);
   }
   connect(compo, input) {
-    // debugger
+    //CREATE CONNECTION INSTANCE
     let conn = new Connection(this, compo, input);
-    // debugger
+    //ADD CLASS TO HTML ELEMENT
     compo.inputElements[input].button.classList.add("connected");
-
+    //ADD THE CONNECTION INSTANCE TO THE ARRAY OF CONNECTIONS OF THIS COMPONENT
     this.connections.push(conn);
-    if (compo.type.toLowerCase() == "output") {
-      this.node.connect(this.app.actx.destination);
-    } else {
-      let whereToConnect = input.startsWith("in")
-        ? conn.to.node
-        : conn.to.node[input];
-      let whichInput = input.split("_")[1];
-      this.node.connect(whereToConnect, undefined, whichInput);
-    }
+
+    let where = figureOutWhereToConnect(this, compo, input, conn);
+    // debugger
+    where.whichInput
+      ? this.node.connect(where.whereToConnect, undefined, where.whichInput)
+      : this.node.connect(where.whereToConnect);
 
     this.drawLine(conn);
   }
@@ -157,9 +154,9 @@ class Component {
       this.container.style.top = Math.floor(window.innerHeight * 0.5) + "px";
     } else {
       this.container.style.left =
-        Math.floor(window.innerWidth * Math.random()) + "px";
+        Math.floor((window.innerWidth - 200) * Math.random()) + "px";
       this.container.style.top =
-        Math.floor(window.innerHeight * Math.random()) + "px";
+        Math.floor((window.innerHeight - 250) * Math.random() - 100) + "px";
     }
 
     this.app.container.appendChild(this.container);
@@ -178,7 +175,11 @@ class Component {
   }
 
   createOutputButton() {
-    if (this.type.toLowerCase() == "output") return;
+    if (
+      this.type.toLowerCase() == "output" ||
+      this.type.toLowerCase() == "imagemaker"
+    )
+      return;
     this.outputButton = document.createElement("input");
     this.outputButton.type = "checkbox";
     this.outputButton.classList.add("outputButton");

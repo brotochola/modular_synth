@@ -7,12 +7,23 @@ class Connection {
     this.id = makeid(8);
   }
   remove() {
-    let whereToConnect = this.audioParam.startsWith("in")
-      ? this.to.node
-      : this.to.node[this.audioParam];
+    let where = figureOutWhereToConnect(
+      this.from,
+      this.to,
+      this.audioParam,
+      this
+    );
+
     try {
-      this.from.node.disconnect(whereToConnect);
+      where.whichInput
+        ? this.from.node.disconnect(
+            where.whereToConnect,
+            undefined,
+            where.whichInput
+          )
+        : this.from.node.disconnect(where.whereToConnect);
     } catch (e) {
+      debugger;
       console.log(e);
     }
     this.to.inputElements[this.audioParam].button.classList.remove("connected");
@@ -24,32 +35,37 @@ class Connection {
   }
 
   reset() {
-    console.log(
-      "resetting ",
-      this.from.type,
-      this.from.id,
-      " -> ",
-      this.to.type,
-      this.to.id,
-      "(",
+    // console.log(
+    //   "resetting ",
+    //   this.from.type,
+    //   this.from.id,
+    //   " -> ",
+    //   this.to.type,
+    //   this.to.id,
+    //   "(",
+    //   this.audioParam,
+    //   ")"
+    // );
+    let where = figureOutWhereToConnect(
+      this.from,
+      this.to,
       this.audioParam,
-      ")"
+      this
     );
-    let whereToConnect = this.audioParam.startsWith("in")
-      ? this.to.node
-      : this.to.node[this.audioParam];
-
-    if (this.to.type.toLowerCase() == "output") {
-      whereToConnect = this.to.app.actx.destination;
-    }
 
     try {
-      this.from.node.disconnect(whereToConnect);
+      this.from.node.disconnect(
+        where.whereToConnect,
+        undefined,
+        where.whichInput
+      );
     } catch (e) {
+      debugger;
       console.log(e);
     }
+
     try {
-      this.from.node.connect(whereToConnect);
+      this.from.node.connect(where.whereToConnect, undefined, where.whichInput);
     } catch (e) {
       console.log(e);
     }

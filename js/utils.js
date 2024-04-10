@@ -5,11 +5,13 @@ function makeChildrenStopPropagation(elem) {
     });
   });
 }
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 function makeid(length) {
   let result = "";
-  const characters =
-    "abcdefghijklmnopqrstuvwxyz0123456789";
+  const characters = "abcdefghijklmnopqrstuvwxyz0123456789";
   const charactersLength = characters.length;
   let counter = 0;
   while (counter < length) {
@@ -65,4 +67,30 @@ function createLine(from, to) {
   line.style.height = H + "px";
 
   return line;
+}
+
+function figureOutWhereToConnect(
+  compoSource,
+  compoTarget,
+  input,
+  connInstance
+) {
+  let whereToConnect;
+  let whichInput;
+  if (compoTarget.type.toLowerCase() == "output") {
+    whereToConnect = compoSource.app.actx.destination;
+  } else {
+    //IF THE CONNECTION STARTS WITH "IN" CONNECT TO THE NODE ITSELF, AS AUDIO INPUT
+    //OTHERWISE CONNECT TO THE NODE'S AUDIO PARAMETER (FREQUENCY FOR EXAMPLE)
+    whereToConnect = input.startsWith("in")
+      ? connInstance.to.node
+      : connInstance.to.node[input];
+    //AUDIO NODES MAY HAVE MORE THAN ONE INPUT, SO THIS WAY WHICH CHECK WHICH ONE IT IS
+    whichInput = parseInt(input.split("_")[1]);
+  }
+
+  return {
+    whereToConnect,
+    whichInput: isNaN(whichInput) ? undefined : whichInput,
+  };
 }

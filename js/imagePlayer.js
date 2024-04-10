@@ -1,4 +1,4 @@
-class FilePlayer extends Component {
+class ImagePlayer extends Component {
   constructor(app,serializedData) {
     super(app,serializedData);
 
@@ -28,25 +28,32 @@ class FilePlayer extends Component {
 
     let optionR = document.createElement("option");
     optionR.value = "r";
-    optionR.innerText = "r";
+    optionR.innerText = "R";
     this.select.appendChild(optionR);
 
     let optionG = document.createElement("option");
     optionG.value = "g";
-    optionG.innerText = "g";
+    optionG.innerText = "G";
     this.select.appendChild(optionG);
 
     let optionB = document.createElement("option");
     optionB.value = "b";
-    optionB.innerText = "b";
+    optionB.innerText = "B";
     this.select.appendChild(optionB);
+
+    let optionA = document.createElement("option");
+    optionA.value = "a";
+    optionA.innerText = "A";
+    this.select.appendChild(optionA);
 
     this.select.onchange = (e) => {
       this.selectedValue = this.select.value;
       try{this.node.stop()}catch(e){}
       this.createAudioBuffer()
-
+      this.app.resetAllConnections();
     };
+
+
     this.container.appendChild(this.select);
   }
 

@@ -6,13 +6,15 @@
     <script src="js/component.js"></script>
     <script src="js/amp.js"></script>
     <script src="js/filter.js"></script>
+    <script src="js/imageMaker.js"></script>
+
     <script src="js/visualizer.js"></script>
     <script src="js/channelMerger.js"></script>
     <script src="js/oscillator.js"></script>
     <script src="js/delay.js"></script>
     <script src="js/mouse.js"></script>
     <script src="js/noise.js"></script>
-    <script src="js/filePlayer.js"></script>
+    <script src="js/imagePlayer.js"></script>
     <script src="js/customProcessorComponent.js"></script>
 
     <script src="js/component_that_uses_worklet.js"></script>
@@ -77,13 +79,35 @@
             content: '⩥'
         }
 
+        component.imagemaker{
+            width:300px;
+            height:200px;
+        }
 
-        component.mouse select, component.filePlayer select {
+        component.imagemaker canvas{
+            bottom:2px;
+            right:2px;
+            position: absolute;
+            border:1px solid gray;
+        }
+
+
+        component.mouse select, component.imagePlayer select {
             position: absolute;
             bottom: 5px;
             left: 5px;
         }
 
+
+        component.imagePlayer canvas{
+            z-index:-1;
+            left:2px;
+            top:2px;
+            position: absolute;
+            width:calc(100% - 4px);
+            height:calc(100% - 4px);
+            pointer-events: none;
+        }
 
 
         component {
@@ -97,7 +121,7 @@
             overflow: hidden;
         }
 
-        component.filePlayer input[type="file"]{
+        component.imagePlayer input[type="file"]{
             position: absolute;
             top:5px;
             lefT:5px;
@@ -157,7 +181,11 @@
             position: absolute;
             left: 2px;
             top: 2px;
+            pointer-events: none;
+          
         }
+
+       
 
         .line {
             position: fixed;
@@ -175,13 +203,13 @@
     <button onclick="app.addVisualizer()">add visualizer</button>
     <button onclick="app.addMouse()">add mouse</button>
     <button onclick="app.addCustomProcessor()">add CustomProcessor</button>
-    <button onclick="app.addCompoWorklet()">add CompoWorklet</button>
+    <button onclick="app.addImageMaker()">add Image Maker</button>
 
     <button onclick="app.addNoise()">add noise</button>
-    <button onclick="app.addFilePlayer()">add filePlayer</button>
+    <button onclick="app.addImagePlayer()">add imagePlayer</button>
 
-    <button onclick="app.save()">save</button>"
-    <button onclick="app.load()">load</button>"
+    <button onclick="app.save()">save</button>
+    <button onclick="app.load()">load</button>
 
 
     <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
