@@ -63,7 +63,7 @@ class Connection {
         : this.from.node.disconnect(where.whereToConnect);
     } catch (e) {
       // debugger;
-      console.warn(e);
+      // console.warn(e);
     }
 
     try {
@@ -76,7 +76,7 @@ class Connection {
         : this.from.node.connect(where.whereToConnect);
     } catch (e) {
       // debugger;
-      console.warn(e);
+      // console.warn(e);
     }
   }
 

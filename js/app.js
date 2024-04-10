@@ -68,6 +68,10 @@ class App {
     this.components.push(new ImageMaker(this));
   }
 
+  addAudioPlayer(){
+    this.components.push(new AudioPlayer(this));
+  }
+
   getAllConnections() {
     let ret = [];
     this.components.map((k) =>

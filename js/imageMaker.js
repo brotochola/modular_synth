@@ -3,7 +3,7 @@ class ImageMaker extends Component {
     super(app, serializedData);
 
     this.width = 215;
-    this.height = 104;
+    this.height = 121;
 
     this.totalPixels = this.height * this.width;
     this.makeImageArrayEmpty();
