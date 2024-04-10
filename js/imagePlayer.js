@@ -1,11 +1,11 @@
 class ImagePlayer extends Component {
-  constructor(app,serializedData) {
-    super(app,serializedData);
-
+  constructor(app, serializedData) {
+    super(app, serializedData);
+    this.imageDataParsed = [{ r: 0, g: 0, b: 0 }];
     this.createInputFile();
-    this.selectedValue="r"
-    this.createSelect()
-
+    this.selectedValue = "r";
+    this.createSelect();
+    this.createAudioBuffer();
   }
 
   createInputFile() {
@@ -48,11 +48,12 @@ class ImagePlayer extends Component {
 
     this.select.onchange = (e) => {
       this.selectedValue = this.select.value;
-      try{this.node.stop()}catch(e){}
-      this.createAudioBuffer()
+      try {
+        this.node.stop();
+      } catch (e) {}
+      this.createAudioBuffer();
       this.app.resetAllConnections();
     };
-
 
     this.container.appendChild(this.select);
   }
@@ -95,7 +96,7 @@ class ImagePlayer extends Component {
       let pixel = this.imageDataParsed[i];
       if (!pixel || pixel?.r == undefined) debugger;
 
-      this.output[i] = pixel[this.selectedValue] / 255;
+      this.output[i] = (pixel[this.selectedValue] / 255) * 2 - 1;
     }
 
     this.node = this.app.actx.createBufferSource();

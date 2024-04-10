@@ -23,7 +23,7 @@ class Connection {
           )
         : this.from.node.disconnect(where.whereToConnect);
     } catch (e) {
-      debugger;
+      // debugger;
       console.log(e);
     }
     this.to.inputElements[this.audioParam].button.classList.remove("connected");
@@ -54,20 +54,29 @@ class Connection {
     );
 
     try {
-      this.from.node.disconnect(
-        where.whereToConnect,
-        undefined,
-        where.whichInput
-      );
+      where.whichInput
+        ? this.from.node.disconnect(
+            where.whereToConnect,
+            undefined,
+            where.whichInput
+          )
+        : this.from.node.disconnect(where.whereToConnect);
     } catch (e) {
-      debugger;
-      console.log(e);
+      // debugger;
+      console.warn(e);
     }
 
     try {
-      this.from.node.connect(where.whereToConnect, undefined, where.whichInput);
+      where.whichInput
+        ? this.from.node.connect(
+            where.whereToConnect,
+            undefined,
+            where.whichInput
+          )
+        : this.from.node.connect(where.whereToConnect);
     } catch (e) {
-      console.log(e);
+      // debugger;
+      console.warn(e);
     }
   }
 

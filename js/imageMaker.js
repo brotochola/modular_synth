@@ -1,20 +1,26 @@
 class ImageMaker extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
+
     this.width = 215;
     this.height = 104;
+
+    this.totalPixels = this.height * this.width;
+    this.makeImageArrayEmpty();
+
     this.createCanvas();
     this.createNode();
+    this.pixelCounter = 0;
     this.lineCounter = 0;
-    this.imageArray = [];
-    for (let i = 0; i < this.height; i++) {
-      this.imageArray.push({});
-    }
+    // for (let i = 0; i < this.height; i++) {
+    //   this.imageArray.push({});
+    // }
   }
   createCanvas() {
     this.canvas = document.createElement("canvas");
     this.canvas.width = this.width;
     this.canvas.height = this.height;
+    this.canvas.willReadFrequently = true;
 
     this.container.appendChild(this.canvas);
     this.ctx = this.canvas.getContext("2d");
@@ -26,7 +32,7 @@ class ImageMaker extends Component {
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "image-maker-worklet", {
           numberOfInputs: 4,
-          numberOfOutputs: 4,
+          numberOfOutputs: 0,
         });
 
         this.node.onprocessorerror = (e) => {
@@ -40,45 +46,65 @@ class ImageMaker extends Component {
   }
   handleDataFromWorklet(e) {
     this.dataFromWorklet = e.data;
-
+    this.pixelCounter += 128;
     for (let i = 0; i < e.data.length; i++) {
-      //I KNOW THERE'S ONLY ONE CHANNEL BECAUSE THIS COMPONENT/MODULE WILL ALWAYS BE MONO AND NOT STEREO
-
+      //4 inputs: rgba
       let color = i == 0 ? "r" : i == 1 ? "g" : i == 2 ? "b" : "a";
-      //EACH LINE OF THIS ARRAY WILL BE A HORIZONTAL LINE IN THE IMAGE
-
-      let channel = e.data[i][0];
-      // let obj={color,channel}
-
-      this.imageArray[this.lineCounter][color] = channel;
+      //channel data, the values of audio, that i'm going to use as pixel values
+      let channel = e.data[i][0] || [];
+      for (let v = 0; v < channel.length; v++) {
+        let pixelNumber = (this.pixelCounter + v) % this.totalPixels;
+        this.imageArray[pixelNumber * 4 + i] = channel[v];
+      }
     }
 
-    this.lineCounter++;
-    if (this.lineCounter >= this.height) {
-      this.lineCounter = 0;
+    //when it reaches the end, it makes the image
+    if (this.pixelCounter >= this.totalPixels) {
+      this.pixelCounter =  this.pixelCounter-this.totalPixels;
 
       this.makeImage();
     }
   }
 
   makeImage() {
-    let imgData = this.ctx.getImageData(
-      0,
-      0,
-      this.canvas.width,
-      this.canvas.height
-    );
-    for (let y = 0; y < this.height; y++) {
-      for (var x = 0; x < this.width; x++) {
-        let pixelIndex = (y * this.width + x) * 4;
-
-        imgData.data[pixelIndex] = (this.imageArray[y].r || [])[x] || 0;
-        imgData.data[pixelIndex + 1] = (this.imageArray[y].g || [])[x] || 0;
-        imgData.data[pixelIndex + 2] = (this.imageArray[y].b || [])[x] || 0;
-        imgData.data[pixelIndex + 3] = 255;
-      }
+    // console.log(this.imageArray)
+    // debugger
+    if (!this.imgData) {
+      this.imgData = this.ctx.getImageData(
+        0,
+        0,
+        this.canvas.width,
+        this.canvas.height
+      );
     }
+    
+    for (let i = 0; i < this.imageArray.length; i++) {
+      let newVal = this.imageArray[i] || 0;
+      if (i == 3 && newVal == 0) newVal = 255; //alpha
+      this.imgData.data[i] = newVal;
+      //   this.imageArray[i] && console.log(this.imageArray[i]);
+    }
+    // for (let y = 0; y < this.height; y++) {
+    //   for (var x = 0; x < this.width; x++) {
+    //     let pixelIndex = (y * this.width + x) * 4;
 
-    this.ctx.putImageData(imgData, 0, 0);
+    //     imgData.data[pixelIndex] = (this.imageArray[y].r || [])[x] || 0;
+    //     imgData.data[pixelIndex + 1] = (this.imageArray[y].g || [])[x] || 0;
+    //     imgData.data[pixelIndex + 2] = (this.imageArray[y].b || [])[x] || 0;
+    //     imgData.data[pixelIndex + 3] = 255;
+    //   }
+    // }
+
+    this.ctx.putImageData(this.imgData, 0, 0);
+    this.makeImageArrayEmpty();
+  }
+  makeImageArrayEmpty() {
+    this.imageArray=[]
+    for (let i = 0; i < this.width * this.height; i++) {
+      this.imageArray[i * 4] = 0;
+      this.imageArray[i * 4 + 1] = 0;
+      this.imageArray[i * 4 + 2] = 0;
+      this.imageArray[i * 4 + 3] = 255;
+    }
   }
 }
