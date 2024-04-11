@@ -33,7 +33,7 @@ class App {
   }
 
   addImagePlayer() {
-    this.components.push(new ImagePlayer(this));
+    this.components.push(new ImagePlayerWorkletVersion(this));
   }
 
   addVisualizer() {

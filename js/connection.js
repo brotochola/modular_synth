@@ -1,8 +1,9 @@
 class Connection {
-  constructor(from, to, audioParam) {
+  constructor(from, to, audioParam, numberOfOutput) {
     this.from = from;
     this.to = to;
     this.audioParam = audioParam;
+    this.numberOfOutput = numberOfOutput;
     this.line = null;
     this.id = makeid(8);
   }
@@ -18,10 +19,10 @@ class Connection {
       where.whichInput
         ? this.from.node.disconnect(
             where.whereToConnect,
-            undefined,
+            this.numberOfOutput,
             where.whichInput
           )
-        : this.from.node.disconnect(where.whereToConnect);
+        : this.from.node.disconnect(where.whereToConnect, this.numberOfOutput);
     } catch (e) {
       // debugger;
       console.log(e);
@@ -57,10 +58,10 @@ class Connection {
       where.whichInput
         ? this.from.node.disconnect(
             where.whereToConnect,
-            undefined,
+            this.numberOfOutput,
             where.whichInput
           )
-        : this.from.node.disconnect(where.whereToConnect);
+        : this.from.node.disconnect(where.whereToConnect, this.numberOfOutput);
     } catch (e) {
       // debugger;
       // console.warn(e);
@@ -70,10 +71,10 @@ class Connection {
       where.whichInput
         ? this.from.node.connect(
             where.whereToConnect,
-            undefined,
+            this.numberOfOutput,
             where.whichInput
           )
-        : this.from.node.connect(where.whereToConnect);
+        : this.from.node.connect(where.whereToConnect, this.numberOfOutput);
     } catch (e) {
       // debugger;
       // console.warn(e);

@@ -4,8 +4,9 @@ class ImagePlayer extends Component {
     this.imageDataParsed = [{ r: 0, g: 0, b: 0 }];
     this.createInputFile();
     this.selectedValue = "r";
+    this.audioBuffers = {};
     this.createSelect();
-    this.createAudioBuffer();
+    this.createAudioBuffers();
   }
 
   createInputFile() {
@@ -47,11 +48,8 @@ class ImagePlayer extends Component {
     this.select.appendChild(optionA);
 
     this.select.onchange = (e) => {
-      this.selectedValue = this.select.value;
-      try {
-        this.node.stop();
-      } catch (e) {}
-      this.createAudioBuffer();
+      this.selectedValue = this.select.value;   
+      this.reloadAudioBufferIntoNode();
       this.app.resetAllConnections();
     };
 
@@ -81,28 +79,42 @@ class ImagePlayer extends Component {
       });
     }
 
-    this.createAudioBuffer();
+    this.createAudioBuffers();
   }
-  createAudioBuffer() {
+  createAudioBuffers() {
     this.bufferSize = this.imageDataParsed.length; //2 * this.app.actx.sampleRate;
 
-    this.audioBuffer = this.app.actx.createBuffer(
-      1,
-      this.bufferSize,
-      this.app.actx.sampleRate
-    );
-    this.output = this.audioBuffer.getChannelData(0);
-    for (var i = 0; i < this.imageDataParsed.length; i++) {
-      let pixel = this.imageDataParsed[i];
-      if (!pixel || pixel?.r == undefined) debugger;
+    let colors = ["r", "g", "b", "a"];
 
-      this.output[i] = (pixel[this.selectedValue] / 255) * 2 - 1;
+    for (let c = 0; c < colors.length; c++) {
+      let letter = colors[c];
+      let audioBuffer = this.app.actx.createBuffer(
+        1,
+        this.bufferSize,
+        this.app.actx.sampleRate
+      );
+      let output = audioBuffer.getChannelData(0);
+
+      for (var i = 0; i < this.imageDataParsed.length; i++) {
+        let pixel = this.imageDataParsed[i];
+        if (!pixel || pixel[letter] == undefined) debugger;
+
+        output[i] = (pixel[letter] / 255) * 2 - 1;
+      }
+
+      this.audioBuffers[letter] = audioBuffer;
     }
 
     this.node = this.app.actx.createBufferSource();
     this.node.parent = this;
-    this.node.buffer = this.audioBuffer;
     this.node.loop = true;
+
+    this.reloadAudioBufferIntoNode();
+  }
+
+  reloadAudioBufferIntoNode() {
+    this.node.stop()
+    this.node.buffer = this.audioBuffers[this.selectedValue];
     this.node.start(0);
   }
   handleOnChange(e) {

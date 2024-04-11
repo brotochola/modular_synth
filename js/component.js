@@ -13,6 +13,7 @@ class Component {
     this.createIcon();
     this.createView();
     this.inputElements = {};
+    this.outputElements = {};
   }
   loadFromSerializedData() {
     if (!this.serializedData) return;
@@ -36,6 +37,7 @@ class Component {
 
   createView() {
     setTimeout(() => {
+      this.createOutputButton();
       makeChildrenStopPropagation(this.container);
       this.loadFromSerializedData();
     }, 500);
@@ -66,7 +68,7 @@ class Component {
         textInput.onchange = (e) => this.onParamChanged(e, inp);
         textInput.max = 2000;
         textInput.min = 0;
-        textInput.value = "200";
+        textInput.value = this.node[inp].value.toString();
         textInput.step = 1;
       }
 
@@ -90,9 +92,17 @@ class Component {
       this.disconnect(audioParam);
     } else {
       if (!this.app.lastOutputClicked) return;
-      this.app.lastOutputClicked.connect(this, audioParam);
+
+      let numberOfOutput =
+        this.app.lastOutputClicked.output.getAttribute("numberOfOutput");
+
+      this.app.lastOutputClicked.compo.connect(
+        this,
+        audioParam,
+        numberOfOutput
+      );
+      this.app.lastOutputClicked = null;
     }
-    this.app.lastOutputClicked = null;
   }
 
   createIcon() {
@@ -114,9 +124,9 @@ class Component {
     this.container.parentElement.removeChild(this.container);
     this.app.components = this.app.components.filter((c) => c != this);
   }
-  connect(compo, input) {
+  connect(compo, input, numberOfOutput) {
     //CREATE CONNECTION INSTANCE
-    let conn = new Connection(this, compo, input);
+    let conn = new Connection(this, compo, input,numberOfOutput);
     //ADD CLASS TO HTML ELEMENT
     compo.inputElements[input].button.classList.add("connected");
     //ADD THE CONNECTION INSTANCE TO THE ARRAY OF CONNECTIONS OF THIS COMPONENT
@@ -125,8 +135,12 @@ class Component {
     let where = figureOutWhereToConnect(this, compo, input, conn);
     // debugger
     where.whichInput
-      ? this.node.connect(where.whereToConnect, undefined, where.whichInput)
-      : this.node.connect(where.whereToConnect);
+      ? this.node.connect(
+          where.whereToConnect,
+          numberOfOutput,
+          where.whichInput
+        )
+      : this.node.connect(where.whereToConnect, numberOfOutput);
 
     this.drawLine(conn);
   }
@@ -166,7 +180,6 @@ class Component {
     this.inputsDiv = document.createElement("div");
     this.inputsDiv.classList.add("inputsDiv");
     this.container.appendChild(this.inputsDiv);
-    this.createOutputButton();
 
     this.container.onmousedown = () => {
       window.tc = this;
@@ -178,26 +191,34 @@ class Component {
     if (
       this.type.toLowerCase() == "output" ||
       this.type.toLowerCase() == "imagemaker"
-    )
+    ) {
       return;
-    this.outputButton = document.createElement("input");
-    this.outputButton.type = "checkbox";
-    this.outputButton.classList.add("outputButton");
-    this.outputButton.onclick = (e) => {
-      this.onOutputClicked(e);
-    };
-    this.container.appendChild(this.outputButton);
+    }
+    this.outputs = document.createElement("outputs");
+    this.container.appendChild(this.outputs);
+
+    for (let i = 0; i < ((this.node || {}).numberOfOutputs || 1); i++) {
+      let outputButton = document.createElement("input");
+      outputButton.type = "checkbox";
+      outputButton.classList.add("outputButton");
+      outputButton.setAttribute("numberOfOutput", i);
+      outputButton.onclick = (e) => {
+        this.onOutputClicked(e, outputButton);
+      };
+      this.outputs.appendChild(outputButton);
+    }
   }
-  onOutputClicked(e) {
+  onOutputClicked(e, outputButton) {
     e.preventDefault();
     e.stopPropagation();
-    this.app.lastOutputClicked = this;
+    this.app.lastOutputClicked = { compo: this, output: outputButton };
   }
   drawLine(conn) {
     let line = createLine(
-      conn.from.outputButton,
+      conn.from.outputs.querySelector('.outputButton[numberOfOutput="'+conn.numberOfOutput+'"]'),
       conn.to.inputElements[conn.audioParam].button
     );
+    // debugger
     conn.line = line;
     this.app.container.appendChild(line);
   }

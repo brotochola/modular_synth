@@ -15,7 +15,9 @@
     <script src="js/delay.js"></script>
     <script src="js/mouse.js"></script>
     <script src="js/noise.js"></script>
-    <script src="js/imagePlayer.js"></script>
+    <!-- <script src="js/imagePlayer.js"></script> -->
+    <script src="js/imagePlayerAudioWorkletVersion.js"></script>
+
     <script src="js/customProcessorComponent.js"></script>
 
     <script src="js/component_that_uses_worklet.js"></script>
@@ -80,33 +82,34 @@
             content: '⩥'
         }
 
-        component.imagemaker{
-            width:300px;
-            height:200px;
+        component.imagemaker {
+            width: 300px;
+            height: 200px;
         }
 
-        component.imagemaker canvas{
-            bottom:2px;
-            right:2px;
+        component.imagemaker canvas {
+            bottom: 2px;
+            right: 2px;
             position: absolute;
-            border:1px solid gray;
+            border: 1px solid gray;
         }
 
 
-        component.mouse select, component.imagePlayer select {
+        component.mouse select,
+        component.imagePlayer select {
             position: absolute;
             bottom: 5px;
             left: 5px;
         }
 
 
-        component.imagePlayer canvas{
-            z-index:-1;
-            left:2px;
-            top:2px;
+        component.ImagePlayerWorkletVersion canvas {
+            z-index: -1;
+            left: 2px;
+            top: 2px;
             position: absolute;
-            width:calc(100% - 4px);
-            height:calc(100% - 4px);
+            width: calc(100% - 4px);
+            height: calc(100% - 4px);
             pointer-events: none;
         }
 
@@ -122,17 +125,17 @@
             overflow: hidden;
         }
 
-        component.imagePlayer input[type="file"]{
+        component input[type="file"] {
             position: absolute;
-            top:5px;
-            lefT:5px;
+            top: 5px;
+            lefT: 5px;
 
         }
 
         component .inputsDiv {
             position: absolute;
             overflow: hidden;
-            /* width: 40px; */
+            width: 80%;
             display: flex;
             flex-direction: column;
             height: 100%;
@@ -143,8 +146,17 @@
             gap: 3px;
         }
 
-        component .outputButton {
+        outputs {
             position: absolute;
+            display: block;
+            right: 2px;
+            display: flex;
+            flex-direction: column;
+            bottom: 2px;
+        }
+
+        component .outputButton {
+            /* position: absolute; */
             overflow: hidden;
             right: 5px;
             bottom: 5px;
@@ -161,7 +173,7 @@
         }
 
         component .inputsDiv audioparamrow input[type="number"] {
-            width: 50px;
+            width: 67px;
             overflow: hidden;
 
             border-radius: 5px;
@@ -183,10 +195,10 @@
             left: 2px;
             top: 2px;
             pointer-events: none;
-          
+
         }
 
-       
+
 
         .line {
             position: fixed;
@@ -214,7 +226,7 @@
 
     <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
     <button onclick="app.resetAllConnections()">!! reset all connections</button>
-    
+
     <button onclick="app.save()">save</button>
     <button onclick="app.load()">load</button>
 
