@@ -10,7 +10,7 @@ class Merger extends Component {
       });
     this.node.parent = this;
 
-    this.createInputButtons();
+    // this.createInputButtons();
   }
 
 }

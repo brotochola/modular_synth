@@ -10,7 +10,7 @@ class CompoWorklet extends Component {
       });
      
 
-      this.createInputButtons();
+      // this.createInputButtons();
     });
   }
 }

@@ -1,28 +1,33 @@
 class AudioPlayer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
+
+    this.playing = false;
+    this.node = this.app.actx.createBufferSource();
     this.createInputFile();
     this.createPlayButton();
-    this.playing = false;
   }
   createPlayButton() {
     this.playButton = document.createElement("button");
+    this.playButton.style.display = "none";
+    this.playButton.classList.add("playButton")
+    
     this.container.appendChild(this.playButton);
-   
+
     this.playButton.onclick = (e) => {
       if (this.playing) {
-        this.playing = false
+        this.playing = false;
         this.handleOnChange();
       } else {
-        this.playing = true
+        this.playing = true;
         this.node.start();
       }
-      
-      this.updateButton()
+
+      this.updateButton();
     };
   }
 
-  updateButton(){
+  updateButton() {
     this.playButton.textContent = !this.playing ? "▶️" : "⏹️";
   }
 
@@ -34,7 +39,6 @@ class AudioPlayer extends Component {
     this.container.appendChild(this.inputFile);
   }
 
-
   //   createAudioBuffer() {
   //     // Create a MediaElementAudioSourceNode
   //     // Feed the HTMLMediaElement into it
@@ -44,6 +48,10 @@ class AudioPlayer extends Component {
   //     // this.node.start(0);
   //   }
   handleOnChange(e) {
+    if (!(this.inputFile.files || [])[0]) {
+      return;
+    }
+    this.playButton.style.display = "block";
     this.playing = false;
     try {
       this.node.stop();
@@ -74,7 +82,6 @@ class AudioPlayer extends Component {
       reader.readAsArrayBuffer(this.inputFile.files[0]);
     }
     this.currentAudioFile = this.inputFile.files[0];
-    this.updateButton()
-
+    this.updateButton();
   }
 }

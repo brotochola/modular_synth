@@ -5,7 +5,7 @@ class Delay extends Component {
     this.node = new DelayNode(this.app.actx);
     this.node.parent = this;
 
-    this.createInputButtons();
+    // this.createInputButtons();
   }
  
 

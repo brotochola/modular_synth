@@ -7,7 +7,7 @@ class Visualizer extends Component {
 
     this.bufferLength = this.node.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
-    this.createInputButtons();
+    // this.createInputButtons();
     this.createCanvas();
     this.draw()
   }

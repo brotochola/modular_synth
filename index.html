@@ -126,9 +126,11 @@
         }
 
         component input[type="file"] {
-            position: absolute;
+            position: relative;
             top: 5px;
             lefT: 5px;
+            z-index: 99;
+            display: block;
 
         }
 
@@ -162,6 +164,13 @@
             bottom: 5px;
         }
 
+        component button.playButton {
+            display: block;
+            position: relative;
+            left: 5px;
+            top: 5px;
+        }
+
         component .inputsDiv button.input {
             width: 70px;
             height: 20px;
@@ -181,6 +190,10 @@
 
         component.filter {
             height: 150px;
+        }
+
+        component.AudioPlayer{
+            height:150px;
         }
 
 

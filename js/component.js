@@ -36,14 +36,23 @@ class Component {
   }
 
   createView() {
-    setTimeout(() => {
-      this.createOutputButton();
-      makeChildrenStopPropagation(this.container);
-      this.loadFromSerializedData();
-    }, 500);
+    if (!this.node) {
+      setTimeout(() => this.createView(), 20);
+      return;
+    }
+
+    // setTimeout(() => {
+    this.createOutputButton();
+    this.createInputButtons();
+    makeChildrenStopPropagation(this.container);
+    this.loadFromSerializedData();
+    // }, 100);
   }
 
   createInputButtons() {
+
+    if(this.type=="Mouse") return
+
     this.audioParams = Object.keys(Object.getPrototypeOf(this.node)).filter(
       (k) => this.node[k] instanceof AudioParam
     );
@@ -53,6 +62,9 @@ class Component {
     }
 
     for (let inp of this.audioParams) {
+      if ((inp == "gain" || inp == "detune") && this.type != "Amp") {
+        continue;
+      }
       let audioParamRow = document.createElement("audioParamRow");
       let button = document.createElement("button");
       button.onclick = (e) => this.onAudioParamClicked(inp);
@@ -126,7 +138,7 @@ class Component {
   }
   connect(compo, input, numberOfOutput) {
     //CREATE CONNECTION INSTANCE
-    let conn = new Connection(this, compo, input,numberOfOutput);
+    let conn = new Connection(this, compo, input, numberOfOutput);
     //ADD CLASS TO HTML ELEMENT
     compo.inputElements[input].button.classList.add("connected");
     //ADD THE CONNECTION INSTANCE TO THE ARRAY OF CONNECTIONS OF THIS COMPONENT
@@ -215,7 +227,9 @@ class Component {
   }
   drawLine(conn) {
     let line = createLine(
-      conn.from.outputs.querySelector('.outputButton[numberOfOutput="'+conn.numberOfOutput+'"]'),
+      conn.from.outputs.querySelector(
+        '.outputButton[numberOfOutput="' + conn.numberOfOutput + '"]'
+      ),
       conn.to.inputElements[conn.audioParam].button
     );
     // debugger

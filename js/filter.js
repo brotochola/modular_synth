@@ -5,7 +5,7 @@ class Filter extends Component {
     this.node = new BiquadFilterNode(this.app.actx);
     this.node.parent = this;
 
-    this.createInputButtons();
+    // this.createInputButtons();
   }
 
 

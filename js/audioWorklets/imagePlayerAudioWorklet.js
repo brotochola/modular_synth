@@ -2,6 +2,7 @@ class ImagePlayerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
     this.pixelCount = 0;
+    this.imageDataParsed = [];
     this.port.onmessage = (e) => {
       // console.log(e.data);
       this.imageDataParsed = e.data;
@@ -26,6 +27,7 @@ class ImagePlayerWorklet extends AudioWorkletProcessor {
         let channel = output[v];
         for (let c = 0; c < channel.length; c++) {
           let idx = (this.pixelCount + c) % this.imageDataParsed.length;
+
           try {
             let letter = i == 0 ? "r" : i == 1 ? "g" : i == 2 ? "b" : "a";
             let pixValue = this.imageDataParsed[idx][letter];
@@ -46,10 +48,14 @@ class ImagePlayerWorklet extends AudioWorkletProcessor {
       }
     }
 
-    this.pixelCount += 128;
-    if (this.pixelCount >= this.imageDataParsed.length) {
-      this.pixelCount = this.pixelCount - this.imageDataParsed.length;
-    }
+    this.pixelCount = (this.pixelCount + 128) % this.imageDataParsed.length;
+    // this.port.postMessage({
+    //   pxlcnt: this.pixelCount,
+    //   total: this.imageDataParsed.length,
+    // });
+    // if (this.pixelCount >= this.imageDataParsed.length) {
+    //   this.pixelCount = this.pixelCount - this.imageDataParsed.length;
+    // }
 
     // outputs=outputs.map((output, numOutput) => {
     //   return output.map((channel) => {

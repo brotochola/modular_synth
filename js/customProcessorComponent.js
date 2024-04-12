@@ -21,11 +21,11 @@ class CustomProcessorComponent extends Component {
       this.updateNodeWithFormula();
       this.node.port.onmessage = (e) => console.log("#msg", e.data);
 
-      this.createInputButtons();
+      // this.createInputButtons();
     });
   }
   updateNodeWithFormula() {
-    this.inputsDiv.innerHTML = "";
+    // this.inputsDiv.innerHTML = "";
     this.updatedFormula = this.formula.replaceAll("y", "outputChannel[i]");
 
     this.node.port.postMessage(this.updatedFormula);
@@ -34,7 +34,7 @@ class CustomProcessorComponent extends Component {
     let val = this.inputText.value;
     this.formula = val;
     this.updateNodeWithFormula();
-    this.createInputButtons();
+    // this.createInputButtons();
   }
 
   createInputText() {

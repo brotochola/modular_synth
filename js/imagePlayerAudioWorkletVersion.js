@@ -80,7 +80,7 @@ class ImagePlayerWorkletVersion extends Component {
         this.node.parent = this;
         this.node.port.onmessage = (e) => this.handleDataFromWorklet(e);
 
-        this.createInputButtons();
+        // this.createInputButtons();
       });
   }
   handleDataFromWorklet(e) {
