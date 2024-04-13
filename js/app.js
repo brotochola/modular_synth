@@ -72,6 +72,12 @@ class App {
     this.components.push(new AudioPlayer(this));
   }
 
+
+  addSequencer(){
+    this.components.push(new Sequencer(this));
+
+  }
+
   getAllConnections() {
     let ret = [];
     this.components.map((k) =>

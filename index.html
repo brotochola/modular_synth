@@ -8,6 +8,7 @@
     <script src="js/filter.js"></script>
     <script src="js/imageMaker.js"></script>
     <script src="js/audioPlayer.js"></script>
+    <script src="js/sequencer.js"></script>
 
     <script src="js/visualizer.js"></script>
     <script src="js/channelMerger.js"></script>
@@ -125,6 +126,31 @@
             overflow: hidden;
         }
 
+        component.sequencer {
+            width: 300px;
+            height: 280px;
+        }
+
+        component.sequencer div.buttonsContainer {
+            display: flex;
+            gap: 2px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+            width: 275px;
+            padding: 5px;
+
+        }
+
+        component.sequencer .buttonsContainer .seqButton {
+            width: 15px;
+            height: 15px;
+            border: 1px solid #aaaaaa;
+        }
+
+        component.sequencer .buttonsContainer .seqButton.active {
+            background: red;
+        }
+
         component input[type="file"] {
             position: relative;
             top: 5px;
@@ -146,6 +172,13 @@
             left: 5px;
             bottom: 5px;
             gap: 3px;
+            pointer-events: none;
+            touch-action: none;
+        }
+
+        component .inputsDiv * {
+            pointer-events: all;
+            touch-action: auto;
         }
 
         outputs {
@@ -192,8 +225,8 @@
             height: 150px;
         }
 
-        component.AudioPlayer{
-            height:150px;
+        component.AudioPlayer {
+            height: 150px;
         }
 
 
@@ -225,6 +258,8 @@
     <button onclick="app.addFilter()">add filter</button>
     <button onclick="app.addDelay()">add Delay</button>
     <button onclick="app.addMerger()">add merger</button>
+    <button onclick="app.addSequencer()">add sequencer</button>
+
     <button onclick="app.addGainNode()">add gain node</button>
     <button onclick="app.addVisualizer()">add visualizer</button>
     <button onclick="app.addMouse()">add mouse</button>

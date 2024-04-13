@@ -6,3 +6,18 @@ But I not only want to use the components that already come with the WebAudio AP
 
 
 https://brotochola.github.io/modular_synth
+
+
+-------------------------
+
+TODO:
+* add multiplayer with firebase
+* fix saving with selects, inputs, images, etc
+* add explanations
+* make ui better
+* upload/download json for instruments
+* add midi features
+* add joystick features
+* for audio player, add param to control currentTime
+* customProcessor: if no input->0
+* make sequencer!
