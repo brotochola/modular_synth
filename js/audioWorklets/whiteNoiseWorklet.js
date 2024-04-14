@@ -3,15 +3,17 @@ class WhiteNoiseProcessor extends AudioWorkletProcessor {
   // used.
 
   process(inputs, outputs, parameters) {
-    let input = inputs[0];
     let output = outputs[0];
-
-    for (let channel = 0; channel < input.length; ++channel) {
-      let inputChannel = input[channel];
-      let outputChannel = output[channel];
-      for (let i = 0; i < inputChannel.length; ++i) {
-        outputChannel[i] = inputChannel[i] * 0.5;
+    try {
+      for (let channel = 0; channel < output.length; ++channel) {
+        // let inputChannel = input[channel];
+        let outputChannel = output[channel];
+        for (let i = 0; i < outputChannel.length; ++i) {
+          outputChannel[i] = Math.random()*2-1;
+        }
       }
+    } catch (e) {
+      this.port.postMessage(e);
     }
 
     return true;

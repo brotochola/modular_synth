@@ -82,11 +82,26 @@ function figureOutWhereToConnect(
   } else {
     //IF THE CONNECTION STARTS WITH "IN" CONNECT TO THE NODE ITSELF, AS AUDIO INPUT
     //OTHERWISE CONNECT TO THE NODE'S AUDIO PARAMETER (FREQUENCY FOR EXAMPLE)
-    whereToConnect = input.startsWith("in")
-      ? connInstance.to.node
-      : connInstance.to.node[input];
+
+    if (input.startsWith("in")) {
+      whereToConnect = connInstance.to.node;
+      whichInput = parseInt(input.split("_")[1]);
+    } else {
+      whereToConnect = connInstance.to.node[input];
+    }
+
+    if ((compoTarget.customAudioParams || []).includes(input)) {
+      for (let i = 0; i < compoTarget.customAudioParams.length; i++) {
+        if (compoTarget.customAudioParams[i] == input) {
+          whereToConnect=compoTarget.customAudioParamsWorkletNode
+          whichInput = i
+          break;
+        }
+      }
+    }
+
     //AUDIO NODES MAY HAVE MORE THAN ONE INPUT, SO THIS WAY WHICH CHECK WHICH ONE IT IS
-    whichInput = parseInt(input.split("_")[1]);
+   
   }
 
   return {

@@ -6,25 +6,41 @@ class AudioPlayer extends Component {
     this.node = this.app.actx.createBufferSource();
     this.createInputFile();
     this.createPlayButton();
+    //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
+    this.customAudioParams = ["trigger"];
   }
   createPlayButton() {
     this.playButton = document.createElement("button");
     this.playButton.style.display = "none";
-    this.playButton.classList.add("playButton")
-    
+    this.playButton.classList.add("playButton");
+
     this.container.appendChild(this.playButton);
 
     this.playButton.onclick = (e) => {
-      if (this.playing) {
-        this.playing = false;
-        this.handleOnChange();
-      } else {
-        this.playing = true;
-        this.node.start();
-      }
-
-      this.updateButton();
+      this.playPause();
     };
+  }
+  handleTriggerFromWorklet(e) {
+    // console.log("#handleTriggerFromWorklet",e)
+    this.triggerAudio()
+  }
+
+  triggerAudio() {
+    this.handleOnChange();
+    this.node.loop = false;
+    this.node.start();
+  }
+
+  playPause() {
+    if (this.playing) {
+      this.playing = false;
+      this.handleOnChange();
+    } else {
+      this.playing = true;
+      this.node.start();
+    }
+
+    this.updateButton();
   }
 
   updateButton() {
@@ -61,13 +77,13 @@ class AudioPlayer extends Component {
 
     //CREATE THE AUDIO BUFFER SOURCE OBJECT
     this.node = this.app.actx.createBufferSource();
+    this.node.pija = 1;
 
     //IF THE AUDIOBUFFER IS ALREADY LOADED AND DECODED, WE USE THAT
     if (this.audioBuffer && this.currentAudioFile == this.inputFile.files[0]) {
       this.node.buffer = this.audioBuffer;
       this.node.loop = true;
       this.app.resetAllConnections();
-      //   this.node.start(0);
     } else {
       //IF NOT WE GOTTA LOAD THE AUDIO FILE
       let reader = new FileReader();
@@ -76,7 +92,6 @@ class AudioPlayer extends Component {
         this.node.buffer = this.audioBuffer;
         this.node.loop = true;
         this.app.resetAllConnections();
-        // this.node.start(0);
       };
 
       reader.readAsArrayBuffer(this.inputFile.files[0]);

@@ -3,6 +3,7 @@ class Component {
     this.app = app;
     this.type = this.constructor.name;
     this.serializedData = serializedData;
+    this.audioParams = [];
 
     this.dragStartedAt = [0, 0];
     this.connections = [];
@@ -14,6 +15,7 @@ class Component {
     this.createView();
     this.inputElements = {};
     this.outputElements = {};
+    this.app.actx.resume();
   }
   loadFromSerializedData() {
     if (!this.serializedData) return;
@@ -42,34 +44,69 @@ class Component {
   }
 
   createView() {
+    //THIS WILL WAIT UNTIL THE NODE EXISTS
     if (!this.node) {
       setTimeout(() => this.createView(), 20);
-      return;
+      return console.warn(this.id, this.type, "NODE NOT READY");
     }
 
-    // setTimeout(() => {
     this.createOutputButton();
     this.createInputButtons();
+    this.createWorkletForCustomInputs();
     makeChildrenStopPropagation(this.container);
     this.loadFromSerializedData();
-    // }, 100);
+  }
+
+  createWorkletForCustomInputs() {
+    if (!Array.isArray(this.customAudioParams)) return;
+
+    this.app.actx.audioWorklet
+      .addModule("js/audioWorklets/triggerWorklet.js")
+      .then(() => {
+        this.customAudioParamsWorkletNode = new AudioWorkletNode(
+          this.app.actx,
+          "trigger-worklet",
+          {
+            numberOfInputs: this.customAudioParams.length,
+            numberOfOutputs: 0,
+          }
+        );
+
+        this.customAudioParamsWorkletNode.onprocessorerror = (e) => {
+          console.error(e);
+        };
+        this.customAudioParamsWorkletNode.parent = this;
+        this.customAudioParamsWorkletNode.port.onmessage = (e) => {
+          if (this.handleTriggerFromWorklet instanceof Function)
+            this.handleTriggerFromWorklet(e.data);
+        };
+      });
   }
 
   createInputButtons() {
     if (this.type == "Mouse") return;
+    console.log("CREATING BUTTONS FOR", this.type, this.id);
 
+    //AUDIOPARAMS FROM THE NODE
     this.audioParams = Object.keys(Object.getPrototypeOf(this.node)).filter(
       (k) => this.node[k] instanceof AudioParam
     );
 
+    //AUDIO INPUTS
     for (let i = 0; i < this.node.numberOfInputs; i++) {
       this.audioParams.push("in_" + i);
     }
+    //AUDIO WORKLETS WITH PARAMETERS BEHAVE THIS WAY:
+    for (let key of Object.keys(this.node)) {
+      if (key != "parent") this.audioParams.push(key);
+    }
 
-    for (let inp of this.audioParams) {
+    for (let inp of [...this.audioParams, ...(this.customAudioParams || [])]) {
       // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
 
+      //CREATE THE ROW
       let audioParamRow = document.createElement("audioParamRow");
+      //CREATE THE BUTTON
       let button = document.createElement("button");
       button.onclick = (e) => this.onAudioParamClicked(inp);
       button.classList.add("input");
@@ -77,7 +114,11 @@ class Component {
       button.innerText = inp;
 
       let textInput;
-      if (!inp.startsWith("in")) {
+      //AUDIO INPUTS DON'T HAVE A TEXT TO SET THEM, DAAH
+      if (
+        !inp.startsWith("in") &&
+        !(this.customAudioParams || []).includes(inp)
+      ) {
         textInput = document.createElement("input");
         textInput.classList.add(inp);
         textInput.type = "number";
@@ -102,6 +143,7 @@ class Component {
     this.node[param].setValueAtTime(event.target.value, 0);
   }
   onAudioParamClicked(audioParam) {
+    console.log("audio param clicked", audioParam);
     //  debugger
 
     if (this.inputElements[audioParam].button.classList.contains("connected")) {
@@ -141,6 +183,10 @@ class Component {
     this.app.components = this.app.components.filter((c) => c != this);
   }
   connect(compo, input, numberOfOutput) {
+    // console.log("#connect", compo, input);
+
+   
+
     //CREATE CONNECTION INSTANCE
     let conn = new Connection(this, compo, input, numberOfOutput);
     //ADD CLASS TO HTML ELEMENT

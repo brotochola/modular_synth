@@ -21,16 +21,14 @@ class App {
       c.updateMyLines();
     }
   }
-  //   onDrop(e){
-  //     console.log(e)
-  //   }
+  addEnvelope() {
+    this.components.push(new EnvelopeGenerator(this));
+  }
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
 
-  addCompoWorklet() {
-    this.components.push(new CompoWorklet(this));
-  }
+
 
   addImagePlayer() {
     this.components.push(new ImagePlayerWorkletVersion(this));
@@ -58,7 +56,7 @@ class App {
     this.components.push(new Merger(this));
   }
   addNoise() {
-    this.components.push(new Noise(this));
+    this.components.push(new NoiseGenWithWorklet(this));
   }
   addMouse() {
     this.components.push(new Mouse(this));
