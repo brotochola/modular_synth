@@ -86,6 +86,7 @@ class Connection {
       from: this.from.id,
       to: this.to.id,
       audioParam: this.audioParam,
+      numberOfOutput: this.numberOfOutput,
       id: this.id,
     };
   }

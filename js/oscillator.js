@@ -14,6 +14,7 @@ class Oscillator extends Component {
 
   addTypeSelect() {
     this.typeSelect = document.createElement("select");
+    this.typeSelect.classList.add("type")
     this.typeOptions = ["sine", "square", "sawtooth", "triangle"];
     for (let type of this.typeOptions) {
       let option = document.createElement("option");
@@ -26,5 +27,9 @@ class Oscillator extends Component {
   }
   handleTypeChange(e) {
     this.node.type = this.typeSelect.value;
+  }
+
+  updateUI(){
+    this.typeSelect.value=this.node.type
   }
 }

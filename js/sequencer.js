@@ -1,10 +1,11 @@
 class Sequencer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.valuesToSave = ["sequence"];
     this.bpm = 120;
-    this.numberOfSemitones = 12;
+    this.numberOfSemitones = 13;
     this.numberOfSteps = 16;
-    this.initSequence();
+    if (!this.sequence) this.initSequence();
     this.createNode();
     this.createbuttons();
   }
@@ -25,7 +26,7 @@ class Sequencer extends Component {
     for (let i = 0; i < this.numberOfSemitones; i++) {
       for (let j = 0; j < this.numberOfSteps; j++) {
         let button = document.createElement("button");
-        button.setAttribute("semitone", this.numberOfSemitones - i - 1);
+        button.setAttribute("semitone", this.numberOfSemitones - i);
         button.setAttribute("time", j);
         button.classList.add("seqButton");
         button.onclick = (e) => {
@@ -39,33 +40,62 @@ class Sequencer extends Component {
 
   handleClickOnSeqButton(e) {
     let but = e.target;
-    but.classList.toggle("active");
+
     let semitone = but.getAttribute("semitone");
     let time = but.getAttribute("time");
-    this.sequence[time][semitone] = but.classList.contains("active");
+    let valueToAssign = !this.sequence[time][semitone - 1];
+
+    for (let v = 0; v < this.sequence[time].length; v++) {
+      this.sequence[time][v] = false;
+    }
+
+    this.sequence[time][semitone - 1] = valueToAssign;
+
+    this.updateUI();
+  
+  }
+
+  updateUI() {
+    this.container.querySelectorAll("button").forEach((button) => {
+      button.classList.remove("active");
+    });
+
+    for (let i = 0; i < this.numberOfSemitones; i++) {
+      for (let j = 0; j < this.numberOfSteps; j++) {
+        if (this.sequence[j][i]) {
+          this.container
+            .querySelector(
+              "button[time='" + j + "'][semitone='" + (i + 1) + "']"
+            )
+            .classList.add("active");
+        }
+      }
+    }
     this.sendToWorklet();
   }
 
   sendToWorklet() {
+    this.convertArrayOfArraysIntoSmpleArray();
     this.node.port.postMessage({
-      seq: this.convertArrayOfArraysIntoSmpleArray(this.sequence),
+      seq: this.convertedArray,
       bpm: this.bpm,
     });
   }
 
-  convertArrayOfArraysIntoSmpleArray(arr) {
+  convertArrayOfArraysIntoSmpleArray() {
     let oneSemitone = 1.059463;
     let newArr = [];
     for (let j = 0; j < this.numberOfSteps; j++) {
-      let semitone = this.sequence[j];
-      let highestValue = 0;
-      for (let i = semitone.length; i >= 0; i--) {
-        if (semitone[i] && i > highestValue) {
-          highestValue = i * oneSemitone;
+      let time = this.sequence[j];
+      newArr[j] = 0;
+      for (let s = 0; s < time.length; s++) {
+        if (time[s]) {
+          newArr[j] = oneSemitone ** s;
+          break;
         }
       }
-      newArr[j] = highestValue;
     }
+    this.convertedArray = newArr;
     return newArr;
   }
 

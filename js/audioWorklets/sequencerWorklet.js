@@ -5,7 +5,7 @@ class SequencerWorklet extends AudioWorkletProcessor {
       // console.log(e.data);
       this.sequence = e.data.seq;
       this.bpm = e.data.bpm;
-      this.durationOfOneNote = 60000 / this.bpm;
+      this.durationOfOneNote = (60000 / this.bpm) * 0.25;
       this.durationOfLoop = this.durationOfOneNote * 16;
       this.port.postMessage({ data: e.data });
     };
@@ -28,7 +28,7 @@ class SequencerWorklet extends AudioWorkletProcessor {
       let outputChannel = (output || [])[channel] || [];
 
       for (let i = 0; i < outputChannel.length; ++i) {
-        outputChannel[i] = this.sequence[this.currentNote] ;
+        outputChannel[i] = this.sequence[this.currentNote];
 
         // this.port.postMessage({
         //   data: "hola",

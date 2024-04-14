@@ -6,6 +6,8 @@
     <script src="js/component.js"></script>
     <script src="js/amp.js"></script>
     <script src="js/filter.js"></script>
+    <script src="js/numberDisplayComponent.js"></script>
+
     <script src="js/imageMaker.js"></script>
     <script src="js/audioPlayer.js"></script>
     <script src="js/sequencer.js"></script>
@@ -244,6 +246,13 @@
 
         }
 
+        component.numberdisplaycomponent .display {
+            font-size: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
 
 
         .line {
@@ -259,7 +268,7 @@
     <button onclick="app.addDelay()">add Delay</button>
     <button onclick="app.addMerger()">add merger</button>
     <button onclick="app.addSequencer()">add sequencer</button>
-
+    <button onclick="app.addNumberDisplay()">add number display</button>
     <button onclick="app.addGainNode()">add gain node</button>
     <button onclick="app.addVisualizer()">add visualizer</button>
     <button onclick="app.addMouse()">add mouse</button>

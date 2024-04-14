@@ -30,7 +30,13 @@ class Component {
         this.node.type = this.serializedData.node.type;
       }
     }
-
+    //LOAD THOSE PARAMETERS THAT WANTED TO BE SAVED FOR EACH TYPE OF COMPONENT
+    if (this.serializedData.valuesToSave) {
+      for (let value of this.serializedData.valuesToSave) {
+        this[value] = this.serializedData[value];
+      }
+    }
+    if (this.updateUI instanceof Function) this.updateUI();
     this.container.style.left = this.serializedData.x;
     this.container.style.top = this.serializedData.y;
   }
@@ -50,8 +56,7 @@ class Component {
   }
 
   createInputButtons() {
-
-    if(this.type=="Mouse") return
+    if (this.type == "Mouse") return;
 
     this.audioParams = Object.keys(Object.getPrototypeOf(this.node)).filter(
       (k) => this.node[k] instanceof AudioParam
@@ -62,9 +67,8 @@ class Component {
     }
 
     for (let inp of this.audioParams) {
-      if ((inp == "gain" || inp == "detune") && this.type != "Amp") {
-        continue;
-      }
+      // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
+
       let audioParamRow = document.createElement("audioParamRow");
       let button = document.createElement("button");
       button.onclick = (e) => this.onAudioParamClicked(inp);
@@ -180,9 +184,9 @@ class Component {
       this.container.style.top = Math.floor(window.innerHeight * 0.5) + "px";
     } else {
       this.container.style.left =
-        Math.floor((window.innerWidth - 200) * Math.random()) + "px";
+        Math.floor((window.innerWidth - 400) * Math.random() + 200) + "px";
       this.container.style.top =
-        Math.floor((window.innerHeight - 250) * Math.random() - 100) + "px";
+        Math.floor((window.innerHeight - 500) * Math.random() + 250) + "px";
     }
 
     this.app.container.appendChild(this.container);
@@ -202,7 +206,8 @@ class Component {
   createOutputButton() {
     if (
       this.type.toLowerCase() == "output" ||
-      this.type.toLowerCase() == "imagemaker"
+      this.type.toLowerCase() == "imagemaker" ||
+      this.type.toLowerCase() == "numberdisplaycomponent"
     ) {
       return;
     }
@@ -261,6 +266,13 @@ class Component {
       if (this.node && this.node[audioParam]) {
         obj.audioParams[audioParam] = this.node[audioParam].value;
       }
+    }
+    //these parameters are set on each class:
+    if (this.valuesToSave && Array.isArray(this.valuesToSave)) {
+      for (let value of this.valuesToSave) {
+        obj[value] = this[value];
+      }
+      obj.valuesToSave = this.valuesToSave;
     }
     obj.x = this.container.style.left;
     obj.y = this.container.style.top;

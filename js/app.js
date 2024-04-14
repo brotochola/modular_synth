@@ -78,6 +78,12 @@ class App {
 
   }
 
+  
+  addNumberDisplay(){
+    this.components.push(new NumberDisplayComponent(this));
+
+  }
+
   getAllConnections() {
     let ret = [];
     this.components.map((k) =>
@@ -143,14 +149,14 @@ class App {
       this.resetAllConnections();
       this.actx.resume();
       this.updateAllLines();
-    }, 600);
+    }, 300);
   }
   addSerializedConnection(conn) {
     let componentsFrom = app.components.filter((k) => k.id == conn.from);
     let componentsTo = app.components.filter((k) => k.id == conn.to);
     if (componentsFrom.length && componentsTo.length) {
       try {
-        componentsFrom[0].connect(componentsTo[0], conn.audioParam);
+        componentsFrom[0].connect(componentsTo[0], conn.audioParam, conn.numberOfOutput);
       } catch (e) {
         console.warn(e);
       }
