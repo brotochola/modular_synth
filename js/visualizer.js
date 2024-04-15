@@ -2,7 +2,7 @@ class Visualizer extends Component {
   constructor(app,serializedData) {
     super(app,serializedData);
     this.node = app.actx.createAnalyser();
-    this.node.parent = this;
+    
     this.node.fftSize = 1024;
 
     this.bufferLength = this.node.frequencyBinCount;

@@ -3,7 +3,7 @@ class Filter extends Component {
     super(app,serializedData);
 
     this.node = new BiquadFilterNode(this.app.actx);
-    this.node.parent = this;
+    
 
     // this.createInputButtons();
   }

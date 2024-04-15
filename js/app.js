@@ -1,8 +1,20 @@
 class App {
   constructor(elem) {
-    this.container = elem;
-    this.SAVE_PREFIX="modular_synth_"
-    // this.container.ondrop=(e)=>this.onDrop(e)
+    this.container = document.createElement("div");
+    this.container.classList.add("mainContainer");
+    this.container.draggable = true;
+    this.dragStartedAt = [0, 0];
+
+    elem.appendChild(this.container);
+    this.SAVE_PREFIX = "modular_synth_";
+    this.container.ondragend = (e) => {
+      this.container.style.left = e.clientX - this.dragStartedAt[0] + "px";
+      this.container.style.top = e.clientY - this.dragStartedAt[1] + "px";
+    };
+    this.container.ondragstart = (e) => {
+      this.dragStartedAt[0] = e.layerX;
+      this.dragStartedAt[1] = e.layerY;
+    };
     this.components = [];
     this.actx = new AudioContext();
     this.createOutputComponent();
@@ -27,8 +39,6 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
-
-
 
   addImagePlayer() {
     this.components.push(new ImagePlayerWorkletVersion(this));
@@ -62,24 +72,20 @@ class App {
     this.components.push(new Mouse(this));
   }
 
-  addImageMaker(){
+  addImageMaker() {
     this.components.push(new ImageMaker(this));
   }
 
-  addAudioPlayer(){
+  addAudioPlayer() {
     this.components.push(new AudioPlayer(this));
   }
 
-
-  addSequencer(){
+  addSequencer() {
     this.components.push(new Sequencer(this));
-
   }
 
-  
-  addNumberDisplay(){
+  addNumberDisplay() {
     this.components.push(new NumberDisplayComponent(this));
-
   }
 
   getAllConnections() {
@@ -154,7 +160,11 @@ class App {
     let componentsTo = app.components.filter((k) => k.id == conn.to);
     if (componentsFrom.length && componentsTo.length) {
       try {
-        componentsFrom[0].connect(componentsTo[0], conn.audioParam, conn.numberOfOutput);
+        componentsFrom[0].connect(
+          componentsTo[0],
+          conn.audioParam,
+          conn.numberOfOutput
+        );
       } catch (e) {
         console.warn(e);
       }
@@ -168,18 +178,18 @@ class App {
   save() {
     let name = prompt("name the instrument");
     if (!name) return;
-    localStorage[this.SAVE_PREFIX+name] = JSON.stringify(this.serialize());
+    localStorage[this.SAVE_PREFIX + name] = JSON.stringify(this.serialize());
   }
   load() {
-    let list=""
-    Object.keys(localStorage).forEach(key =>{
-      if(key.startsWith(this.SAVE_PREFIX)){
-        list+=key+"\n"
+    let list = "";
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith(this.SAVE_PREFIX)) {
+        list += key + "\n";
       }
-    })
-    let name = prompt("which one \n"+list);
+    });
+    let name = prompt("which one \n" + list);
     if (!name) return;
-    if (!localStorage[this.SAVE_PREFIX+name]) return;
-    this.loadFromFile(JSON.parse(localStorage[this.SAVE_PREFIX+name]));
+    if (!localStorage[this.SAVE_PREFIX + name]) return;
+    this.loadFromFile(JSON.parse(localStorage[this.SAVE_PREFIX + name]));
   }
 }

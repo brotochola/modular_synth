@@ -27,7 +27,7 @@ class Mouse extends Component {
     
 
     this.node = new GainNode(this.app.actx);
-    this.node.parent = this;
+    
     this.node.gain.value = 1;
     this.generator.connect(this.node)
 

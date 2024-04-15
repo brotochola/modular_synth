@@ -24,6 +24,7 @@ TODO:
         6 - apply changes
 
 * fix saving with selects, inputs, images, etc
+* play / pause, and keep them in synch using the actx.currentTime
 * add explanations
 * make ui better
 * upload/download json for instruments
@@ -31,5 +32,3 @@ TODO:
 * add joystick features
 * for audio player, add param to control currentTime
 * customProcessor: if no input->0
-* add envelope:
-    https://github.com/itsjoesullivan/envelope-generator?tab=readme-ov-file

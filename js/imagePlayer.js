@@ -106,7 +106,7 @@ class ImagePlayer extends Component {
     }
 
     this.node = this.app.actx.createBufferSource();
-    this.node.parent = this;
+    
     this.node.loop = true;
 
     this.reloadAudioBufferIntoNode();

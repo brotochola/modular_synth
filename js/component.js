@@ -49,7 +49,7 @@ class Component {
       setTimeout(() => this.createView(), 20);
       return console.warn(this.id, this.type, "NODE NOT READY");
     }
-
+    this.node.parent = this;
     this.createOutputButton();
     this.createInputButtons();
     this.createWorkletForCustomInputs();
@@ -208,6 +208,8 @@ class Component {
   }
 
   ondragend(e) {
+    e.stopPropagation()
+    e.preventDefault()
     this.container.style.left = e.clientX - this.dragStartedAt[0] + "px";
     this.container.style.top = e.clientY - this.dragStartedAt[1] + "px";
 

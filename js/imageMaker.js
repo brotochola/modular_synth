@@ -38,7 +38,7 @@ class ImageMaker extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        this.node.parent = this;
+        
         this.node.port.onmessage = (e) => this.handleDataFromWorklet(e);
 
         // this.createInputButtons();

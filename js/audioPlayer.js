@@ -59,7 +59,7 @@ class AudioPlayer extends Component {
   //     // Create a MediaElementAudioSourceNode
   //     // Feed the HTMLMediaElement into it
   //     this.node = this.app.actx.createMediaElementSource(this.audio);
-  //     this.node.parent = this;
+  //     
   //     this.node.loop = true;
   //     // this.node.start(0);
   //   }

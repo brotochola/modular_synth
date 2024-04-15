@@ -18,7 +18,7 @@ class CustomProcessorComponent extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        this.node.parent = this;
+        
         this.updateNodeWithFormula();
         this.node.port.onmessage = (e) => console.log("#msg", e.data);
       });

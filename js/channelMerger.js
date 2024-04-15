@@ -8,7 +8,7 @@ class Merger extends Component {
     this.node =  new ChannelMergerNode(this.app.actx,  {
         numberOfInputs: 4,
       });
-    this.node.parent = this;
+    
 
     // this.createInputButtons();
   }

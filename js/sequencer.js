@@ -111,7 +111,7 @@ class Sequencer extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        this.node.parent = this;
+        
 
         this.sendToWorklet();
 

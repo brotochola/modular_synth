@@ -3,7 +3,7 @@ class Amp extends Component {
     super(app,serializedData);
 
     this.node = new GainNode(this.app.actx);
-    this.node.parent = this;
+    
 
     // this.createInputButtons();
   }

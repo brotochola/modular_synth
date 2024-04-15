@@ -5,7 +5,7 @@ class Oscillator extends Component {
     this.node = new OscillatorNode(this.app.actx);
     if(serializedData?.node.type) this.node.type = serializedData.node.type;
     
-    this.node.parent = this;
+    
     this.node.frequency.value = Math.floor(150 + Math.random() * 50)
     this.node.start();
     // this.createInputButtons();

@@ -3,7 +3,7 @@ class Delay extends Component {
     super(app,serializedData);
 
     this.node = new DelayNode(this.app.actx);
-    this.node.parent = this;
+    
 
     // this.createInputButtons();
   }

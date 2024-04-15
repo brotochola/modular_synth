@@ -18,7 +18,7 @@ class NumberDisplayComponent extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        this.node.parent = this;
+        
       });
   }
   handleMsgFromWorklet(e) {

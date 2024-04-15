@@ -12,7 +12,7 @@ class NoiseGenWithWorklet extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
-      this.node.parent = this;      
+            
       this.node.port.onmessage = (e) => console.log("##noise compo", e.data);
 
       // this.createInputButtons();
