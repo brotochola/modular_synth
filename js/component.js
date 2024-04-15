@@ -185,8 +185,6 @@ class Component {
   connect(compo, input, numberOfOutput) {
     // console.log("#connect", compo, input);
 
-   
-
     //CREATE CONNECTION INSTANCE
     let conn = new Connection(this, compo, input, numberOfOutput);
     //ADD CLASS TO HTML ELEMENT
@@ -208,10 +206,12 @@ class Component {
   }
 
   ondragend(e) {
-    e.stopPropagation()
-    e.preventDefault()
-    this.container.style.left = e.clientX - this.dragStartedAt[0] + "px";
-    this.container.style.top = e.clientY - this.dragStartedAt[1] + "px";
+    e.stopPropagation();
+    e.preventDefault();
+    let box = this.app.container.getBoundingClientRect();
+    this.container.style.left =
+      -box.x + e.clientX - this.dragStartedAt[0] + "px";
+    this.container.style.top = -box.y + e.clientY - this.dragStartedAt[1] + "px";
 
     this.app.updateAllLines();
   }

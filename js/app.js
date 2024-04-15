@@ -1,5 +1,12 @@
 class App {
   constructor(elem) {
+    this.components = [];
+    this.actx = new AudioContext();
+    this.createMainContainer(elem);
+    this.createOutputComponent();
+  }
+
+  createMainContainer(elem) {
     this.container = document.createElement("div");
     this.container.classList.add("mainContainer");
     this.container.draggable = true;
@@ -8,16 +15,25 @@ class App {
     elem.appendChild(this.container);
     this.SAVE_PREFIX = "modular_synth_";
     this.container.ondragend = (e) => {
-      this.container.style.left = e.clientX - this.dragStartedAt[0] + "px";
-      this.container.style.top = e.clientY - this.dragStartedAt[1] + "px";
+      console.log(e);
+
+      let x = e.clientX - this.dragStartedAt[0];
+      let y = e.clientY - this.dragStartedAt[1];
+      this.container.style.left = x + "px";
+      this.container.style.top = y + "px";
+      this.putCSSVariablesInMainContainer(x, y);
+      this.updateAllLines();
     };
     this.container.ondragstart = (e) => {
+      console.log(e);
       this.dragStartedAt[0] = e.layerX;
       this.dragStartedAt[1] = e.layerY;
     };
-    this.components = [];
-    this.actx = new AudioContext();
-    this.createOutputComponent();
+    this.putCSSVariablesInMainContainer(0, 0);
+  }
+  putCSSVariablesInMainContainer(x, y) {
+    this.container.style.setProperty("--mainContainerX", x + "px");
+    this.container.style.setProperty("--mainContainerY", y + "px");
   }
 
   getOutputComponent() {

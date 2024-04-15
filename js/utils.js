@@ -26,6 +26,9 @@ function createLine(from, to) {
   line.classList.add("line");
   let fromBox = from.getBoundingClientRect();
   let toBox = to.getBoundingClientRect();
+
+  // let parentBox=to.parentElement.getBoundingClientRect()
+
   var fT = fromBox.y + fromBox.height / 2;
   var tT = toBox.y + toBox.height / 2;
   var fL = fromBox.x + fromBox.width / 2;
@@ -56,15 +59,22 @@ function createLine(from, to) {
     ANG *= -1;
   }
   top -= H / 2;
-
-  line.style["-webkit-transform"] = "rotate(" + ANG + "deg)";
-  line.style["-moz-transform"] = "rotate(" + ANG + "deg)";
-  line.style["-ms-transform"] = "rotate(" + ANG + "deg)";
-  line.style["-o-transform"] = "rotate(" + ANG + "deg)";
-  line.style["-transform"] = "rotate(" + ANG + "deg)";
-  line.style.top = top + "px";
-  line.style.left = left + "px";
+  let rotation = "rotate(" + ANG + "deg)";
+  line.style["-webkit-transform"] = rotation;
+  line.style["-moz-transform"] = rotation;
+  line.style["-ms-transform"] = rotation;
+  line.style["-o-transform"] = rotation;
+  line.style["-transform"] = rotation;
+  
   line.style.height = H + "px";
+  line.style.setProperty("--x", left + "px");
+  line.style.setProperty("--y", top + "px");
+  line.style.setProperty("--height", H + "px");
+  line.style.setProperty("--rotation", rotation);
+
+
+  line.style.left = "calc(var(--x) - var(--mainContainerX))";
+  line.style.top = "calc(var(--y) - var(--mainContainerY))";
 
   return line;
 }
@@ -93,15 +103,14 @@ function figureOutWhereToConnect(
     if ((compoTarget.customAudioParams || []).includes(input)) {
       for (let i = 0; i < compoTarget.customAudioParams.length; i++) {
         if (compoTarget.customAudioParams[i] == input) {
-          whereToConnect=compoTarget.customAudioParamsWorkletNode
-          whichInput = i
+          whereToConnect = compoTarget.customAudioParamsWorkletNode;
+          whichInput = i;
           break;
         }
       }
     }
 
     //AUDIO NODES MAY HAVE MORE THAN ONE INPUT, SO THIS WAY WHICH CHECK WHICH ONE IT IS
-   
   }
 
   return {
