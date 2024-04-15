@@ -7,7 +7,7 @@ class Oscillator extends Component {
     
     
     this.node.frequency.value = Math.floor(150 + Math.random() * 50)
-    this.node.start();
+    this.node.start(this.app.getNextBeat());
     // this.createInputButtons();
     this.addTypeSelect();
   }

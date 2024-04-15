@@ -38,9 +38,9 @@ class Visualizer extends Component {
       const y = v * (this.canvas.height / 2);
 
       if (i === 0) {
-        canvasCtx.moveTo(x, y);
+        canvasCtx.moveTo(x, this.canvas.height-y);
       } else {
-        canvasCtx.lineTo(x, y);
+        canvasCtx.lineTo(x, this.canvas.height-y);
       }
 
       x += sliceWidth;

@@ -2,8 +2,14 @@ class App {
   constructor(elem) {
     this.components = [];
     this.actx = new AudioContext();
+    this.bpm = 120;
     this.createMainContainer(elem);
     this.createOutputComponent();
+  }
+
+  getNextBeat() {
+    let durationOf4Beats = (60 / 120) * 4;
+    return durationOf4Beats - (this.actx.currentTime % durationOf4Beats);
   }
 
   createMainContainer(elem) {
@@ -15,8 +21,6 @@ class App {
     elem.appendChild(this.container);
     this.SAVE_PREFIX = "modular_synth_";
     this.container.ondragend = (e) => {
-      console.log(e);
-
       let x = e.clientX - this.dragStartedAt[0];
       let y = e.clientY - this.dragStartedAt[1];
       this.container.style.left = x + "px";
@@ -25,7 +29,6 @@ class App {
       this.updateAllLines();
     };
     this.container.ondragstart = (e) => {
-      console.log(e);
       this.dragStartedAt[0] = e.layerX;
       this.dragStartedAt[1] = e.layerY;
     };

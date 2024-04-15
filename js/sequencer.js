@@ -2,7 +2,7 @@ class Sequencer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.valuesToSave = ["sequence"];
-    this.bpm = 120;
+
     this.numberOfSemitones = 13;
     this.numberOfSteps = 16;
     if (!this.sequence) this.initSequence();
@@ -52,7 +52,6 @@ class Sequencer extends Component {
     this.sequence[time][semitone - 1] = valueToAssign;
 
     this.updateUI();
-  
   }
 
   updateUI() {
@@ -78,7 +77,7 @@ class Sequencer extends Component {
     this.convertArrayOfArraysIntoSmpleArray();
     this.node.port.postMessage({
       seq: this.convertedArray,
-      bpm: this.bpm,
+      bpm: this.app.bpm,
     });
   }
 
@@ -105,13 +104,14 @@ class Sequencer extends Component {
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "sequencer-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: 1,
+          numberOfOutputs: 1,       
         });
 
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
         
+
 
         this.sendToWorklet();
 

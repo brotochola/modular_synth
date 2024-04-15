@@ -22,13 +22,13 @@ class AudioPlayer extends Component {
   }
   handleTriggerFromWorklet(e) {
     // console.log("#handleTriggerFromWorklet",e)
-    this.triggerAudio()
+    this.triggerAudio();
   }
 
   triggerAudio() {
     this.handleOnChange();
     this.node.loop = false;
-    this.node.start();
+    this.node.start(this.app.getNextBeat());
   }
 
   playPause() {
@@ -37,7 +37,7 @@ class AudioPlayer extends Component {
       this.handleOnChange();
     } else {
       this.playing = true;
-      this.node.start();
+      this.node.start(this.app.getNextBeat());
     }
 
     this.updateButton();
@@ -59,7 +59,7 @@ class AudioPlayer extends Component {
   //     // Create a MediaElementAudioSourceNode
   //     // Feed the HTMLMediaElement into it
   //     this.node = this.app.actx.createMediaElementSource(this.audio);
-  //     
+  //
   //     this.node.loop = true;
   //     // this.node.start(0);
   //   }

@@ -115,7 +115,7 @@ class ImagePlayer extends Component {
   reloadAudioBufferIntoNode() {
     this.node.stop()
     this.node.buffer = this.audioBuffers[this.selectedValue];
-    this.node.start(0);
+    this.node.start(this.app.getNextBeat());
   }
   handleOnChange(e) {
     try {

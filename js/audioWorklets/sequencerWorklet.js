@@ -1,6 +1,7 @@
 class SequencerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+
     this.port.onmessage = (e) => {
       // console.log(e.data);
       this.sequence = e.data.seq;
@@ -9,12 +10,11 @@ class SequencerWorklet extends AudioWorkletProcessor {
       this.durationOfLoop = this.durationOfOneNote * 16;
       this.port.postMessage({ data: e.data });
     };
-    this.timeItStarted = Date.now();
   }
 
   process(inputs, outputs) {
     let output = (outputs || [])[0] || [];
-    this.currentTime = Date.now() - this.timeItStarted;
+    this.currentTime = currentTime * 1000;
     this.currentNote = Math.floor(
       (this.currentTime % this.durationOfLoop) / this.durationOfOneNote
     );
@@ -47,6 +47,11 @@ class SequencerWorklet extends AudioWorkletProcessor {
     // this.lastTime = Date.now();
     return true;
   }
+}
+
+function getNextBeat() {
+  let durationOf4Beats = (60 / 120) * 4;
+  return durationOf4Beats - (currentTime % durationOf4Beats);
 }
 
 registerProcessor("sequencer-worklet", SequencerWorklet);
