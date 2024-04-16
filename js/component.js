@@ -100,6 +100,12 @@ class Component {
     for (let key of Object.keys(this.node)) {
       if (key != "parent") this.audioParams.push(key);
     }
+    if (this.node.parameters) {
+      //IT'S AN AUDIO WORKLET NODE
+      this.node.parameters.forEach((audioParam, name) => {
+        this.audioParams.push(name);
+      });
+    }
 
     for (let inp of [...this.audioParams, ...(this.customAudioParams || [])]) {
       // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
@@ -125,7 +131,9 @@ class Component {
         textInput.onchange = (e) => this.onParamChanged(e, inp);
         textInput.max = 2000;
         textInput.min = 0;
-        textInput.value = this.node[inp].value.toString();
+        textInput.value = !this.node.parameters
+          ? this.node[inp].value.toString()
+          : this.node.parameters.get(inp).value.toString();
         textInput.step = 1;
       }
 
@@ -139,8 +147,11 @@ class Component {
 
   onParamChanged(event, param) {
     event.stopPropagation();
-
-    this.node[param].setValueAtTime(event.target.value, 0);
+    if (this.node?.parameters?.get(param)) {
+      this.node.parameters.get(param).setValueAtTime(event.target.value, 0);
+    } else {
+      this.node[param].setValueAtTime(event.target.value, 0);
+    }
   }
   onAudioParamClicked(audioParam) {
     console.log("audio param clicked", audioParam);

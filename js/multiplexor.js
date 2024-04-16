@@ -14,8 +14,9 @@ class Multiplexor extends Component {
       .addModule("js/audioWorklets/multiplexorWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "multiplexor-worklet", {
-          numberOfInputs: 9,
+          numberOfInputs: 8,
           numberOfOutputs: 1,
+          parameterData: { which: 0 },
         });
 
         this.node.onprocessorerror = (e) => {

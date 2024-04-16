@@ -1,4 +1,7 @@
 class SequencerWorklet extends AudioWorkletProcessor {
+ 
+
+
   constructor() {
     super();
 
@@ -12,7 +15,8 @@ class SequencerWorklet extends AudioWorkletProcessor {
     };
   }
 
-  process(inputs, outputs) {
+  process(inputs, outputs,parameters) {
+      // this.port.postMessage({parameters})
     let output = (outputs || [])[0] || [];
     this.currentTime = currentTime * 1000;
     this.currentNote = Math.floor(

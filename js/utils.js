@@ -65,15 +65,12 @@ function createLine(from, to) {
   line.style["-ms-transform"] = rotation;
   line.style["-o-transform"] = rotation;
   line.style["-transform"] = rotation;
-  
+
   line.style.height = H + "px";
   line.style.setProperty("--x", left + "px");
   line.style.setProperty("--y", top + "px");
   line.style.setProperty("--height", H + "px");
   line.style.setProperty("--rotation", rotation);
-
- 
-
 
   line.style.left = "calc(var(--x) - var(--mainContainerX))";
   line.style.top = "calc(var(--y) - var(--mainContainerY))";
@@ -96,10 +93,15 @@ function figureOutWhereToConnect(
     //OTHERWISE CONNECT TO THE NODE'S AUDIO PARAMETER (FREQUENCY FOR EXAMPLE)
 
     if (input.startsWith("in")) {
-      whereToConnect = connInstance.to.node;
+      whereToConnect = compoTarget.node;
       whichInput = parseInt(input.split("_")[1]);
     } else {
-      whereToConnect = connInstance.to.node[input];
+      //TRY TO GET A NORMAL AUDIO PARAM
+      whereToConnect = compoTarget.node[input];
+    }
+
+    if (!whereToConnect && compoTarget.node.parameters.get(input)) {
+      whereToConnect = compoTarget.node.parameters.get(input);
     }
 
     if ((compoTarget.customAudioParams || []).includes(input)) {
