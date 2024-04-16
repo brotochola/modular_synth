@@ -8,7 +8,7 @@ class NumberDisplay extends AudioWorkletProcessor {
       let input1 = (inputs || [])[0] || [];
       for (let channel = 0; channel < input1.length; ++channel) {
         let inputChannel1 = (input1 || [])[channel] || [];
-        this.port.postMessage({ number: inputChannel1[0] });
+        this.port.postMessage({ number: inputChannel1[127] });
         // for (let i = 0; i < inputChannel1.length; ++i) {
         //   //   counter++;
 

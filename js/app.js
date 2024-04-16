@@ -52,11 +52,20 @@ class App {
       c.updateMyLines();
     }
   }
+
+  
+  addMultiplexor() {
+    this.components.push(new Multiplexor(this));
+  }
   addEnvelope() {
     this.components.push(new EnvelopeGenerator(this));
   }
   addOscillator() {
     this.components.push(new Oscillator(this));
+  }
+
+  addKeyboard(){
+    this.components.push(new KeyboardComponent(this));
   }
 
   addImagePlayer() {

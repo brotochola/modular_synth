@@ -250,6 +250,15 @@ class Component {
       window.tc = this;
       console.log(this);
     };
+
+    this.container.style.setProperty(
+      "--posX",
+      (Math.random() * 100).toFixed(2) + "%"
+    );
+    this.container.style.setProperty(
+      "--posY",
+      (Math.random() * 100).toFixed(2) + "%"
+    );
   }
   updateBPM() {}
 

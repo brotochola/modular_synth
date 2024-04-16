@@ -6,6 +6,7 @@
     <script src="js/component.js"></script>
     <!-- <script src="js/external/envelope-generator.js"></script> -->
     <script src="js/external/audioworklet-adsrnode.js"></script>
+    <script src="js/multiplexor.js"></script>
 
     <script src="js/envelope.js"></script>
     <script src="js/amp.js"></script>
@@ -22,6 +23,8 @@
     <script src="js/delay.js"></script>
     <script src="js/mouse.js"></script>
     <script src="js/noiseGenWithWorklet.js"></script>
+    <script src="js/keyboardComponent.js"></script>
+
     <!-- <script src="js/imagePlayer.js"></script> -->
     <script src="js/imagePlayerAudioWorkletVersion.js"></script>
 
@@ -34,6 +37,10 @@
 
 
     <style>
+        * {
+            font-family: 'courier new';
+        }
+
         body,
         html,
         app {
@@ -45,10 +52,12 @@
 
         .line {
             position: absolute;
-            width: 2px;
+            width: 1px;
             margin-top: -1px;
             background-color: red;
             pointer-events: none;
+            border-radius: 31px;
+            border: 2px solid darkred;
             touch-action: none;
         }
 
@@ -67,9 +76,12 @@
             height: 200vh;
             top: 0px;
             left: 0px;
+            background-image: url(carpet.jpg);
+            background-size: 25%;
         }
 
         .buttons {
+            flex-wrap: wrap;
             position: fixed;
             top: 5px;
             left: 50vw;
@@ -88,6 +100,11 @@
         }
 
         component {
+            background-image: url(leather.jpg);
+            background-size:225%;
+            background-position-x:var(--posX);
+            background-position-y:var(--posY);
+            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.7);
             /* pointer-events: none; */
             position: absolute;
             background-color: white;
@@ -148,8 +165,35 @@
             height: inherit;
         }
 
+        component.multiplexor {
+            height: 280px;
+        }
+
+        component.multiplexor p {
+
+            padding: 5px;
+            margin-top: 0px;
+            font-size: 12px;
+        }
+
         component.envelopegenerator {
             height: 250px;
+        }
+
+        /* component.KeyboardComponent {
+            width: 400px;
+
+        } */
+
+        component.KeyboardComponent outputs {
+            flex-direction: row;
+
+        }
+
+        component.KeyboardComponent input.outputButton:after {
+            content: var(--letter);
+            position: absolute;
+            top: -12px;
         }
 
         component.imagemaker {
@@ -340,6 +384,8 @@
 
 
         <button onclick="app.addAudioPlayer()">add Audio Player</button>
+        <button onclick="app.addKeyboard()">add keyboard</button>
+        <button onclick="app.addMultiplexor()">add multiplexor</button>
 
         <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
         <button onclick="app.resetAllConnections()">!! reset all connections</button>
