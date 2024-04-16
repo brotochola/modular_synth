@@ -117,6 +117,7 @@ class Component {
       button.onclick = (e) => this.onAudioParamClicked(inp);
       button.classList.add("input");
       button.classList.add(inp);
+      button.title = inp;
       button.innerText = inp;
 
       let textInput;

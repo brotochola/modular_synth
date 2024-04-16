@@ -5,8 +5,15 @@ class Multiplexor extends Component {
     this.createNode();
     this.text = document.createElement("p");
     this.text.innerHTML =
-      "input 0 sets which of the other 8 inputs will be at the output<br> if the input is 1, the output will take the input 1, if the input is set at 2, etc";
+      "The 'which' input sets which input will come out from the output<br> If it has a 0 it won't take out the 0 input, <br> it will remember the last state";
     this.container.appendChild(this.text);
+    this.createDisplay();
+  }
+
+  createDisplay() {
+    this.display = document.createElement("div");
+    this.display.classList.add("display");
+    this.container.appendChild(this.display);
   }
 
   createNode() {
@@ -23,8 +30,12 @@ class Multiplexor extends Component {
           console.error(e);
         };
 
-        this.node.port.onmessage = (e) =>
+        this.node.port.onmessage = (e) => {
           console.log("#multiplexor worklet", e.data);
+          if (e.data.which) {
+            this.display.innerHTML = e.data.which;
+          }
+        };
       });
   }
 }
