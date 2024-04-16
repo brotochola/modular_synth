@@ -31,7 +31,6 @@ class Multiplexor extends Component {
         };
 
         this.node.port.onmessage = (e) => {
-          console.log("#multiplexor worklet", e.data);
           if (e.data.which) {
             this.display.innerHTML = e.data.which;
           }

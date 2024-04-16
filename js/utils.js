@@ -100,7 +100,7 @@ function figureOutWhereToConnect(
       whereToConnect = compoTarget.node[input];
     }
 
-    if (!whereToConnect && compoTarget.node.parameters.get(input)) {
+    if (!whereToConnect && compoTarget.node.parameters?.get(input)) {
       whereToConnect = compoTarget.node.parameters.get(input);
     }
 

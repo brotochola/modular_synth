@@ -16,6 +16,7 @@ class Component {
     this.inputElements = {};
     this.outputElements = {};
     this.app.actx.resume();
+    this.active = false;
   }
   loadFromSerializedData() {
     if (!this.serializedData) return;
@@ -109,7 +110,10 @@ class Component {
 
     for (let inp of [...this.audioParams, ...(this.customAudioParams || [])]) {
       // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
-
+      if (inp == "in_0" && this.type == "Multiplexor") {
+        //INPUT 0 DOESNT WORK, I USE 0 TO INDICATE THE MULTIPLEXOR HAS TO REMEMBER ITS LAST STATE
+        continue;
+      }
       //CREATE THE ROW
       let audioParamRow = document.createElement("audioParamRow");
       //CREATE THE BUTTON
@@ -241,13 +245,19 @@ class Component {
     this.container.ondragstart = (e) => this.ondragstart(e);
 
     if (this.type.toLowerCase() == "output") {
-      this.container.style.left = Math.floor(window.innerWidth * 0.5) + "px";
-      this.container.style.top = Math.floor(window.innerHeight * 0.5) + "px";
+      this.container.style.left =
+        Math.floor(window.innerWidth * 0.5) + 500 + "px";
+      this.container.style.top =
+        Math.floor(window.innerHeight * 0.5) + 500 + "px";
     } else {
       this.container.style.left =
-        Math.floor((window.innerWidth - 400) * Math.random() + 200) + "px";
+        Math.floor((window.innerWidth - 400) * Math.random() + 200) -
+        this.app.container.getBoundingClientRect().x +
+        "px";
       this.container.style.top =
-        Math.floor((window.innerHeight - 500) * Math.random() + 250) + "px";
+        Math.floor((window.innerHeight - 500) * Math.random() + 250) -
+        this.app.container.getBoundingClientRect().y +
+        "px";
     }
 
     this.app.container.appendChild(this.container);
@@ -259,6 +269,21 @@ class Component {
     this.container.appendChild(this.inputsDiv);
 
     this.container.onmousedown = () => {
+      if (this.active) {
+        for (let c of this.app.components) {
+          c.active = false;
+          c.container.classList.remove("active");
+        }
+        this.active = false;
+      } else {
+        for (let c of this.app.components) {
+          c.active = false;
+          c.container.classList.remove("active");
+        }
+        this.container.classList.add("active");
+        this.active = true;
+      }
+
       window.tc = this;
       console.log(this);
     };

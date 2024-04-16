@@ -5,6 +5,14 @@ class App {
     this.bpm = 100;
     this.createMainContainer(elem);
     this.createOutputComponent();
+
+    window.addEventListener("keydown",e=>{
+      if(e.key=="Delete"){
+        for(let c of this.components.filter(k=>k.active)){
+          c.remove()
+        }
+      }
+    },false);
   }
 
   getNextBeat() {

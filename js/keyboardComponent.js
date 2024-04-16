@@ -20,6 +20,7 @@ class KeyboardComponent extends Component {
 
   }
   onKeyDown(e) {
+    
     for (let i = 0; i < this.letters.length; i++) {
       if (e.key == this.letters[i]) {
         this.node.port.postMessage({ type: "down", which: i });

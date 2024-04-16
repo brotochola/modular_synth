@@ -47,7 +47,7 @@
             margin: 0px;
             padding: 0px;
             border: none;
-            box-sizing: border-box;
+            /* box-sizing: border-box; */
         }
 
         .line {
@@ -72,10 +72,10 @@
 
         app .mainContainer {
             position: absolute;
-            width: 200vw;
-            height: 200vh;
-            top: 0px;
-            left: 0px;
+            width: 400vw;
+            height: 400vh;
+            top: -500px;
+            left: -500px;
             background-image: url(carpet.jpg);
             background-size: 25%;
         }
@@ -113,6 +113,9 @@
             width: 180px;
             height: 100px;
             overflow: hidden;
+        }
+        component.active{
+            outline: 3px solid yellow;
         }
 
         component icon {

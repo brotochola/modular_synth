@@ -24,7 +24,7 @@ class KeyboardWorklet extends AudioWorkletProcessor {
           }
         }
       }
-      // this.port.postMessage({ data: "hola", counter });
+      // this.port.postMessage( this.status);
     } catch (e) {
       this.port.postMessage(e);
     }
