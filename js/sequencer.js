@@ -72,6 +72,9 @@ class Sequencer extends Component {
     }
     this.sendToWorklet();
   }
+  updateBPM(){
+    this.sendToWorklet()
+  }
 
   sendToWorklet() {
     this.convertArrayOfArraysIntoSmpleArray();

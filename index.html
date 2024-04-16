@@ -34,12 +34,15 @@
 
 
     <style>
-        body,html,app{
-            margin:0px;
-            padding:0px;
-            border:none;
+        body,
+        html,
+        app {
+            margin: 0px;
+            padding: 0px;
+            border: none;
             box-sizing: border-box;
         }
+
         .line {
             position: absolute;
             width: 2px;
@@ -65,19 +68,21 @@
             top: 0px;
             left: 0px;
         }
-        .buttons{
+
+        .buttons {
             position: fixed;
-            top:5px;
-            left:50vw;
-            transform:translateX(-50%);
-            width:calc(100vw - 50px);
+            top: 5px;
+            left: 50vw;
+            transform: translateX(-50%);
+            width: calc(100vw - 50px);
             display: flex;
-            gap:3px;
+            gap: 3px;
             z-index: 999;
             pointer-events: none;
             touch-action: none;
         }
-        .buttons button{
+
+        .buttons button {
             pointer-events: all;
             touch-action: auto;
         }
@@ -250,6 +255,9 @@
             overflow: hidden;
             right: 5px;
             bottom: 5px;
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
         }
 
         component button.playButton {
@@ -263,6 +271,7 @@
             width: 70px;
             height: 20px;
             overflow: hidden;
+            cursor: pointer;
 
 
 
@@ -307,40 +316,37 @@
             justify-content: center;
             align-items: center;
         }
-
-
-
-   
     </style>
 </head>
 
 <body>
     <div class="buttons">
-    <button onclick="app.addOscillator()">add osc</button>
-    <button onclick="app.addFilter()">add filter</button>
-    <button onclick="app.addEnvelope()">add env</button>
-    <button onclick="app.addDelay()">add Delay</button>
-    <button onclick="app.addMerger()">add merger</button>
-    <button onclick="app.addSequencer()">add sequencer</button>
-    <button onclick="app.addNumberDisplay()">add number display</button>
-    <button onclick="app.addGainNode()">add gain node</button>
-    <button onclick="app.addVisualizer()">add visualizer</button>
-    <button onclick="app.addMouse()">add mouse</button>
-    <button onclick="app.addCustomProcessor()">add CustomProcessor</button>
-    <button onclick="app.addImageMaker()">add Image Maker</button>
+        <button onclick="app.changeBPM()">change bpm</button>
+        <button onclick="app.addOscillator()">add osc</button>
+        <button onclick="app.addFilter()">add filter</button>
+        <button onclick="app.addEnvelope()">add env</button>
+        <button onclick="app.addDelay()">add Delay</button>
+        <button onclick="app.addMerger()">add merger</button>
+        <button onclick="app.addSequencer()">add sequencer</button>
+        <button onclick="app.addNumberDisplay()">add number display</button>
+        <button onclick="app.addGainNode()">add gain node</button>
+        <button onclick="app.addVisualizer()">add visualizer</button>
+        <button onclick="app.addMouse()">add mouse</button>
+        <button onclick="app.addCustomProcessor()">add CustomProcessor</button>
+        <button onclick="app.addImageMaker()">add Image Maker</button>
 
-    <button onclick="app.addNoise()">add noise</button>
-    <button onclick="app.addImagePlayer()">add imagePlayer</button>
+        <button onclick="app.addNoise()">add noise</button>
+        <button onclick="app.addImagePlayer()">add imagePlayer</button>
 
 
-    <button onclick="app.addAudioPlayer()">add Audio Player</button>
+        <button onclick="app.addAudioPlayer()">add Audio Player</button>
 
-    <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
-    <button onclick="app.resetAllConnections()">!! reset all connections</button>
+        <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
+        <button onclick="app.resetAllConnections()">!! reset all connections</button>
 
-    <button onclick="app.save()">save</button>
-    <button onclick="app.load()">load</button>
-</div>
+        <button onclick="app.save()">save</button>
+        <button onclick="app.load()">load</button>
+    </div>
     <app></app>
     <script>
         var app = new App(document.querySelector('app'))

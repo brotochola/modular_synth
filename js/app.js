@@ -2,7 +2,7 @@ class App {
   constructor(elem) {
     this.components = [];
     this.actx = new AudioContext();
-    this.bpm = 120;
+    this.bpm = 100;
     this.createMainContainer(elem);
     this.createOutputComponent();
   }
@@ -147,7 +147,7 @@ class App {
   }
 
   serialize() {
-    let obj = { components: [], connections: [] };
+    let obj = { components: [], connections: [], bpm: this.bpm };
     for (let comp of this.components) {
       obj.components.push(comp.serialize());
     }
@@ -164,6 +164,8 @@ class App {
     for (let comp of obj.components) {
       this.addSerializedComponent(comp);
     }
+
+    if (obj.bpm) this.bpm = obj.bpm;
 
     setTimeout(() => {
       for (let c of obj.connections) {
@@ -210,5 +212,15 @@ class App {
     if (!name) return;
     if (!localStorage[this.SAVE_PREFIX + name]) return;
     this.loadFromFile(JSON.parse(localStorage[this.SAVE_PREFIX + name]));
+  }
+
+  changeBPM() {
+    let val = prompt("bpm");
+    val = parseInt(val);
+    if (isNaN(val)) return;
+    this.bpm = val;
+    for (let c of this.components) {
+      c.updateBPM(this.bpm);
+    }
   }
 }

@@ -211,7 +211,8 @@ class Component {
     let box = this.app.container.getBoundingClientRect();
     this.container.style.left =
       -box.x + e.clientX - this.dragStartedAt[0] + "px";
-    this.container.style.top = -box.y + e.clientY - this.dragStartedAt[1] + "px";
+    this.container.style.top =
+      -box.y + e.clientY - this.dragStartedAt[1] + "px";
 
     this.app.updateAllLines();
   }
@@ -250,12 +251,14 @@ class Component {
       console.log(this);
     };
   }
+  updateBPM() {}
 
   createOutputButton() {
     if (
       this.type.toLowerCase() == "output" ||
       this.type.toLowerCase() == "imagemaker" ||
-      this.type.toLowerCase() == "numberdisplaycomponent"
+      this.type.toLowerCase() == "numberdisplaycomponent" ||
+      this.type.toLowerCase() == "visualizer"
     ) {
       return;
     }
