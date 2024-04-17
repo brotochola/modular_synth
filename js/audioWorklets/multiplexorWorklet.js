@@ -14,6 +14,8 @@ class MultiplexorWorklet extends AudioWorkletProcessor {
   }
 
   process(inputs, outputs, parameters) {
+    this.port.postMessage({ which: this.which });
+
     // this.port.postMessage({ parameters: parameters });
     try {
       //try to get the last value of the last input
@@ -36,9 +38,10 @@ class MultiplexorWorklet extends AudioWorkletProcessor {
 
       for (let i = 0; i < outputs[0][0].length; i++) {
         let inputValue = ((inputs[this.which] || [])[0] || [])[i];
+        // this.port.postMessage(inputValue);
         outputs[0][0][i] = inputValue || 0;
       }
-      this.lastWhich = tempWhich;
+      this.lastWhich = this.which;
     } catch (e) {
       this.port.postMessage(e);
     }

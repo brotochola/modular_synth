@@ -4,6 +4,7 @@
     <script src="js/utils.js"></script>
     <script src="js/connection.js"></script>
     <script src="js/component.js"></script>
+    <script src="js/text.js"></script>
     <!-- <script src="js/external/envelope-generator.js"></script> -->
     <script src="js/external/audioworklet-adsrnode.js"></script>
     <script src="js/multiplexor.js"></script>
@@ -39,6 +40,7 @@
     <style>
         * {
             font-family: 'courier new';
+            box-sizing: border-box;
         }
 
         body,
@@ -47,7 +49,7 @@
             margin: 0px;
             padding: 0px;
             border: none;
-            /* box-sizing: border-box; */
+
         }
 
         .line {
@@ -99,6 +101,11 @@
             touch-action: auto;
         }
 
+        component.text textarea {
+            width: 100%;
+            height: 100%;
+        }
+
         component {
             background-image: url(leather.jpg);
             background-size: 225%;
@@ -114,7 +121,8 @@
             height: 100px;
             overflow: hidden;
         }
-        component.active{
+
+        component.active {
             outline: 3px solid yellow;
         }
 
@@ -168,6 +176,23 @@
             height: inherit;
         }
 
+        component.CustomProcessorComponent {
+            height: 260px
+        }
+
+        component.CustomProcessorComponent textarea {
+            height: 80px;
+            width: 100%;
+            /* top:20px; */
+            position: relative;
+
+        }
+
+        textarea {
+            resize: none;
+
+        }
+
         component.multiplexor {
             height: 280px;
         }
@@ -182,11 +207,12 @@
 
         }
 
-        component.multiplexor p {
+        component p {
 
             padding: 5px;
             margin-top: 0px;
             font-size: 12px;
+            margin-bottom: 5px;
         }
 
         component.envelopegenerator {
@@ -250,7 +276,7 @@
 
         component.sequencer div.buttonsContainer {
             display: flex;
-            gap: 2px;
+            gap: 1px;
             margin-top: 20px;
             flex-wrap: wrap;
             width: 275px;
@@ -399,6 +425,8 @@
         <button onclick="app.addAudioPlayer()">add Audio Player</button>
         <button onclick="app.addKeyboard()">add keyboard</button>
         <button onclick="app.addMultiplexor()">add multiplexor</button>
+        <button onclick="app.addText()">add text</button>
+
 
         <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
         <button onclick="app.resetAllConnections()">!! reset all connections</button>

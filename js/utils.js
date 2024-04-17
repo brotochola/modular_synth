@@ -78,12 +78,7 @@ function createLine(from, to) {
   return line;
 }
 
-function figureOutWhereToConnect(
-  compoSource,
-  compoTarget,
-  input,
-  connInstance
-) {
+function figureOutWhereToConnect(compoSource, compoTarget, input) {
   let whereToConnect;
   let whichInput;
   if (compoTarget.type.toLowerCase() == "output") {
@@ -100,8 +95,8 @@ function figureOutWhereToConnect(
       whereToConnect = compoTarget.node[input];
     }
 
-    if (!whereToConnect && compoTarget.node.parameters?.get(input)) {
-      whereToConnect = compoTarget.node.parameters.get(input);
+    if (!whereToConnect && compoTarget.node?.parameters?.get(input)) {
+      whereToConnect = compoTarget.node?.parameters?.get(input);
     }
 
     if ((compoTarget.customAudioParams || []).includes(input)) {

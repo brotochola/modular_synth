@@ -1,9 +1,9 @@
 class Output extends Component {
-  constructor(app,serializedData) {
-    super(app,serializedData);
+  constructor(app, serializedData) {
+    super(app, serializedData);
     this.node = null;
-    this.id="output"
-    this.createInput() 
+    this.id = "output";
+    this.createInput();
   }
 
   createInput() {
@@ -17,6 +17,12 @@ class Output extends Component {
   }
 
   createView() {
+    //OVERWRITE THIS METHOD BC THIS COMPONENTS BEHAVES DIFFERENTLY
     makeChildrenStopPropagation(this.container);
+    this.ready = true;
+  }
+
+  remove() {
+    //OVERWRITE THIS METHOD BC THIS COMPONENT YOU CANNOT DELETE
   }
 }

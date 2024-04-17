@@ -2,9 +2,17 @@ class CustomProcessorComponent extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.formula = serializedData?.formula || "y=x1*x2";
-
+    this.createInfo();
     this.createInputText();
+
     this.createNode();
+  }
+  createInfo() {
+    this.infoText = document.createElement("p");
+
+    this.infoText.innerText =
+      "y is the output, x1, x2, x3 are the 3 inputs at each frame, but also you can use it like: inputChannel1[i], being the i between 0 and 127";
+    this.container.appendChild(this.infoText);
   }
   createNode() {
     this.app.actx.audioWorklet
@@ -18,7 +26,7 @@ class CustomProcessorComponent extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        
+
         this.updateNodeWithFormula();
         this.node.port.onmessage = (e) => console.log("#msg", e.data);
       });
@@ -34,7 +42,7 @@ class CustomProcessorComponent extends Component {
   }
 
   createInputText() {
-    this.inputText = document.createElement("input");
+    this.inputText = document.createElement("textarea");
     this.inputText.onchange = (e) => this.handleInputChange(e);
     this.inputText.value = this.formula;
     this.container.appendChild(this.inputText);

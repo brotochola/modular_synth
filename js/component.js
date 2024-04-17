@@ -4,7 +4,7 @@ class Component {
     this.type = this.constructor.name;
     this.serializedData = serializedData;
     this.audioParams = [];
-
+    this.retryCounter = 0;
     this.dragStartedAt = [0, 0];
     this.connections = [];
     this.running = false;
@@ -34,6 +34,7 @@ class Component {
       }
     }
     //LOAD THOSE PARAMETERS THAT WANTED TO BE SAVED FOR EACH TYPE OF COMPONENT
+
     if (this.serializedData.valuesToSave) {
       for (let value of this.serializedData.valuesToSave) {
         this[value] = this.serializedData[value];
@@ -47,10 +48,15 @@ class Component {
   createView() {
     //THIS WILL WAIT UNTIL THE NODE EXISTS
     if (!this.node) {
-      setTimeout(() => this.createView(), 20);
+      if (this.retryCounter > 200) {
+        return console.error("this component has an error in its node", this);
+      }
+      setTimeout(() => this.createView(), 50);
+      this.retryCounter++;
       return console.warn(this.id, this.type, "NODE NOT READY");
     }
     this.node.parent = this;
+    this.ready = true;
     this.createOutputButton();
     this.createInputButtons();
     this.createWorkletForCustomInputs();

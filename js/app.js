@@ -6,13 +6,17 @@ class App {
     this.createMainContainer(elem);
     this.createOutputComponent();
 
-    window.addEventListener("keydown",e=>{
-      if(e.key=="Delete"){
-        for(let c of this.components.filter(k=>k.active)){
-          c.remove()
+    window.addEventListener(
+      "keydown",
+      (e) => {
+        if (e.key == "Delete") {
+          for (let c of this.components.filter((k) => k.active)) {
+            c.remove();
+          }
         }
-      }
-    },false);
+      },
+      false
+    );
   }
 
   getNextBeat() {
@@ -20,9 +24,17 @@ class App {
     return durationOf4Beats - (this.actx.currentTime % durationOf4Beats);
   }
 
+  makeAllComponentsInactive() {
+    for (let c of this.components) {
+      c.container.classList.remove("active");
+      c.active = false;
+    }
+  }
+
   createMainContainer(elem) {
     this.container = document.createElement("div");
     this.container.classList.add("mainContainer");
+
     this.container.draggable = true;
     this.dragStartedAt = [0, 0];
 
@@ -37,10 +49,12 @@ class App {
       this.updateAllLines();
     };
     this.container.ondragstart = (e) => {
+      this.makeAllComponentsInactive();
       this.dragStartedAt[0] = e.layerX;
       this.dragStartedAt[1] = e.layerY;
     };
-    this.putCSSVariablesInMainContainer(0, 0);
+    let box = this.container.getBoundingClientRect();
+    this.putCSSVariablesInMainContainer(box.x, box.y);
   }
   putCSSVariablesInMainContainer(x, y) {
     this.container.style.setProperty("--mainContainerX", x + "px");
@@ -60,8 +74,9 @@ class App {
       c.updateMyLines();
     }
   }
-
-  
+  addText() {
+    this.components.push(new Text(this));
+  }
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
   }
@@ -72,7 +87,7 @@ class App {
     this.components.push(new Oscillator(this));
   }
 
-  addKeyboard(){
+  addKeyboard() {
     this.components.push(new KeyboardComponent(this));
   }
 
@@ -175,40 +190,57 @@ class App {
   }
 
   loadFromFile(obj) {
+    if (obj.bpm) this.bpm = obj.bpm;
+    //REMOVE ALL
     for (let c of this.components) {
       c.remove();
     }
+    //CREATE ALL COMPONENTS
     for (let comp of obj.components) {
       this.addSerializedComponent(comp);
     }
 
-    if (obj.bpm) this.bpm = obj.bpm;
+    this.waitUntilComponentsAreLoadedAndLoadConnections(obj);
+  }
 
-    setTimeout(() => {
+  waitUntilComponentsAreLoadedAndLoadConnections(obj) {
+    if (this.components.filter(k=>k.ready).length != obj.components.length) {
+      console.log(
+        "$$NOT ALL COMPONENTS WERE LOADED YET",
+        this.components.length,
+        obj.components.length
+      );
+      setTimeout(
+        () => this.waitUntilComponentsAreLoadedAndLoadConnections(obj),
+        50
+      );
+    } else {
+      // setTimeout(() => {
       for (let c of obj.connections) {
         this.addSerializedConnection(c);
       }
       this.resetAllConnections();
       this.actx.resume();
       this.updateAllLines();
-    }, 300);
+      // }, 300);
+    }
   }
   addSerializedConnection(conn) {
     let componentsFrom = app.components.filter((k) => k.id == conn.from);
     let componentsTo = app.components.filter((k) => k.id == conn.to);
     if (componentsFrom.length && componentsTo.length) {
-      try {
-        componentsFrom[0].connect(
-          componentsTo[0],
-          conn.audioParam,
-          conn.numberOfOutput
-        );
-      } catch (e) {
-        console.warn(e);
-      }
+      componentsFrom[0].connect(
+        componentsTo[0],
+        conn.audioParam,
+        parseInt(conn.numberOfOutput)
+      );
+    } else {
+      return console.warn("Couldn't find the components", conn);
     }
   }
   addSerializedComponent(comp) {
+    if (comp.type == "Output")
+      return console.warn("YOU CANT CREATE OUTPUT COMPONENTS");
     let c = eval(comp.constructor);
     this.components.push(new c(this, comp));
   }
