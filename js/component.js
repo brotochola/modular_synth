@@ -41,8 +41,8 @@ class Component {
       }
     }
     if (this.updateUI instanceof Function) this.updateUI();
-    this.container.style.left = this.serializedData.x;
-    this.container.style.top = this.serializedData.y;
+    // this.container.style.left = this.serializedData.x;
+    // this.container.style.top = this.serializedData.y;
   }
 
   createView() {
@@ -249,21 +249,26 @@ class Component {
     this.container.draggable = true;
     this.container.ondragend = (e) => this.ondragend(e);
     this.container.ondragstart = (e) => this.ondragstart(e);
-
-    if (this.type.toLowerCase() == "output") {
-      this.container.style.left =
-        Math.floor(window.innerWidth * 0.5) + 500 + "px";
-      this.container.style.top =
-        Math.floor(window.innerHeight * 0.5) + 500 + "px";
+    
+    if (this.serializedData) {
+      this.container.style.left = this.serializedData.x;
+      this.container.style.top = this.serializedData.y;
     } else {
-      this.container.style.left =
-        Math.floor((window.innerWidth - 400) * Math.random() + 200) -
-        this.app.container.getBoundingClientRect().x +
-        "px";
-      this.container.style.top =
-        Math.floor((window.innerHeight - 500) * Math.random() + 250) -
-        this.app.container.getBoundingClientRect().y +
-        "px";
+      if (this.type.toLowerCase() == "output") {
+        this.container.style.left =
+          Math.floor(window.innerWidth * 0.5) + 500 + "px";
+        this.container.style.top =
+          Math.floor(window.innerHeight * 0.5) + 500 + "px";
+      } else {
+        this.container.style.left =
+          Math.floor((window.innerWidth - 400) * Math.random() + 200) -
+          this.app.container.getBoundingClientRect().x +
+          "px";
+        this.container.style.top =
+          Math.floor((window.innerHeight - 500) * Math.random() + 250) -
+          this.app.container.getBoundingClientRect().y +
+          "px";
+      }
     }
 
     this.app.container.appendChild(this.container);

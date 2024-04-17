@@ -195,6 +195,9 @@ class App {
     for (let c of this.components) {
       c.remove();
     }
+    //PUT THE OUTPUT WHERE IT WAS SAVED:
+    this.updatePositionOfOutPutComponent(obj);
+
     //CREATE ALL COMPONENTS
     for (let comp of obj.components) {
       this.addSerializedComponent(comp);
@@ -203,8 +206,19 @@ class App {
     this.waitUntilComponentsAreLoadedAndLoadConnections(obj);
   }
 
+  updatePositionOfOutPutComponent(savedData) {
+    let outputCompo = this.components.filter((c) => c.type == "Output")[0];
+    let savedOutputcompo = savedData.components.filter(
+      (c) => c.type == "Output"
+    )[0];
+    outputCompo.container.style.left = savedOutputcompo.x;
+    outputCompo.container.style.top = savedOutputcompo.y;
+  }
+
   waitUntilComponentsAreLoadedAndLoadConnections(obj) {
-    if (this.components.filter(k=>k.ready).length != obj.components.length) {
+    if (
+      this.components.filter((k) => k.ready).length != obj.components.length
+    ) {
       console.log(
         "$$NOT ALL COMPONENTS WERE LOADED YET",
         this.components.length,
