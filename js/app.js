@@ -5,6 +5,7 @@ class App {
     this.bpm = 100;
     this.createMainContainer(elem);
     this.createOutputComponent();
+    this.createCanvasOnTop();
 
     window.addEventListener(
       "keydown",
@@ -17,6 +18,45 @@ class App {
       },
       false
     );
+  }
+  createCanvasOnTop() {
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = this.container.getBoundingClientRect().width;
+    this.canvas.height = this.container.getBoundingClientRect().height;
+    this.container.appendChild(this.canvas);
+    this.canvas.onclick = (e) => console.log(e);
+    this.ctx = this.canvas.getContext("2d");
+  }
+  drawLine(from, to, color) {
+    this.ctx.beginPath();
+    let box = this.container.getBoundingClientRect();
+    let fromBox = from.getBoundingClientRect();
+    let toBox = to.getBoundingClientRect();
+
+    // let x1 = parseInt(from.container.style.left.replace("px",""))
+    // let y1 = parseInt(from.container.style.top.replace("px",""))
+    // let x2 = parseInt(tp.container.style.left.replace("px",""))
+    // let y2 = parseInt(to.container.style.top.replace("px",""))
+
+    this.ctx.lineWidth = 3;
+    this.ctx.strokeStyle = color || "red";
+    let startX = fromBox.x - box.x + fromBox.width / 2;
+    let startY = fromBox.y - box.y + fromBox.height / 2;
+    this.ctx.moveTo(startX, startY);
+
+    let endX = toBox.x - box.x + toBox.height / 2;
+    let endY = toBox.y - box.y + toBox.height / 2;
+    let deviation = 150;
+    this.ctx.bezierCurveTo(
+      startX + deviation,
+      startY,
+      endX - deviation,
+      endY,
+      endX,
+      endY
+    );
+    this.ctx.stroke();
+    // this.ctx.endPath();
   }
 
   getNextBeat() {
@@ -70,9 +110,13 @@ class App {
   }
 
   updateAllLines() {
-    for (let c of this.components) {
-      c.updateMyLines();
-    }
+    // debugger
+    this.ctx.clearRect(0, 0, 9999, 9999);
+    setTimeout(() => {
+      for (let c of this.getAllConnections()) {
+        c.redraw();
+      }
+    }, 10);
   }
   addText() {
     this.components.push(new Text(this));

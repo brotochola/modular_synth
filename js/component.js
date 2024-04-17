@@ -190,11 +190,7 @@ class Component {
     this.container.appendChild(this.icon);
   }
   disconnect(audioParam) {
-    // for (let c of this.connections) {
-    //   c.line.parentNode.removeChild(c.line);
-    //   c = null;
-    // }
-    // this.connections = [];
+
     this.app.removeConnectionToMe(this, audioParam);
     this.app.updateAllLines();
   }
@@ -208,7 +204,7 @@ class Component {
     // console.log("#connect", compo, input);
 
     //CREATE CONNECTION INSTANCE
-    let conn = new Connection(this, compo, input, numberOfOutput);
+    let conn = new Connection(this, compo, input, numberOfOutput, this.app);
     //ADD CLASS TO HTML ELEMENT
     compo.inputElements[input].button.classList.add("connected");
     //ADD THE CONNECTION INSTANCE TO THE ARRAY OF CONNECTIONS OF THIS COMPONENT
@@ -224,7 +220,7 @@ class Component {
         )
       : this.node.connect(where.whereToConnect, numberOfOutput);
 
-    this.drawLine(conn);
+    conn.redraw()
   }
 
   ondragend(e) {
@@ -338,23 +334,8 @@ class Component {
     e.stopPropagation();
     this.app.lastOutputClicked = { compo: this, output: outputButton };
   }
-  drawLine(conn) {
-    let line = createLine(
-      conn.from.outputs.querySelector(
-        '.outputButton[numberOfOutput="' + conn.numberOfOutput + '"]'
-      ),
-      conn.to.inputElements[conn.audioParam].button
-    );
-    // debugger
-    conn.line = line;
-    this.app.container.appendChild(line);
-  }
-  updateMyLines() {
-    for (let conn of this.connections) {
-      conn.line?.parentNode?.removeChild(conn.line);
-      this.drawLine(conn);
-    }
-  }
+ 
+
 
   serialize() {
     let obj = {

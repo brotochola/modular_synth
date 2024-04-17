@@ -1,10 +1,10 @@
 class Connection {
-  constructor(from, to, audioParam, numberOfOutput) {
+  constructor(from, to, audioParam, numberOfOutput, app) {
+    this.app = app;
     this.from = from;
     this.to = to;
     this.audioParam = audioParam;
     this.numberOfOutput = numberOfOutput;
-    this.line = null;
     this.id = makeid(8);
   }
   remove() {
@@ -28,10 +28,18 @@ class Connection {
       console.log(e);
     }
     this.to.inputElements[this.audioParam].button.classList.remove("connected");
-    this.line.parentNode.removeChild(this.line);
-    this.line = null;
     this.from.connections = this.from.connections.filter(
       (k) => k.id != this.id
+    );
+  }
+
+  redraw() {
+    let color=(this.from.type+this.to.type+this.audioParam+this.numberOfOutput).toRGB()
+    this.app.drawLine(
+      this.from.outputs.querySelector(
+        '.outputButton[numberOfOutput="' + this.numberOfOutput + '"]'
+      ),
+      this.to.inputElements[this.audioParam].button,color
     );
   }
 
