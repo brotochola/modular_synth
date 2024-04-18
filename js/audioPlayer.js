@@ -79,7 +79,6 @@ class AudioPlayer extends Component {
 
     //CREATE THE AUDIO BUFFER SOURCE OBJECT
     this.node = this.app.actx.createBufferSource();
-    this.node.pija = 1;
 
     //IF THE AUDIOBUFFER IS ALREADY LOADED AND DECODED, WE USE THAT
     if (this.audioBuffer && this.currentAudioFile == this.inputFile.files[0]) {
@@ -90,6 +89,8 @@ class AudioPlayer extends Component {
       //IF NOT WE GOTTA LOAD THE AUDIO FILE
       let reader = new FileReader();
       reader.onload = async () => {
+        // console.log(reader.result);
+        this.arrayBuffer = copyArrayBuffer(reader.result)
         this.audioBuffer = await this.app.actx.decodeAudioData(reader.result);
         this.node.buffer = this.audioBuffer;
         this.node.loop = true;

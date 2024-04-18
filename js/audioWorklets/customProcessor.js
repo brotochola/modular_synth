@@ -4,7 +4,7 @@ class CustomProcessor extends AudioWorkletProcessor {
     this.port.onmessage = (e) => {
       console.log(e.data);
       this.formula = e.data;
-      this.port.postMessage("UPDATED FORMULA " + this.formula);
+      // this.port.postMessage("UPDATED FORMULA " + this.formula);
     };
   }
   getFormula() {
@@ -12,6 +12,7 @@ class CustomProcessor extends AudioWorkletProcessor {
   }
 
   process(inputs, outputs) {
+    // this.port.postMessage("FORMULA " + this.formula)
     try {
       let input1 = (inputs || [])[0] || [];
       let input2 = (inputs || [])[1] || [];
@@ -20,19 +21,19 @@ class CustomProcessor extends AudioWorkletProcessor {
       // this.port.postMessage(inputs);
       let counter = 0;
 
-      for (let channel = 0; channel < input1.length; ++channel) {
+      for (let channel = 0; channel < output.length; ++channel) {
         let inputChannel1 = (input1 || [])[channel] || [];
         let inputChannel2 = (input2 || [])[channel] || [];
         let inputChannel3 = (input3 || [])[channel] || [];
         let outputChannel = (output || [])[channel] || [];
 
-        for (let i = 0; i < inputChannel1.length; ++i) {
+        for (let i = 0; i < outputChannel.length; ++i) {
           counter++;
           let x1 = inputChannel1[i] || 0;
           let x2 = inputChannel2[i] || 0;
           let x3 = inputChannel3[i] || 0;
 
-          // this.port.postMessage({ data: "hola", inputChannel1, inputChannel2 ,outputChannel});
+        
 
           // this.port.postMessage(inputChannel1[i], inputChannel2[i]);
           // this.port.postMessage(outputChannel[i]);
@@ -44,7 +45,7 @@ class CustomProcessor extends AudioWorkletProcessor {
       }
       // this.port.postMessage({ data: "hola", counter });
     } catch (e) {
-      // this.port.postMessage({ data: "hola", counter });
+      this.port.postMessage(e);
     }
     return true;
   }

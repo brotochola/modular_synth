@@ -21,6 +21,7 @@ class App {
   }
   createCanvasOnTop() {
     this.canvas = document.createElement("canvas");
+    this.canvas.classList.add("linesCanvas")
     this.canvas.width = this.container.getBoundingClientRect().width;
     this.canvas.height = this.container.getBoundingClientRect().height;
     this.container.appendChild(this.canvas);
@@ -46,11 +47,21 @@ class App {
 
     let endX = toBox.x - box.x + toBox.height / 2;
     let endY = toBox.y - box.y + toBox.height / 2;
-    let deviation = 150;
+    // let deviation = 100;
+    // this.ctx.bezierCurveTo(
+    //   startX + deviation,
+    //   startY,
+    //   endX - deviation,
+    //   endY,
+    //   endX,
+    //   endY
+    // );
+
+    
     this.ctx.bezierCurveTo(
-      startX + deviation,
+      endX,
       startY,
-      endX - deviation,
+      startX,
       endY,
       endX,
       endY
@@ -129,6 +140,11 @@ class App {
   }
   addOscillator() {
     this.components.push(new Oscillator(this));
+  }
+
+  addMidiPlayer(){
+    this.components.push(new MidiFilePlayer(this));
+    
   }
 
   addKeyboard() {
