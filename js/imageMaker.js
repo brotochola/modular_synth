@@ -10,11 +10,19 @@ class ImageMaker extends Component {
 
     this.createCanvas();
     this.createNode();
+    this.createButtonToToggleFullscreen()
     this.pixelCounter = 0;
     this.lineCounter = 0;
+
     // for (let i = 0; i < this.height; i++) {
     //   this.imageArray.push({});
     // }
+  }
+  createButtonToToggleFullscreen(){
+    this.toggle=document.createElement("button");
+    this.toggle.innerHTML = "Toggle Fullscreen";
+    this.toggle.onclick=()=>this.canvas.classList.toggle("fullscreen")
+    this.container.appendChild(this.toggle);
   }
   createCanvas() {
     this.canvas = document.createElement("canvas");

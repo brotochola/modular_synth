@@ -135,6 +135,9 @@ class App {
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
   }
+  addJoystick() {
+    this.components.push(new JoystickComponent(this));
+  }
   addEnvelope() {
     this.components.push(new EnvelopeGenerator(this));
   }

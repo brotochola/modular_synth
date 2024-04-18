@@ -10,6 +10,7 @@
     <script src="js/external/audioworklet-adsrnode.js"></script>
     <script src="js/multiplexor.js"></script>
     <script src="js/midiFilePlayer.js"></script>
+    <script src="js/joystickComponent.js"></script>
 
     <script src="js/envelope.js"></script>
     <script src="js/amp.js"></script>
@@ -91,6 +92,7 @@
             position: absolute;
             width: 400vw;
             height: 400vh;
+            z-index: 1;
             top: -500px;
             left: -500px;
             background-image: url(carpet.jpg);
@@ -151,18 +153,21 @@
 
         }
 
-    
+
 
 
         component.output icon:after {
             content: '🔊'
         }
 
-    
+
         component.numberdisplay icon:after {
             content: '#'
         }
 
+        component.joystickcomponent icon:after {
+            content: '🎮'
+        }
 
         component.oscillator icon:after {
             content: '∿'
@@ -198,6 +203,14 @@
             position: absolute;
             width: inherit;
             height: inherit;
+        }
+
+        component.NumberDisplayComponent {
+            height: 32px;
+        }
+
+        component.joystickcomponent {
+            height: 475px
         }
 
         component.CustomProcessorComponent {
@@ -269,6 +282,16 @@
             right: 2px;
             position: absolute;
             border: 1px solid gray;
+        }
+
+        component.imagemaker canvas.fullscreen {
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+
         }
 
 
@@ -420,8 +443,18 @@
         component.numberdisplaycomponent .display {
             font-size: 20px;
             display: flex;
-            justify-content: center;
+            justify-content: flex-end;
+            margin-right: 15px;
             align-items: center;
+            margin-top: 4px;
+        }
+
+        component.joystickcomponent input.outputButton:after {
+            content: var(--letter);
+            left: -19px;
+            position: absolute;
+            text-align: right;
+            width: 20px;
         }
     </style>
 </head>
@@ -433,6 +466,8 @@
         <button onclick="app.addFilter()">⩥ add filter</button>
         <button onclick="app.addEnvelope()">add env</button>
         <button onclick="app.addDelay()">add Delay</button>
+        <button onclick="app.addJoystick()">🎮 add Joystick</button>
+
         <button onclick="app.addMerger()">add merger</button>
         <button onclick="app.addSequencer()">📈add sequencer</button>
         <button onclick="app.addNumberDisplay()"># add number display</button>
@@ -445,7 +480,7 @@
         <button onclick="app.addNoise()">add noise</button>
         <button onclick="app.addImagePlayer()">add imagePlayer</button>
 
-        
+
         <button onclick="app.addAudioPlayer()">🎶 add Audio Player</button>
         <button onclick="app.addKeyboard()">⌨ add keyboard</button>
         <button onclick="app.addMultiplexor()">🔌 add multiplexor</button>
