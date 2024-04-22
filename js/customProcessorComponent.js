@@ -1,7 +1,7 @@
 class CustomProcessorComponent extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
-    this.formula = serializedData?.formula || "y=x1*x2";
+    this.formula = serializedData?.formula || "y=x1+x2+x3+x4";
     this.createInfo();
     this.createInputText();
 
@@ -19,7 +19,7 @@ class CustomProcessorComponent extends Component {
       .addModule("js/audioWorklets/customProcessor.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "custom-proc", {
-          numberOfInputs: 3,
+          numberOfInputs: 4,
           numberOfOutputs: 1,
         });
 

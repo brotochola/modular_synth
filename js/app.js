@@ -7,6 +7,7 @@ class App {
     this.createOutputComponent();
     this.createCanvasOnTop();
 
+    this.putBPMInButton();
     window.addEventListener(
       "keydown",
       (e) => {
@@ -19,9 +20,13 @@ class App {
       false
     );
   }
+  putBPMInButton() {
+    (document.querySelector(".buttons #bpmButton") || {}).innerHTML =
+      "change BPM (" + this.bpm + ")";
+  }
   createCanvasOnTop() {
     this.canvas = document.createElement("canvas");
-    this.canvas.classList.add("linesCanvas")
+    this.canvas.classList.add("linesCanvas");
     this.canvas.width = this.container.getBoundingClientRect().width;
     this.canvas.height = this.container.getBoundingClientRect().height;
     this.container.appendChild(this.canvas);
@@ -57,15 +62,7 @@ class App {
     //   endY
     // );
 
-    
-    this.ctx.bezierCurveTo(
-      endX,
-      startY,
-      startX,
-      endY,
-      endX,
-      endY
-    );
+    this.ctx.bezierCurveTo(endX, startY, startX, endY, endX, endY);
     this.ctx.stroke();
     // this.ctx.endPath();
   }
@@ -144,10 +141,12 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
+  addMemoryComponent() {
+    this.components.push(new MemoryComponent(this));
+  }
 
-  addMidiPlayer(){
+  addMidiPlayer() {
     this.components.push(new MidiFilePlayer(this));
-    
   }
 
   addKeyboard() {
@@ -348,5 +347,14 @@ class App {
     for (let c of this.components) {
       c.updateBPM(this.bpm);
     }
+    this.putBPMInButton();
+  }
+
+  download() {
+    downloader(
+      JSON.stringify(this.serialize()),
+      "application/json",
+      "my_patch.json"
+    );
   }
 }

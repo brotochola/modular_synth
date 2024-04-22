@@ -8,6 +8,7 @@ class AudioPlayer extends Component {
     this.createPlayButton();
     //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
     this.customAudioParams = ["trigger"];
+    this.valuesToSave = ["base64", "filename"];
   }
   createPlayButton() {
     this.playButton = document.createElement("button");
@@ -46,7 +47,9 @@ class AudioPlayer extends Component {
   }
 
   updateButton() {
-    this.playButton.textContent = !this.playing ? "▶️" : "⏹️";
+    this.playButton.textContent = !this.playing
+      ? "▶️ " + this.filename
+      : "⏹️ " + this.filename;
   }
 
   createInputFile() {
@@ -65,9 +68,9 @@ class AudioPlayer extends Component {
   //     this.node.loop = true;
   //     // this.node.start(0);
   //   }
-  handleOnChange(e) {
-    if (!(this.inputFile.files || [])[0]) {
-      return;
+  handleOnChange() {
+    if (!(this.inputFile.files || [])[0] && !this.audioBuffer) {
+      return console.warn("no file selected or no audio buffer loaded");
     }
     this.playButton.style.display = "block";
     this.playing = false;
@@ -90,16 +93,32 @@ class AudioPlayer extends Component {
       let reader = new FileReader();
       reader.onload = async () => {
         // console.log(reader.result);
-        this.arrayBuffer = copyArrayBuffer(reader.result)
+        this.base64 = arrayBufferToBase64(reader.result);
+        this.filename = this.inputFile.files[0].name;
+        this.arrayBuffer = copyArrayBuffer(reader.result);
         this.audioBuffer = await this.app.actx.decodeAudioData(reader.result);
         this.node.buffer = this.audioBuffer;
         this.node.loop = true;
         this.app.resetAllConnections();
+        this.updateButton();
       };
 
       reader.readAsArrayBuffer(this.inputFile.files[0]);
     }
     this.currentAudioFile = this.inputFile.files[0];
+
+    this.updateButton();
+  }
+  async updateUI() {
+    //THIS METHOD IS EXECUTED FROM THE COMPONENT CLASS, WHEN THIS COMPONENT ALREADY LOADED THE SAVED DATA
+
+    if (this.base64) {
+      this.audioBuffer = await this.app.actx.decodeAudioData(
+        base64ToArrayBuffer(this.base64)
+      );
+      this.handleOnChange();
+    }
+
     this.updateButton();
   }
 }

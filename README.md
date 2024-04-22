@@ -24,11 +24,37 @@ TODO:
         6 - apply changes
 
 * fix saving with selects, inputs, images, etc
-* play / pause, and keep them in synch using the actx.currentTime
 * add explanations
-* make ui better
 * upload/download json for instruments
 * add midi features
-* add joystick features
 * for audio player, add param to control currentTime
-* customProcessor: if no input->0
+
+* nicer ui:
+https://g200kg.github.io/webaudio-controls/docs/howitworks.html
+
+* add drum machine, maybe with individual components:
+
+https://dev.opera.com/articles/drum-sounds-webaudio/
+
+var context = new AudioContext();
+
+function playKick() {
+    let when=context.currentTime
+    var oscillator = context.createOscillator();
+    var gain = context.createGain();
+    oscillator.connect(gain);
+    gain.connect(context.destination);
+    
+    oscillator.frequency.value = 150;
+    oscillator.frequency.setValueAtTime(150, when);
+    gain.gain.setValueAtTime(1, when);
+    oscillator.frequency.exponentialRampToValueAtTime(0.001, when + 0.5);
+    gain.gain.exponentialRampToValueAtTime(0.001, when + 0.5);
+
+    oscillator.start(when);
+    oscillator.stop(when + 0.5);
+}
+document.body.onclick=()=>playKick();
+
+
+

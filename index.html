@@ -5,6 +5,8 @@
     <script src="js/utils.js"></script>
     <script src="js/connection.js"></script>
     <script src="js/component.js"></script>
+    <script src="js/memoryComponent.js"></script>
+
     <script src="js/text.js"></script>
     <!-- <script src="js/external/envelope-generator.js"></script> -->
     <script src="js/external/audioworklet-adsrnode.js"></script>
@@ -38,463 +40,50 @@
     <script src="js/output.js"></script>
     <script src="js/app.js"></script>
 
+    <link rel="stylesheet" href="styles.css">
 
 
-    <style>
-        * {
-            font-family: 'courier new';
-            box-sizing: border-box;
-        }
-
-        body,
-        html,
-        app {
-            margin: 0px;
-            padding: 0px;
-            overflow: hidden;
-            border: none;
-
-        }
-
-        app canvas.linesCanvas {
-            z-index: 999;
-            position: absolute;
-            top: 0px;
-            width: 100%;
-            height: 100%;
-            left: 0px;
-            background-color: transparent;
-            pointer-events: none;
-            touch-action: none;
-        }
-
-        .line {
-            position: absolute;
-            width: 1px;
-            margin-top: -1px;
-            background-color: red;
-            pointer-events: none;
-            border-radius: 31px;
-            border: 2px solid darkred;
-            touch-action: none;
-        }
-
-        app {
-            position: absolute;
-            left: 0px;
-            top: 0px;
-            width: 100vw;
-            height: 100vh;
-            border-top: 1px solid gray;
-        }
-
-        app .mainContainer {
-            position: absolute;
-            width: 400vw;
-            height: 400vh;
-            z-index: 1;
-            top: -500px;
-            left: -500px;
-            background-image: url(carpet.jpg);
-            background-size: 25%;
-        }
-
-        .buttons {
-            flex-wrap: wrap;
-            position: fixed;
-            top: 5px;
-            left: 50vw;
-            transform: translateX(-50%);
-            width: calc(100vw - 50px);
-            display: flex;
-            gap: 3px;
-            z-index: 999;
-            pointer-events: none;
-            touch-action: none;
-        }
-
-        .buttons button {
-            pointer-events: all;
-            touch-action: auto;
-        }
-
-        component.text textarea {
-            width: 100%;
-            height: 100%;
-        }
-
-        component {
-            background-image: url(leather.jpg);
-            background-size: 225%;
-            background-position-x: var(--posX);
-            background-position-y: var(--posY);
-            box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.7);
-            /* pointer-events: none; */
-            position: absolute;
-            background-color: white;
-            border-radius: 5px;
-            border: 1px solid gray;
-            width: 180px;
-            height: 100px;
-            overflow: hidden;
-        }
-
-        component.active {
-            outline: 3px solid yellow;
-        }
-
-        component icon {
-            position: absolute;
-            left: 5px;
-            top: 5px;
-            width: 20px;
-            height: 20px;
-
-
-        }
-
-
-
-
-        component.output icon:after {
-            content: '🔊'
-        }
-
-
-        component.numberdisplay icon:after {
-            content: '#'
-        }
-
-        component.joystickcomponent icon:after {
-            content: '🎮'
-        }
-
-        component.oscillator icon:after {
-            content: '∿'
-        }
-
-        component.NoiseGenWithWorklet icon:after {
-            content: '👾'
-        }
-
-        component.mouse icon:after {
-            content: '🖱️'
-        }
-
-
-        component.amp icon:after {
-            content: '📢'
-        }
-
-        component.delay icon:after {
-            content: '⏰'
-        }
-
-        component.filter icon:after {
-            content: '⩥'
-        }
-
-        component.envelopegenerator icon:after {
-            content: ' ';
-            background-image: url(https://www.svgrepo.com/show/510368/adsr.svg);
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            position: absolute;
-            width: inherit;
-            height: inherit;
-        }
-
-        component.NumberDisplayComponent {
-            height: 32px;
-        }
-
-        component.joystickcomponent {
-            height: 475px
-        }
-
-        component.CustomProcessorComponent {
-            height: 260px
-        }
-
-        component.CustomProcessorComponent textarea {
-            height: 80px;
-            width: 100%;
-            /* top:20px; */
-            position: relative;
-
-        }
-
-        textarea {
-            resize: none;
-
-        }
-
-        component.multiplexor {
-            height: 280px;
-        }
-
-        component.multiplexor .display {
-
-            position: absolute;
-            right: 6px;
-            font-weight: bold;
-            font-size: 24px;
-            bottom: 22px;
-
-        }
-
-        component p {
-
-            padding: 5px;
-            margin-top: 0px;
-            font-size: 12px;
-            margin-bottom: 5px;
-        }
-
-        component.envelopegenerator {
-            height: 320px;
-        }
-
-        /* component.KeyboardComponent {
-            width: 400px;
-
-        } */
-
-        component.KeyboardComponent outputs {
-            flex-direction: row;
-
-        }
-
-        component.KeyboardComponent input.outputButton:after {
-            content: var(--letter);
-            position: absolute;
-            top: -12px;
-        }
-
-        component.imagemaker {
-            width: 300px;
-            height: 200px;
-        }
-
-        component.imagemaker canvas {
-            bottom: 2px;
-            right: 2px;
-            position: absolute;
-            border: 1px solid gray;
-            pointer-events: none;
-            touch-action: none;
-        }
-
-        component.imagemaker canvas.fullscreen {
-            position: fixed;
-            top: 0px;
-            left: 0px;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-
-        }
-
-
-        component.mouse select,
-        component.imagePlayer select {
-            position: absolute;
-            bottom: 5px;
-            left: 5px;
-        }
-
-
-        component.ImagePlayerWorkletVersion canvas {
-            z-index: -1;
-            left: 2px;
-            top: 2px;
-            position: absolute;
-            width: calc(100% - 4px);
-            height: calc(100% - 4px);
-            pointer-events: none;
-        }
-
-
-
-
-        component.sequencer {
-            width: 300px;
-            height: 280px;
-        }
-
-        component.sequencer div.buttonsContainer {
-            display: flex;
-            gap: 1px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-            width: 275px;
-            padding: 5px;
-
-        }
-
-        component.sequencer .buttonsContainer .seqButton {
-            width: 15px;
-            height: 15px;
-            border: 1px solid #aaaaaa;
-        }
-
-        component.sequencer .buttonsContainer .seqButton.active {
-            background: red;
-        }
-
-        component input[type="file"] {
-            position: relative;
-            top: 5px;
-            lefT: 5px;
-            z-index: 99;
-            display: block;
-
-        }
-
-        component .inputsDiv {
-            position: absolute;
-            overflow: hidden;
-            width: 80%;
-            display: flex;
-            flex-direction: column;
-            height: 100%;
-            justify-content: flex-end;
-            align-content: flex-start;
-            left: 5px;
-            bottom: 5px;
-            gap: 3px;
-            pointer-events: none;
-            touch-action: none;
-        }
-
-        component .inputsDiv * {
-            pointer-events: all;
-            touch-action: auto;
-        }
-
-        outputs {
-            position: absolute;
-            display: block;
-            right: 2px;
-            display: flex;
-            flex-direction: column;
-            bottom: 2px;
-        }
-
-        component .outputButton {
-            /* position: absolute; */
-            overflow: hidden;
-            right: 5px;
-            bottom: 5px;
-            width: 15px;
-            height: 15px;
-            cursor: pointer;
-        }
-
-        component button.playButton {
-            display: block;
-            position: relative;
-            left: 5px;
-            top: 5px;
-        }
-
-        component .inputsDiv button.input {
-            width: 70px;
-            height: 20px;
-            overflow: hidden;
-            cursor: pointer;
-
-
-
-
-        }
-
-        component .inputsDiv audioparamrow input[type="number"] {
-            width: calc(100% - 20px);
-
-            overflow: hidden;
-
-            border-radius: 5px;
-        }
-
-        component.filter {
-            height: 150px;
-        }
-
-        component.AudioPlayer {
-            height: 150px;
-            width: 250px;
-        }
-
-
-
-        audioparamrow {
-            display: flex;
-            flex-direction: row;
-        }
-
-        component.visualizer canvas {
-            position: absolute;
-            left: 2px;
-            top: 2px;
-            pointer-events: none;
-
-        }
-
-        component.numberdisplaycomponent .display {
-            font-size: 20px;
-            display: flex;
-            justify-content: flex-end;
-            margin-right: 15px;
-            align-items: center;
-            margin-top: 4px;
-        }
-
-        component.joystickcomponent input.outputButton:after {
-            content: var(--letter);
-            left: -19px;
-            position: absolute;
-            text-align: right;
-            width: 20px;
-        }
-    </style>
 </head>
 
 <body>
     <div class="buttons">
-        <button onclick="app.changeBPM()">change bpm</button>
+        <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
         <button onclick="app.addOscillator()">∿ add osc</button>
         <button onclick="app.addFilter()">⩥ add filter</button>
         <button onclick="app.addEnvelope()">add env</button>
-        <button onclick="app.addDelay()">add Delay</button>
+        <button onclick="app.addDelay()">⏰ add Delay</button>
+        <button onclick="app.addMemoryComponent()">🖭 add Memory</button>
+
         <button onclick="app.addJoystick()">🎮 add Joystick</button>
 
-        <button onclick="app.addMerger()">add merger</button>
+        <button onclick="app.addMerger()">🍲 add merger</button>
         <button onclick="app.addSequencer()">📈add sequencer</button>
         <button onclick="app.addNumberDisplay()"># add number display</button>
-        <button onclick="app.addGainNode()">add gain node</button>
-        <button onclick="app.addVisualizer()">add visualizer</button>
-        <button onclick="app.addMouse()">add mouse</button>
-        <button onclick="app.addCustomProcessor()">add CustomProcessor</button>
-        <button onclick="app.addImageMaker()">🖼️ add Image Maker</button>
+        <button onclick="app.addGainNode()">📢 add gain node</button>
+        <button onclick="app.addVisualizer()">📺 add visualizer</button>
+        <button onclick="app.addMouse()">🖱️ add mouse</button>
+        <button onclick="app.addCustomProcessor()">❓ add CustomProcessor</button>
+        <button onclick="app.addImageMaker()">📷 add Image Maker</button>
 
-        <button onclick="app.addNoise()">add noise</button>
-        <button onclick="app.addImagePlayer()">add imagePlayer</button>
+        <button onclick="app.addNoise()">👾 add noise</button>
+        <button onclick="app.addImagePlayer()">🖼️ add imagePlayer</button>
 
 
         <button onclick="app.addAudioPlayer()">🎶 add Audio Player</button>
         <button onclick="app.addKeyboard()">⌨ add keyboard</button>
         <button onclick="app.addMultiplexor()">🔌 add multiplexor</button>
-        <button onclick="app.addText()">add text</button>
-        <button onclick="app.addMidiPlayer()">add midi player</button>
+        <button onclick="app.addText()">📄 add text</button>
+        <button onclick="app.addMidiPlayer()">🎹 add midi player</button>
 
 
         <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
         <button onclick="app.resetAllConnections()">!! reset all connections</button>
 
-        <button onclick="app.save()">save</button>
-        <button onclick="app.load()">load</button>
+        <button onclick="app.save()">💾 save</button>
+        <button onclick="app.download()"> download</button>
+
+        
+        <button onclick="app.load()">📂 load</button>
     </div>
     <app></app>
     <script>

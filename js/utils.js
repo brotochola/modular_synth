@@ -117,24 +117,53 @@ function figureOutWhereToConnect(compoSource, compoTarget, input) {
     whichInput: isNaN(whichInput) ? undefined : whichInput,
   };
 }
+function base64ToArrayBuffer(base64) {
+  var binaryString = atob(base64);
+  var bytes = new Uint8Array(binaryString.length);
+  for (var i = 0; i < binaryString.length; i++) {
+    bytes[i] = binaryString.charCodeAt(i);
+  }
+  return bytes.buffer;
+}
+function arrayBufferToBase64(buffer) {
+  let binary = "";
+  const bytes = new Uint8Array(buffer);
+  const len = bytes.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return window.btoa(binary);
+}
+function downloader(data, type, name) {
+	let blob = new Blob([data], {type});
+	let url = window.URL.createObjectURL(blob);
+	downloadURI(url, name);
+	window.URL.revokeObjectURL(url);
+}
 
-String.prototype.toRGB = function() {
+function downloadURI(uri, name) {
+    let link = document.createElement("a");
+    link.download = name;
+    link.href = uri;
+    link.click();
+}
+
+String.prototype.toRGB = function () {
   var hash = 0;
   if (this.length === 0) return hash;
   for (var i = 0; i < this.length; i++) {
-      hash = this.charCodeAt(i) + ((hash << 5) - hash);
-      hash = hash & hash;
+    hash = this.charCodeAt(i) + ((hash << 5) - hash);
+    hash = hash & hash;
   }
   var rgb = [0, 0, 0];
   for (var i = 0; i < 3; i++) {
-      var value = (hash >> (i * 8)) & 255;
-      rgb[i] = value;
+    var value = (hash >> (i * 8)) & 255;
+    rgb[i] = value;
   }
   return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
-}
+};
 
-
-function copyArrayBuffer(src)  {
+function copyArrayBuffer(src) {
   var dst = new ArrayBuffer(src.byteLength);
   new Uint8Array(dst).set(new Uint8Array(src));
   return dst;
