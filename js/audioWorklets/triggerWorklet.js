@@ -1,6 +1,7 @@
 class TriggerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    this.prevValues = {};
   }
 
   process(inputs) {
@@ -10,23 +11,19 @@ class TriggerWorklet extends AudioWorkletProcessor {
         for (let channel = 0; channel < input.length; ++channel) {
           let inputChannel = (input || [])[channel] || [];
 
-          for (let i = 0; i < inputChannel.length; i++) {
-            let lastVal;
-            if (i == inputChannel.length - 1) {
-              this.lastValueFromPrevBuffer = inputChannel[i];
-              lastVal = inputChannel[i - 1];
-            } else if (i == 0) {
-              lastVal = this.lastValueFromPrevBuffer;
-            } else {
-              lastVal = inputChannel[i - 1];
-            }
-            if (
-              (inputChannel[i] > 0 && lastVal <= 0) ||
-              (inputChannel[i] < 0 && lastVal >= 0)
-            ) {
-              this.port.postMessage({ channelTriggered: p });
-            }
+          let current = inputChannel[127] || 0;
+          let lastVal = this.prevValues[channel + "_" + p] || 0;
+
+          if ((current > 0 && lastVal <= 0) || (current < 0 && lastVal >= 0)) {
+            this.port.postMessage({
+              channelTriggered: p,
+              lastVal,
+              current,
+              prevValues: this.prevValues,
+              // inputs,
+            });
           }
+          this.prevValues[channel + "_" + p] = current;
         }
       }
     } catch (e) {

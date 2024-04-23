@@ -27,10 +27,10 @@ class AudioPlayer extends Component {
   }
 
   triggerAudio() {
-    if (this.node && this.currentAudioFile) {
+    if (this.node && this.audioBuffer) {
       this.handleOnChange();
       this.node.loop = false;
-      this.node.start(this.app.getNextBeat());
+      this.node.start();
     }
   }
 

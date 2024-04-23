@@ -141,6 +141,9 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
+  addCounter() {
+    this.components.push(new CounterComponent(this));
+  }
   addMemoryComponent() {
     this.components.push(new MemoryComponent(this));
   }
@@ -279,7 +282,7 @@ class App {
 
   waitUntilComponentsAreLoadedAndLoadConnections(obj) {
     if (
-      this.components.filter((k) => k.ready).length != obj.components.length
+      this.components.filter((k) => k.ready).length != obj.components.length 
     ) {
       console.log(
         "$$NOT ALL COMPONENTS WERE LOADED YET",
@@ -291,14 +294,14 @@ class App {
         50
       );
     } else {
-      // setTimeout(() => {
+      setTimeout(() => {
       for (let c of obj.connections) {
         this.addSerializedConnection(c);
       }
       this.resetAllConnections();
       this.actx.resume();
       this.updateAllLines();
-      // }, 300);
+      }, 100);
     }
   }
   addSerializedConnection(conn) {

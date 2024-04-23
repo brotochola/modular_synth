@@ -1,16 +1,15 @@
-class MemoryWorklet extends AudioWorkletProcessor {
+class CounterWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
     this.val = 0;
     this.port.onmessage = (e) => {
-      //   this.port.postMessage("UPDATED data from joystick " + this.dataFromJoystick);
+      this.port.postMessage({ val: e.data.val });
+      this.val = e.data.val;
     };
-
   }
 
-
   process(inputs, outputs) {
-    // this.port.postMessage({savedValue:this.val})
+    // this.port.postMessage({ savedValue: this.val });
 
     try {
       let output = outputs[0];
@@ -21,9 +20,6 @@ class MemoryWorklet extends AudioWorkletProcessor {
         let inputChannel = (input || [])[channel] || [];
 
         for (let i = 0; i < outputChannel.length; ++i) {
-            
-          this.val = inputChannel[i] != 0 ? inputChannel[i] : this.val;
-          if (isNaN(this.val)) this.val = 0;
           outputChannel[i] = this.val;
         }
       }
@@ -36,4 +32,4 @@ class MemoryWorklet extends AudioWorkletProcessor {
   }
 }
 
-registerProcessor("memory-worklet", MemoryWorklet);
+registerProcessor("counter-worklet", CounterWorklet);
