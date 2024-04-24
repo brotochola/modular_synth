@@ -114,6 +114,8 @@ class Component {
       });
     }
 
+    this.audioParams = unique(this.audioParams);
+
     for (let inp of [...this.audioParams, ...(this.customAudioParams || [])]) {
       // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
       if (inp == "in_0" && this.type == "Multiplexor") {
@@ -190,7 +192,6 @@ class Component {
     this.container.appendChild(this.icon);
   }
   disconnect(audioParam) {
-
     this.app.removeConnectionToMe(this, audioParam);
     this.app.updateAllLines();
   }
@@ -220,7 +221,7 @@ class Component {
         )
       : this.node.connect(where.whereToConnect, numberOfOutput);
 
-    conn.redraw()
+    conn.redraw();
   }
 
   ondragend(e) {
@@ -245,7 +246,7 @@ class Component {
     this.container.draggable = true;
     this.container.ondragend = (e) => this.ondragend(e);
     this.container.ondragstart = (e) => this.ondragstart(e);
-    
+
     if (this.serializedData) {
       this.container.style.left = this.serializedData.x;
       this.container.style.top = this.serializedData.y;
@@ -334,8 +335,6 @@ class Component {
     e.stopPropagation();
     this.app.lastOutputClicked = { compo: this, output: outputButton };
   }
- 
-
 
   serialize() {
     let obj = {

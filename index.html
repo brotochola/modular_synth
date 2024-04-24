@@ -1,21 +1,24 @@
 <html>
 
 <head>
+    <script src="js/external/wheel-zoom.js"></script>
     <script src="js/external/midiplayer.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/connection.js"></script>
     <script src="js/component.js"></script>
     <script src="js/memoryComponent.js"></script>
     <script src="js/counterComponent.js"></script>
+    <script src="js/bpmOutputComponent.js"></script>
 
     <script src="js/text.js"></script>
     <!-- <script src="js/external/envelope-generator.js"></script> -->
     <script src="js/external/audioworklet-adsrnode.js"></script>
+    <script src="js/envelope.js"></script>
+
     <script src="js/multiplexor.js"></script>
     <script src="js/midiFilePlayer.js"></script>
     <script src="js/joystickComponent.js"></script>
 
-    <script src="js/envelope.js"></script>
     <script src="js/amp.js"></script>
     <script src="js/filter.js"></script>
     <script src="js/numberDisplayComponent.js"></script>
@@ -51,15 +54,17 @@
         <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
         <button onclick="app.addOscillator()">∿ add osc</button>
         <button onclick="app.addFilter()">⩥ add filter</button>
-        <button onclick="app.addEnvelope()">add env</button>
+        <button onclick="app.addEnvelope()">⛰️ add env</button>
         <button onclick="app.addDelay()">⏰ add Delay</button>
-        <button onclick="app.addMemoryComponent()">🖭 add Memory</button>
+        <button onclick="app.addMemoryComponent()">📼 add Memory</button>
 
         <button onclick="app.addJoystick()">🎮 add Joystick</button>
 
-        <button onclick="app.addMerger()">🍲 add merger</button>
+        <!-- <button onclick="app.addMerger()">🍲 add merger</button> -->
+        <button onclick="app.addBPMOutputComponenet()">🎵 bpm output</button>
+
         <button onclick="app.addSequencer()">📈add sequencer</button>
-        <button onclick="app.addNumberDisplay()"># add number display</button>
+        <button onclick="app.addNumberDisplay()">#️⃣ add number display</button>
         <button onclick="app.addGainNode()">📢 add gain node</button>
         <button onclick="app.addVisualizer()">📺 add visualizer</button>
         <button onclick="app.addMouse()">🖱️ add mouse</button>
@@ -69,7 +74,7 @@
         <button onclick="app.addNoise()">👾 add noise</button>
         <button onclick="app.addImagePlayer()">🖼️ add imagePlayer</button>
 
-        <button onclick="app.addCounter()">add Counter</button>
+        <button onclick="app.addCounter()">🧮 add Counter</button>
 
         <button onclick="app.addAudioPlayer()">🎶 add Audio Player</button>
         <button onclick="app.addKeyboard()">⌨ add keyboard</button>
@@ -82,9 +87,9 @@
         <button onclick="app.resetAllConnections()">!! reset all connections</button>
 
         <button onclick="app.save()">💾 save</button>
-        <button onclick="app.download()"> download</button>
+        <button onclick="app.download()">⬇️ download</button>
 
-        
+
         <button onclick="app.load()">📂 load</button>
     </div>
     <app></app>

@@ -14,11 +14,35 @@ class App {
         if (e.key == "Delete") {
           for (let c of this.components.filter((k) => k.active)) {
             c.remove();
+            break
           }
+          this.updateAllLines()
         }
       },
       false
     );
+
+    this.wheelZoom();
+  }
+
+  wheelZoom() {
+    // this.container.onwheel = (event) => {
+    //   this.scale += event.deltaY * 0.01;
+
+    //   // Restrict scale
+    //   this.scale = Math.min(Math.max(0.25, this.scale), 1);
+
+    //   // Apply scale transform
+    //   for (let el of document.querySelectorAll("component")) {
+    //     el.style.transform = `scale(${this.scale})`;
+    //   }
+
+    //   // this.container.style.transformOrigin =
+    //   //   event.clientX + "px " + event.clientY + "px";
+    //   event.preventDefault();
+    //   this.updateAllLines();
+    // };
+    // this.scale = 1;
   }
   putBPMInButton() {
     (document.querySelector(".buttons #bpmButton") || {}).innerHTML =
@@ -129,6 +153,10 @@ class App {
   addText() {
     this.components.push(new Text(this));
   }
+  addBPMOutputComponenet() {
+    this.components.push(new BPMOutputComponent(this));
+  }
+  
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
   }
@@ -282,7 +310,7 @@ class App {
 
   waitUntilComponentsAreLoadedAndLoadConnections(obj) {
     if (
-      this.components.filter((k) => k.ready).length != obj.components.length 
+      this.components.filter((k) => k.ready).length != obj.components.length
     ) {
       console.log(
         "$$NOT ALL COMPONENTS WERE LOADED YET",
@@ -295,12 +323,12 @@ class App {
       );
     } else {
       setTimeout(() => {
-      for (let c of obj.connections) {
-        this.addSerializedConnection(c);
-      }
-      this.resetAllConnections();
-      this.actx.resume();
-      this.updateAllLines();
+        for (let c of obj.connections) {
+          this.addSerializedConnection(c);
+        }
+        this.resetAllConnections();
+        this.actx.resume();
+        this.updateAllLines();
       }, 100);
     }
   }
@@ -348,7 +376,7 @@ class App {
     if (isNaN(val)) return;
     this.bpm = val;
     for (let c of this.components) {
-      c.updateBPM(this.bpm);
+      c.updateBPM();
     }
     this.putBPMInButton();
   }

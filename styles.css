@@ -111,8 +111,14 @@ component icon {
 }
 
 component.memorycomponent icon:after {
-  content: "🖭";
+  content: "📼";
 }
+component.bpmoutputcomponent icon:after {
+  content: "🎵";
+}
+
+
+
 
 component.imageplayer icon:after {
   content: "🖼️";
@@ -131,7 +137,7 @@ component.output icon:after {
 }
 
 component.numberdisplay icon:after {
-  content: "#";
+  content: "🔢";
 }
 
 component.joystickcomponent icon:after {
@@ -222,11 +228,10 @@ component p {
 component.envelopegenerator {
   height: 320px;
 }
-
-/* component.KeyboardComponent {
-            width: 400px;
-
-        } */
+component.BPMOutputComponent {
+  height: 28px;
+  width: 100px;
+}
 
 component.KeyboardComponent outputs {
   flex-direction: row;
@@ -365,7 +370,7 @@ component .inputsDiv button.input {
 }
 
 component .inputsDiv audioparamrow input[type="number"] {
-  width: calc(100% - 20px);
+  width: calc(100% - 50px);
 
   overflow: hidden;
 
@@ -394,13 +399,20 @@ component.visualizer canvas {
 }
 
 component.numberdisplaycomponent .display,
-component.memorycomponent .display {
+component.memorycomponent .display, component.bpmoutputcomponent .display{
   font-size: 20px;
   display: flex;
   justify-content: flex-end;
   margin-right: 15px;
   align-items: center;
   margin-top: 4px;
+}
+component.bpmoutputcomponent .display{
+  text-align: left;
+  margin-right: unset;
+  left: 5px;
+  position: absolute;
+  bottom: 1px;
 }
 
 component.countercomponent .display {
@@ -423,3 +435,4 @@ component.joystickcomponent input.outputButton:after {
   text-align: right;
   width: 20px;
 }
+
