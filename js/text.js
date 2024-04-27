@@ -13,6 +13,7 @@ class Text extends Component {
     this.textEl = document.createElement("textarea");
     this.textEl.oninput = (e) => {
       this.text = this.textEl.value;
+      this.app.quickSave()
     };
 
     this.container.appendChild(this.textEl);
@@ -21,5 +22,7 @@ class Text extends Component {
   createView() {
     this.ready = true;
   }
-  updateUI() {}
+  updateUI() {
+    this.textEl.value = this.text;
+  }
 }

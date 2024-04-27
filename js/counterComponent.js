@@ -1,7 +1,7 @@
 class CounterComponent extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
-    this.customAudioParams = ["+", "-"];
+    this.customAudioTriggers = ["+", "-"];
     this.val = 0;
     this.createNode();
     this.createDisplay();

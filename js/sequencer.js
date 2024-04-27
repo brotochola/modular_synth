@@ -50,6 +50,7 @@ class Sequencer extends Component {
     }
 
     this.sequence[time][semitone - 1] = valueToAssign;
+    this.app.quickSave()
 
     this.updateUI();
   }

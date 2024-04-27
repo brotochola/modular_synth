@@ -14,7 +14,7 @@ class MidiFilePlayer extends Component {
     this.createNode();
 
     //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
-    this.customAudioParams = ["trigger"];
+    this.customAudioTriggers = ["trigger"];
   }
   handleMidiEvent(e) {
     // if (e.track == 1) {

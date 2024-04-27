@@ -1,24 +1,26 @@
 class Distortion extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.amount = 20;
 
     this.createNode();
-    // this.customAudioParams = ["amount"];
+    this.customAudioParams = ["amount"];
   }
 
-  handleTriggerFromWorklet(e) {
-    console.log("#distortion input", e);
+  handleCustomAudioParamChanged(e) {
+    // console.log("#distortion input", e);
+    if (e.current < 0) return;
     if (e.current) this.amount = e.current;
-    this.node.curve = this.makeDistortionCurve(this.amount);
-
+    this.node.curve = this.makeDistortionCurve();
   }
 
-  makeDistortionCurve(amount = 20) {
+  makeDistortionCurve() {
     let n_samples = 256,
       curve = new Float32Array(n_samples);
     for (let i = 0; i < n_samples; ++i) {
       let x = (i * 2) / n_samples - 1;
-      curve[i] = ((Math.PI + amount) * x) / (Math.PI + amount * Math.abs(x));
+      curve[i] =
+        ((Math.PI + this.amount) * x) / (Math.PI + this.amount * Math.abs(x));
     }
     return curve;
   }

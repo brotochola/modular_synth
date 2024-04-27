@@ -49,3 +49,14 @@ async function getAllDocuments() {
 
   return ret;
 }
+
+function listenToChangesInDoc(docName, cb) {
+  const docRef = firebase.firestore().collection("modular").doc(docName);
+
+  docRef.onSnapshot((doc) => {
+    const data = doc.data();
+    if (cb instanceof Function) {
+      cb(data);
+    }
+  });
+}

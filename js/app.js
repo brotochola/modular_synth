@@ -23,6 +23,63 @@ class App {
     );
 
     this.wheelZoom();
+
+    this.checkIfTheresAPatchToOpenInTheURL();
+  }
+
+  async checkIfTheresAPatchToOpenInTheURL() {
+    this.patchName = getParameterByName("patch");
+    if (!this.patchName) return;
+
+    this.loadFromFile(await getDocFromFirebase(this.patchName));
+    console.log("#", this.patchName, " loaded from firestore");
+    listenToChangesInDoc(this.patchName, (e) => {
+      this.handleChangesInThisPatchFromFirestore(e);
+    });
+  }
+
+  compareTwoComponents(c1, c2) {
+    let compC1, compC2;
+    if (c1 instanceof Component) {
+      compC1 = c1.serialize();
+    } else {
+      compC1 = c1;
+    }
+    if (c2 instanceof Component) {
+      compC2 = c2.serialize();
+    } else {
+      compC2 = c2;
+    }
+    let json1 = JSON.stringify(sortObjectKeysAlphabetically(compC1));
+    let json2 = JSON.stringify(sortObjectKeysAlphabetically(compC2));
+    // console.log("####",json1, json2, json1 == json2);
+    return json1 == json2;
+  }
+
+  handleChangesInThisPatchFromFirestore(e) {
+    //GET BPM
+    this.bpm = e.bpm;
+    for (let c of this.components) {
+      c.updateBPM();
+    }
+    this.putBPMInButton();
+
+    let doWeHaveToUpdateLines = false;
+
+    // CHECK COMPONENTS
+    for (let c of e.components) {
+      let currentCompo = this.getComponentByID(c.id);
+      if (!this.compareTwoComponents(currentCompo, c)) {
+        console.log("### component changed", currentCompo, c);
+        currentCompo.updateFromSerialized(c);
+        doWeHaveToUpdateLines = true;
+      }
+    }
+
+    //CHECK CONNECTIONS
+
+    //
+    if (doWeHaveToUpdateLines) this.updateAllLines();
   }
 
   wheelZoom() {
@@ -139,7 +196,7 @@ class App {
   }
 
   updateAllLines() {
-    // debugger
+    // console.trace("updateAllLines");
     this.ctx.clearRect(0, 0, 9999, 9999);
     setTimeout(() => {
       for (let c of this.getAllConnections()) {
@@ -363,6 +420,7 @@ class App {
   save() {
     let name = prompt("name the instrument");
     if (!name) return;
+    this.patchName = name;
     let serialized = this.serialize();
     localStorage[this.SAVE_PREFIX + name] = JSON.stringify(serialized);
     saveInFireStore(serialized, name);
@@ -389,6 +447,7 @@ class App {
       c.updateBPM();
     }
     this.putBPMInButton();
+    this.quickSave();
   }
 
   download() {
@@ -397,5 +456,17 @@ class App {
       "application/json",
       "my_patch.json"
     );
+  }
+
+  getComponentByID(id) {
+    return this.components.filter((c) => c.id == id)[0];
+  }
+
+  /*
+   * takes the name of the patch and saves it in firestore
+   */
+  quickSave() {
+    if (!this.patchName) return console.warn("no patch name");
+    saveInFireStore(this.serialize(), this.patchName);
   }
 }

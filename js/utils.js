@@ -99,7 +99,15 @@ function figureOutWhereToConnect(compoSource, compoTarget, input) {
       whereToConnect = compoTarget.node?.parameters?.get(input);
     }
 
-    if ((compoTarget.customAudioParams || []).includes(input)) {
+    if ((compoTarget.customAudioTriggers || []).includes(input)) {
+      for (let i = 0; i < compoTarget.customAudioTriggers.length; i++) {
+        if (compoTarget.customAudioTriggers[i] == input) {
+          whereToConnect = compoTarget.customAudioTriggersWorkletNode;
+          whichInput = i;
+          break;
+        }
+      }
+    } else if ((compoTarget.customAudioParams || []).includes(input)) {
       for (let i = 0; i < compoTarget.customAudioParams.length; i++) {
         if (compoTarget.customAudioParams[i] == input) {
           whereToConnect = compoTarget.customAudioParamsWorkletNode;
@@ -174,9 +182,31 @@ function unique(arr) {
 }
 
 function arrayToObject(arr) {
+  if(!Array.isArray(arr)) return arr
   const obj = {};
   arr.forEach((element, index) => {
     obj[index] = element;
   });
   return obj;
+}
+
+
+function getParameterByName(name, url = window.location.href) {
+  name = name.replace(/[\[\]]/g, '\\$&');
+  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+      results = regex.exec(url);
+  if (!results) return null;
+  if (!results[2]) return '';
+  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+}
+
+function sortObjectKeysAlphabetically(obj) {
+  const sortedKeys = Object.keys(obj).sort();
+  const sortedObj = {};
+
+  sortedKeys.forEach(key => {
+    sortedObj[key] = obj[key];
+  });
+
+  return sortedObj;
 }

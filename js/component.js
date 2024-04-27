@@ -40,6 +40,10 @@ class Component {
         this[value] = this.serializedData[value];
       }
     }
+
+    this.container.style.left = this.serializedData.x;
+    this.container.style.top = this.serializedData.y;
+
     if (this.updateUI instanceof Function) this.updateUI();
     // this.container.style.left = this.serializedData.x;
     // this.container.style.top = this.serializedData.y;
@@ -59,20 +63,21 @@ class Component {
     this.ready = true;
     this.createOutputButton();
     this.createInputButtons();
-    this.createWorkletForCustomInputs();
+    this.createWorkletForCustomTriggers();
+    this.createWorkletForCustomParams();
     makeChildrenStopPropagation(this.container);
     this.loadFromSerializedData();
   }
 
-  createWorkletForCustomInputs() {
+  createWorkletForCustomParams() {
     if (!Array.isArray(this.customAudioParams)) return;
 
     this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/triggerWorklet.js")
+      .addModule("js/audioWorklets/customAudioParamsWorklet.js")
       .then(() => {
         this.customAudioParamsWorkletNode = new AudioWorkletNode(
           this.app.actx,
-          "trigger-worklet",
+          "custom-params-worklet",
           {
             numberOfInputs: this.customAudioParams.length,
             numberOfOutputs: 0,
@@ -84,6 +89,32 @@ class Component {
         };
         this.customAudioParamsWorkletNode.parent = this;
         this.customAudioParamsWorkletNode.port.onmessage = (e) => {
+          if (this.handleCustomAudioParamChanged instanceof Function)
+            this.handleCustomAudioParamChanged(e.data);
+        };
+      });
+  }
+
+  createWorkletForCustomTriggers() {
+    if (!Array.isArray(this.customAudioTriggers)) return;
+
+    this.app.actx.audioWorklet
+      .addModule("js/audioWorklets/triggerWorklet.js")
+      .then(() => {
+        this.customAudioTriggersWorkletNode = new AudioWorkletNode(
+          this.app.actx,
+          "trigger-worklet",
+          {
+            numberOfInputs: this.customAudioTriggers.length,
+            numberOfOutputs: 0,
+          }
+        );
+
+        this.customAudioTriggersWorkletNode.onprocessorerror = (e) => {
+          console.error(e);
+        };
+        this.customAudioTriggersWorkletNode.parent = this;
+        this.customAudioTriggersWorkletNode.port.onmessage = (e) => {
           if (this.handleTriggerFromWorklet instanceof Function)
             this.handleTriggerFromWorklet(e.data);
         };
@@ -116,7 +147,11 @@ class Component {
 
     this.audioParams = unique(this.audioParams);
 
-    for (let inp of [...this.audioParams, ...(this.customAudioParams || [])]) {
+    for (let inp of [
+      ...this.audioParams,
+      ...(this.customAudioTriggers || []),
+      ...(this.customAudioParams || []),
+    ]) {
       // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
       if (inp == "in_0" && this.type == "Multiplexor") {
         //INPUT 0 DOESNT WORK, I USE 0 TO INDICATE THE MULTIPLEXOR HAS TO REMEMBER ITS LAST STATE
@@ -136,6 +171,7 @@ class Component {
       //AUDIO INPUTS DON'T HAVE A TEXT TO SET THEM, DAAH
       if (
         !inp.startsWith("in") &&
+        !(this.customAudioTriggers || []).includes(inp) &&
         !(this.customAudioParams || []).includes(inp)
       ) {
         textInput = document.createElement("input");
@@ -161,10 +197,11 @@ class Component {
   onParamChanged(event, param) {
     event.stopPropagation();
     if (this.node?.parameters?.get(param)) {
-      this.node.parameters.get(param).value=event.target.value
+      this.node.parameters.get(param).value = event.target.value;
     } else {
-      this.node[param].value=event.target.value
+      this.node[param].value = event.target.value;
     }
+    this.app.quickSave();
   }
   onAudioParamClicked(audioParam) {
     console.log("audio param clicked", audioParam);
@@ -235,7 +272,7 @@ class Component {
       -box.x + e.clientX - this.dragStartedAt[0] + "px";
     this.container.style.top =
       -box.y + e.clientY - this.dragStartedAt[1] + "px";
-
+    this.app.quickSave();
     this.app.updateAllLines();
   }
   ondragstart(e) {
@@ -341,6 +378,16 @@ class Component {
     e.stopPropagation();
     this.app.lastOutputClicked = { compo: this, output: outputButton };
   }
+  updateFromSerialized(other) {
+    if (other instanceof Component) {
+      this.serializedData = other.serialize();
+    } else {
+      this.serializedData = other;
+    }
+
+    this.loadFromSerializedData();
+    if (this.updateUI instanceof Function) this.updateUI();
+  }
 
   serialize() {
     let obj = {
@@ -371,6 +418,6 @@ class Component {
     obj.x = this.container.style.left;
     obj.y = this.container.style.top;
 
-    return obj;
+    return sortObjectKeysAlphabetically(obj);
   }
 }

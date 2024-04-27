@@ -7,7 +7,7 @@ class AudioPlayer extends Component {
     this.createInputFile();
     this.createPlayButton();
     //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
-    this.customAudioParams = ["trigger"];
+    this.customAudioTriggers = ["trigger"];
     this.valuesToSave = ["base64", "filename"];
   }
   createPlayButton() {
