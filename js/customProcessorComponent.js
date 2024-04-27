@@ -4,6 +4,7 @@ class CustomProcessorComponent extends Component {
     this.formula = serializedData?.formula || "y=x1+x2+x3+x4";
     this.createInfo();
     this.createInputText();
+    this.valuesToSave = ["formula"];
 
     this.createNode();
   }
@@ -39,6 +40,7 @@ class CustomProcessorComponent extends Component {
     let val = this.inputText.value;
     this.formula = val;
     this.updateNodeWithFormula();
+    this.app.quickSave();
   }
 
   createInputText() {
@@ -46,5 +48,8 @@ class CustomProcessorComponent extends Component {
     this.inputText.onchange = (e) => this.handleInputChange(e);
     this.inputText.value = this.formula;
     this.container.appendChild(this.inputText);
+  }
+  updateUI() {
+    this.inputText.value = this.formula;
   }
 }
