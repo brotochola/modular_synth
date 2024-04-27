@@ -117,6 +117,10 @@ component.bpmoutputcomponent icon:after {
   content: "🎵";
 }
 
+component.distortion icon:after {
+  content: "🤘";
+}
+
 
 
 
@@ -226,7 +230,7 @@ component p {
 }
 
 component.envelopegenerator {
-  height: 320px;
+  height: 180px;
 }
 component.BPMOutputComponent {
   height: 28px;

@@ -18,10 +18,12 @@ class MidiFilePlayer extends Component {
   }
   handleMidiEvent(e) {
     // if (e.track == 1) {
+    console.log(e);
     this.outputValue = 0;
     if (e.name == "Note on") {
       this.outputValue = this.noteToFreq(e.noteNumber);
       this.updateNodeWithcurrentValue();
+    } else if (e.name == "Note off") {
     }
     // }
   }
@@ -80,11 +82,11 @@ class MidiFilePlayer extends Component {
 
   createNode() {
     this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/customProcessor.js")
+      .addModule("js/audioWorklets/midiPlayerWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "custom-proc", {
+        this.node = new AudioWorkletNode(this.app.actx, "midi-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: 1,
+          numberOfOutputs: 2,
         });
 
         this.node.onprocessorerror = (e) => {
@@ -97,9 +99,10 @@ class MidiFilePlayer extends Component {
   }
   updateNodeWithcurrentValue() {
     if (!this.node?.port) return console.warn("no port");
-    this.updatedcurrentValue =
-      "outputChannel[i]=" + Math.floor(this.outputValue);
-    this.node.port.postMessage(this.updatedcurrentValue);
+    this.node.port.postMessage({
+      event: "note_on",
+      value: Math.floor(this.outputValue),
+    });
   }
   handleOnChange(e) {
     if (!(this.inputFile.files || [])[0]) {

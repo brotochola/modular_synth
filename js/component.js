@@ -161,9 +161,9 @@ class Component {
   onParamChanged(event, param) {
     event.stopPropagation();
     if (this.node?.parameters?.get(param)) {
-      this.node.parameters.get(param).setValueAtTime(event.target.value, 0);
+      this.node.parameters.get(param).value=event.target.value
     } else {
-      this.node[param].setValueAtTime(event.target.value, 0);
+      this.node[param].value=event.target.value
     }
   }
   onAudioParamClicked(audioParam) {
@@ -189,6 +189,9 @@ class Component {
 
   createIcon() {
     this.icon = document.createElement("icon");
+    this.icon.onclick = () => {
+      this.toggleActive();
+    };
     this.container.appendChild(this.icon);
   }
   disconnect(audioParam) {
@@ -277,23 +280,7 @@ class Component {
     this.container.appendChild(this.inputsDiv);
 
     this.container.onmousedown = () => {
-      if (this.active) {
-        for (let c of this.app.components) {
-          c.active = false;
-          c.container.classList.remove("active");
-        }
-        this.active = false;
-      } else {
-        for (let c of this.app.components) {
-          c.active = false;
-          c.container.classList.remove("active");
-        }
-        this.container.classList.add("active");
-        this.active = true;
-      }
-
-      window.tc = this;
-      console.log(this);
+      this.toggleActive();
     };
 
     this.container.style.setProperty(
@@ -304,6 +291,25 @@ class Component {
       "--posY",
       (Math.random() * 100).toFixed(2) + "%"
     );
+  }
+  toggleActive() {
+    if (this.active) {
+      for (let c of this.app.components) {
+        c.active = false;
+        c.container.classList.remove("active");
+      }
+      this.active = false;
+    } else {
+      for (let c of this.app.components) {
+        c.active = false;
+        c.container.classList.remove("active");
+      }
+      this.container.classList.add("active");
+      this.active = true;
+    }
+
+    window.tc = this;
+    console.log(this);
   }
   updateBPM() {}
 

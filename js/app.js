@@ -14,9 +14,9 @@ class App {
         if (e.key == "Delete") {
           for (let c of this.components.filter((k) => k.active)) {
             c.remove();
-            break
+            break;
           }
-          this.updateAllLines()
+          this.updateAllLines();
         }
       },
       false
@@ -28,15 +28,12 @@ class App {
   wheelZoom() {
     // this.container.onwheel = (event) => {
     //   this.scale += event.deltaY * 0.01;
-
     //   // Restrict scale
     //   this.scale = Math.min(Math.max(0.25, this.scale), 1);
-
     //   // Apply scale transform
     //   for (let el of document.querySelectorAll("component")) {
     //     el.style.transform = `scale(${this.scale})`;
     //   }
-
     //   // this.container.style.transformOrigin =
     //   //   event.clientX + "px " + event.clientY + "px";
     //   event.preventDefault();
@@ -156,7 +153,7 @@ class App {
   addBPMOutputComponenet() {
     this.components.push(new BPMOutputComponent(this));
   }
-  
+
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
   }
@@ -168,6 +165,9 @@ class App {
   }
   addOscillator() {
     this.components.push(new Oscillator(this));
+  }
+  addDistortion() {
+    this.components.push(new Distortion(this));
   }
   addCounter() {
     this.components.push(new CounterComponent(this));
@@ -299,6 +299,14 @@ class App {
     this.waitUntilComponentsAreLoadedAndLoadConnections(obj);
   }
 
+  async loadFromFireStore() {
+    let keys = Object.keys(await getAllDocuments());
+
+    let name = prompt(JSON.stringify(keys).replaceAll(",", "\n"));
+    if (!name) return;
+    this.loadFromFile(await getDocFromFirebase(name));
+  }
+
   updatePositionOfOutPutComponent(savedData) {
     let outputCompo = this.components.filter((c) => c.type == "Output")[0];
     let savedOutputcompo = savedData.components.filter(
@@ -355,7 +363,9 @@ class App {
   save() {
     let name = prompt("name the instrument");
     if (!name) return;
-    localStorage[this.SAVE_PREFIX + name] = JSON.stringify(this.serialize());
+    let serialized = this.serialize();
+    localStorage[this.SAVE_PREFIX + name] = JSON.stringify(serialized);
+    saveInFireStore(serialized, name);
   }
   load() {
     let list = "";

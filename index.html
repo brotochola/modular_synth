@@ -1,6 +1,9 @@
 <html>
 
 <head>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="js/firebase.js"></script>
     <script src="js/external/wheel-zoom.js"></script>
     <script src="js/external/midiplayer.js"></script>
     <script src="js/utils.js"></script>
@@ -14,6 +17,7 @@
     <!-- <script src="js/external/envelope-generator.js"></script> -->
     <script src="js/external/audioworklet-adsrnode.js"></script>
     <script src="js/envelope.js"></script>
+    <script src="js/distortion.js"></script>
 
     <script src="js/multiplexor.js"></script>
     <script src="js/midiFilePlayer.js"></script>
@@ -57,6 +61,8 @@
         <button onclick="app.addEnvelope()">⛰️ add env</button>
         <button onclick="app.addDelay()">⏰ add Delay</button>
         <button onclick="app.addMemoryComponent()">📼 add Memory</button>
+        <button onclick="app.addDistortion()">🤘 add distortion</button>
+
 
         <button onclick="app.addJoystick()">🎮 add Joystick</button>
 
@@ -91,6 +97,8 @@
 
 
         <button onclick="app.load()">📂 load</button>
+        
+        <button onclick="app.loadFromFireStore()">📂 load from firestore</button>
     </div>
     <app></app>
     <script>

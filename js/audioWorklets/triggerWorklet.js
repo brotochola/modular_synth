@@ -22,6 +22,14 @@ class TriggerWorklet extends AudioWorkletProcessor {
               prevValues: this.prevValues,
               // inputs,
             });
+          }else if(current==0 && lastVal!=0){
+            this.port.postMessage({
+              channelTriggered: p,
+              lastVal,
+              current,
+              prevValues: this.prevValues,
+              // inputs,
+            });
           }
           this.prevValues[channel + "_" + p] = current;
         }

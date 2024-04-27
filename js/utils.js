@@ -172,3 +172,11 @@ function copyArrayBuffer(src) {
 function unique(arr) {
   return [...new Set(arr)];
 }
+
+function arrayToObject(arr) {
+  const obj = {};
+  arr.forEach((element, index) => {
+    obj[index] = element;
+  });
+  return obj;
+}

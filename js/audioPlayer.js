@@ -22,8 +22,9 @@ class AudioPlayer extends Component {
     };
   }
   handleTriggerFromWorklet(e) {
-    // console.log("#handleTriggerFromWorklet",e)
-    this.triggerAudio();
+    // console.log("#handleTriggerFromWorklet", e);
+    if (e.current != 0) this.triggerAudio();
+    else this.node.stop();
   }
 
   triggerAudio() {

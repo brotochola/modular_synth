@@ -58,3 +58,23 @@ document.body.onclick=()=>playKick();
 
 
 
+------------------
+
+IDEA FOR JOYSTICK:
+L1: turn on and off kick drum
+R1: hihat
+L2: clap
+R2: some other percu
+
+Left Analog: bass filter
+right analog: more fm? more noise?
+
+TRIANGLE: toggle long/short amp relase
+SQUARE: toggle long/short amp release
+CIRCLE: toggle long/short filter attack
+X: toggle long/short filter release
+
+UP: one shot woman talking
+DOWN: feedback bass delay
+RIGHT: turn on/off pad
+LEFT: toggle tremolo for pad?

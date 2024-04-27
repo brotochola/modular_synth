@@ -118,9 +118,15 @@ class Sequencer extends Component {
 
         this.sendToWorklet();
 
-        this.node.port.onmessage = (e) => console.log("########", e.data);
+        // this.node.port.onmessage = (e) => console.log("########", e.data);
 
         // this.createInputButtons();
       });
+  }
+
+  serialize(){
+    let obj=super.serialize()
+    obj.sequence=arrayToObject(obj.sequence)
+    return obj
   }
 }
