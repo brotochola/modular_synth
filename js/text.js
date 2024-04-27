@@ -13,7 +13,9 @@ class Text extends Component {
     this.textEl = document.createElement("textarea");
     this.textEl.oninput = (e) => {
       this.text = this.textEl.value;
-      this.app.quickSave()
+    };
+    this.textEl.onchange = (e) => {
+      this.app.quickSave();
     };
 
     this.container.appendChild(this.textEl);

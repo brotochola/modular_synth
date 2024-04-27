@@ -57,12 +57,8 @@ class App {
   }
 
   handleChangesInThisPatchFromFirestore(e) {
-    //GET BPM
-    this.bpm = e.bpm;
-    for (let c of this.components) {
-      c.updateBPM();
-    }
-    this.putBPMInButton();
+
+ 
 
     let doWeHaveToUpdateLines = false;
 
@@ -75,6 +71,13 @@ class App {
         doWeHaveToUpdateLines = true;
       }
     }
+    
+    //GET BPM
+    this.bpm = e.bpm;
+    for (let c of this.components) {
+      c.updateBPM();
+    }
+    this.putBPMInButton();
 
     //CHECK CONNECTIONS
 

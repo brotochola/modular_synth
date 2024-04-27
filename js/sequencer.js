@@ -1,4 +1,5 @@
 class Sequencer extends Component {
+  static oneSemitone = 1.059463;
   constructor(app, serializedData) {
     super(app, serializedData);
     this.valuesToSave = ["sequence"];
@@ -50,7 +51,7 @@ class Sequencer extends Component {
     }
 
     this.sequence[time][semitone - 1] = valueToAssign;
-    this.app.quickSave()
+    this.app.quickSave();
 
     this.updateUI();
   }
@@ -73,11 +74,12 @@ class Sequencer extends Component {
     }
     this.sendToWorklet();
   }
-  updateBPM(){
-    this.sendToWorklet()
+  updateBPM() {
+    this.sendToWorklet();
   }
 
   sendToWorklet() {
+    if (!this.node) return console.warn("seq node not ready");
     this.convertArrayOfArraysIntoSmpleArray();
     this.node.port.postMessage({
       seq: this.convertedArray,
@@ -86,14 +88,13 @@ class Sequencer extends Component {
   }
 
   convertArrayOfArraysIntoSmpleArray() {
-    let oneSemitone = 1.059463;
     let newArr = [];
     for (let j = 0; j < this.numberOfSteps; j++) {
       let time = this.sequence[j];
       newArr[j] = 0;
       for (let s = 0; s < time.length; s++) {
         if (time[s]) {
-          newArr[j] = oneSemitone ** s;
+          newArr[j] = Sequencer.oneSemitone ** s;
           break;
         }
       }
@@ -108,14 +109,12 @@ class Sequencer extends Component {
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "sequencer-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: 1,       
+          numberOfOutputs: 1,
         });
 
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        
-
 
         this.sendToWorklet();
 
@@ -125,9 +124,9 @@ class Sequencer extends Component {
       });
   }
 
-  serialize(){
-    let obj=super.serialize()
-    obj.sequence=arrayToObject(obj.sequence)
-    return obj
+  serialize() {
+    let obj = super.serialize();
+    obj.sequence = arrayToObject(obj.sequence);
+    return obj;
   }
 }
