@@ -382,7 +382,7 @@ component .inputsDiv audioparamrow input[type="number"] {
 }
 
 component.filter {
-  height: 150px;
+  height: 170px;
 }
 
 component.AudioPlayer {
