@@ -12,19 +12,19 @@ https://brotochola.github.io/modular_synth
 
 TODO:
 * add multiplayer with firebase
-    EASY WAY: 
-        1. the person leading puts the whole instrument on each change
-        2. the other user fetch the whole thing, and check, like react, what gotta be updated, using the id of the components
-    EVENT BASED:
-        1. give each user an id and save it in the localStorage
-        2. keep track in firebase who is online
-        3. all users leave events with userID and timestamp
-        4. all the changes are picked up by the rest of the users (checking to not fall into loops)
-        5. pickup all events between the last pickup and now
-        6. apply changes
-    ANOTER WAY:
-        1. components: { id:{connections:[{},{}]}, id:{connections:[{},{}]}}
-        2. each component updates only its own representation in firestore, including serialized connections coming from it
+    + EASY WAY: 
+        - the person leading puts the whole instrument on each change
+        - the other user fetch the whole thing, and check, like react, what gotta be updated, using the id of the components
+    + EVENT BASED:
+        - give each user an id and save it in the localStorage
+        - keep track in firebase who is online
+        - all users leave events with userID and timestamp
+        - all the changes are picked up by the rest of the users (checking to not fall into loops)
+        - pickup all events between the last pickup and now
+        - apply changes
+    + ANOTER WAY:
+        - components: { id:{connections:[{},{}]}, id:{connections:[{},{}]}}
+        - each component updates only its own representation in firestore, including serialized connections coming from it
         
 
 
