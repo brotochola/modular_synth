@@ -13,15 +13,20 @@ https://brotochola.github.io/modular_synth
 TODO:
 * add multiplayer with firebase
     EASY WAY: 
-        1 - the person leading puts the whole instrument on each change
-        2 - the other user fetch the whole thing, and check, like react, what gotta be updated, using the id of the components
+        1. the person leading puts the whole instrument on each change
+        2. the other user fetch the whole thing, and check, like react, what gotta be updated, using the id of the components
     EVENT BASED:
-        1 - give each user an id and save it in the localStorage
-        2 - keep track in firebase who is online
-        3 - all users leave events with userID and timestamp
-        4 - all the changes are picked up by the rest of the users (checking to not fall into loops)
-        5 - pickup all events between the last pickup and now
-        6 - apply changes
+        1. give each user an id and save it in the localStorage
+        2. keep track in firebase who is online
+        3. all users leave events with userID and timestamp
+        4. all the changes are picked up by the rest of the users (checking to not fall into loops)
+        5. pickup all events between the last pickup and now
+        6. apply changes
+    ANOTER WAY:
+        1. components: { id:{connections:[{},{}]}, id:{connections:[{},{}]}}
+        2. each component updates only its own representation in firestore, including serialized connections coming from it
+        
+
 
 * fix saving with selects, inputs, images, etc
 * add explanations
@@ -36,25 +41,7 @@ https://g200kg.github.io/webaudio-controls/docs/howitworks.html
 
 https://dev.opera.com/articles/drum-sounds-webaudio/
 
-var context = new AudioContext();
 
-function playKick() {
-    let when=context.currentTime
-    var oscillator = context.createOscillator();
-    var gain = context.createGain();
-    oscillator.connect(gain);
-    gain.connect(context.destination);
-    
-    oscillator.frequency.value = 150;
-    oscillator.frequency.setValueAtTime(150, when);
-    gain.gain.setValueAtTime(1, when);
-    oscillator.frequency.exponentialRampToValueAtTime(0.001, when + 0.5);
-    gain.gain.exponentialRampToValueAtTime(0.001, when + 0.5);
-
-    oscillator.start(when);
-    oscillator.stop(when + 0.5);
-}
-document.body.onclick=()=>playKick();
 
 
 
