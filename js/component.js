@@ -222,6 +222,7 @@ class Component {
       );
       this.app.lastOutputClicked = null;
     }
+    this.app.quickSave()
   }
 
   createIcon() {
@@ -233,6 +234,7 @@ class Component {
   }
   disconnect(audioParam) {
     this.app.removeConnectionToMe(this, audioParam);
+    this.app.quickSave()
     this.app.updateAllLines();
   }
 

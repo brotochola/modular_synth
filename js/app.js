@@ -60,7 +60,7 @@ class App {
   handleChangesInThisPatchFromFirestore(e) {
     let doWeHaveToUpdateLines = false;
 
-    // CHECK COMPONENTS
+    // CHECK COMPONENTS FOR UPDATES
     for (let c of e.components) {
       let currentCompo = this.getComponentByID(c.id);
       if (!currentCompo) {
@@ -68,7 +68,6 @@ class App {
         this.addSerializedComponent(c);
       } else {
         if (!this.compareTwoComponents(currentCompo, c)) {
-          console.log("### component changed", currentCompo, c);
           currentCompo.updateFromSerialized(c);
           doWeHaveToUpdateLines = true;
         }
@@ -76,14 +75,14 @@ class App {
     }
 
     //CHECK IF I GOTTA REMOVE SOME COMPONENT FROM THIS FRONTEND:
-    if (this.components.length > e.components.length) {      
-      let componentsWeHaveToRemove = this.components.filter(
-        (k) => !e.components.map((co) => co.id).includes(k.id)
-      );
-      for (let compo of componentsWeHaveToRemove) {
-        compo.remove();
-      }
+    // if (this.components.length > e.components.length) {
+    let componentsWeHaveToRemove = this.components.filter(
+      (k) => !e.components.map((co) => co.id).includes(k.id)
+    );
+    for (let compo of componentsWeHaveToRemove) {
+      compo.remove();
     }
+    // }
 
     //GET BPM
     this.bpm = e.bpm;
@@ -93,6 +92,57 @@ class App {
     this.putBPMInButton();
 
     //CHECK CONNECTIONS
+    let allConnections = this.getAllConnections();
+
+    for (let j = 0; j < e.connections.length; j++) {
+      let connectionFromFirebase = e.connections[j];
+      let found = false;
+      for (let i = 0; i < allConnections.length; i++) {
+        if (
+          Connection.compareTwoConnections(
+            connectionFromFirebase,
+            allConnections[i]
+          )
+        ) {
+          found = true;
+          break;
+        }
+      }
+      //IF THE CONNECTION COMING FROM FIREBASE DOESN'T EXIST...
+      if (!found) {
+        console.log(
+          "### ADDING CONNECTION FROM FIREBASE ",
+          connectionFromFirebase
+        );
+        this.addSerializedConnection(connectionFromFirebase);
+        doWeHaveToUpdateLines=true
+      }
+    }
+
+    //UPDATE THIS BC I NEED TO TAKE INTO ACCOUNT THE RECENTLY ADDED
+    allConnections = this.getAllConnections();
+
+    //NOW I RAN THE SAME BUT STARTING FROM THE CONNECTIONS IN THIS FRONTEND, THOSE THAT ARE NOT FOUND, GOTTA BE DELETED
+    for (let i = 0; i < allConnections.length; i++) {
+      let found = false;
+      for (let j = 0; j < e.connections.length; j++) {
+        let connectionFromFirebase = e.connections[j];
+        if (
+          Connection.compareTwoConnections(
+            connectionFromFirebase,
+            allConnections[i]
+          )
+        ) {
+          found = true;
+          break;
+        }
+      }
+      if (!found) {
+        console.log("# REMOVING CONNECTION ", allConnections[i]);
+        allConnections[i].remove();
+        doWeHaveToUpdateLines=true
+      }
+    }
 
     //
     if (doWeHaveToUpdateLines) this.updateAllLines();
@@ -288,7 +338,7 @@ class App {
     this.quickSave();
   }
   createOutputComponent() {
-    this.components.push(new Output(this));    
+    this.components.push(new Output(this));
   }
   addDelay() {
     this.components.push(new Delay(this));
@@ -456,7 +506,9 @@ class App {
   }
 
   save() {
-    let name = prompt("name the instrument");
+    let name = prompt(
+      "name the instrument, it will be saved in localStorage and in firebase"
+    );
     if (!name) return;
     this.patchName = name;
     let serialized = this.serialize();
@@ -504,7 +556,7 @@ class App {
    * takes the name of the patch and saves it in firestore
    */
   quickSave() {
-    if (!this.patchName) return //console.warn("no patch name");
+    if (!this.patchName) return; //console.warn("no patch name");
     saveInFireStore(this.serialize(), this.patchName);
   }
 }

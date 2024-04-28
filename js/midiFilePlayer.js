@@ -12,6 +12,7 @@ class MidiFilePlayer extends Component {
     this.midiPlayer = new MidiPlayer.Player(() => {});
     this.midiPlayer.on("midiEvent", (e) => this.handleMidiEvent(e));
     this.createNode();
+    this.valuesToSave = ["base64", "filename"];
 
     //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
     this.customAudioTriggers = ["trigger"];
@@ -51,6 +52,8 @@ class MidiFilePlayer extends Component {
     if (this.playing) {
       this.playing = false;
       this.midiPlayer.stop();
+      this.outputValue = 0;
+      this.updateNodeWithcurrentValue()
     } else {
       this.midiPlayer.play();
       this.playing = true;
@@ -60,7 +63,9 @@ class MidiFilePlayer extends Component {
   }
 
   updateButton() {
-    this.playButton.textContent = !this.playing ? "▶️" : "⏹️";
+    this.playButton.textContent = !this.playing
+      ? "▶️ " + this.filename
+      : "⏹️ " + this.filename;
   }
 
   createInputFile() {
@@ -105,23 +110,38 @@ class MidiFilePlayer extends Component {
     });
   }
   handleOnChange(e) {
-    if (!(this.inputFile.files || [])[0]) {
+    if (!(this.inputFile.files || [])[0] && !this.arrayBuffer) {
       return;
     }
     this.playButton.style.display = "block";
     this.playing = false;
-
     //IF NOT WE GOTTA LOAD THE AUDIO FILE
-    let reader = new FileReader();
-    reader.onload = async () => {
-      this.arrayBuffer = copyArrayBuffer(reader.result);
+
+    if (this.arrayBuffer && this.currentAudioFile == this.inputFile.files[0]) {
       this.midiPlayer.loadArrayBuffer(this.arrayBuffer);
       this.app.resetAllConnections();
-    };
-
-    reader.readAsArrayBuffer(this.inputFile.files[0]);
-
+    } else {
+      let reader = new FileReader();
+      reader.onload = async () => {
+        this.arrayBuffer = copyArrayBuffer(reader.result);
+        this.base64 = arrayBufferToBase64(reader.result);
+        this.midiPlayer.loadArrayBuffer(this.arrayBuffer);
+        this.app.resetAllConnections();
+      };
+      this.filename = this.inputFile.files[0].name;
+      reader.readAsArrayBuffer(this.inputFile.files[0]);
+    }
     this.currentAudioFile = this.inputFile.files[0];
+    this.updateButton();
+  }
+  async updateUI() {
+    //THIS METHOD IS EXECUTED FROM THE COMPONENT CLASS, WHEN THIS COMPONENT ALREADY LOADED THE SAVED DATA
+
+    if (this.base64) {
+      this.arrayBuffer = base64ToArrayBuffer(this.base64);
+      this.handleOnChange();
+    }
+
     this.updateButton();
   }
 }

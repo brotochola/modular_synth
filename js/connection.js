@@ -34,12 +34,18 @@ class Connection {
   }
 
   redraw() {
-    let color=(this.from.type+this.to.type+this.audioParam+this.numberOfOutput).toRGB()
+    let color = (
+      this.from.type +
+      this.to.type +
+      this.audioParam +
+      this.numberOfOutput
+    ).toRGB();
     this.app.drawLine(
       this.from.outputs.querySelector(
         '.outputButton[numberOfOutput="' + this.numberOfOutput + '"]'
       ),
-      this.to.inputElements[this.audioParam].button,color
+      this.to.inputElements[this.audioParam].button,
+      color
     );
   }
 
@@ -97,5 +103,28 @@ class Connection {
       numberOfOutput: this.numberOfOutput,
       id: this.id,
     };
+  }
+
+  static compareTwoConnections(c1, c2) {
+    let sc1, sc2;
+    if (c1 instanceof Connection) {
+      sc1 = c1.serialize();
+    } else {
+      sc1 = c1;
+    }
+
+    if (c2 instanceof Connection) {
+      sc2 = c2.serialize();
+    } else {
+      sc1 = c2;
+    }
+    
+
+    return (
+      sc1.from == sc2.from &&
+      sc1.to == sc2.to &&
+      sc1.numberOfOutput == sc2.numberOfOutput &&
+      sc1.audioParam == sc2.audioParam
+    );
   }
 }
