@@ -110,10 +110,10 @@ class App {
       }
       //IF THE CONNECTION COMING FROM FIREBASE DOESN'T EXIST...
       if (!found) {
-        console.log(
-          "### ADDING CONNECTION FROM FIREBASE ",
-          connectionFromFirebase
-        );
+        // console.log(
+        //   "### ADDING CONNECTION FROM FIREBASE ",
+        //   connectionFromFirebase
+        // );
         this.addSerializedConnection(connectionFromFirebase);
         doWeHaveToUpdateLines=true
       }
@@ -138,7 +138,7 @@ class App {
         }
       }
       if (!found) {
-        console.log("# REMOVING CONNECTION ", allConnections[i]);
+        // console.log("# REMOVING CONNECTION ", allConnections[i]);
         allConnections[i].remove();
         doWeHaveToUpdateLines=true
       }

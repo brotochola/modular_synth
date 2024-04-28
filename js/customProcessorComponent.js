@@ -51,5 +51,6 @@ class CustomProcessorComponent extends Component {
   }
   updateUI() {
     this.inputText.value = this.formula;
+    this.updateNodeWithFormula();
   }
 }
