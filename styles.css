@@ -414,7 +414,7 @@ component.memorycomponent .display, component.bpmoutputcomponent .display{
 component.bpmoutputcomponent .display{
   text-align: left;
   margin-right: unset;
-  left: 5px;
+  left: 40px;
   position: absolute;
   bottom: 1px;
 }

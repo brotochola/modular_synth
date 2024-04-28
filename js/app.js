@@ -16,6 +16,7 @@ class App {
             c.remove();
             break;
           }
+          this.quickSave();
           this.updateAllLines();
         }
       },
@@ -57,21 +58,33 @@ class App {
   }
 
   handleChangesInThisPatchFromFirestore(e) {
-
- 
-
     let doWeHaveToUpdateLines = false;
 
     // CHECK COMPONENTS
     for (let c of e.components) {
       let currentCompo = this.getComponentByID(c.id);
-      if (!this.compareTwoComponents(currentCompo, c)) {
-        console.log("### component changed", currentCompo, c);
-        currentCompo.updateFromSerialized(c);
-        doWeHaveToUpdateLines = true;
+      if (!currentCompo) {
+        //COMPONENT DOESN'T EXIST IN THIS FRONTEND
+        this.addSerializedComponent(c);
+      } else {
+        if (!this.compareTwoComponents(currentCompo, c)) {
+          console.log("### component changed", currentCompo, c);
+          currentCompo.updateFromSerialized(c);
+          doWeHaveToUpdateLines = true;
+        }
       }
     }
-    
+
+    //CHECK IF I GOTTA REMOVE SOME COMPONENT FROM THIS FRONTEND:
+    if (this.components.length > e.components.length) {      
+      let componentsWeHaveToRemove = this.components.filter(
+        (k) => !e.components.map((co) => co.id).includes(k.id)
+      );
+      for (let compo of componentsWeHaveToRemove) {
+        compo.remove();
+      }
+    }
+
     //GET BPM
     this.bpm = e.bpm;
     for (let c of this.components) {
@@ -216,80 +229,102 @@ class App {
 
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
+    this.quickSave();
   }
   addJoystick() {
     this.components.push(new JoystickComponent(this));
+    this.quickSave();
   }
   addEnvelope() {
     this.components.push(new EnvelopeGenerator(this));
+    this.quickSave();
   }
   addOscillator() {
     this.components.push(new Oscillator(this));
+    this.quickSave();
   }
   addDistortion() {
     this.components.push(new Distortion(this));
+    this.quickSave();
   }
   addCounter() {
     this.components.push(new CounterComponent(this));
+    this.quickSave();
   }
   addMemoryComponent() {
     this.components.push(new MemoryComponent(this));
+    this.quickSave();
   }
 
   addMidiPlayer() {
     this.components.push(new MidiFilePlayer(this));
+    this.quickSave();
   }
 
   addKeyboard() {
     this.components.push(new KeyboardComponent(this));
+    this.quickSave();
   }
 
   addImagePlayer() {
     this.components.push(new ImagePlayerWorkletVersion(this));
+    this.quickSave();
   }
 
   addVisualizer() {
     this.components.push(new Visualizer(this));
+    this.quickSave();
   }
   addCustomProcessor() {
     this.components.push(new CustomProcessorComponent(this));
+    this.quickSave();
   }
   addFilter() {
     this.components.push(new Filter(this));
+    this.quickSave();
   }
   addGainNode() {
     this.components.push(new Amp(this));
+    this.quickSave();
   }
   createOutputComponent() {
-    this.components.push(new Output(this));
+    this.components.push(new Output(this));    
   }
   addDelay() {
     this.components.push(new Delay(this));
+    this.quickSave();
   }
   addMerger() {
     this.components.push(new Merger(this));
+    this.quickSave();
   }
   addNoise() {
     this.components.push(new NoiseGenWithWorklet(this));
+    this.quickSave();
   }
   addMouse() {
     this.components.push(new Mouse(this));
+    this.quickSave();
   }
 
   addImageMaker() {
     this.components.push(new ImageMaker(this));
+    this.quickSave();
   }
 
   addAudioPlayer() {
     this.components.push(new AudioPlayer(this));
+    this.quickSave();
   }
 
   addSequencer() {
     this.components.push(new Sequencer(this));
+    this.quickSave();
   }
 
   addNumberDisplay() {
     this.components.push(new NumberDisplayComponent(this));
+    this.quickSave();
   }
 
   getAllConnections() {
@@ -469,7 +504,7 @@ class App {
    * takes the name of the patch and saves it in firestore
    */
   quickSave() {
-    if (!this.patchName) return console.warn("no patch name");
+    if (!this.patchName) return //console.warn("no patch name");
     saveInFireStore(this.serialize(), this.patchName);
   }
 }

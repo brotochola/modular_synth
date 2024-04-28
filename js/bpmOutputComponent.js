@@ -13,6 +13,7 @@ class BPMOutputComponent extends Component {
   }
 
   updateBPM(){
+    if(!(this.node||{}).port) return
     this.node.port.postMessage({ bpm: this.app.bpm });
   }
   updateDisplay() {

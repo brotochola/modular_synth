@@ -100,6 +100,7 @@ class AudioPlayer extends Component {
         this.audioBuffer = await this.app.actx.decodeAudioData(reader.result);
         this.node.buffer = this.audioBuffer;
         this.node.loop = true;
+        this.app.quickSave()
         this.app.resetAllConnections();
         this.updateButton();
       };

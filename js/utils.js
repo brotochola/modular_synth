@@ -190,6 +190,20 @@ function arrayToObject(arr) {
   return obj;
 }
 
+function objectToArray(obj) {
+  if (typeof obj !== 'object' || obj === null) return obj;
+
+  const keys = Object.keys(obj);
+  const maxValue = Math.max(...keys.map(Number));
+  const arr = [];
+
+  for (let i = 0; i <= maxValue; i++) {
+    arr.push(obj[i]);
+  }
+
+  return arr;
+}
+
 
 function getParameterByName(name, url = window.location.href) {
   name = name.replace(/[\[\]]/g, '\\$&');

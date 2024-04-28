@@ -36,8 +36,8 @@ class Component {
     //LOAD THOSE PARAMETERS THAT WANTED TO BE SAVED FOR EACH TYPE OF COMPONENT
 
     if (this.serializedData.valuesToSave) {
-      for (let value of this.serializedData.valuesToSave) {
-        this[value] = this.serializedData[value];
+      for (let key of this.serializedData.valuesToSave) {
+        this[key] = this.serializedData[key];
       }
     }
 
@@ -123,7 +123,7 @@ class Component {
 
   createInputButtons() {
     if (this.type == "Mouse") return;
-    console.log("CREATING BUTTONS FOR", this.type, this.id);
+    // console.log("CREATING BUTTONS FOR", this.type, this.id);
 
     //AUDIOPARAMS FROM THE NODE
     this.audioParams = Object.keys(Object.getPrototypeOf(this.node)).filter(
@@ -240,6 +240,7 @@ class Component {
     this.app.removeAllConnections(this);
     this.container.parentElement.removeChild(this.container);
     this.app.components = this.app.components.filter((c) => c != this);
+    
   }
   connect(compo, input, numberOfOutput) {
     // console.log("#connect", compo, input);
@@ -397,9 +398,9 @@ class Component {
       constructor: this.constructor.name,
       node: {},
     };
-    if (this.formula) {
-      obj.formula = this.formula;
-    }
+    // if (this.formula) {
+    //   obj.formula = this.formula;
+    // }
     if ((this.node || {}).type) {
       obj.node.type = this.node.type;
     }
@@ -407,13 +408,14 @@ class Component {
       if (this.node && this.node[audioParam]) {
         obj.audioParams[audioParam] = this.node[audioParam].value;
       }
+      obj.audioParams = sortObjectKeysAlphabetically(obj.audioParams)
     }
     //these parameters are set on each class:
-    if (this.valuesToSave && Array.isArray(this.valuesToSave)) {
-      for (let value of this.valuesToSave) {
-        obj[value] = this[value];
+    if (Array.isArray(this.valuesToSave)) {
+      for (let key of this.valuesToSave) {
+       if(this[key]) obj[key] = this[key];
       }
-      obj.valuesToSave = this.valuesToSave;
+      obj.valuesToSave = this.valuesToSave.sort();
     }
     obj.x = this.container.style.left;
     obj.y = this.container.style.top;
