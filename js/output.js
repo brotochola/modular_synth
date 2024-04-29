@@ -2,7 +2,6 @@ class Output extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.node = null;
-    this.id = "output";
     this.createInput();
   }
 
@@ -20,6 +19,11 @@ class Output extends Component {
     //OVERWRITE THIS METHOD BC THIS COMPONENTS BEHAVES DIFFERENTLY
     makeChildrenStopPropagation(this.container);
     this.ready = true;
+
+    listenToChangesInDoc(this.app.patchName, this.id, (data) => {
+      console.log("#changes", this.type, this.id, data)
+      this.updateFromSerialized(data);
+    });
   }
 
   remove() {

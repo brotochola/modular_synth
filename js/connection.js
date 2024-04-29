@@ -1,5 +1,6 @@
 class Connection {
   constructor(from, to, audioParam, numberOfOutput, app) {
+    Connection.app=app
     this.app = app;
     this.from = from;
     this.to = to;
@@ -126,5 +127,13 @@ class Connection {
       sc1.numberOfOutput == sc2.numberOfOutput &&
       sc1.audioParam == sc2.audioParam
     );
+  }
+
+  static getComponentFrom(to,audioParam){
+    let conn=Connection.app.getAllConnections().filter(connection => connection.to.id==to.id&&connection.audioParam==audioParam)
+    if(conn.length){
+      return conn[0].from
+    }
+    return null
   }
 }

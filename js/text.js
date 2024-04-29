@@ -23,6 +23,10 @@ class Text extends Component {
 
   createView() {
     this.ready = true;
+    listenToChangesInDoc(this.app.patchName, this.id, (data) => {
+      console.log("#changes", this.type, this.id, data);
+      this.updateFromSerialized(data);
+    });
   }
   updateUI() {
     this.textEl.value = this.text;

@@ -16,17 +16,47 @@ firebase.initializeApp(firebaseConfig);
 var firestore = firebase.firestore();
 var collectionRef = firestore.collection(collection);
 
-// Reference to the document you want to retrieve
+// async function createDocInFirestore(patchName, serializedOutputComponent) {
+//   await collectionRef
+//     .doc(patchName)
+//     .collection("components")
+//     .doc("output")
+//     .set(serializedOutputComponent);
+// }
+
+// COLLECTION -> DOC -> COLLECTION OF COMPONENTS -> DOC WITH COMPONENT
+async function createInstanceOfComponentInFirestore(
+  patchName,
+  serializedComponent
+) {
+  // console.log("# creating instance of components", patchName, serializedComponent, serializedComponent.id)
+  collectionRef
+    .doc(patchName)
+    .collection("components")
+    .doc(serializedComponent.id)
+    .set(serializedComponent);
+}
+
+async function removeComponentFromFirestore(patchName, id) {
+  collectionRef.doc(patchName).collection("components").doc(id).delete();
+}
 
 async function getDocFromFirebase(name) {
-  let doc = await collectionRef.doc(name).get();
-  if (doc.exists) {
-    var userData = doc.data();
-    return userData;
-  } else {
-    // Document doesn't exist
-    console.log("No such document!");
-  }
+  let ret = { components: [], connections: [], bpm: 100 };
+  let docs = await collectionRef.doc(name).collection("components").get();
+
+  docs.forEach((doc) => {
+    ret.components.push(doc.data());
+  });
+
+  //PUT CONNECTIONS IN ONE SINGLE ARRAY, THE SAME FORMAT AS I'M SAVING LOCALLY
+  ret.components.map((k) =>
+    (k.connections || []).map((c) => {
+      ret.connections.push(c);
+    })
+  );
+
+  return ret;
 }
 
 async function saveInFireStore(obj, id) {
@@ -50,8 +80,14 @@ async function getAllDocuments() {
   return ret;
 }
 
-function listenToChangesInDoc(docName, cb) {
-  const docRef = firebase.firestore().collection("modular").doc(docName);
+function listenToChangesInDoc(docName, componentID, cb) {
+  console.log("# listen to changes", docName, componentID)
+  const docRef = firebase
+    .firestore()
+    .collection("modular")
+    .doc(docName)
+    .collection("components")
+    .doc(componentID);
 
   docRef.onSnapshot((doc) => {
     const data = doc.data();

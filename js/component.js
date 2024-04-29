@@ -9,6 +9,7 @@ class Component {
     this.connections = [];
     this.running = false;
     this.id = serializedData?.id ? serializedData.id : makeid(8);
+    if (this.type.toLowerCase() == "output") this.id = "output";
 
     this.createContainer();
     this.createIcon();
@@ -17,6 +18,13 @@ class Component {
     this.outputElements = {};
     this.app.actx.resume();
     this.active = false;
+
+    if (!serializedData) this.quickSave();
+  }
+
+  quickSave() {
+    console.trace("saving ", this.type, this.id);
+    createInstanceOfComponentInFirestore(this.app.patchName, this.serialize());
   }
   loadFromSerializedData() {
     if (!this.serializedData) return;
@@ -34,19 +42,65 @@ class Component {
       }
     }
     //LOAD THOSE PARAMETERS THAT WANTED TO BE SAVED FOR EACH TYPE OF COMPONENT
-
     if (this.serializedData.valuesToSave) {
       for (let key of this.serializedData.valuesToSave) {
         this[key] = this.serializedData[key];
       }
     }
-
+    
+    
+    //POSITION:
+    let doWeHaveToUpdateLines=false
+    if(this.container.style.left  != this.serializedData.x ||   this.container.style.top != this.serializedData.y ){
+      doWeHaveToUpdateLines=true
+    } 
     this.container.style.left = this.serializedData.x;
     this.container.style.top = this.serializedData.y;
+    
+    this.updateConnectionsFromSerializedData(this.serializedData.connections,doWeHaveToUpdateLines);
 
+    //THIS IS IMPLEMENTED IN EACH CLASS THAT INHERITES FROM THIS ONE
     if (this.updateUI instanceof Function) this.updateUI();
-    // this.container.style.left = this.serializedData.x;
-    // this.container.style.top = this.serializedData.y;
+  }
+
+  updateConnectionsFromSerializedData(connections,forceUpdateLines) {
+    let doWeHaveToUpdateLines = false;
+
+    if (Array.isArray(connections)) {
+      for (let incomingConn of connections) {
+        let found = false;
+        for (let currentConn of this.connections) {
+          if (Connection.compareTwoConnections(incomingConn, currentConn)) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          //ADD IT
+          this.app.addSerializedConnection(incomingConn)
+          doWeHaveToUpdateLines=true
+        }
+      }
+    }
+
+
+
+    for(let currentConn of this.connections){
+      let found=false
+      for(let incomingConn of connections){
+        if (Connection.compareTwoConnections(incomingConn, currentConn)) {
+          found = true;
+          break;
+        }
+
+      }
+      if(!found){
+        //THE CONNECTIONS DOES NOT EXIST IN FIRESTORE, SO DELETE IT
+        currentConn.remove()
+        doWeHaveToUpdateLines=true
+      }
+    }
+    if(doWeHaveToUpdateLines || forceUpdateLines) this.app.updateAllLines()
   }
 
   createView() {
@@ -67,6 +121,11 @@ class Component {
     this.createWorkletForCustomParams();
     makeChildrenStopPropagation(this.container);
     this.loadFromSerializedData();
+
+    listenToChangesInDoc(this.app.patchName, this.id, (data) => {
+      console.log("#changes", this.type, this.id, data)
+      this.updateFromSerialized(data);
+    });
   }
 
   createWorkletForCustomParams() {
@@ -201,14 +260,20 @@ class Component {
     } else {
       this.node[param].value = event.target.value;
     }
-    this.app.quickSave();
+    this.quickSave();
   }
   onAudioParamClicked(audioParam) {
-    console.log("audio param clicked", audioParam);
-    //  debugger
+    // console.log("audio param clicked", audioParam);
 
     if (this.inputElements[audioParam].button.classList.contains("connected")) {
+      let componentFromWhichThisConnectionComes = Connection.getComponentFrom(
+        this,
+        audioParam
+      );
+
       this.disconnect(audioParam);
+
+      setTimeout(() => componentFromWhichThisConnectionComes.quickSave(), 10);
     } else {
       if (!this.app.lastOutputClicked) return;
 
@@ -220,9 +285,10 @@ class Component {
         audioParam,
         numberOfOutput
       );
+
+      this.app.lastOutputClicked.compo.quickSave();
       this.app.lastOutputClicked = null;
     }
-    this.app.quickSave()
   }
 
   createIcon() {
@@ -234,7 +300,6 @@ class Component {
   }
   disconnect(audioParam) {
     this.app.removeConnectionToMe(this, audioParam);
-    this.app.quickSave()
     this.app.updateAllLines();
   }
 
@@ -242,7 +307,7 @@ class Component {
     this.app.removeAllConnections(this);
     this.container.parentElement.removeChild(this.container);
     this.app.components = this.app.components.filter((c) => c != this);
-    
+    removeComponentFromFirestore(this.app.patchName, this.id);
   }
   connect(compo, input, numberOfOutput) {
     // console.log("#connect", compo, input);
@@ -275,7 +340,7 @@ class Component {
       -box.x + e.clientX - this.dragStartedAt[0] + "px";
     this.container.style.top =
       -box.y + e.clientY - this.dragStartedAt[1] + "px";
-    this.app.quickSave();
+    this.quickSave();
     this.app.updateAllLines();
   }
   ondragstart(e) {
@@ -389,7 +454,6 @@ class Component {
     }
 
     this.loadFromSerializedData();
-    if (this.updateUI instanceof Function) this.updateUI();
   }
 
   serialize() {
@@ -410,17 +474,19 @@ class Component {
       if (this.node && this.node[audioParam]) {
         obj.audioParams[audioParam] = this.node[audioParam].value;
       }
-      obj.audioParams = sortObjectKeysAlphabetically(obj.audioParams)
+      obj.audioParams = sortObjectKeysAlphabetically(obj.audioParams);
     }
     //these parameters are set on each class:
     if (Array.isArray(this.valuesToSave)) {
       for (let key of this.valuesToSave) {
-       if(this[key]) obj[key] = this[key];
+        if (this[key]) obj[key] = this[key];
       }
       obj.valuesToSave = this.valuesToSave.sort();
     }
     obj.x = this.container.style.left;
     obj.y = this.container.style.top;
+
+    obj.connections = this.connections.map((k) => k.serialize());
 
     return sortObjectKeysAlphabetically(obj);
   }

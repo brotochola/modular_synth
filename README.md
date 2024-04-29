@@ -24,9 +24,15 @@ TODO:
         - apply changes
     + ANOTER WAY:
         - components: { id:{connections:[{},{}]}, id:{connections:[{},{}]}}
+        - when a component is created it creates a new collection with its data
         - each component updates only its own representation in firestore, including serialized connections coming from it
-        
-
+        - The data structure in firestore shuold be like:
+            + main collection
+                * document of a patch
+                    - collection of components
+                        + doc of the component including its connections
+                * document of another patch
+      
 
 * fix saving with selects, inputs, images, etc
 * add explanations

@@ -1,5 +1,7 @@
 class App {
   constructor(elem) {
+    this.patchName = getParameterByName("patch");
+
     this.components = [];
     this.actx = new AudioContext();
     this.bpm = 100;
@@ -29,14 +31,16 @@ class App {
   }
 
   async checkIfTheresAPatchToOpenInTheURL() {
-    this.patchName = getParameterByName("patch");
     if (!this.patchName) return;
+    let loaded = await getDocFromFirebase(this.patchName);
 
-    this.loadFromFile(await getDocFromFirebase(this.patchName));
-    console.log("#", this.patchName, " loaded from firestore");
-    listenToChangesInDoc(this.patchName, (e) => {
-      this.handleChangesInThisPatchFromFirestore(e);
-    });
+    if (loaded) {
+      console.log("#", this.patchName, " loaded from firestore", loaded);
+      this.loadFromFile(loaded);
+    } else {
+      console.warn(this.patchName + " could not be loaded");
+      // createDocInFirestore(this.patchName, this.components.filter(k=>k.type=="Output")[0].serialize())
+    }
   }
 
   compareTwoComponents(c1, c2) {
@@ -57,6 +61,9 @@ class App {
     return json1 == json2;
   }
 
+  /*
+   * THIS IS NOW IMPLEMENTED IN EACH COMPONENT
+   */
   handleChangesInThisPatchFromFirestore(e) {
     let doWeHaveToUpdateLines = false;
 
@@ -115,7 +122,7 @@ class App {
         //   connectionFromFirebase
         // );
         this.addSerializedConnection(connectionFromFirebase);
-        doWeHaveToUpdateLines=true
+        doWeHaveToUpdateLines = true;
       }
     }
 
@@ -140,7 +147,7 @@ class App {
       if (!found) {
         // console.log("# REMOVING CONNECTION ", allConnections[i]);
         allConnections[i].remove();
-        doWeHaveToUpdateLines=true
+        doWeHaveToUpdateLines = true;
       }
     }
 
@@ -338,7 +345,7 @@ class App {
     this.quickSave();
   }
   createOutputComponent() {
-    this.components.push(new Output(this));
+    this.components.push(new Output(this, {}));
   }
   addDelay() {
     this.components.push(new Delay(this));
@@ -449,11 +456,13 @@ class App {
 
     let name = prompt(JSON.stringify(keys).replaceAll(",", "\n"));
     if (!name) return;
-    this.loadFromFile(await getDocFromFirebase(name));
+    let loadedDoc = await getDocFromFirebase(name);
+    console.log("#loaded patch", loadedDoc);
+    this.loadFromFile(loadedDoc);
   }
 
   updatePositionOfOutPutComponent(savedData) {
-    let outputCompo = this.components.filter((c) => c.type == "Output")[0];
+    let outputCompo = this.getOutputComponent();
     let savedOutputcompo = savedData.components.filter(
       (c) => c.type == "Output"
     )[0];
@@ -556,7 +565,8 @@ class App {
    * takes the name of the patch and saves it in firestore
    */
   quickSave() {
+    console.log("quicksave...");
     if (!this.patchName) return; //console.warn("no patch name");
-    saveInFireStore(this.serialize(), this.patchName);
+    // saveInFireStore(this.serialize(), this.patchName);
   }
 }
