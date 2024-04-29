@@ -18,7 +18,7 @@ class App {
             c.remove();
             break;
           }
-          this.quickSave();
+
           this.updateAllLines();
         }
       },
@@ -39,7 +39,8 @@ class App {
       this.loadFromFile(loaded);
     } else {
       console.warn(this.patchName + " could not be loaded");
-      // createDocInFirestore(this.patchName, this.components.filter(k=>k.type=="Output")[0].serialize())
+      //THIS IS BC THE OUTPUT COMPO WAS NOT LOADED YET
+    
     }
   }
 
@@ -286,102 +287,80 @@ class App {
 
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
-    this.quickSave();
   }
   addJoystick() {
     this.components.push(new JoystickComponent(this));
-    this.quickSave();
   }
   addEnvelope() {
     this.components.push(new EnvelopeGenerator(this));
-    this.quickSave();
   }
   addOscillator() {
     this.components.push(new Oscillator(this));
-    this.quickSave();
   }
   addDistortion() {
     this.components.push(new Distortion(this));
-    this.quickSave();
   }
   addCounter() {
     this.components.push(new CounterComponent(this));
-    this.quickSave();
   }
   addMemoryComponent() {
     this.components.push(new MemoryComponent(this));
-    this.quickSave();
   }
 
   addMidiPlayer() {
     this.components.push(new MidiFilePlayer(this));
-    this.quickSave();
   }
 
   addKeyboard() {
     this.components.push(new KeyboardComponent(this));
-    this.quickSave();
   }
 
   addImagePlayer() {
     this.components.push(new ImagePlayerWorkletVersion(this));
-    this.quickSave();
   }
 
   addVisualizer() {
     this.components.push(new Visualizer(this));
-    this.quickSave();
   }
   addCustomProcessor() {
     this.components.push(new CustomProcessorComponent(this));
-    this.quickSave();
   }
   addFilter() {
     this.components.push(new Filter(this));
-    this.quickSave();
   }
   addGainNode() {
     this.components.push(new Amp(this));
-    this.quickSave();
   }
   createOutputComponent() {
-    this.components.push(new Output(this, {}));
+    this.components.push(new Output(this));
   }
   addDelay() {
     this.components.push(new Delay(this));
-    this.quickSave();
   }
   addMerger() {
     this.components.push(new Merger(this));
-    this.quickSave();
   }
   addNoise() {
     this.components.push(new NoiseGenWithWorklet(this));
-    this.quickSave();
   }
   addMouse() {
     this.components.push(new Mouse(this));
-    this.quickSave();
   }
 
   addImageMaker() {
     this.components.push(new ImageMaker(this));
-    this.quickSave();
   }
 
   addAudioPlayer() {
     this.components.push(new AudioPlayer(this));
-    this.quickSave();
   }
 
   addSequencer() {
     this.components.push(new Sequencer(this));
-    this.quickSave();
   }
 
   addNumberDisplay() {
     this.components.push(new NumberDisplayComponent(this));
-    this.quickSave();
   }
 
   getAllConnections() {
@@ -436,6 +415,8 @@ class App {
 
   loadFromFile(obj) {
     if (obj.bpm) this.bpm = obj.bpm;
+    this.putBPMInButton();
+
     //REMOVE ALL
     for (let c of this.components) {
       c.remove();
@@ -462,12 +443,15 @@ class App {
   }
 
   updatePositionOfOutPutComponent(savedData) {
+    if (!Array.isArray(savedData.components)) return;
     let outputCompo = this.getOutputComponent();
-    let savedOutputcompo = savedData.components.filter(
+    let savedOutputcompo = (savedData.components.filter(
       (c) => c.type == "Output"
-    )[0];
-    outputCompo.container.style.left = savedOutputcompo.x;
-    outputCompo.container.style.top = savedOutputcompo.y;
+    ) || [])[0];
+    if (savedOutputcompo) {
+      outputCompo.container.style.left = savedOutputcompo.x;
+      outputCompo.container.style.top = savedOutputcompo.y;
+    }
   }
 
   waitUntilComponentsAreLoadedAndLoadConnections(obj) {
@@ -542,11 +526,11 @@ class App {
     val = parseInt(val);
     if (isNaN(val)) return;
     this.bpm = val;
+    putBPMInFireStore(this.patchName, this.bpm);
     for (let c of this.components) {
       c.updateBPM();
     }
     this.putBPMInButton();
-    this.quickSave();
   }
 
   download() {
@@ -561,12 +545,12 @@ class App {
     return this.components.filter((c) => c.id == id)[0];
   }
 
-  /*
-   * takes the name of the patch and saves it in firestore
-   */
-  quickSave() {
-    console.log("quicksave...");
-    if (!this.patchName) return; //console.warn("no patch name");
-    // saveInFireStore(this.serialize(), this.patchName);
+  saveListOfComponentsInFirestore() {
+    
+    if (!this.patchName) return;
+    saveInFireStore(
+      { bpm: this.bpm, components: this.components.map((k) => k.id) },
+      this.patchName
+    );
   }
 }

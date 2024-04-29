@@ -25,6 +25,7 @@ class Component {
   quickSave() {
     console.trace("saving ", this.type, this.id);
     createInstanceOfComponentInFirestore(this.app.patchName, this.serialize());
+    setTimeout(()=>this.app.saveListOfComponentsInFirestore(),500)
   }
   loadFromSerializedData() {
     if (!this.serializedData) return;
@@ -47,23 +48,28 @@ class Component {
         this[key] = this.serializedData[key];
       }
     }
-    
-    
+
     //POSITION:
-    let doWeHaveToUpdateLines=false
-    if(this.container.style.left  != this.serializedData.x ||   this.container.style.top != this.serializedData.y ){
-      doWeHaveToUpdateLines=true
-    } 
+    let doWeHaveToUpdateLines = false;
+    if (
+      this.container.style.left != this.serializedData.x ||
+      this.container.style.top != this.serializedData.y
+    ) {
+      doWeHaveToUpdateLines = true;
+    }
     this.container.style.left = this.serializedData.x;
     this.container.style.top = this.serializedData.y;
-    
-    this.updateConnectionsFromSerializedData(this.serializedData.connections,doWeHaveToUpdateLines);
+
+    this.updateConnectionsFromSerializedData(
+      this.serializedData.connections,
+      doWeHaveToUpdateLines
+    );
 
     //THIS IS IMPLEMENTED IN EACH CLASS THAT INHERITES FROM THIS ONE
     if (this.updateUI instanceof Function) this.updateUI();
   }
 
-  updateConnectionsFromSerializedData(connections,forceUpdateLines) {
+  updateConnectionsFromSerializedData(connections, forceUpdateLines) {
     let doWeHaveToUpdateLines = false;
 
     if (Array.isArray(connections)) {
@@ -77,30 +83,27 @@ class Component {
         }
         if (!found) {
           //ADD IT
-          this.app.addSerializedConnection(incomingConn)
-          doWeHaveToUpdateLines=true
+          setTimeout(() => this.app.addSerializedConnection(incomingConn), 50);
+          doWeHaveToUpdateLines = true;
         }
       }
     }
 
-
-
-    for(let currentConn of this.connections){
-      let found=false
-      for(let incomingConn of connections){
+    for (let currentConn of this.connections) {
+      let found = false;
+      for (let incomingConn of connections) {
         if (Connection.compareTwoConnections(incomingConn, currentConn)) {
           found = true;
           break;
         }
-
       }
-      if(!found){
+      if (!found) {
         //THE CONNECTIONS DOES NOT EXIST IN FIRESTORE, SO DELETE IT
-        currentConn.remove()
-        doWeHaveToUpdateLines=true
+        currentConn.remove();
+        doWeHaveToUpdateLines = true;
       }
     }
-    if(doWeHaveToUpdateLines || forceUpdateLines) this.app.updateAllLines()
+    if (doWeHaveToUpdateLines || forceUpdateLines) this.app.updateAllLines();
   }
 
   createView() {
@@ -121,11 +124,12 @@ class Component {
     this.createWorkletForCustomParams();
     makeChildrenStopPropagation(this.container);
     this.loadFromSerializedData();
-
-    listenToChangesInDoc(this.app.patchName, this.id, (data) => {
-      console.log("#changes", this.type, this.id, data)
-      this.updateFromSerialized(data);
-    });
+    if (this.app.patchName) {
+      listenToChangesInDoc(this.app.patchName, this.id, (data) => {
+        // console.log("#changes", this.type, this.id, data)
+        this.updateFromSerialized(data);
+      });
+    }
   }
 
   createWorkletForCustomParams() {
@@ -355,7 +359,7 @@ class Component {
     this.container.ondragend = (e) => this.ondragend(e);
     this.container.ondragstart = (e) => this.ondragstart(e);
 
-    if (this.serializedData) {
+    if ((this.serializedData || {}).x && (this.serializedData || {}).y) {
       this.container.style.left = this.serializedData.x;
       this.container.style.top = this.serializedData.y;
     } else {

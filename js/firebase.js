@@ -37,13 +37,25 @@ async function createInstanceOfComponentInFirestore(
     .set(serializedComponent);
 }
 
+async function putBPMInFireStore(patchName, bpm) {
+  collectionRef.doc(patchName).set({ bpm: bpm });
+}
+
 async function removeComponentFromFirestore(patchName, id) {
   collectionRef.doc(patchName).collection("components").doc(id).delete();
 }
 
+async function getListOfComponentsFromFirestore(patchName) {
+  let docs = await collectionRef.doc(patchName).collection("components").get();
+
+  return docs.docs.map((k) => k.id);
+}
+
 async function getDocFromFirebase(name) {
-  let ret = { components: [], connections: [], bpm: 100 };
+  let ret = { components: [], connections: [] };
   let docs = await collectionRef.doc(name).collection("components").get();
+  let bpm = ((await collectionRef.doc(name).get()).data()||{}).bpm;
+  ret.bpm = bpm;
 
   docs.forEach((doc) => {
     ret.components.push(doc.data());
@@ -55,6 +67,8 @@ async function getDocFromFirebase(name) {
       ret.connections.push(c);
     })
   );
+
+  if(ret.components.length==0) return null
 
   return ret;
 }
@@ -74,14 +88,14 @@ async function getAllDocuments() {
   docs.forEach((doc) => {
     // doc.data() is the data of each document
     ret[doc.id] = doc.data();
-    // console.log(doc.id, " => ", doc.data());
+    console.log(doc.id, " => ", doc.data());
   });
 
   return ret;
 }
 
 function listenToChangesInDoc(docName, componentID, cb) {
-  console.log("# listen to changes", docName, componentID)
+  // console.log("# listen to changes", docName, componentID)
   const docRef = firebase
     .firestore()
     .collection("modular")
