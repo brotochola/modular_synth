@@ -45,7 +45,7 @@ class App {
     let loaded = await getDocFromFirebase(this.patchName);
 
     if (loaded) {
-      // console.log("#", this.patchName, " loaded from firestore", loaded);
+      console.log("#", this.patchName, " loaded from firestore", loaded);
       this.loadFromFile(loaded);
     } else {
       console.warn(this.patchName + " could not be loaded");
