@@ -23,9 +23,10 @@ class Component {
   }
 
   quickSave() {
-    console.trace("saving ", this.type, this.id);
+    // console.trace("saving ", this.type, this.id);
+    if (this.id == "output") return;
     createInstanceOfComponentInFirestore(this.app.patchName, this.serialize());
-    setTimeout(()=>this.app.saveListOfComponentsInFirestore(),500)
+    setTimeout(() => this.app.saveListOfComponentsInFirestore(), 500);
   }
   loadFromSerializedData() {
     if (!this.serializedData) return;
@@ -124,12 +125,15 @@ class Component {
     this.createWorkletForCustomParams();
     makeChildrenStopPropagation(this.container);
     this.loadFromSerializedData();
-    if (this.app.patchName) {
-      listenToChangesInDoc(this.app.patchName, this.id, (data) => {
-        // console.log("#changes", this.type, this.id, data)
-        this.updateFromSerialized(data);
-      });
-    }
+    setTimeout(() => this.startListeningToChangesInThiscomponent(), 2000);
+  }
+
+  startListeningToChangesInThiscomponent() {
+    if (!this.app.patchName) return;
+    listenToChangesInComponent(this.app.patchName, this.id, (data) => {
+      console.log("#changes", this.type, this.id, data);
+      this.updateFromSerialized(data);
+    });
   }
 
   createWorkletForCustomParams() {
@@ -312,6 +316,7 @@ class Component {
     this.container.parentElement.removeChild(this.container);
     this.app.components = this.app.components.filter((c) => c != this);
     removeComponentFromFirestore(this.app.patchName, this.id);
+    this.app.saveListOfComponentsInFirestore();
   }
   connect(compo, input, numberOfOutput) {
     // console.log("#connect", compo, input);

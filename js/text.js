@@ -15,7 +15,7 @@ class Text extends Component {
       this.text = this.textEl.value;
     };
     this.textEl.onchange = (e) => {
-      this.app.quickSave();
+      this.quickSave();
     };
 
     this.container.appendChild(this.textEl);
@@ -24,7 +24,7 @@ class Text extends Component {
   createView() {
     this.ready = true;
     if (this.app.patchName) {
-      listenToChangesInDoc(this.app.patchName, this.id, (data) => {
+      listenToChangesInComponent(this.app.patchName, this.id, (data) => {
         console.log("#changes", this.type, this.id, data);
         this.updateFromSerialized(data);
       });

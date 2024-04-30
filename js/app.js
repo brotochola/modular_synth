@@ -16,6 +16,7 @@ class App {
         if (e.key == "Delete") {
           for (let c of this.components.filter((k) => k.active)) {
             c.remove();
+           
             break;
           }
 
@@ -28,6 +29,15 @@ class App {
     this.wheelZoom();
 
     this.checkIfTheresAPatchToOpenInTheURL();
+    setTimeout(() => this.startListeningToFirestoreChanges(), 2000);
+  }
+
+  startListeningToFirestoreChanges() {
+    if (!this.patchName) return;
+    listenToChangesInWholePatch(this.patchName, (e) => {
+      console.log("### CHANGES IN THE PATCH", e);
+      this.handleChangesInThisPatchFromFirestore(e);
+    });
   }
 
   async checkIfTheresAPatchToOpenInTheURL() {
@@ -40,7 +50,6 @@ class App {
     } else {
       console.warn(this.patchName + " could not be loaded");
       //THIS IS BC THE OUTPUT COMPO WAS NOT LOADED YET
-    
     }
   }
 
@@ -62,98 +71,51 @@ class App {
     return json1 == json2;
   }
 
-  /*
-   * THIS IS NOW IMPLEMENTED IN EACH COMPONENT
-   */
   handleChangesInThisPatchFromFirestore(e) {
-    let doWeHaveToUpdateLines = false;
-
-    // CHECK COMPONENTS FOR UPDATES
-    for (let c of e.components) {
-      let currentCompo = this.getComponentByID(c.id);
-      if (!currentCompo) {
-        //COMPONENT DOESN'T EXIST IN THIS FRONTEND
-        this.addSerializedComponent(c);
-      } else {
-        if (!this.compareTwoComponents(currentCompo, c)) {
-          currentCompo.updateFromSerialized(c);
-          doWeHaveToUpdateLines = true;
+    if (!e) return;
+    if (e.components) {
+      //THIS IS ONLY A LIST OF IDS IN THE DOC
+      //INSIDE THIS DOC THERE'S A COLLECTION WITH ALL THE DOCUMENTS
+      for (let c of e.components) {
+        //C IS AN ID
+        let currentCompo = this.getComponentByID(c);
+        if (!currentCompo) {
+          //GETS THE COMPONENT FROM THE COLLECTION, THE SERIALIZED COMPONENT
+          getComponentFromFirestore(
+            this.patchName,
+            c,
+            (serializedComponent) => {
+              //COMPONENT DOESN'T EXIST IN THIS FRONTEND
+              if (serializedComponent) {
+                this.addSerializedComponent(serializedComponent);
+              }
+            }
+          );
         }
       }
-    }
 
-    //CHECK IF I GOTTA REMOVE SOME COMPONENT FROM THIS FRONTEND:
-    // if (this.components.length > e.components.length) {
-    let componentsWeHaveToRemove = this.components.filter(
-      (k) => !e.components.map((co) => co.id).includes(k.id)
-    );
-    for (let compo of componentsWeHaveToRemove) {
-      compo.remove();
+      //CHECK IF I GOTTA REMOVE SOME COMPONENT FROM THIS FRONTEND:
+
+      let componentsWeHaveToRemove = this.components.filter(
+        (k) => !e.components.includes(k.id)
+      );
+
+      for (let compo of componentsWeHaveToRemove) {
+        if (compo instanceof Output) continue;
+        compo.remove();
+      }
     }
-    // }
 
     //GET BPM
-    this.bpm = e.bpm;
-    for (let c of this.components) {
-      c.updateBPM();
-    }
-    this.putBPMInButton();
-
-    //CHECK CONNECTIONS
-    let allConnections = this.getAllConnections();
-
-    for (let j = 0; j < e.connections.length; j++) {
-      let connectionFromFirebase = e.connections[j];
-      let found = false;
-      for (let i = 0; i < allConnections.length; i++) {
-        if (
-          Connection.compareTwoConnections(
-            connectionFromFirebase,
-            allConnections[i]
-          )
-        ) {
-          found = true;
-          break;
-        }
+    if (e.bpm) {
+      this.bpm = e.bpm;
+      for (let c of this.components) {
+        c.updateBPM();
       }
-      //IF THE CONNECTION COMING FROM FIREBASE DOESN'T EXIST...
-      if (!found) {
-        // console.log(
-        //   "### ADDING CONNECTION FROM FIREBASE ",
-        //   connectionFromFirebase
-        // );
-        this.addSerializedConnection(connectionFromFirebase);
-        doWeHaveToUpdateLines = true;
-      }
+      this.putBPMInButton();
     }
 
-    //UPDATE THIS BC I NEED TO TAKE INTO ACCOUNT THE RECENTLY ADDED
-    allConnections = this.getAllConnections();
-
-    //NOW I RAN THE SAME BUT STARTING FROM THE CONNECTIONS IN THIS FRONTEND, THOSE THAT ARE NOT FOUND, GOTTA BE DELETED
-    for (let i = 0; i < allConnections.length; i++) {
-      let found = false;
-      for (let j = 0; j < e.connections.length; j++) {
-        let connectionFromFirebase = e.connections[j];
-        if (
-          Connection.compareTwoConnections(
-            connectionFromFirebase,
-            allConnections[i]
-          )
-        ) {
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        // console.log("# REMOVING CONNECTION ", allConnections[i]);
-        allConnections[i].remove();
-        doWeHaveToUpdateLines = true;
-      }
-    }
-
-    //
-    if (doWeHaveToUpdateLines) this.updateAllLines();
+    this.updateAllLines()
   }
 
   wheelZoom() {
@@ -455,8 +417,14 @@ class App {
   }
 
   waitUntilComponentsAreLoadedAndLoadConnections(obj) {
+    console.log(
+      "#waitUntilComponentsAreLoadedAndLoadConnections",
+      obj,
+      this.components
+    );
     if (
-      this.components.filter((k) => k.ready).length != obj.components.length
+      this.components.filter((k) => k.ready && k.id != "output").length !=
+      obj.components.length
     ) {
       console.log(
         "$$NOT ALL COMPONENTS WERE LOADED YET",
@@ -465,7 +433,7 @@ class App {
       );
       setTimeout(
         () => this.waitUntilComponentsAreLoadedAndLoadConnections(obj),
-        50
+        250
       );
     } else {
       setTimeout(() => {
@@ -479,6 +447,7 @@ class App {
     }
   }
   addSerializedConnection(conn) {
+    console.log("## adding serialized connection", conn);
     let componentsFrom = app.components.filter((k) => k.id == conn.from);
     let componentsTo = app.components.filter((k) => k.id == conn.to);
     if (componentsFrom.length && componentsTo.length) {
@@ -492,7 +461,11 @@ class App {
     }
   }
   addSerializedComponent(comp) {
-    if (comp.type == "Output")
+    console.log("## adding serialized component", comp.type, comp.id);
+    if (!comp) {
+      return console.trace("trying to add a null serialized component??");
+    }
+    if (comp.type == "Output" || comp.id == "output")
       return console.warn("YOU CANT CREATE OUTPUT COMPONENTS");
     let c = eval(comp.constructor);
     this.components.push(new c(this, comp));
@@ -546,10 +519,14 @@ class App {
   }
 
   saveListOfComponentsInFirestore() {
-    
     if (!this.patchName) return;
     saveInFireStore(
-      { bpm: this.bpm, components: this.components.map((k) => k.id) },
+      {
+        bpm: this.bpm,
+        components: this.components
+          .filter((k) => k.id != "output")
+          .map((k) => k.id),
+      },
       this.patchName
     );
   }

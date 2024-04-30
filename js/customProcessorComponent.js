@@ -40,7 +40,7 @@ class CustomProcessorComponent extends Component {
     let val = this.inputText.value;
     this.formula = val;
     this.updateNodeWithFormula();
-    this.app.quickSave();
+    this.quickSave();
   }
 
   createInputText() {

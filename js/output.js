@@ -19,13 +19,7 @@ class Output extends Component {
     //OVERWRITE THIS METHOD BC THIS COMPONENTS BEHAVES DIFFERENTLY
     makeChildrenStopPropagation(this.container);
     this.ready = true;
-    if (this.app.patchName) {
-      listenToChangesInDoc(this.app.patchName, this.id, (data) => {
-        console.log("#changes", this.type, this.id, data);
-
-        if (data) this.updateFromSerialized(data);
-      });
-    }
+   
   }
 
   remove() {

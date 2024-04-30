@@ -22,7 +22,7 @@ class Filter extends Component {
   }
   handleTypeChange(e) {
     this.node.type = this.typeSelect.value;
-    this.app.quickSave();
+    this.quickSave();
   }
 
   updateUI() {

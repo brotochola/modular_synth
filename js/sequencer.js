@@ -51,12 +51,15 @@ class Sequencer extends Component {
     }
 
     this.sequence[time][semitone - 1] = valueToAssign;
-    this.app.quickSave();
+    this.quickSave();
 
     this.updateUI();
   }
 
   updateUI() {
+    if(!Array.isArray(this.sequence)){
+      this.sequence=objectToArray(this.sequence)
+    }
     this.container.querySelectorAll("button").forEach((button) => {
       button.classList.remove("active");
     });
@@ -126,7 +129,7 @@ class Sequencer extends Component {
 
   serialize() {
     let obj = super.serialize();
-    obj.sequence = arrayToObject(obj.sequence);
+    obj.sequence = arrayToObject(this.sequence.map(k=>k.map(b=>b?1:0)));
     return obj;
   }
 }

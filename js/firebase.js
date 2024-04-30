@@ -54,7 +54,7 @@ async function getListOfComponentsFromFirestore(patchName) {
 async function getDocFromFirebase(name) {
   let ret = { components: [], connections: [] };
   let docs = await collectionRef.doc(name).collection("components").get();
-  let bpm = ((await collectionRef.doc(name).get()).data()||{}).bpm;
+  let bpm = ((await collectionRef.doc(name).get()).data() || {}).bpm;
   ret.bpm = bpm;
 
   docs.forEach((doc) => {
@@ -68,7 +68,7 @@ async function getDocFromFirebase(name) {
     })
   );
 
-  if(ret.components.length==0) return null
+  if (ret.components.length == 0) return null;
 
   return ret;
 }
@@ -94,7 +94,19 @@ async function getAllDocuments() {
   return ret;
 }
 
-function listenToChangesInDoc(docName, componentID, cb) {
+function listenToChangesInWholePatch(docName, cb) {
+  // console.log("# listen to changes", docName, componentID)
+  const docRef = firebase.firestore().collection("modular").doc(docName);
+
+  docRef.onSnapshot((doc) => {
+    const data = doc.data();
+    if (cb instanceof Function) {
+      cb(data);
+    }
+  });
+}
+
+function listenToChangesInComponent(docName, componentID, cb) {
   // console.log("# listen to changes", docName, componentID)
   const docRef = firebase
     .firestore()
@@ -109,4 +121,17 @@ function listenToChangesInDoc(docName, componentID, cb) {
       cb(data);
     }
   });
+}
+
+async function getComponentFromFirestore(docName, componentID, cb) {
+  // console.log("# listen to changes", docName, componentID)
+  let doc = await collectionRef
+    .doc(docName)
+    .collection("components")
+    .doc(componentID)
+    .get();
+
+  if (cb instanceof Function) {
+    cb(doc.data());
+  }
 }
