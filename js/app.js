@@ -16,7 +16,7 @@ class App {
         if (e.key == "Delete") {
           for (let c of this.components.filter((k) => k.active)) {
             c.remove();
-           
+
             break;
           }
 
@@ -35,7 +35,7 @@ class App {
   startListeningToFirestoreChanges() {
     if (!this.patchName) return;
     listenToChangesInWholePatch(this.patchName, (e) => {
-      console.log("### CHANGES IN THE PATCH", e);
+      // console.log("### CHANGES IN THE PATCH", e);
       this.handleChangesInThisPatchFromFirestore(e);
     });
   }
@@ -45,7 +45,7 @@ class App {
     let loaded = await getDocFromFirebase(this.patchName);
 
     if (loaded) {
-      console.log("#", this.patchName, " loaded from firestore", loaded);
+      // console.log("#", this.patchName, " loaded from firestore", loaded);
       this.loadFromFile(loaded);
     } else {
       console.warn(this.patchName + " could not be loaded");
@@ -115,7 +115,7 @@ class App {
       this.putBPMInButton();
     }
 
-    this.updateAllLines()
+    this.updateAllLines();
   }
 
   wheelZoom() {
@@ -144,7 +144,7 @@ class App {
     this.canvas.width = this.container.getBoundingClientRect().width;
     this.canvas.height = this.container.getBoundingClientRect().height;
     this.container.appendChild(this.canvas);
-    this.canvas.onclick = (e) => console.log(e);
+    // this.canvas.onclick = (e) => console.log(e);
     this.ctx = this.canvas.getContext("2d");
   }
   drawLine(from, to, color) {
@@ -367,11 +367,11 @@ class App {
   serialize() {
     let obj = { components: [], connections: [], bpm: this.bpm };
     for (let comp of this.components) {
-      obj.components.push(comp.serialize());
+      if (!(comp instanceof Output)) obj.components.push(comp.serialize());
     }
-    for (let conn of this.getAllConnections()) {
-      obj.connections.push(conn.serialize());
-    }
+    // for (let conn of this.getAllConnections()) {
+    //   obj.connections.push(conn.serialize());
+    // }
     return obj;
   }
 
@@ -400,7 +400,7 @@ class App {
     let name = prompt(JSON.stringify(keys).replaceAll(",", "\n"));
     if (!name) return;
     let loadedDoc = await getDocFromFirebase(name);
-    console.log("#loaded patch", loadedDoc);
+    // console.log("#loaded patch", loadedDoc);
     this.loadFromFile(loadedDoc);
   }
 
@@ -417,20 +417,20 @@ class App {
   }
 
   waitUntilComponentsAreLoadedAndLoadConnections(obj) {
-    console.log(
-      "#waitUntilComponentsAreLoadedAndLoadConnections",
-      obj,
-      this.components
-    );
+    // console.log(
+    //   "#waitUntilComponentsAreLoadedAndLoadConnections",
+    //   obj,
+    //   this.components
+    // );
     if (
       this.components.filter((k) => k.ready && k.id != "output").length !=
-      obj.components.length
+      obj.components.filter((k) => k.id != "output").length
     ) {
-      console.log(
-        "$$NOT ALL COMPONENTS WERE LOADED YET",
-        this.components.length,
-        obj.components.length
-      );
+      // console.log(
+      //   "$$NOT ALL COMPONENTS WERE LOADED YET",
+      //   this.components.length,
+      //   obj.components.length
+      // );
       setTimeout(
         () => this.waitUntilComponentsAreLoadedAndLoadConnections(obj),
         250
@@ -447,7 +447,7 @@ class App {
     }
   }
   addSerializedConnection(conn) {
-    console.log("## adding serialized connection", conn);
+    // console.log("## adding serialized connection", conn);
     let componentsFrom = app.components.filter((k) => k.id == conn.from);
     let componentsTo = app.components.filter((k) => k.id == conn.to);
     if (componentsFrom.length && componentsTo.length) {
@@ -461,7 +461,7 @@ class App {
     }
   }
   addSerializedComponent(comp) {
-    console.log("## adding serialized component", comp.type, comp.id);
+    // console.log("## adding serialized component", comp.type, comp.id);
     if (!comp) {
       return console.trace("trying to add a null serialized component??");
     }

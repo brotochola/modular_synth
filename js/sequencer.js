@@ -129,7 +129,7 @@ class Sequencer extends Component {
 
   serialize() {
     let obj = super.serialize();
-    obj.sequence = arrayToObject(this.sequence.map(k=>k.map(b=>b?1:0)));
+    if(this.sequence) obj.sequence = arrayToObject(this.sequence.map(k=>k.map(b=>b?1:0)));
     return obj;
   }
 }

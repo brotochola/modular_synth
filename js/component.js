@@ -24,6 +24,7 @@ class Component {
 
   quickSave() {
     // console.trace("saving ", this.type, this.id);
+    if (!this.app.patchName) return;
     if (this.id == "output") return;
     createInstanceOfComponentInFirestore(this.app.patchName, this.serialize());
     setTimeout(() => this.app.saveListOfComponentsInFirestore(), 500);
@@ -60,7 +61,7 @@ class Component {
     }
     this.container.style.left = this.serializedData.x;
     this.container.style.top = this.serializedData.y;
-
+    
     this.updateConnectionsFromSerializedData(
       this.serializedData.connections,
       doWeHaveToUpdateLines
@@ -131,7 +132,7 @@ class Component {
   startListeningToChangesInThiscomponent() {
     if (!this.app.patchName) return;
     listenToChangesInComponent(this.app.patchName, this.id, (data) => {
-      console.log("#changes", this.type, this.id, data);
+      // console.log("#changes", this.type, this.id, data);
       this.updateFromSerialized(data);
     });
   }
@@ -315,7 +316,7 @@ class Component {
     this.app.removeAllConnections(this);
     this.container.parentElement.removeChild(this.container);
     this.app.components = this.app.components.filter((c) => c != this);
-    removeComponentFromFirestore(this.app.patchName, this.id);
+    if(this.app.patchName) removeComponentFromFirestore(this.app.patchName, this.id);
     this.app.saveListOfComponentsInFirestore();
   }
   connect(compo, input, numberOfOutput) {
@@ -324,7 +325,12 @@ class Component {
     //CREATE CONNECTION INSTANCE
     let conn = new Connection(this, compo, input, numberOfOutput, this.app);
     //ADD CLASS TO HTML ELEMENT
-    compo.inputElements[input].button.classList.add("connected");
+    try {
+      compo.inputElements[input].button.classList.add("connected");
+    } catch (e) {
+      console.trace(e);
+      debugger;
+    }
     //ADD THE CONNECTION INSTANCE TO THE ARRAY OF CONNECTIONS OF THIS COMPONENT
     this.connections.push(conn);
 
