@@ -17,7 +17,7 @@ class BPMOutputComponent extends Component {
     this.node.port.postMessage({ bpm: this.app.bpm });
   }
   updateDisplay() {
-    this.display.innerHTML = this.val;
+    (this.display||{}).innerHTML = this.val;
   }
   createNode() {
     this.app.actx.audioWorklet

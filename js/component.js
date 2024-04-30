@@ -351,7 +351,7 @@ class Component {
       compo.inputElements[input].button.classList.add("connected");
     } catch (e) {
       console.trace(e);
-      debugger;
+      // debugger;
     }
     //ADD THE CONNECTION INSTANCE TO THE ARRAY OF CONNECTIONS OF THIS COMPONENT
     this.connections.push(conn);

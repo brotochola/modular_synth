@@ -1,7 +1,4 @@
 class SequencerWorklet extends AudioWorkletProcessor {
- 
-
-
   constructor() {
     super();
 
@@ -15,9 +12,10 @@ class SequencerWorklet extends AudioWorkletProcessor {
     };
   }
 
-  process(inputs, outputs,parameters) {
-      // this.port.postMessage({parameters})
+  process(inputs, outputs, parameters) {
+    // this.port.postMessage({parameters})
     let output = (outputs || [])[0] || [];
+    let triggerOutput = (outputs || [])[1] || [];
     this.currentTime = currentTime * 1000;
     this.currentNote = Math.floor(
       (this.currentTime % this.durationOfLoop) / this.durationOfOneNote
@@ -28,25 +26,29 @@ class SequencerWorklet extends AudioWorkletProcessor {
     //   durationOfOneNote: this.durationOfOneNote,
     // });
 
-    for (let channel = 0; channel < output.length; ++channel) {
-      let outputChannel = (output || [])[channel] || [];
+    let outputChannel = (output || [])[0] || [];
+    let triggerOutputChannel = (triggerOutput || [])[0] || [];
 
-      for (let i = 0; i < outputChannel.length; ++i) {
-        outputChannel[i] = (this.sequence||[])[this.currentNote];
+    for (let i = 0; i < outputChannel.length; ++i) {
+      outputChannel[i] = (this.sequence || [])[this.currentNote];
+      if (this.prevNote != this.currentNote) triggerOutputChannel[i] = 1;
+      else triggerOutputChannel[i] = 0;
 
-        // this.port.postMessage({
-        //   data: "hola",
-        //   note: this.sequence[this.currentNote],
-        // });
+      // this.port.postMessage({
+      //   data: "hola",
+      //   note: this.sequence[this.currentNote],
+      // });
 
-        // this.port.postMessage(inputChannel1[i], inputChannel2[i]);
-        // this.port.postMessage(outputChannel[i]);
+      // this.port.postMessage(inputChannel1[i], inputChannel2[i]);
+      // this.port.postMessage(outputChannel[i]);
 
-        // this.port.postMessage({ data: "hola", output: outputChannel[i] });
+      // this.port.postMessage({ data: "hola", output: outputChannel[i] });
 
-        // outputChannel[i] = inputChannel[i] * 0.5;
-      }
+      // outputChannel[i] = inputChannel[i] * 0.5;
     }
+
+    this.prevNote = this.currentNote;
+
     // this.port.postMessage({ data: "hola", counter });
     // this.lastTime = Date.now();
     return true;

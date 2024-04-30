@@ -112,7 +112,7 @@ class Sequencer extends Component {
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "sequencer-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: 1,
+          numberOfOutputs: 2,
         });
 
         this.node.onprocessorerror = (e) => {
