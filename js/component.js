@@ -61,7 +61,7 @@ class Component {
     }
     this.container.style.left = this.serializedData.x;
     this.container.style.top = this.serializedData.y;
-    
+
     this.updateConnectionsFromSerializedData(
       this.serializedData.connections,
       doWeHaveToUpdateLines
@@ -116,7 +116,7 @@ class Component {
       }
       setTimeout(() => this.createView(), 50);
       this.retryCounter++;
-      return console.warn(this.id, this.type, "NODE NOT READY");
+      return console.log("###", this.id, this.type, "NODE NOT READY");
     }
     this.node.parent = this;
     this.ready = true;
@@ -126,15 +126,22 @@ class Component {
     this.createWorkletForCustomParams();
     makeChildrenStopPropagation(this.container);
     this.loadFromSerializedData();
-    setTimeout(() => this.startListeningToChangesInThiscomponent(), 2000);
+
+    setTimeout(() => {
+      if (this.app.patchName) this.startListeningToChangesInThiscomponent();
+    }, 2000);
   }
 
   startListeningToChangesInThiscomponent() {
     if (!this.app.patchName) return;
-    listenToChangesInComponent(this.app.patchName, this.id, (data) => {
-      // console.log("#changes", this.type, this.id, data);
-      this.updateFromSerialized(data);
-    });
+    this.unsubscribeToFireStore = listenToChangesInComponent(
+      this.app.patchName,
+      this.id,
+      (data) => {
+        // console.log("#changes", this.type, this.id, data);
+        this.updateFromSerialized(data);
+      }
+    );
   }
 
   createWorkletForCustomParams() {
@@ -246,6 +253,7 @@ class Component {
         textInput.classList.add(inp);
         textInput.type = "number";
         textInput.onchange = (e) => this.onParamChanged(e, inp);
+        textInput.onkeydown = (e) => e.stopImmediatePropagation();
         textInput.max = 2000;
         textInput.min = 0;
         textInput.value = !this.node.parameters
@@ -312,12 +320,26 @@ class Component {
     this.app.updateAllLines();
   }
 
+  clearAll() {
+    this.container.innerHTML = "";
+    Object.keys(this).forEach((k) => {
+      this[k] = undefined;
+      delete this[k];
+    });
+    // this=null
+  }
+
   remove() {
+    if (this.unsubscribeToFireStore instanceof Function)
+      this.unsubscribeToFireStore();
     this.app.removeAllConnections(this);
     this.container.parentElement.removeChild(this.container);
+
     this.app.components = this.app.components.filter((c) => c != this);
-    if(this.app.patchName) removeComponentFromFirestore(this.app.patchName, this.id);
+    if (this.app.patchName)
+      removeComponentFromFirestore(this.app.patchName, this.id);
     this.app.saveListOfComponentsInFirestore();
+    setTimeout(() => this.clearAll(), 50);
   }
   connect(compo, input, numberOfOutput) {
     // console.log("#connect", compo, input);
@@ -429,7 +451,7 @@ class Component {
     }
 
     window.tc = this;
-    console.log(this);
+    // console.log(this);
   }
   updateBPM() {}
 

@@ -29,7 +29,8 @@ class CustomProcessorComponent extends Component {
         };
 
         this.updateNodeWithFormula();
-        this.node.port.onmessage = (e) => console.log("#msg", e.data);
+        this.node.port.onmessage = (e) =>
+          console.log("#msg from custom proc", e.data);
       });
   }
   updateNodeWithFormula() {
@@ -37,6 +38,8 @@ class CustomProcessorComponent extends Component {
     this.node.port.postMessage(this.updatedFormula);
   }
   handleInputChange(e) {
+    e.preventDefault();
+    // e.stopPropagating()
     let val = this.inputText.value;
     this.formula = val;
     this.updateNodeWithFormula();
@@ -46,6 +49,9 @@ class CustomProcessorComponent extends Component {
   createInputText() {
     this.inputText = document.createElement("textarea");
     this.inputText.onchange = (e) => this.handleInputChange(e);
+    this.inputText.onclick = (e) => {
+      this.active ? this.toggleActive() : null;
+    };
     this.inputText.value = this.formula;
     this.container.appendChild(this.inputText);
   }

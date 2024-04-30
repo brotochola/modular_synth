@@ -98,12 +98,13 @@ function listenToChangesInWholePatch(docName, cb) {
   // console.log("# listen to changes", docName, componentID)
   const docRef = firebase.firestore().collection("modular").doc(docName);
 
-  docRef.onSnapshot((doc) => {
+  let refToUnsubscribe = docRef.onSnapshot((doc) => {
     const data = doc.data();
     if (cb instanceof Function) {
       cb(data);
     }
   });
+  return refToUnsubscribe;
 }
 
 function listenToChangesInComponent(docName, componentID, cb) {
@@ -115,12 +116,13 @@ function listenToChangesInComponent(docName, componentID, cb) {
     .collection("components")
     .doc(componentID);
 
-  docRef.onSnapshot((doc) => {
+  let refToUnsubscribe = docRef.onSnapshot((doc) => {
     const data = doc.data();
     if (cb instanceof Function) {
       cb(data);
     }
   });
+  return refToUnsubscribe;
 }
 
 async function getComponentFromFirestore(docName, componentID, cb) {
