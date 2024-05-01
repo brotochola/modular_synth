@@ -8,7 +8,7 @@ class Component {
     this.dragStartedAt = [0, 0];
     this.connections = [];
     this.running = false;
-    this.id = serializedData?.id ? serializedData.id : makeid(8);
+    this.id = serializedData?.id ? serializedData.id : this.type.toLowerCase().substring(0,6)+"_"+makeid(8);
     if (this.type.toLowerCase() == "output") this.id = "output";
 
     this.createContainer();
@@ -73,7 +73,7 @@ class Component {
     if (this.updateUI instanceof Function) this.updateUI();
   }
 
-  updateConnectionsFromSerializedData(connections, forceUpdateLines) {    
+  updateConnectionsFromSerializedData(connections, forceUpdateLines) {
     let doWeHaveToUpdateLines = false;
 
     //CHECK IF WE GOTTA ADD NEW CONNECTIONS
@@ -120,7 +120,7 @@ class Component {
       }
       setTimeout(() => this.createView(), 50);
       this.retryCounter++;
-      return// console.log("###", this.id, this.type, "NODE NOT READY");
+      return; // console.log("###", this.id, this.type, "NODE NOT READY");
     }
     this.node.parent = this;
     this.ready = true;
