@@ -8,6 +8,7 @@ class App {
     this.createMainContainer(elem);
     this.createOutputComponent();
     this.createCanvasOnTop();
+    this.addEventsToDropFile();
 
     this.putBPMInButton();
     window.addEventListener(
@@ -30,6 +31,46 @@ class App {
 
     this.checkIfTheresAPatchToOpenInTheURL();
     setTimeout(() => this.startListeningToFirestoreChanges(), 2000);
+  }
+
+  addEventsToDropFile() {
+    document.body.ondrop = (ev) => {
+      // console.log(ev);
+      let files=[]
+      if (ev.dataTransfer.items) {
+        // Use DataTransferItemList interface to access the file(s)
+        [...ev.dataTransfer.items].forEach((item, i) => {
+          // If dropped items aren't files, reject them
+          if (item.kind === "file") {
+            files.push( item.getAsFile())
+            // console.log(file);
+          }
+        });
+      } else {
+        // Use DataTransfer interface to access the file(s)
+        [...ev.dataTransfer.files].forEach((file, i) => {
+          files.push(file)
+        });
+      }
+
+      // console.log("## result", files)
+
+      let reader = new FileReader();
+      reader.onload = async () => {        
+        this.loadedJSON = JSON.parse(reader.result)
+        this.loadFromFile(this.loadedJSON);
+      };
+
+      reader.readAsText(files[0]);
+
+
+      ev.preventDefault();
+    };
+
+    document.body.ondragover = (e) => {
+      // console.log(e);
+      e.preventDefault();
+    };
   }
 
   startListeningToFirestoreChanges() {
