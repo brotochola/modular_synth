@@ -24,7 +24,11 @@ class AudioPlayer extends Component {
   handleTriggerFromWorklet(e) {
     // console.log("#handleTriggerFromWorklet", e);
     if (e.current != 0) this.triggerAudio();
-    else this.node.stop();
+    else {
+      try {
+        this.node.stop();
+      } catch (e) {}
+    }
   }
 
   triggerAudio() {
@@ -100,7 +104,7 @@ class AudioPlayer extends Component {
         this.audioBuffer = await this.app.actx.decodeAudioData(reader.result);
         this.node.buffer = this.audioBuffer;
         this.node.loop = true;
-        this.quickSave()
+        this.quickSave();
         this.app.resetAllConnections();
         this.updateButton();
       };

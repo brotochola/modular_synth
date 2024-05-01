@@ -62,18 +62,21 @@ class Component {
     this.container.style.left = this.serializedData.x;
     this.container.style.top = this.serializedData.y;
 
-    this.updateConnectionsFromSerializedData(
-      this.serializedData.connections,
-      doWeHaveToUpdateLines
-    );
+    this.app.waitUntilAllComopnentsAreReady(() => {
+      this.updateConnectionsFromSerializedData(
+        this.serializedData.connections,
+        doWeHaveToUpdateLines
+      );
+    });
 
     //THIS IS IMPLEMENTED IN EACH CLASS THAT INHERITES FROM THIS ONE
     if (this.updateUI instanceof Function) this.updateUI();
   }
 
-  updateConnectionsFromSerializedData(connections, forceUpdateLines) {
+  updateConnectionsFromSerializedData(connections, forceUpdateLines) {    
     let doWeHaveToUpdateLines = false;
 
+    //CHECK IF WE GOTTA ADD NEW CONNECTIONS
     if (Array.isArray(connections)) {
       for (let incomingConn of connections) {
         let found = false;
@@ -91,6 +94,7 @@ class Component {
       }
     }
 
+    //CHECK IF WE GOTTA REMOVE SOME
     for (let currentConn of this.connections) {
       let found = false;
       for (let incomingConn of connections) {
@@ -116,7 +120,7 @@ class Component {
       }
       setTimeout(() => this.createView(), 50);
       this.retryCounter++;
-      return console.log("###", this.id, this.type, "NODE NOT READY");
+      return// console.log("###", this.id, this.type, "NODE NOT READY");
     }
     this.node.parent = this;
     this.ready = true;

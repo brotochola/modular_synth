@@ -12,7 +12,7 @@ class CustomProcessorComponent extends Component {
     this.infoText = document.createElement("p");
 
     this.infoText.innerText =
-      "y is the output, x1, x2, x3 are the 3 inputs at each frame, but also you can use it like: inputChannel1[i], being the i between 0 and 127";
+      "y is the output, x1, x2, x3, x4 are the 4 inputs at each frame, but also you can use it like: inputChannel1[i], being the i between 0 and 127";
     this.container.appendChild(this.infoText);
   }
   createNode() {
@@ -29,8 +29,9 @@ class CustomProcessorComponent extends Component {
         };
 
         this.updateNodeWithFormula();
-        this.node.port.onmessage = (e) =>
-          console.log("#msg from custom proc", e.data);
+        this.node.port.onmessage = (e) => {
+          // console.log("#msg from custom proc", e.data);
+        };
       });
   }
   updateNodeWithFormula() {

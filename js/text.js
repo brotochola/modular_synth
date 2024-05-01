@@ -24,8 +24,7 @@ class Text extends Component {
   createView() {
     this.ready = true;
     if (this.app.patchName) {
-      listenToChangesInComponent(this.app.patchName, this.id, (data) => {
-        console.log("#changes", this.type, this.id, data);
+      listenToChangesInComponent(this.app.patchName, this.id, (data) => {        
         this.updateFromSerialized(data);
       });
     }

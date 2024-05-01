@@ -30,39 +30,38 @@ class App {
     this.wheelZoom();
 
     this.checkIfTheresAPatchToOpenInTheURL();
-    setTimeout(() => this.startListeningToFirestoreChanges(), 2000);
+    setTimeout(() => this.startListeningToFirestoreChanges(), 4000);
   }
 
   addEventsToDropFile() {
     document.body.ondrop = (ev) => {
       // console.log(ev);
-      let files=[]
+      let files = [];
       if (ev.dataTransfer.items) {
         // Use DataTransferItemList interface to access the file(s)
         [...ev.dataTransfer.items].forEach((item, i) => {
           // If dropped items aren't files, reject them
           if (item.kind === "file") {
-            files.push( item.getAsFile())
+            files.push(item.getAsFile());
             // console.log(file);
           }
         });
       } else {
         // Use DataTransfer interface to access the file(s)
         [...ev.dataTransfer.files].forEach((file, i) => {
-          files.push(file)
+          files.push(file);
         });
       }
-
+      if (files.length == 0) return;
       // console.log("## result", files)
 
       let reader = new FileReader();
-      reader.onload = async () => {        
-        this.loadedJSON = JSON.parse(reader.result)
+      reader.onload = async () => {
+        this.loadedJSON = JSON.parse(reader.result);
         this.loadFromFile(this.loadedJSON);
       };
 
       reader.readAsText(files[0]);
-
 
       ev.preventDefault();
     };
@@ -250,6 +249,8 @@ class App {
       this.container.style.top = y + "px";
       this.putCSSVariablesInMainContainer(x, y);
       this.updateAllLines();
+      e.preventDefault();
+      e.stopImmediatePropagation();
     };
     this.container.ondragstart = (e) => {
       this.makeAllComponentsInactive();
@@ -432,7 +433,11 @@ class App {
       this.addSerializedComponent(comp);
     }
 
-    this.waitUntilComponentsAreLoadedAndLoadConnections(obj);
+    setTimeout(() => {
+      this.resetAllConnections();
+      this.actx.resume();
+      this.updateAllLines();
+    }, 200);
   }
 
   async loadFromFireStore() {
@@ -457,34 +462,17 @@ class App {
     }
   }
 
-  waitUntilComponentsAreLoadedAndLoadConnections(obj) {
-    // console.log(
-    //   "#waitUntilComponentsAreLoadedAndLoadConnections",
-    //   obj,
-    //   this.components
-    // );
-    if (
-      this.components.filter((k) => k.ready && k.id != "output").length !=
-      obj.components.filter((k) => k.id != "output").length
-    ) {
-      // console.log(
-      //   "$$NOT ALL COMPONENTS WERE LOADED YET",
-      //   this.components.length,
-      //   obj.components.length
-      // );
-      setTimeout(
-        () => this.waitUntilComponentsAreLoadedAndLoadConnections(obj),
-        250
-      );
+  waitUntilAllComopnentsAreReady(cb, counter) {
+    if (!counter) counter = 1;
+    else counter++;
+    let notReadyComopnents = this.components.filter((k) => !k.ready);
+    if (notReadyComopnents.length > 0) {
+      if (counter > 20) {
+        return console.warn("components didn't load :(");
+      }
+      setTimeout(() => this.waitUntilAllComopnentsAreReady(cb, counter), 250);
     } else {
-      setTimeout(() => {
-        for (let c of obj.connections) {
-          this.addSerializedConnection(c);
-        }
-        this.resetAllConnections();
-        this.actx.resume();
-        this.updateAllLines();
-      }, 100);
+      if (cb instanceof Function) cb();
     }
   }
   addSerializedConnection(conn) {
@@ -520,7 +508,10 @@ class App {
     this.patchName = name;
     let serialized = this.serialize();
     localStorage[this.SAVE_PREFIX + name] = JSON.stringify(serialized);
-    saveInFireStore(serialized, name);
+    this.saveListOfComponentsInFirestore();
+    for (let comp of this.components) {
+      comp.quickSave();
+    }
   }
   load() {
     let list = "";

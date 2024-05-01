@@ -1,6 +1,6 @@
 class Connection {
   constructor(from, to, audioParam, numberOfOutput, app) {
-    Connection.app=app
+    Connection.app = app;
     this.app = app;
     this.from = from;
     this.to = to;
@@ -41,13 +41,15 @@ class Connection {
       this.audioParam +
       this.numberOfOutput
     ).toRGB();
-    this.app.drawLine(
-      this.from.outputs.querySelector(
-        '.outputButton[numberOfOutput="' + this.numberOfOutput + '"]'
-      ),
-      this.to.inputElements[this.audioParam].button,
-      color
+
+    let fromEl = this.from.outputs.querySelector(
+      '.outputButton[numberOfOutput="' + this.numberOfOutput + '"]'
     );
+    let toEl = (this.to.inputElements[this.audioParam]||{}).button;
+    if(!toEl) {
+      console.trace("epa")
+    }
+    this.app.drawLine(fromEl, toEl, color);
   }
 
   reset() {
@@ -119,7 +121,6 @@ class Connection {
     } else {
       sc1 = c2;
     }
-    
 
     return (
       sc1.from == sc2.from &&
@@ -129,11 +130,16 @@ class Connection {
     );
   }
 
-  static getComponentFrom(to,audioParam){
-    let conn=Connection.app.getAllConnections().filter(connection => connection.to.id==to.id&&connection.audioParam==audioParam)
-    if(conn.length){
-      return conn[0].from
+  static getComponentFrom(to, audioParam) {
+    let conn = Connection.app
+      .getAllConnections()
+      .filter(
+        (connection) =>
+          connection.to.id == to.id && connection.audioParam == audioParam
+      );
+    if (conn.length) {
+      return conn[0].from;
     }
-    return null
+    return null;
   }
 }
