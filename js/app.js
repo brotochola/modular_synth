@@ -407,7 +407,15 @@ class App {
   }
 
   serialize() {
-    let obj = { components: [], connections: [], bpm: this.bpm };
+    let serializedOutputComponent = this.getOutputComponent().serialize();
+    let obj = {
+      components: [],
+      connections: [],
+      bpm: this.bpm,
+      outputX: serializedOutputComponent.x,
+      outputY: serializedOutputComponent.y,
+    };
+
     for (let comp of this.components) {
       if (!(comp instanceof Output)) obj.components.push(comp.serialize());
     }
@@ -451,15 +459,10 @@ class App {
   }
 
   updatePositionOfOutPutComponent(savedData) {
-    if (!Array.isArray(savedData.components)) return;
     let outputCompo = this.getOutputComponent();
-    let savedOutputcompo = (savedData.components.filter(
-      (c) => c.type == "Output"
-    ) || [])[0];
-    if (savedOutputcompo) {
-      outputCompo.container.style.left = savedOutputcompo.x;
-      outputCompo.container.style.top = savedOutputcompo.y;
-    }
+
+    outputCompo.container.style.left = savedData.outputX;
+    outputCompo.container.style.top = savedData.outputY;
   }
 
   waitUntilAllComopnentsAreReady(cb, counter) {
@@ -552,12 +555,15 @@ class App {
 
   saveListOfComponentsInFirestore() {
     if (!this.patchName) return;
+    let serializedOutputComponent = this.getOutputComponent().serialize();
     saveInFireStore(
       {
         bpm: this.bpm,
         components: this.components
           .filter((k) => k.id != "output")
           .map((k) => k.id),
+        outputX: serializedOutputComponent.x,
+        outputY: serializedOutputComponent.y,
       },
       this.patchName
     );

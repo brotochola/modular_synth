@@ -52,10 +52,13 @@ async function getListOfComponentsFromFirestore(patchName) {
 }
 
 async function getDocFromFirebase(name) {
-  let ret = { components: [], connections: [] };
+  let ret = { components: [], connections: [], outputX: null, outputY: null };
   let docs = await collectionRef.doc(name).collection("components").get();
-  let bpm = ((await collectionRef.doc(name).get()).data() || {}).bpm;
-  ret.bpm = bpm;
+  let loadadDoc = (await collectionRef.doc(name).get()).data() || {};
+
+  ret.bpm = loadadDoc.bpm;
+  ret.outputX = loadadDoc.outputX;
+  ret.outputY = loadadDoc.outputY;
 
   docs.forEach((doc) => {
     ret.components.push(doc.data());

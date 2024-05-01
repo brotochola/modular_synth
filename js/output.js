@@ -19,10 +19,11 @@ class Output extends Component {
     //OVERWRITE THIS METHOD BC THIS COMPONENTS BEHAVES DIFFERENTLY
     makeChildrenStopPropagation(this.container);
     this.ready = true;
-   
   }
 
   remove() {
     //OVERWRITE THIS METHOD BC THIS COMPONENT YOU CANNOT DELETE
   }
+
+  quickSave() {}
 }
