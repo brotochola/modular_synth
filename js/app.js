@@ -301,6 +301,9 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
+  addMic() {
+    this.components.push(new Mic(this));
+  }
   addDistortion() {
     this.components.push(new Distortion(this));
   }
