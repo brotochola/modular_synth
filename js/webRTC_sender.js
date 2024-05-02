@@ -1,9 +1,7 @@
 class WebRTCSender extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
-    this.peer = new Peer(
-      this.app.patchName ? this.app.patchName + "_" : "" + makeid(6)
-    );
+    this.peer = new Peer(makeid(6));
     this.node = this.app.actx.createMediaStreamDestination();
     // this.app.streamToSendViaRTC=this.node.stream
     // this.node.stream
@@ -48,8 +46,9 @@ class WebRTCSender extends Component {
     }
   }
   remove() {
+    if (this.call) this.call.close();
     this.peer.destroy();
-    this.call.close();
+
     super.remove();
   }
 }

@@ -29,7 +29,13 @@ class Component {
     if (!this.app.patchName) return;
     if (this.id == "output") return;
     createInstanceOfComponentInFirestore(this.app.patchName, this.serialize());
-    setTimeout(() => this.app.saveListOfComponentsInFirestore(), 500);
+    setTimeout(() => {
+      try {
+        this.app.saveListOfComponentsInFirestore();
+      } catch (e) {
+        console.warn(e);
+      }
+    }, 1000);
   }
   loadFromSerializedData() {
     if (!this.serializedData) return;
@@ -134,6 +140,7 @@ class Component {
     this.loadFromSerializedData();
 
     setTimeout(() => {
+      if (!this.app) console.trace("no app??");
       if (this.app.patchName) this.startListeningToChangesInThiscomponent();
     }, 2000);
   }
