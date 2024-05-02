@@ -286,7 +286,7 @@ class Component {
     this.quickSave();
   }
   onAudioParamClicked(audioParam) {
-    // console.log("audio param clicked", audioParam);
+    console.log("audio param clicked", audioParam);
 
     if (this.inputElements[audioParam].button.classList.contains("connected")) {
       let componentFromWhichThisConnectionComes = Connection.getComponentFrom(
@@ -348,7 +348,7 @@ class Component {
     setTimeout(() => this.clearAll(), 50);
   }
   connect(compo, input, numberOfOutput) {
-    // console.log("#connect", compo, input);
+    console.log("#connect", compo, input);
 
     //CREATE CONNECTION INSTANCE
     let conn = new Connection(this, compo, input, numberOfOutput, this.app);

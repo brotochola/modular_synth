@@ -42,7 +42,9 @@ class WebRTCSender extends Component {
       setTimeout(() => this.checkIfPeerIsConnected(), 500);
     } else {
       this.input.style.display = "none";
-      this.container.innerHTML += "connected to " + this.whoAmICalling;
+      let p = document.createElement("p");
+      p.innerHTML = "connected to " + this.whoAmICalling;
+      this.container.appendChild(p);
     }
   }
   remove() {
