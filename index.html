@@ -1,7 +1,9 @@
 <html>
 
 <head>
-    
+    <script src="js/external/peerjs.min.js"></script>
+
+
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
     <script src="js/firebase.js"></script>
@@ -26,6 +28,8 @@
     <script src="js/midiFilePlayer.js"></script>
     <script src="js/joystickComponent.js"></script>
 
+    <script src="js/webRTC_sender.js"></script>
+    <script src="js/webRTC_receiver.js"></script>
     <script src="js/amp.js"></script>
     <script src="js/filter.js"></script>
     <script src="js/numberDisplayComponent.js"></script>
@@ -91,7 +95,8 @@
         <button onclick="app.addText()">📄 add text</button>
         <button onclick="app.addMidiPlayer()">🎹 add midi player</button>
         <button onclick="app.addMic()">🎤 add mic</button>
-
+        <button onclick="app.addRTCSender()">📭 add RTC sender</button>
+        <button onclick="app.addRTCReceiver()">📨 add RTC receiver</button>
 
         <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
         <button onclick="app.resetAllConnections()">!! reset all connections</button>
@@ -101,7 +106,7 @@
 
 
         <button onclick="app.load()">📂 load</button>
-        
+
         <button onclick="app.loadFromFireStore()">📂 load from firestore</button>
     </div>
     <app></app>

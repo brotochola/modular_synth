@@ -47,7 +47,14 @@ https://g200kg.github.io/webaudio-controls/docs/howitworks.html
 
 https://dev.opera.com/articles/drum-sounds-webaudio/
 
+* CONNECT WITH WEBRTC:
 
+urls: 'turn:openrelay.metered.ca:80',
+username: 'openrelayproject',
+credentials: 'openrelayproject'
+
+https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
+https://gist.github.com/sagivo/3a4b2f2c7ac6e1b5267c2f1f59ac6c6b
 
 
 

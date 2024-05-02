@@ -1,7 +1,7 @@
 class App {
   constructor(elem) {
     this.patchName = getParameterByName("patch");
-
+    
     this.components = [];
     this.actx = new AudioContext();
     this.bpm = 100;
@@ -32,6 +32,8 @@ class App {
     this.checkIfTheresAPatchToOpenInTheURL();
     setTimeout(() => this.startListeningToFirestoreChanges(), 4000);
   }
+
+
 
   addEventsToDropFile() {
     document.body.ondrop = (ev) => {
@@ -301,6 +303,15 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
   }
+
+  addRTCReceiver() {
+    this.components.push(new WebRTCReceiver(this));
+  }
+
+  addRTCSender() {
+    this.components.push(new WebRTCSender(this));
+  }
+
   addMic() {
     this.components.push(new Mic(this));
   }

@@ -8,7 +8,9 @@ class Component {
     this.dragStartedAt = [0, 0];
     this.connections = [];
     this.running = false;
-    this.id = serializedData?.id ? serializedData.id : this.type.toLowerCase().substring(0,6)+"_"+makeid(8);
+    this.id = serializedData?.id
+      ? serializedData.id
+      : this.type.toLowerCase().substring(0, 6) + "_" + makeid(8);
     if (this.type.toLowerCase() == "output") this.id = "output";
 
     this.createContainer();
@@ -471,7 +473,7 @@ class Component {
     this.outputs = document.createElement("outputs");
     this.container.appendChild(this.outputs);
 
-    for (let i = 0; i < ((this.node || {}).numberOfOutputs || 1); i++) {
+    for (let i = 0; i < (this.node || {}).numberOfOutputs; i++) {
       let outputButton = document.createElement("input");
       outputButton.type = "checkbox";
       outputButton.classList.add("outputButton");
