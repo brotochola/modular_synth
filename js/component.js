@@ -20,24 +20,35 @@ class Component {
     this.outputElements = {};
     this.app.actx.resume();
     this.active = false;
-
-    if (!serializedData) this.quickSave();
   }
 
-  quickSave() {
-    // console.trace("saving ", this.type, this.id);
+  async quickSave(alsoSaveTheUpdatedListOfComponents) {
     if (!this.app.patchName) return;
     if (this.id == "output") return;
-    createInstanceOfComponentInFirestore(this.app.patchName, this.serialize());
-    setTimeout(() => {
-      try {
-        this.app.saveListOfComponentsInFirestore();
-      } catch (e) {
-        console.warn(e);
-      }
-    }, 1000);
+    this.app.updateAllLines();
+    // this.stopListeningToChanges();
+    let serializedMe = this.serialize();
+    serializedMe.sessionID = this.app.sessionID;
+    serializedMe.userID = this.app.userID;
+
+    // console.log("saving ", this.type, this.id, serializedMe);
+
+    await createInstanceOfComponentInFirestore(
+      this.app.patchName,
+      serializedMe
+    );
+    if (alsoSaveTheUpdatedListOfComponents) {
+      setTimeout(() => {
+        try {
+          this.app.saveListOfComponentsInFirestore();
+        } catch (e) {
+          console.warn(e);
+        }
+      }, 100);
+    }
+    // this.startListeningToChangesInThiscomponent();
   }
-  loadFromSerializedData() {
+  loadFromSerializedData(cb) {
     if (!this.serializedData) return;
 
     if (this.node) {
@@ -72,9 +83,10 @@ class Component {
 
     this.app.waitUntilAllComopnentsAreReady(() => {
       this.updateConnectionsFromSerializedData(
-        this.serializedData.connections,
+        (this.serializedData || {}).connections || [],
         doWeHaveToUpdateLines
       );
+      if (cb instanceof Function) cb();
     });
 
     //THIS IS IMPLEMENTED IN EACH CLASS THAT INHERITES FROM THIS ONE
@@ -82,6 +94,13 @@ class Component {
   }
 
   updateConnectionsFromSerializedData(connections, forceUpdateLines) {
+    // console.log(
+    //   "#update connections from serialized data",
+    //   this.type,
+    //   this.id,
+    //   this.connections,
+    //   connections
+    // );
     let doWeHaveToUpdateLines = false;
 
     //CHECK IF WE GOTTA ADD NEW CONNECTIONS
@@ -96,6 +115,8 @@ class Component {
         }
         if (!found) {
           //ADD IT
+  
+          // debugger
           setTimeout(() => this.app.addSerializedConnection(incomingConn), 50);
           doWeHaveToUpdateLines = true;
         }
@@ -103,7 +124,8 @@ class Component {
     }
 
     //CHECK IF WE GOTTA REMOVE SOME
-    for (let currentConn of this.connections) {
+
+    for (let currentConn of this.connections || []) {
       let found = false;
       for (let incomingConn of connections) {
         if (Connection.compareTwoConnections(incomingConn, currentConn)) {
@@ -113,6 +135,7 @@ class Component {
       }
       if (!found) {
         //THE CONNECTIONS DOES NOT EXIST IN FIRESTORE, SO DELETE IT
+        
         currentConn.remove();
         doWeHaveToUpdateLines = true;
       }
@@ -137,24 +160,44 @@ class Component {
     this.createWorkletForCustomTriggers();
     this.createWorkletForCustomParams();
     makeChildrenStopPropagation(this.container);
-    this.loadFromSerializedData();
+    if (this.serializedData) this.loadFromSerializedData();
+    else this.quickSave(true);
 
     setTimeout(() => {
-      if (!this.app) console.trace("no app??");
-      if (this.app.patchName) this.startListeningToChangesInThiscomponent();
+      if (!this.app) {
+        console.log("no app??");
+      } else if (this.app.patchName) {
+        this.startListeningToChangesInThiscomponent();
+      }
     }, 2000);
   }
+  // stopListeningToChanges() {
+  //   if (this.unsubscribeToFireStore instanceof Function)
+  //     this.unsubscribeToFireStore();
+  //   this.listeneningToFirestore = false;
+  // }
 
   startListeningToChangesInThiscomponent() {
     if (!this.app.patchName) return;
+    if (this.listeneningToFirestore) return;
     this.unsubscribeToFireStore = listenToChangesInComponent(
       this.app.patchName,
       this.id,
       (data) => {
-        // console.log("#changes", this.type, this.id, data);
-        this.updateFromSerialized(data);
+        if (!data) return;
+        // console.log("#changes", this.id, data);
+        //IF ITS MY CHANGES DONT DO ANYTHING
+        if (
+          data.sessionID != this.app.sessionID &&
+          data.userID != this.app.userID
+        ) {
+          this.updateFromSerialized(data);
+        } else {
+          // console.warn("## your own changes", this.type, this.id);
+        }
       }
     );
+    this.listeneningToFirestore = true;
   }
 
   createWorkletForCustomParams() {
@@ -293,7 +336,7 @@ class Component {
     this.quickSave();
   }
   onAudioParamClicked(audioParam) {
-    console.log("audio param clicked", audioParam);
+    // console.log("audio param clicked", audioParam);
 
     if (this.inputElements[audioParam].button.classList.contains("connected")) {
       let componentFromWhichThisConnectionComes = Connection.getComponentFrom(
@@ -349,13 +392,14 @@ class Component {
     this.container.parentElement.removeChild(this.container);
 
     this.app.components = this.app.components.filter((c) => c != this);
-    if (this.app.patchName)
+    if (this.app.patchName) {
       removeComponentFromFirestore(this.app.patchName, this.id);
-    this.app.saveListOfComponentsInFirestore();
+    }
+
     setTimeout(() => this.clearAll(), 50);
   }
   connect(compo, input, numberOfOutput) {
-    console.log("#connect", compo, input);
+    // console.log("#connect", compo, input);
 
     //CREATE CONNECTION INSTANCE
     let conn = new Connection(this, compo, input, numberOfOutput, this.app);
@@ -363,7 +407,7 @@ class Component {
     try {
       compo.inputElements[input].button.classList.add("connected");
     } catch (e) {
-      console.trace(e);
+      console.log(e);
       // debugger;
     }
     //ADD THE CONNECTION INSTANCE TO THE ARRAY OF CONNECTIONS OF THIS COMPONENT

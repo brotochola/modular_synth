@@ -15,12 +15,12 @@ class KeyboardComponent extends Component {
     }
   }
   putEvents() {
-    window.addEventListener("keydown", (e) => this.onKeyDown(e), false);
-    window.addEventListener("keyup", (e) => this.onKeyUp(e), false);
-
+    (this.bindedKeyUp = this.onKeyDown), bind(this);
+    (this.bindedKeyDown = this.onKeyDown), bind(this);
+    window.addEventListener("keydown", this.bindedKeyUp, false);
+    window.addEventListener("keyup", this.bindedKeyDown, false);
   }
   onKeyDown(e) {
-    
     for (let i = 0; i < this.letters.length; i++) {
       if (e.key == this.letters[i]) {
         this.node.port.postMessage({ type: "down", which: i });
@@ -51,9 +51,13 @@ class KeyboardComponent extends Component {
 
         this.node.port.onmessage = (e) =>
           console.log("#keyboard worklet", e.data);
-          
 
         setTimeout(() => this.putLabels(), 150);
       });
+  }
+  remove() {
+    window.removeEventListener("keydown", this.bindedKeyUp, false);
+    window.removeEventListener("keyup", this.bindedKeyDown, false);
+    super.remove();
   }
 }

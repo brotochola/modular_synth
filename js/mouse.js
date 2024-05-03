@@ -1,6 +1,6 @@
 class Mouse extends Component {
-  constructor(app,serializedData) {
-    super(app,serializedData);
+  constructor(app, serializedData) {
+    super(app, serializedData);
 
     ////
     //ConstantSourceNode
@@ -24,26 +24,26 @@ class Mouse extends Component {
     this.generator.buffer = this.noiseBuffer;
     this.generator.loop = true;
     this.generator.start(0);
-    
 
     this.node = new GainNode(this.app.actx);
-    
+
     this.node.gain.value = 1;
-    this.generator.connect(this.node)
+    this.generator.connect(this.node);
 
     // this.osc.connect(this.node);
     this.selectedCoord = "x";
-
-    this.app.container.addEventListener("mousemove", (e) => {
-      let height = window.innerWidth;
-      let width = window.innerHeight;
-      this.x = (width - e.pageX) / width;
-      this.y = (height - e.pageY) / height;
-
-      this.node.gain.value = this[this.selectedCoord];
-    });
+    this.bindedEventHandler = this.handleMouseMove.bind(this);
+    this.app.container.addEventListener("mousemove", this.bindedEventHandler);
 
     this.createSelect();
+  }
+  handleMouseMove(e) {
+    let height = window.innerWidth;
+    let width = window.innerHeight;
+    this.x = (width - e.pageX) / width;
+    this.y = (height - e.pageY) / height;
+
+    this.node.gain.value = this[this.selectedCoord];
   }
 
   createSelect() {
@@ -64,5 +64,13 @@ class Mouse extends Component {
   }
   handleOnChange(e) {
     this.selectedCoord = this.xorY.value;
+  }
+  remove() {
+    // console.log(this.app.container)
+    this.app.container.removeEventListener(
+      "mousemove",
+      this.bindedEventHandler
+    );
+    super.remove();
   }
 }

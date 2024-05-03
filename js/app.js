@@ -1,7 +1,7 @@
 class App {
   constructor(elem) {
     this.patchName = getParameterByName("patch");
-    
+
     this.components = [];
     this.actx = new AudioContext();
     this.bpm = 100;
@@ -11,13 +11,16 @@ class App {
     this.addEventsToDropFile();
 
     this.putBPMInButton();
+
+    this.generateUserAndSessionIDs();
+
     window.addEventListener(
       "keydown",
       (e) => {
         if (e.key == "Delete") {
           for (let c of this.components.filter((k) => k.active)) {
             c.remove();
-
+            this.saveListOfComponentsInFirestore();
             break;
           }
 
@@ -29,12 +32,16 @@ class App {
 
     this.wheelZoom();
 
-    this.checkIfTheresAPatchToOpenInTheURL();
-    setTimeout(() => this.startListeningToFirestoreChanges(), 4000);
+    // this.checkIfTheresAPatchToOpenInTheURL();
+    setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
   }
-
-
-
+  generateUserAndSessionIDs() {
+    if (!localStorage.getItem("user_id")) {
+      localStorage["user_id"] = makeid(16);
+    }
+    this.userID = localStorage.getItem("user_id");
+    this.sessionID = makeid(12);
+  }
   addEventsToDropFile() {
     document.body.ondrop = (ev) => {
       // console.log(ev);
@@ -59,8 +66,20 @@ class App {
 
       let reader = new FileReader();
       reader.onload = async () => {
-        this.loadedJSON = JSON.parse(reader.result);
-        this.loadFromFile(this.loadedJSON);
+        // this.unsubscribeFromFirestore();
+        try {
+          this.loadedJSON = JSON.parse(reader.result);
+          this.loadFromFile(this.loadedJSON);
+          // //IF THERE IS A PATCH NAME IN THE URL, AND YOU DROP A JSON FILE THAT COULD LOAD BE LOADED
+          // //IT WILL OVERWRITE THE PATCH
+          // if (this.patchName) {
+          //   this.waitUntilAllComopnentsAreReady(() =>
+          //     setTimeout(()=>this.save(this.patchName),500)
+          //   );
+          // }
+        } catch (e) {
+          console.warn("error with this json file", e);
+        }
       };
 
       reader.readAsText(files[0]);
@@ -76,24 +95,32 @@ class App {
 
   startListeningToFirestoreChanges() {
     if (!this.patchName) return;
-    listenToChangesInWholePatch(this.patchName, (e) => {
-      // console.log("### CHANGES IN THE PATCH", e);
-      this.handleChangesInThisPatchFromFirestore(e);
+    if (this.listeningToFirestore) return;
+    this.waitUntilAllComopnentsAreReady(() => {
+      this.functionToUnsubscribeFromFirestore = listenToChangesInWholePatch(
+        this.patchName,
+        (e) => {
+          this.handleChangesInThisPatchFromFirestore(e);
+        },
+        this.sesstionID,
+        this.userID
+      );
+      this.listeningToFirestore = true;
     });
   }
 
-  async checkIfTheresAPatchToOpenInTheURL() {
-    if (!this.patchName) return;
-    let loaded = await getDocFromFirebase(this.patchName);
+  // async checkIfTheresAPatchToOpenInTheURL() {
+  //   if (!this.patchName) return;
+  //   let loaded = await getDocFromFirebase(this.patchName);
 
-    if (loaded) {
-      console.log("#", this.patchName, " loaded from firestore", loaded);
-      this.loadFromFile(loaded);
-    } else {
-      console.warn(this.patchName + " could not be loaded");
-      //THIS IS BC THE OUTPUT COMPO WAS NOT LOADED YET
-    }
-  }
+  //   if (loaded) {
+  //     console.log("#", this.patchName, " loaded from firestore", loaded);
+  //     this.loadFromFile(loaded);
+  //   } else {
+  //     console.warn(this.patchName + " could not be loaded");
+  //     //THIS IS BC THE OUTPUT COMPO WAS NOT LOADED YET
+  //   }
+  // }
 
   compareTwoComponents(c1, c2) {
     let compC1, compC2;
@@ -115,6 +142,9 @@ class App {
 
   handleChangesInThisPatchFromFirestore(e) {
     if (!e) return;
+    if (e.sessionID == this.sessionID && e.userID == this.userID) {
+      return // console.warn("THESEA RE YOUR OWN CHANGES");
+    }
     if (e.components) {
       //THIS IS ONLY A LIST OF IDS IN THE DOC
       //INSIDE THIS DOC THERE'S A COLLECTION WITH ALL THE DOCUMENTS
@@ -122,6 +152,7 @@ class App {
         //C IS AN ID
         let currentCompo = this.getComponentByID(c);
         if (!currentCompo) {
+          // console.log("##### el compo no se encontró", c, this.components);
           //GETS THE COMPONENT FROM THE COLLECTION, THE SERIALIZED COMPONENT
           getComponentFromFirestore(
             this.patchName,
@@ -141,6 +172,7 @@ class App {
       let componentsWeHaveToRemove = this.components.filter(
         (k) => !e.components.includes(k.id)
       );
+      // if(componentsWeHaveToRemove.length ==this.components.length) {}
 
       for (let compo of componentsWeHaveToRemove) {
         if (compo instanceof Output) continue;
@@ -276,7 +308,7 @@ class App {
   }
 
   updateAllLines() {
-    // console.trace("updateAllLines");
+    
     this.ctx.clearRect(0, 0, 9999, 9999);
     setTimeout(() => {
       for (let c of this.getAllConnections()) {
@@ -286,99 +318,126 @@ class App {
   }
   addText() {
     this.components.push(new Text(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addBPMOutputComponenet() {
     this.components.push(new BPMOutputComponent(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addJoystick() {
     this.components.push(new JoystickComponent(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addEnvelope() {
     this.components.push(new EnvelopeGenerator(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addOscillator() {
     this.components.push(new Oscillator(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addRTCReceiver() {
     this.components.push(new WebRTCReceiver(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addRTCSender() {
     this.components.push(new WebRTCSender(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addMic() {
     this.components.push(new Mic(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addDistortion() {
     this.components.push(new Distortion(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addCounter() {
     this.components.push(new CounterComponent(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addMemoryComponent() {
     this.components.push(new MemoryComponent(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addMidiPlayer() {
     this.components.push(new MidiFilePlayer(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addKeyboard() {
     this.components.push(new KeyboardComponent(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addImagePlayer() {
     this.components.push(new ImagePlayerWorkletVersion(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addVisualizer() {
     this.components.push(new Visualizer(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addCustomProcessor() {
     this.components.push(new CustomProcessorComponent(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addFilter() {
     this.components.push(new Filter(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addGainNode() {
     this.components.push(new Amp(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   createOutputComponent() {
     this.components.push(new Output(this));
   }
   addDelay() {
     this.components.push(new Delay(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addMerger() {
     this.components.push(new Merger(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addNoise() {
     this.components.push(new NoiseGenWithWorklet(this));
+    //   this.saveListOfComponentsInFirestore();
   }
   addMouse() {
     this.components.push(new Mouse(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addImageMaker() {
     this.components.push(new ImageMaker(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addAudioPlayer() {
     this.components.push(new AudioPlayer(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addSequencer() {
     this.components.push(new Sequencer(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   addNumberDisplay() {
     this.components.push(new NumberDisplayComponent(this));
+    //   this.saveListOfComponentsInFirestore();
   }
 
   getAllConnections() {
@@ -509,26 +568,32 @@ class App {
   addSerializedComponent(comp) {
     // console.log("## adding serialized component", comp.type, comp.id);
     if (!comp) {
-      return console.trace("trying to add a null serialized component??");
+      return console.log("trying to add a null serialized component??");
     }
     if (comp.type == "Output" || comp.id == "output")
-      return console.warn("YOU CANT CREATE OUTPUT COMPONENTS");
+      return //console.warn("YOU CANT CREATE OUTPUT COMPONENTS");
     let c = eval(comp.constructor);
     this.components.push(new c(this, comp));
   }
 
-  save() {
-    let name = prompt(
-      "name the instrument, it will be saved in localStorage and in firebase"
-    );
+  deepSaveAllComponents() {
+    for (let comp of this.components) {
+      comp.quickSave();
+    }
+  }
+
+  save(name) {
+    if (!name) {
+      name = prompt(
+        "name the instrument, it will be saved in localStorage and in firebase"
+      );
+    }
     if (!name) return;
     this.patchName = name;
     let serialized = this.serialize();
     localStorage[this.SAVE_PREFIX + name] = JSON.stringify(serialized);
+    this.deepSaveAllComponents();
     this.saveListOfComponentsInFirestore();
-    for (let comp of this.components) {
-      comp.quickSave();
-    }
   }
   load() {
     let list = "";
@@ -539,7 +604,8 @@ class App {
     });
     let name = prompt("which one \n" + list);
     if (!name) return;
-    if (!localStorage[this.SAVE_PREFIX + name]) return;
+    if (!localStorage[this.SAVE_PREFIX + name])
+      return console.warn("Couldn't find");
     this.loadFromFile(JSON.parse(localStorage[this.SAVE_PREFIX + name]));
   }
 
@@ -566,20 +632,39 @@ class App {
   getComponentByID(id) {
     return this.components.filter((c) => c.id == id)[0];
   }
+  // unsubscribeFromFirestore() {
+  //   if (this.functionToUnsubscribeFromFirestore instanceof Function) {
+  //     this.functionToUnsubscribeFromFirestore();
+  //   }
+  //   this.listeningToFirestore = false;
+  // }
 
-  saveListOfComponentsInFirestore() {
+  async saveListOfComponentsInFirestore() {
     if (!this.patchName) return;
+    //I STOP THE LISTENING, SAVE, AND START LISTENING AGAIN
+    // this.unsubscribeFromFirestore();
     let serializedOutputComponent = this.getOutputComponent().serialize();
-    saveInFireStore(
+    let listOfSerializedComponents = this.components
+      .filter((k) => k.id != "output")
+      .map((k) => k.id);
+
+    // console.log("# SAVING LIST OF COMPONENTS", listOfSerializedComponents);
+    //I'M SAVING THE SESSION ID, WHICH IS A RANDOM VALUE EACH TIME YOU OPEN THE APP
+    //AND THE USER ID THAT STAYS THE SAME, SAVED IN THE LOCALSTORAGE.
+    //THE IDEA IS THAT IF IT'S YOUR CHANGES, AND YOU DID THEM NOW, THIS FRONTEND
+    //SHOULD NOT UPDATE ANYTHING
+    //IF IT'S YOUR OWN CHANGES FROM A PREVIOUS SESSION, GO AHEAD AND UPDATE
+    await saveInFireStore(
       {
         bpm: this.bpm,
-        components: this.components
-          .filter((k) => k.id != "output")
-          .map((k) => k.id),
+        components: listOfSerializedComponents,
         outputX: serializedOutputComponent.x,
         outputY: serializedOutputComponent.y,
+        sessionID: this.sessionID,
+        userID: this.userID,
       },
       this.patchName
     );
+    // setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
   }
 }

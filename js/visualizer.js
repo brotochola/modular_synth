@@ -21,7 +21,7 @@ class Visualizer extends Component {
   }
 
   draw() {
-    
+    if(!this.node) return
     this.node.getByteTimeDomainData(this.dataArray);
     const canvasCtx=this.canvas.getContext("2d");
     canvasCtx.fillStyle = "#000000";

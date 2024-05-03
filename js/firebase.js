@@ -30,11 +30,13 @@ async function createInstanceOfComponentInFirestore(
   serializedComponent
 ) {
   // console.log("# creating instance of components", patchName, serializedComponent, serializedComponent.id)
-  collectionRef
+  let ret = await collectionRef
     .doc(patchName)
     .collection("components")
     .doc(serializedComponent.id)
     .set(serializedComponent);
+
+  return ret;
 }
 
 async function putBPMInFireStore(patchName, bpm) {

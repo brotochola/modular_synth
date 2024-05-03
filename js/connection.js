@@ -47,7 +47,7 @@ class Connection {
     );
     let toEl = (this.to.inputElements[this.audioParam]||{}).button;
     if(!toEl) {
-      console.trace("epa")
+      console.log("epa")
     }
     this.app.drawLine(fromEl, toEl, color);
   }
