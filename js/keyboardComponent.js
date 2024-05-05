@@ -15,8 +15,8 @@ class KeyboardComponent extends Component {
     }
   }
   putEvents() {
-    (this.bindedKeyUp = this.onKeyDown), bind(this);
-    (this.bindedKeyDown = this.onKeyDown), bind(this);
+    this.bindedKeyUp = this.onKeyUp.bind(this);
+    this.bindedKeyDown = this.onKeyDown.bind(this);
     window.addEventListener("keydown", this.bindedKeyUp, false);
     window.addEventListener("keyup", this.bindedKeyDown, false);
   }

@@ -56,7 +56,7 @@ class App {
     }
     this.userID = localStorage.getItem("user_id");
     this.sessionID = makeid(12);
-    this.container.style.setProperty("--userID",this.userID)
+    this.container.style.setProperty("--userID", this.userID);
   }
   addEventsToDropFile() {
     document.body.ondrop = (ev) => {
@@ -117,6 +117,7 @@ class App {
         this.patchName,
         (e) => {
           console.log("#!!! changes", e);
+          this.lastChangedFromFirestore = e;
           this.handleChangesInThisPatchFromFirestore(e);
         },
         this.sesstionID,
@@ -357,7 +358,7 @@ class App {
     this.components.push(new Oscillator(this));
     //   this.saveListOfComponentsInFirestore();
   }
-  addFrequencyAnalizer(){
+  addFrequencyAnalizer() {
     this.components.push(new FrequencyAnalizer(this));
   }
 
@@ -560,10 +561,19 @@ class App {
   waitUntilAllComopnentsAreReady(cb, counter) {
     if (!counter) counter = 1;
     else counter++;
-    let notReadyComopnents = this.components.filter((k) => !k.ready);
-    if (notReadyComopnents.length > 0) {
+    let notReadyComponents = this.components.filter((k) => !k.ready);
+    let isItStillLoadingComponents =
+      ((this.lastChangedFromFirestore || {}).components || []).length !=
+      this.components.length - 1;
+    if (notReadyComponents.length > 0 || isItStillLoadingComponents) {
       if (counter > 20) {
-        return console.warn("components didn't load :(");
+        return console.warn(
+          "components didn't load :(",
+          "notReadyComponents",
+          notReadyComponents.length,
+          "isItStillLoadingComponents:",
+          isItStillLoadingComponents
+        );
       }
       setTimeout(() => this.waitUntilAllComopnentsAreReady(cb, counter), 250);
     } else {

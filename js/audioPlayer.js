@@ -22,8 +22,8 @@ class AudioPlayer extends Component {
     };
   }
   handleTriggerFromWorklet(e) {
-    // console.log("#handleTriggerFromWorklet", e);
-    if (e.current != 0) this.triggerAudio();
+    console.log("#handleTriggerFromWorklet", e);
+    if (e.current != 0) this.triggerAudio(e.current);
     else {
       try {
         this.node.stop();
@@ -31,11 +31,11 @@ class AudioPlayer extends Component {
     }
   }
 
-  triggerAudio() {
+  triggerAudio(offset) {
     if (this.node && this.audioBuffer) {
       this.handleOnChange();
       this.node.loop = false;
-      this.node.start();
+      this.node.start(0, offset);
     }
   }
 

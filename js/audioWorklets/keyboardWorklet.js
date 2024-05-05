@@ -8,7 +8,7 @@ class KeyboardWorklet extends AudioWorkletProcessor {
       } else if (e.data.type == "up") {
         this.status[e.data.which] = false;
       }
-      // this.port.postMessage({ status: this.status });
+      this.port.postMessage({ status: this.status });
     };
   }
 
