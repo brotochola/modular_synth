@@ -1,4 +1,19 @@
 class App {
+  static signalignServers = [
+    "stun.l.google.com",
+    "stun1.l.google.com:19302",
+    "stun2.l.google.com:19302",
+    "stun3.l.google.com:19302",
+    "stun4.l.google.com:19302",
+    "stun.rixtelecom.se",
+    "stun.schlund.de",
+    "stun.stunprotocol.org:3478",
+    "stun.voiparound.com",
+    "stun.voipbuster.com",
+    "stun.voipstunt.com",
+    "stun.voxgratia.org",
+    "stun.ekiga.net",
+  ];
   constructor(elem) {
     this.patchName = getParameterByName("patch");
 
@@ -37,10 +52,11 @@ class App {
   }
   generateUserAndSessionIDs() {
     if (!localStorage.getItem("user_id")) {
-      localStorage["user_id"] = makeid(16);
+      localStorage["user_id"] = "user_" + makeid(5);
     }
     this.userID = localStorage.getItem("user_id");
     this.sessionID = makeid(12);
+    this.container.style.setProperty("--userID",this.userID)
   }
   addEventsToDropFile() {
     document.body.ondrop = (ev) => {
@@ -100,6 +116,7 @@ class App {
       this.functionToUnsubscribeFromFirestore = listenToChangesInWholePatch(
         this.patchName,
         (e) => {
+          console.log("#!!! changes", e);
           this.handleChangesInThisPatchFromFirestore(e);
         },
         this.sesstionID,
@@ -143,7 +160,7 @@ class App {
   handleChangesInThisPatchFromFirestore(e) {
     if (!e) return;
     if (e.sessionID == this.sessionID && e.userID == this.userID) {
-      return // console.warn("THESEA RE YOUR OWN CHANGES");
+      return; // console.warn("THESEA RE YOUR OWN CHANGES");
     }
     if (e.components) {
       //THIS IS ONLY A LIST OF IDS IN THE DOC
@@ -176,7 +193,7 @@ class App {
 
       for (let compo of componentsWeHaveToRemove) {
         if (compo instanceof Output) continue;
-        compo.remove();
+        compo.remove(true);
       }
     }
 
@@ -308,7 +325,6 @@ class App {
   }
 
   updateAllLines() {
-    
     this.ctx.clearRect(0, 0, 9999, 9999);
     setTimeout(() => {
       for (let c of this.getAllConnections()) {
@@ -340,6 +356,9 @@ class App {
   addOscillator() {
     this.components.push(new Oscillator(this));
     //   this.saveListOfComponentsInFirestore();
+  }
+  addFrequencyAnalizer(){
+    this.components.push(new FrequencyAnalizer(this));
   }
 
   addRTCReceiver() {
@@ -570,8 +589,7 @@ class App {
     if (!comp) {
       return console.log("trying to add a null serialized component??");
     }
-    if (comp.type == "Output" || comp.id == "output")
-      return //console.warn("YOU CANT CREATE OUTPUT COMPONENTS");
+    if (comp.type == "Output" || comp.id == "output") return; //console.warn("YOU CANT CREATE OUTPUT COMPONENTS");
     let c = eval(comp.constructor);
     this.components.push(new c(this, comp));
   }

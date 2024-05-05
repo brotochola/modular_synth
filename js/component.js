@@ -3,6 +3,9 @@ class Component {
     this.app = app;
     this.type = this.constructor.name;
     this.serializedData = serializedData;
+    this.createdBy = (this.serializedData || {}).createdBy
+      ? (this.serializedData || {}).createdBy
+      : this.app.userID;
     this.audioParams = [];
     this.retryCounter = 0;
     this.dragStartedAt = [0, 0];
@@ -10,7 +13,7 @@ class Component {
     this.running = false;
     this.id = serializedData?.id
       ? serializedData.id
-      : this.type.toLowerCase().substring(0, 6) + "_" + makeid(8);
+      : this.type.toLowerCase().substring(0, 7) + "_" + makeid(8);
     if (this.type.toLowerCase() == "output") this.id = "output";
 
     this.createContainer();
@@ -115,7 +118,7 @@ class Component {
         }
         if (!found) {
           //ADD IT
-  
+
           // debugger
           setTimeout(() => this.app.addSerializedConnection(incomingConn), 50);
           doWeHaveToUpdateLines = true;
@@ -135,7 +138,7 @@ class Component {
       }
       if (!found) {
         //THE CONNECTIONS DOES NOT EXIST IN FIRESTORE, SO DELETE IT
-        
+
         currentConn.remove();
         doWeHaveToUpdateLines = true;
       }
@@ -253,7 +256,7 @@ class Component {
   }
 
   createInputButtons() {
-    if (this.type == "Mouse") return;
+    if (this.type == "Mouse" || this.type == "WebRTCReceiver") return;
     // console.log("CREATING BUTTONS FOR", this.type, this.id);
 
     //AUDIOPARAMS FROM THE NODE
@@ -490,6 +493,10 @@ class Component {
       "--posY",
       (Math.random() * 100).toFixed(2) + "%"
     );
+
+    if (this.createdBy == this.app.userID) {
+      this.container.classList.add("mine");
+    }
   }
   toggleActive() {
     if (this.active) {
@@ -517,7 +524,8 @@ class Component {
       this.type.toLowerCase() == "output" ||
       this.type.toLowerCase() == "imagemaker" ||
       this.type.toLowerCase() == "numberdisplaycomponent" ||
-      this.type.toLowerCase() == "visualizer"
+      this.type.toLowerCase() == "visualizer" ||
+      this.type.toLowerCase() == "frequencyanalizer"
     ) {
       return;
     }
@@ -579,6 +587,8 @@ class Component {
     }
     obj.x = this.container.style.left;
     obj.y = this.container.style.top;
+
+    obj.createdBy = this.createdBy;
 
     obj.connections = this.connections.map((k) => k.serialize());
 

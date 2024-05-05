@@ -1,4 +1,4 @@
-class Visualizer extends Component {
+class FrequencyAnalizer extends Component {
   constructor(app,serializedData) {
     super(app,serializedData);
     this.node = app.actx.createAnalyser();
@@ -7,6 +7,7 @@ class Visualizer extends Component {
 
     this.bufferLength = this.node.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);
+    
     // this.createInputButtons();
     this.createCanvas();
     this.draw()
@@ -22,31 +23,19 @@ class Visualizer extends Component {
 
   draw() {
     if(!this.node) return
-    this.node.getByteTimeDomainData(this.dataArray);
+    this.node.getByteFrequencyData(this.dataArray);
     const canvasCtx=this.canvas.getContext("2d");
     canvasCtx.fillStyle = "#000000";
     canvasCtx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-    canvasCtx.lineWidth = 2;
-    canvasCtx.strokeStyle = "#ffffff";
-    canvasCtx.beginPath();
-
-    const sliceWidth = this.canvas.width / this.bufferLength;
-    let x = 0;
-
-    for (let i = 0; i < this.bufferLength; i++) {
-      const v = this.dataArray[i] / 128.0;
-      const y = v * (this.canvas.height / 2);
-
-      if (i === 0) {
-        canvasCtx.moveTo(x, this.canvas.height-y);
-      } else {
-        canvasCtx.lineTo(x, this.canvas.height-y);
-      }
-
-      x += sliceWidth;
-    }
-    canvasCtx.lineTo(this.canvas.width, this.canvas.height / 2);
-    canvasCtx.stroke();
+   // Draw visualization
+   const barWidth = this.canvas.width / this.bufferLength;
+   let x = 0;
+   for (let i = 0; i < this.bufferLength; i++) {
+       const barHeight = this.dataArray[i] / 4;
+       canvasCtx.fillStyle = 'rgb(' + (barHeight*4 + 100) + ',50,50)';
+       canvasCtx.fillRect(x, this.canvas.height - barHeight, barWidth, barHeight);
+       x += barWidth;
+   }
 
     // canvasCtx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 

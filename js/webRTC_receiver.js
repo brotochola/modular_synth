@@ -7,31 +7,55 @@ class WebRTCReceiver extends Component {
     this.container.appendChild(this.p);
 
     this.p.innerText = "Loading...";
-    this.peer = new Peer(makeid(6));
+    this.peerID = this.id + "_" + this.app.userID;
+    this.peer = new Peer(this.peerID, {});
+    //TEMPORARLY I SET THIS NODE, SO THIS COMPO HAS A NODE WITH NO STREAM
+    this.node = this.app.actx.createBufferSource();
+    this.audioElement = new Audio();
+    this.quickSave(true);
+
     this.peer.on("open", (id) => {
-      console.log("my peerjs id is", id);
-      this.peerID = id;
-      this.p.innerHTML =
-        "Your ID is <input readonly='readonly' type='text' value='" +
-        id +
-        "'><br>Someone gotta call you and the output will work";
+      this.onConnectionOpen(id);
     });
 
     this.peer.on("call", (call) => {
-      console.log("#incoming call", call);
       this.call = call;
       call.answer();
       call.on("stream", (remoteStream) => {
-        console.log("#on stream", remoteStream);
         this.remoteStream = remoteStream;
         this.node = this.app.actx.createMediaStreamSource(this.remoteStream);
-        this.audioElement = new Audio();
         this.audioElement.srcObject = this.remoteStream;
-        this.p.innerHTML = "ID: " + this.peerID + ".<br>Connected!";
-
+        this.handlePeerIsConnected();
+        this.quickSave();
         super.createView();
       });
+
+      call.on("close", () => {
+        this.handleConnectionClosed();
+      });
     });
+  }
+
+  handlePeerIsConnected() {
+    this.connected = true;
+    this.p.innerHTML = "ID: " + this.peerID + ".<br>Connected!";
+  }
+  onConnectionOpen() {
+    this.p.style.display = "block";
+    this.p.innerHTML =
+      "this component's ID is <input readonly='readonly' type='text' value='" +
+      this.peerID +
+      "'><br>Someone gotta call you and the output will work";
+    this.audioElement.srcObject = null;
+    this.remoteStream = null;
+    try {
+      this.node.stop();
+    } catch (e) {}
+  }
+
+  handleConnectionClosed() {
+    this.connected = false;
+    this.onConnectionOpen();
   }
   createView() {
     this.ready = true;
@@ -40,9 +64,13 @@ class WebRTCReceiver extends Component {
         this.updateFromSerialized(data);
       });
     }
+    super.createView()
   }
 
-  remove() {
+  remove(forceRemove) {
+    if (this.createdBy != this.app.userID && !forceRemove) {
+      return console.warn("this component only can be removed by its owner");
+    }
     if (this.call) this.call.close();
     this.peer.destroy();
 

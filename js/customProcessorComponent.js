@@ -10,7 +10,7 @@ class CustomProcessorComponent extends Component {
   }
   createInfo() {
     this.infoText = document.createElement("p");
-
+    this.infoText.onclick=e=>this.toggleActive()
     this.infoText.innerText =
       "y is the output, x1, x2, x3, x4 are the 4 inputs at each frame, but also you can use it like: inputChannel1[i], being the i between 0 and 127";
     this.container.appendChild(this.infoText);

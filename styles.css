@@ -63,7 +63,7 @@ app .mainContainer {
   /* transform: translateX(-50%); */
   width: 200px;
   display: flex;
-  gap: 3px;
+  gap: 2px;
   /* text-align: left; */
   z-index: 999;
   pointer-events: none;
@@ -75,6 +75,14 @@ app .mainContainer {
   pointer-events: all;
   touch-action: auto;
   text-align: left;
+}
+
+.buttons hr {
+  height: 4px;
+  line-height: 4px;
+  padding: 0px;
+  margin: 0px;
+  border: none;
 }
 
 component.text textarea {
@@ -115,6 +123,8 @@ component.mic icon:after {
 component.WebRTCSender icon:after {
   content: "📭";
 }
+
+
 component.WebRTCReceiver icon:after {
   content: "📨";
 }
@@ -498,6 +508,7 @@ component.WebRTCReceiver {
 }
 component.WebRTCReceiver {
   padding-top: 30px;
+  height: 123px;
 }
 
 component.WebRTCSender input {
@@ -505,6 +516,17 @@ component.WebRTCSender input {
   margin-left: 5px;
 }
 
-component.WebRTCReceiver input[type="text"]{
-  width: 70px;
+component.WebRTCReceiver input[type="text"] {
+  width: 100%;
+}
+
+component.WebRTCReceiver:not(.mine),
+component.WebRTCSender:not(.mine) {
+  background-image: none;
+  background: #eeb3c8;
+}
+component.WebRTCReceiver:not(.mine) *,
+component.WebRTCSender:not(.mine) * {
+  pointer-events: none;
+  touch-action: none;
 }
