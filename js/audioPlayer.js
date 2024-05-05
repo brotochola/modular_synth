@@ -8,8 +8,11 @@ class AudioPlayer extends Component {
     this.createPlayButton();
     //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
     this.customAudioTriggers = ["trigger"];
+    this.customAudioParams = ["offset"];
     this.valuesToSave = ["base64", "filename"];
+    this.offset = 0;
   }
+
   createPlayButton() {
     this.playButton = document.createElement("button");
     this.playButton.style.display = "none";
@@ -21,9 +24,24 @@ class AudioPlayer extends Component {
       this.playPause();
     };
   }
+
+  handleCustomAudioParamChanged(e) {
+    // console.log(e)
+    //CUSTOM AUDIO PARAMS CAN BE WHATEVER VALUE
+
+    if (e.current) this.offset = e.current;
+    if (this.offset > this.audioBuffer.duration) {
+      this.offset = this.audioBuffer.duration;
+    }
+    if (this.offset < 0) this.offset = 0;
+
+    //SET THE OFFSET AND TRIGGER THE AUDIO
+    this.handleTriggerFromWorklet(e);
+  }
+
   handleTriggerFromWorklet(e) {
-    console.log("#handleTriggerFromWorklet", e);
-    if (e.current != 0) this.triggerAudio(e.current);
+    //TRIGGER ONLY CHECKS 1 OR 0
+    if (e.current != 0) this.triggerAudio(0);
     else {
       try {
         this.node.stop();
@@ -31,11 +49,11 @@ class AudioPlayer extends Component {
     }
   }
 
-  triggerAudio(offset) {
+  triggerAudio() {
     if (this.node && this.audioBuffer) {
       this.handleOnChange();
       this.node.loop = false;
-      this.node.start(0, offset);
+      this.node.start(0, this.offset);
     }
   }
 

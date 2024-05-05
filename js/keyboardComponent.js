@@ -17,8 +17,8 @@ class KeyboardComponent extends Component {
   putEvents() {
     this.bindedKeyUp = this.onKeyUp.bind(this);
     this.bindedKeyDown = this.onKeyDown.bind(this);
-    window.addEventListener("keydown", this.bindedKeyUp, false);
-    window.addEventListener("keyup", this.bindedKeyDown, false);
+    window.addEventListener("keydown", this.bindedKeyDown, false);
+    window.addEventListener("keyup", this.bindedKeyUp, false);
   }
   onKeyDown(e) {
     for (let i = 0; i < this.letters.length; i++) {
@@ -56,8 +56,8 @@ class KeyboardComponent extends Component {
       });
   }
   remove() {
-    window.removeEventListener("keydown", this.bindedKeyUp, false);
-    window.removeEventListener("keyup", this.bindedKeyDown, false);
+    window.removeEventListener("keydown", this.bindedKeyDown, false);
+    window.removeEventListener("keyup", this.bindedKeyUp, false);
     super.remove();
   }
 }

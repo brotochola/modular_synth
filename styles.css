@@ -422,7 +422,10 @@ component button.playButton {
   display: block;
   position: relative;
   left: 5px;
+  height: 25px;
   top: 5px;
+  overflow: hidden;
+  width: calc(100% - 15px);
 }
 
 component .inputsDiv button.input {

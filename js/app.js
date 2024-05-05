@@ -358,6 +358,11 @@ class App {
     this.components.push(new Oscillator(this));
     //   this.saveListOfComponentsInFirestore();
   }
+  addReverb() {
+    this.components.push(new Reverb(this));
+   
+  }
+  
   addFrequencyAnalizer() {
     this.components.push(new FrequencyAnalizer(this));
   }

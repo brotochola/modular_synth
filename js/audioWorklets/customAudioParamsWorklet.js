@@ -6,7 +6,7 @@ class customAudioParamsWorklet extends AudioWorkletProcessor {
   }
 
   process(inputs) {
-    // this.port.postMessage({ hola: 11 });
+    
     try {
       for (let p = 0; p < inputs.length; p++) {
         let input = inputs[p];
@@ -16,15 +16,15 @@ class customAudioParamsWorklet extends AudioWorkletProcessor {
           let current = inputChannel[127] || 0;
           let lastVal = this.prevValues[channel + "_" + p] || 0;
 
-          // if (current !=lastVal) {
-          this.port.postMessage({
-            channelTriggered: p,
-            lastVal,
-            current,
-            prevValues: this.prevValues,
-            // inputs,
-          });
-          // }
+          if (current != lastVal) {
+            this.port.postMessage({
+              channelTriggered: p,
+              lastVal,
+              current,
+              prevValues: this.prevValues,
+              // inputs,
+            });
+          }
           this.prevValues[channel + "_" + p] = current;
         }
       }
