@@ -3,7 +3,7 @@ class JoystickWorklet extends AudioWorkletProcessor {
     super();
     this.dataFromJoystick = {};
     this.port.onmessage = (e) => {
-      console.log(e.data);
+      // console.log(e.data);
       this.dataFromJoystick = e.data;
       //   this.port.postMessage("UPDATED data from joystick " + this.dataFromJoystick);
     };

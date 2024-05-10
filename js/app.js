@@ -362,6 +362,12 @@ class App {
     this.components.push(new Reverb(this));
    
   }
+  addWaveShaper() {
+    this.components.push(new WaveShaper(this));
+   
+  }
+  
+
   
   addFrequencyAnalizer() {
     this.components.push(new FrequencyAnalizer(this));

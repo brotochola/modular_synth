@@ -12,9 +12,10 @@ class CounterComponent extends Component {
     this.container.appendChild(this.display);
   }
   handleTriggerFromWorklet(e) {
-    if (e.channelTriggered == 0) {
+    // console.log(e);
+    if (e.channelTriggered == 0 && e.current == 1 && e.lastVal == 0) {
       this.val++;
-    } else {
+    } else if (e.channelTriggered == 1 && e.current == 1 && e.lastVal == 0) {
       this.val--;
     }
     this.updateValueInNode();
