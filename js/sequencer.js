@@ -7,6 +7,7 @@ class Sequencer extends Component {
     this.numberOfSemitones = 13;
     this.numberOfSteps = 16;
     if (!this.sequence) this.initSequence();
+    this.outputLabels = ["relative note", "trigger"];
     this.createNode();
     this.createbuttons();
   }
@@ -57,8 +58,8 @@ class Sequencer extends Component {
   }
 
   updateUI() {
-    if(!Array.isArray(this.sequence)){
-      this.sequence=objectToArray(this.sequence)
+    if (!Array.isArray(this.sequence)) {
+      this.sequence = objectToArray(this.sequence);
     }
     this.container.querySelectorAll("button").forEach((button) => {
       button.classList.remove("active");
@@ -129,7 +130,10 @@ class Sequencer extends Component {
 
   serialize() {
     let obj = super.serialize();
-    if(this.sequence) obj.sequence = arrayToObject(this.sequence.map(k=>k.map(b=>b?1:0)));
+    if (this.sequence)
+      obj.sequence = arrayToObject(
+        this.sequence.map((k) => k.map((b) => (b ? 1 : 0)))
+      );
     return obj;
   }
 }
