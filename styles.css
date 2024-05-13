@@ -12,6 +12,18 @@ app {
   border: none;
 }
 
+component select {
+  border: 1px solid green;
+  border-radius: 5px;
+  background: black;
+  max-width: calc(100% - 7px);
+  outline: none;
+  color: lightgreen;
+}
+component {
+  color: lightgreen;
+}
+
 app canvas.linesCanvas {
   z-index: 999;
   position: absolute;
@@ -40,6 +52,10 @@ app {
   left: 0px;
   top: 0px;
   width: 100vw;
+  background-image: url(carpet.jpg);
+  background-position: calc(0.25 * var(--mainContainerX))
+    calc(0.25 * var(--mainContainerY));
+  background-size: 150% auto;
   height: 100vh;
   border-top: 1px solid gray;
 }
@@ -51,7 +67,7 @@ app .mainContainer {
   z-index: 1;
   top: -500px;
   left: -500px;
-  background-image: url(carpet.jpg);
+  /* background-image: url(carpet.jpg); */
   background-size: 25%;
 }
 
@@ -69,12 +85,19 @@ app .mainContainer {
   pointer-events: none;
   touch-action: none;
   flex-direction: column;
+  transform: translateX(-120%);
+  transition: transform 250ms;
+}
+.buttons.visible {
+  transform: translateX(0%);
 }
 
 .buttons button {
   pointer-events: all;
   touch-action: auto;
   text-align: left;
+  width: 160px;
+  background: #000900;
 }
 
 .buttons hr {
@@ -91,23 +114,25 @@ component.text textarea {
 }
 
 component {
-  background-image: url(leather.jpg);
+  /* background-image: url(leather.jpg); */
   background-size: 225%;
   background-position-x: var(--posX);
   background-position-y: var(--posY);
-  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.7);
+  box-shadow: 5px 5px 20px rgba(0, 255, 0, 0.1);
   /* pointer-events: none; */
   position: absolute;
   background-color: white;
   border-radius: 5px;
-  border: 1px solid gray;
+  border: 1px solid green;
   width: 180px;
   height: 100px;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
   overflow: hidden;
 }
 
 component.active {
-  outline: 3px solid yellow;
+  outline: 3px solid lightgreen;
 }
 
 component icon {
@@ -115,6 +140,7 @@ component icon {
   left: 5px;
   top: 5px;
   width: 20px;
+  filter: sepia(100%) saturate(60%) brightness(80%) hue-rotate(68deg);
   height: 20px;
 }
 component.mic icon:after {
@@ -123,7 +149,9 @@ component.mic icon:after {
 component.WebRTCSender icon:after {
   content: "📭";
 }
-
+component.reverb icon:after {
+  content: "⛪";
+}
 
 component.WebRTCReceiver icon:after {
   content: "📨";
@@ -214,11 +242,19 @@ component.CustomProcessorComponent {
   height: 273px;
 }
 
-component.CustomProcessorComponent textarea {
-  height: 60px;
+textarea {
+  height: 76px;
   width: 100%;
   /* top:20px; */
+  background: rgba(0, 0, 0, 0.5);
   position: relative;
+  border-color: green;
+  color: lightgreen;
+  border-radius: 5px;
+  border-left-width: 0px;
+  outline: lightgreen;
+  border-right-width: 0px;
+  border-top-width: 1px;
 }
 
 textarea {
@@ -240,7 +276,7 @@ component.multiplexor .display {
 component p {
   padding: 5px;
   margin-top: 0px;
-  font-size: 12px;
+  font-size: 11px;
   margin-bottom: 5px;
 }
 
@@ -263,8 +299,15 @@ component.KeyboardComponent input.outputButton:after {
 }
 
 component.imagemaker {
-  width: 300px;
+  width: 320px;
   height: 200px;
+}
+
+component.imagemaker button.togglefullscreen {
+  width: max-content;
+  margin: 5px;
+  right: 0px;
+  position: absolute;
 }
 
 component.imagemaker canvas {
@@ -274,15 +317,6 @@ component.imagemaker canvas {
   border: 1px solid gray;
   pointer-events: none;
   touch-action: none;
-}
-
-component.imagemaker canvas.fullscreen {
-  position: fixed;
-  top: 0px;
-  left: 0px;
-  width: 100vw;
-  height: 100vh;
-  z-index: -1;
 }
 
 component.mouse select,
@@ -316,25 +350,6 @@ component.sequencer div.buttonsContainer {
   padding: 5px;
 }
 
-component.sequencer input.outputButton:nth-child(1):after {
-  content: "v out";
-  position: absolute;
-  width: 100px;
-  font-size: 11px;
-  left: -100px;
-  text-align: right;
-  line-height: 14px;
-}
-component.sequencer input.outputButton:nth-child(2):after {
-  content: "trig out";
-  position: absolute;
-  width: 100px;
-  font-size: 11px;
-  left: -100px;
-  text-align: right;
-  line-height: 14px;
-}
-
 component.ImagePlayerWorkletVersion input.outputButton:after {
   position: absolute;
   width: 100px;
@@ -362,11 +377,16 @@ component.ImagePlayerWorkletVersion input.outputButton:nth-child(4):after {
 component.sequencer .buttonsContainer .seqButton {
   width: 15px;
   height: 15px;
-  border: 1px solid #aaaaaa;
+  border: 1px solid green;
+  background: black;
+}
+component.sequencer .buttonsContainer .seqButton:hover {
+  background: #003300;
+  border: 1px solid lightgreen;
 }
 
 component.sequencer .buttonsContainer .seqButton.active {
-  background: red;
+  background: green;
 }
 
 component input[type="file"] {
@@ -375,13 +395,36 @@ component input[type="file"] {
   left: 5px;
   z-index: 99;
   display: block;
-  width: 136px;
+
+  width: 142px;
+  overflow: visible;
+  height: 35px;
+  border: none;
+  outline: none;
+}
+
+component input[type="file"]:after {
+  content: " choose file";
+  padding: 4px;
+  border-radius: 5px;
+  width: 132px;
+  line-height: 18px;
+  box-sizing: content-box;
+  height: 20px;
+  color: lightgreen;
+  background: black;
+  border: 1px solid green;
+  position: absolute;
+  top: 0px;
+  left: 0px;
+}
+component input[type="file"] {
 }
 
 component .inputsDiv {
   position: absolute;
   overflow: hidden;
-  width: 80%;
+  width: calc(100% - 4px);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -413,9 +456,19 @@ component .outputButton {
   overflow: hidden;
   right: 5px;
   bottom: 5px;
-  width: 15px;
-  height: 15px;
+  box-shadow: inset 0px 0px 5px 10px black;
+  width: 10px;
+  height: 10px;
+
   cursor: pointer;
+  border-radius: 5px;
+  /* padding: 6px; */
+  outline: 1px solid green;
+}
+
+component .outputButton:hover {
+  box-shadow: inset 0px 0px 5px 10px #003300;
+  outline: 1px solid lightgreen;
 }
 
 component button.playButton {
@@ -424,36 +477,53 @@ component button.playButton {
   left: 5px;
   height: 25px;
   top: 5px;
+  text-overflow: ellipsis;
   overflow: hidden;
   width: calc(100% - 15px);
+  white-space: nowrap;
 }
 
-component .inputsDiv button.input {
-  width: 70px;
+component .inputsDiv button.input,
+button {
+  width: 90px;
   height: 20px;
   overflow: hidden;
   cursor: pointer;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid green;
+  color: lightgreen;
+  text-align: left;
+  border-radius: 5px;
+  font-size: 11px;
+}
+component .inputsDiv button.input:hover {
+  background: #000f00;
+  border: 1px solid lightgreen;
 }
 
 component .inputsDiv audioparamrow input[type="number"] {
-  width: calc(100% - 50px);
-
+  width: calc(100% - 100px);
   overflow: hidden;
-
+  background: black;
   border-radius: 5px;
+  border: 1px solid green;
+  color: white;
 }
-
+component.Compressor {
+  height: 147px;
+}
 component.filter {
   height: 170px;
 }
 
 component.AudioPlayer {
-  height: 150px;
+  height: 166px;
   width: 250px;
 }
 
 audioparamrow {
   display: flex;
+  gap: 3px;
   flex-direction: row;
 }
 
@@ -472,6 +542,7 @@ component.bpmoutputcomponent .display {
   justify-content: flex-end;
   margin-right: 15px;
   align-items: center;
+  color: lightgreen;
   margin-top: 4px;
 }
 component.bpmoutputcomponent .display {
@@ -532,4 +603,40 @@ component.WebRTCReceiver:not(.mine) *,
 component.WebRTCSender:not(.mine) * {
   pointer-events: none;
   touch-action: none;
+}
+
+component.sequencer input.outputButton:nth-child(1):after {
+  content: "v out";
+  position: absolute;
+  width: 100px;
+  font-size: 11px;
+  left: -100px;
+  text-align: right;
+  line-height: 14px;
+  color: lightgreen;
+}
+component.sequencer input.outputButton:nth-child(2):after {
+  content: "trig out";
+  position: absolute;
+  width: 100px;
+  font-size: 11px;
+  left: -100px;
+  color: lightgreen;
+  border-radius: 0px !important;
+  border: none;
+  text-align: right;
+  line-height: 15px;
+}
+
+*:after {
+  color: lightgreen;
+}
+
+app > .mainContainer > canvas.imgMakerCanvas {
+  width: 100vw;
+  height: 100vw;
+  left: 0px;
+  position: fixed;
+  z-index: -1;
+  top:0px;
 }

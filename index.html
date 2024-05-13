@@ -11,9 +11,14 @@
     <script src="js/external/midiplayer.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/connection.js"></script>
+  
+
     <script src="js/component.js"></script>
     <script src="js/reverb.js"></script>
+    <script src="js/compressor.js"></script>
 
+    <script src="js/midi.js"></script>
+    <script src="js/peakDetectorComponent.js"></script>
     <script src="js/memoryComponent.js"></script>
     <script src="js/mic.js"></script>
     <script src="js/frequencyAnalizer.js"></script>
@@ -69,21 +74,24 @@
         <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
         <button onclick="app.addOscillator()">∿ add osc</button>
         <button onclick="app.addWaveShaper()"> add wave shaper</button>
+        <button onclick="app.addMidiInput()"> add midi input</button>
+        <button onclick="app.addMidiPlayer()">🎹 add midi player</button>
+        
 
         <button onclick="app.addAudioPlayer()">🎶 add Audio Player</button>
         <button onclick="app.addMic()">🎤 add mic</button>
         <button onclick="app.addNoise()">👾 add noise</button>
-        <button onclick="app.addFilter()">⩥ add filter</button>
-        <button onclick="app.addEnvelope()">⛰️ add env</button>
-        <button onclick="app.addGainNode()">📢 add gain node</button>
-
-
-        <button onclick="app.addDelay()">⏰ add Delay</button>
-
-        <button onclick="app.addReverb()"> add reverb</button>
-        <button onclick="app.addDistortion()">🤘 add distortion</button>
-        <button onclick="app.addSequencer()">📈 add sequencer</button>
         <hr>
+        <button onclick="app.addFilter()">⩥ add filter</button>
+        <button onclick="app.addCustomProcessor()">❓ add CustomProcessor</button>
+        <button onclick="app.addGainNode()">📢 add gain node</button>
+        <button onclick="app.addCompressor()"> add compressor</button>
+        <button onclick="app.addDelay()">⏰ add Delay</button>
+        <button onclick="app.addReverb()">⛪ add reverb</button>
+        <button onclick="app.addDistortion()">🤘 add distortion</button>
+        <hr>
+        <button onclick="app.addSequencer()">📈 add sequencer</button>
+        <button onclick="app.addEnvelope()">⛰️ add env</button>
         <button onclick="app.addMouse()">🖱️ add mouse</button>
         <button onclick="app.addKeyboard()">⌨ add keyboard</button>
         <button onclick="app.addJoystick()">🎮 add Joystick</button>
@@ -95,8 +103,9 @@
         <button onclick="app.addNumberDisplay()">#️⃣ add number display</button>
         <button onclick="app.addFrequencyAnalizer()">🖥️ Freq Analizer</button>
         <button onclick="app.addVisualizer()">📺 add visualizer</button>
+        <button onclick="app.addPeakDetector()"> add peak detector</button>
         <hr>
-        <button onclick="app.addCustomProcessor()">❓ add CustomProcessor</button>
+
 
         <button onclick="app.addImageMaker()">📷 add Image Maker</button>
         <button onclick="app.addImagePlayer()">🖼️ add imagePlayer</button>
@@ -108,7 +117,7 @@
         <button onclick="app.addMultiplexor()">🔌 add multiplexor</button>
         <hr>
         <button onclick="app.addText()">📄 add text</button>
-        <button onclick="app.addMidiPlayer()">🎹 add midi player</button>
+
 
         <button onclick="app.addRTCSender()">📭 add RTC sender</button>
         <button onclick="app.addRTCReceiver()">📨 add RTC receiver</button>

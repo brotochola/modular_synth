@@ -47,6 +47,8 @@ class App {
 
     this.wheelZoom();
 
+    this.buttonsContainer = document.querySelector(".buttons");
+
     // this.checkIfTheresAPatchToOpenInTheURL();
     setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
   }
@@ -309,10 +311,19 @@ class App {
       this.dragStartedAt[0] = e.layerX;
       this.dragStartedAt[1] = e.layerY;
     };
+    this.container.onmousemove = (e) => {
+      if (e.x < 160) {
+        this.buttonsContainer.classList.add("visible");
+      } else {
+        this.buttonsContainer.classList.remove("visible");
+      }
+    };
     let box = this.container.getBoundingClientRect();
     this.putCSSVariablesInMainContainer(box.x, box.y);
   }
   putCSSVariablesInMainContainer(x, y) {
+    document.body.style.setProperty("--mainContainerX", x + "px");
+    document.body.style.setProperty("--mainContainerY", y + "px");
     this.container.style.setProperty("--mainContainerX", x + "px");
     this.container.style.setProperty("--mainContainerY", y + "px");
   }
@@ -358,17 +369,28 @@ class App {
     this.components.push(new Oscillator(this));
     //   this.saveListOfComponentsInFirestore();
   }
+  addPeakDetector() {
+    this.components.push(new PeakDetectorComponent(this));
+    
+  }
+
+  addCompressor() {
+    this.components.push(new Compressor(this));
+    
+  }
+
+  addMidiInput() {
+    this.components.push(new Midi(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
+
   addReverb() {
     this.components.push(new Reverb(this));
-   
   }
   addWaveShaper() {
     this.components.push(new WaveShaper(this));
-   
   }
-  
 
-  
   addFrequencyAnalizer() {
     this.components.push(new FrequencyAnalizer(this));
   }
@@ -606,7 +628,7 @@ class App {
     }
   }
   addSerializedComponent(comp) {
-    // console.log("## adding serialized component", comp.type, comp.id);
+    console.log("## adding serialized component", comp, comp);
     if (!comp) {
       return console.log("trying to add a null serialized component??");
     }

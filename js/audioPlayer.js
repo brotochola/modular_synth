@@ -41,12 +41,13 @@ class AudioPlayer extends Component {
 
   handleTriggerFromWorklet(e) {
     //TRIGGER ONLY CHECKS 1 OR 0
-    if (e.current != 0) this.triggerAudio(0);
-    else {
-      try {
-        this.node.stop();
-      } catch (e) {}
-    }
+    // console.log(e)
+    if (e.current != 0) this.triggerAudio();
+    // else {
+    //   try {
+    //     this.node.stop();
+    //   } catch (e) {}
+    // }
   }
 
   triggerAudio() {

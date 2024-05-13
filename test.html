@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Image Transition</title>
+</head>
+<body>
+
+<canvas id="myCanvas" width="400" height="300"></canvas>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const canvas = document.getElementById("myCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const image1 = new Image();
+    const image2 = new Image();
+
+    // Set up the sources for both images
+    const imageUrl1 = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS1-CTFs-CmZMbHHLAsnc5iWKD9Ra3jCo4kpc7hIG69UPL_I4eFNwoFdUHxSZykoiOelFs&usqp=CAU";
+    const imageUrl2 = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT8C8vZSwTc2dHxjShZ3FMGN6ZaIlz1C_GB-r62zC4Ag7NQeQMrHYDQU4vF4t6MCgV5PAc&usqp=CAU";
+
+    // Load both images
+    image1.onload = function() {
+        image2.onload = function() {
+            fadeImages(2000); // Specify the duration of the fade in milliseconds
+        };
+        image2.src = imageUrl2;
+    };
+    image1.src = imageUrl1;
+
+    // Function to fade between images
+    function fadeImages(duration) {
+        let startTime = null;
+
+        // Function to update the animation
+        function animate(currentTime) {
+            if (!startTime) {
+                startTime = currentTime;
+            }
+            const elapsed = currentTime - startTime;
+            const opacity = Math.min(1, elapsed / duration);
+            console.log(opacity)
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw image1 with current opacity
+            ctx.globalAlpha = 1 - opacity;
+            ctx.drawImage(image1, 0, 0, canvas.width, canvas.height);
+            
+            // Draw image2 with complementary opacity
+            ctx.globalAlpha = opacity;
+            ctx.drawImage(image2, 0, 0, canvas.width, canvas.height);
+
+            // Continue animating until duration is reached
+            if (elapsed < duration) {
+                requestAnimationFrame(animate);
+            }
+        }
+
+        // Start the animation
+        requestAnimationFrame(animate);
+    }
+});
+</script>
+
+</body>
+</html>

@@ -22,8 +22,8 @@ class imageMakerAudioWorklet extends AudioWorkletProcessor {
         });
       })
     );
-    //bypass the audio
-    outputs = inputs;
+    // //bypass the audio
+    // outputs = inputs;
 
     // let inputCount = 0;
     // for (let input of inputs) {

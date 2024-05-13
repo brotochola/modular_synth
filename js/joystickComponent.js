@@ -36,12 +36,12 @@ class JoystickComponent extends Component {
         if (i >= this.buttons.length) {
           let idx = i - this.buttons.length;
           if (this.axes[idx] != this.prevAxes[idx])
-            this.outputElements[i].style.color = "red";
-          else this.outputElements[i].style.color = "black";
+            this.outputElements[i].classList.add("active");
+          else this.outputElements[i].classList.remove("active");
         } else {
           let idx = i;
-          if (this.buttons[idx]) this.outputElements[i].style.color = "red";
-          else this.outputElements[i].style.color = "black";
+          if (this.buttons[idx]) this.outputElements[i].classList.add("active");
+          else this.outputElements[i].classList.remove("active");
         }
       }
     }

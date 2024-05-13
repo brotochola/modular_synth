@@ -8,7 +8,7 @@ class Distortion extends Component {
   }
 
   handleCustomAudioParamChanged(e) {
-    console.log("#distortion input", e);
+    // console.log("#distortion input", e);
     if (e.current < 0) return;
     if (e.current) this.amount = e.current;
     this.node.curve = this.makeDistortionCurve();

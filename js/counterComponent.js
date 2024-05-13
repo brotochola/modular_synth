@@ -42,7 +42,7 @@ class CounterComponent extends Component {
           console.error(e);
         };
 
-        this.node.port.onmessage = (e) => console.log("#msg", e.data);
+        // this.node.port.onmessage = (e) => console.log("#msg", e.data);
       });
   }
 }

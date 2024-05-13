@@ -182,7 +182,7 @@ function unique(arr) {
 }
 
 function arrayToObject(arr) {
-  if(!Array.isArray(arr)) return arr
+  if (!Array.isArray(arr)) return arr;
   const obj = {};
   arr.forEach((element, index) => {
     obj[index] = element;
@@ -191,7 +191,7 @@ function arrayToObject(arr) {
 }
 
 function objectToArray(obj) {
-  if (typeof obj !== 'object' || obj === null) return obj;
+  if (typeof obj !== "object" || obj === null) return obj;
 
   const keys = Object.keys(obj);
   const maxValue = Math.max(...keys.map(Number));
@@ -204,23 +204,38 @@ function objectToArray(obj) {
   return arr;
 }
 
-
 function getParameterByName(name, url = window.location.href) {
-  name = name.replace(/[\[\]]/g, '\\$&');
-  var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-      results = regex.exec(url);
+  name = name.replace(/[\[\]]/g, "\\$&");
+  var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+    results = regex.exec(url);
   if (!results) return null;
-  if (!results[2]) return '';
-  return decodeURIComponent(results[2].replace(/\+/g, ' '));
+  if (!results[2]) return "";
+  return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
 function sortObjectKeysAlphabetically(obj) {
   const sortedKeys = Object.keys(obj).sort();
   const sortedObj = {};
 
-  sortedKeys.forEach(key => {
+  sortedKeys.forEach((key) => {
     sortedObj[key] = obj[key];
   });
 
   return sortedObj;
+}
+
+function linearToDecibel(linear) {
+  return linear != 0 ? 20 * Math.log10(linear) : -144;
+}
+
+function makeCopyOfImageData(imageData) {
+  return new ImageData(
+    new Uint8ClampedArray(imageData.data),
+    imageData.width,
+    imageData.height
+  );
+}
+
+function sigmoid(x) {
+  return 1 / (1 + Math.exp(-x));
 }
