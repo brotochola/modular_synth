@@ -21,6 +21,7 @@ class App {
     this.actx = new AudioContext();
     this.bpm = 100;
     this.createMainContainer(elem);
+    this.createMessageBox();
     this.createOutputComponent();
     this.createCanvasOnTop();
     this.addEventsToDropFile();
@@ -51,6 +52,25 @@ class App {
 
     // this.checkIfTheresAPatchToOpenInTheURL();
     setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
+  }
+  showMessage(text) {
+    this.messageBox.classList.add("visible");
+    this.messageBox.onclick = () => {
+      clearTimeout(this.messageBoxTimeoutVar);
+      this.messageBox.classList.remove("visible");
+    };
+    this.messageBox.innerHTML = text;
+    let delay = 3000 + text.length * 30;
+    clearTimeout(this.messageBoxTimeoutVar);
+    this.messageBoxTimeoutVar = setTimeout(
+      () => this.messageBox.classList.remove("visible"),
+      delay
+    );
+  }
+  createMessageBox() {
+    this.messageBox = document.createElement("div");
+    this.messageBox.classList.add("messageBox");
+    this.container.appendChild(this.messageBox);
   }
   generateUserAndSessionIDs() {
     if (!localStorage.getItem("user_id")) {
@@ -371,12 +391,10 @@ class App {
   }
   addPeakDetector() {
     this.components.push(new PeakDetectorComponent(this));
-    
   }
 
   addCompressor() {
     this.components.push(new Compressor(this));
-    
   }
 
   addMidiInput() {

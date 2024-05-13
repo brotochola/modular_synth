@@ -1,10 +1,11 @@
 class Filter extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
-
+    this.infoText =
+      "It lowers the amplitudes of certain parts of the input signal's spectrum, according to the cutoff frequency and resonance (or Q). It comes in different flavors: lowpass, bandpass, notch and highpass ";
     this.node = new BiquadFilterNode(this.app.actx);
 
-    this.addTypeSelect()
+    this.addTypeSelect();
   }
 
   addTypeSelect() {

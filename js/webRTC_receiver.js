@@ -58,6 +58,8 @@ class WebRTCReceiver extends Component {
     this.onConnectionOpen();
   }
   createView() {
+    this.createInfoButton()
+
     this.ready = true;
     if (this.app.patchName) {
       listenToChangesInComponent(this.app.patchName, this.id, (data) => {

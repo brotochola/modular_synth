@@ -1,8 +1,8 @@
 class Midi extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
-    // this.ready=true
-    // start talking to MIDI controller
+    this.infoText =
+      "If you have a midi device connected, this module outputs note on/off messages as frequency and velocity values, modulation wheel, and pitch bend.. for now";
     if (navigator.requestMIDIAccess) {
       navigator
         .requestMIDIAccess({
@@ -17,7 +17,7 @@ class Midi extends Component {
     }
     this.createDisplay();
     this.createNode();
-    this.outputLabels=["freq", "velocity", "mod wheel","pitch bend"]
+    this.outputLabels = ["freq", "velocity", "mod wheel", "pitch bend"];
   }
   createDisplay() {
     this.display = document.createElement("div");
@@ -53,23 +53,18 @@ class Midi extends Component {
       this.onPitchBend.bind(this)
     );
   }
-  onPad(note, velocity){
+  onPad(note, velocity) {
     // this.node.port.postMessage({type:"pad",note,velocity})
-
   }
-  onModWheel(velocity){
-    this.node.port.postMessage({type:"modWheel",velocity})
-
-
+  onModWheel(velocity) {
+    this.node.port.postMessage({ type: "modWheel", velocity });
   }
-  onPitchBend(velocity){
-    this.node.port.postMessage({type:"pitchBend",velocity})
-
+  onPitchBend(velocity) {
+    this.node.port.postMessage({ type: "pitchBend", velocity });
   }
   onNote(note, velocity) {
     console.log("onNote", note, velocity);
-    this.node.port.postMessage({type:"note",note,velocity})
-
+    this.node.port.postMessage({ type: "note", note, velocity });
   }
 
   // on failure

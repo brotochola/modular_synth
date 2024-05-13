@@ -10,6 +10,8 @@ class Oscillator extends Component {
     this.node.start(this.app.getNextBeat());
     // this.createInputButtons();
     this.addTypeSelect();
+    this.infoText="Simple oscillator. It generates either a sine, square, saw or triangle signal of the desired frequency. It can be automated/modulated by connecting some other module's output to its frequency input"
+
   }
 
   addTypeSelect() {

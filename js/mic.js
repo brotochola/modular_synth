@@ -1,7 +1,8 @@
 class Mic extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
-
+    this.infoText =
+      "Microphone module. It outputs the signal coming from the mic. I also wanna put here a select with every single line in / mic available in the device";
     navigator.getUserMedia =
       navigator.getUserMedia ||
       navigator.webkitGetUserMedia ||

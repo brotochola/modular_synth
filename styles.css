@@ -14,6 +14,10 @@ app {
 input {
   outline: none;
 }
+button,
+input[type="checkbox"] {
+  cursor: pointer;
+}
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -323,6 +327,10 @@ component.KeyboardComponent input.outputButton:after {
   width: min-content;
 }
 
+component input.outputButton.active:after {
+  color: orange !important;
+}
+
 component.imagemaker {
   width: 320px;
   height: 200px;
@@ -391,7 +399,7 @@ component.sequencer .buttonsContainer .seqButton {
   width: 15px;
   height: 15px;
   border: 1px solid green;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
 }
 component.sequencer .buttonsContainer .seqButton:hover {
   background: #003300;
@@ -618,8 +626,6 @@ component.WebRTCSender:not(.mine) * {
   touch-action: none;
 }
 
-
-
 *:after {
   color: lightgreen;
 }
@@ -631,4 +637,36 @@ app > .mainContainer > canvas.imgMakerCanvas {
   position: fixed;
   z-index: -1;
   top: 0px;
+}
+
+app .messageBox {
+  top: -50vh;
+  width: max-content;
+  padding: 10px;
+  color: lightgreen;
+  max-width: 450px;
+  height: max-content;
+  position: fixed;
+  right: 10px;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(5px);
+  border-radius: 5px;
+  border: 3px solid gray;
+  transition: all 0.35s ease-in-out;
+}
+
+app .messageBox.visible {
+  top: 10px;
+}
+
+component button.infoButton {
+  width: 16px;
+  position: absolute;
+  right: 5px;
+  font-size: 14px;
+  top: 5px;
+  /* aspect-ratio: 2; */
+  padding: 0px;
+  height: 18px;
+  padding-left: 3px;
 }

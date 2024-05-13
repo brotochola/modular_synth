@@ -5,6 +5,7 @@ class BPMOutputComponent extends Component {
     this.val = 0;
     this.createNode();
     this.createDisplay();
+
   }
   createDisplay() {
     this.display = document.createElement("div");

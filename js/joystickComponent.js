@@ -2,6 +2,8 @@ class JoystickComponent extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.createDisplay();
+    this.infoText =
+      "If you have a gamepad connected, it will show as many buttons and analog sticks as it comes with";
     window.addEventListener("gamepadconnected", (e) => {
       this.gamepad = navigator.getGamepads()[e.gamepad.index];
       //   console.log(
@@ -17,9 +19,9 @@ class JoystickComponent extends Component {
     this.display.classList.add("display");
     this.container.appendChild(this.display);
   }
-  putGamePadNameInDisplay(){
-    if(this.display.innerHTML!=this.gamepad.id){
-      this.display.innerHTML=this.gamepad.id
+  putGamePadNameInDisplay() {
+    if (this.display.innerHTML != this.gamepad.id) {
+      this.display.innerHTML = this.gamepad.id;
     }
   }
   runGameLoop() {
@@ -27,7 +29,7 @@ class JoystickComponent extends Component {
       (k) => k instanceof Gamepad
     )[0];
 
-    this.putGamePadNameInDisplay()
+    this.putGamePadNameInDisplay();
 
     if (!this.gamepad) return;
 
@@ -39,6 +41,15 @@ class JoystickComponent extends Component {
     } catch (e) {}
 
     if (
+      !Array.isArray(this.outputElements) ||
+      (this.outputElements || []).length == 0
+    ) {
+      this.outputElements = Array.from(
+        this.container.querySelectorAll("outputs .outputButton")
+      );
+    }
+
+    if (
       Array.isArray(this.outputElements) &&
       this.outputElements.length &&
       this.outputElements[0] instanceof HTMLElement
@@ -46,13 +57,19 @@ class JoystickComponent extends Component {
       for (let i = 0; i < this.buttons.length + this.axes.length; i++) {
         if (i >= this.buttons.length) {
           let idx = i - this.buttons.length;
-          if (this.axes[idx] != this.prevAxes[idx])
+          
+          if (this.axes[idx] != this.prevAxes[idx]) {
             this.outputElements[i].classList.add("active");
-          else this.outputElements[i].classList.remove("active");
+          } else {
+            this.outputElements[i].classList.remove("active");
+          }
         } else {
           let idx = i;
-          if (this.buttons[idx]) this.outputElements[i].classList.add("active");
-          else this.outputElements[i].classList.remove("active");
+          if (this.buttons[idx]) {
+            this.outputElements[i].classList.add("active");
+          } else {
+            this.outputElements[i].classList.remove("active");
+          }
         }
       }
     }

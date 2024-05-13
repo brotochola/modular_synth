@@ -2,6 +2,7 @@ class Output extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.node = null;
+    this.infoText="This is the main output module. Plug something here and hear it"
     this.createInput();
   }
 
@@ -18,6 +19,7 @@ class Output extends Component {
   createView() {
     //OVERWRITE THIS METHOD BC THIS COMPONENTS BEHAVES DIFFERENTLY
     makeChildrenStopPropagation(this.container);
+    this.createInfoButton()
     this.ready = true;
   }
 

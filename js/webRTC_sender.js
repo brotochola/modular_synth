@@ -20,6 +20,7 @@ class WebRTCSender extends Component {
     this.connected = false;
     this.button.onclick = () => this.handleButtonClick();
     this.sessionID = this.app.sessionID;
+    
   }
   handleButtonClick() {
     if (!this.input.value) return console.warn("no peer id");

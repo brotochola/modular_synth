@@ -11,6 +11,9 @@ class AudioPlayer extends Component {
     this.customAudioParams = ["offset"];
     this.valuesToSave = ["base64", "filename"];
     this.offset = 0;
+
+    this.infoText =
+      "Load an audio file and play it, either manually with the play button, or by triggering it with an input. Also you can choose when exactly the audio file will start playing (the offset), and the playback rate";
   }
 
   createPlayButton() {

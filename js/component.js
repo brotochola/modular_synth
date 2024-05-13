@@ -20,7 +20,7 @@ class Component {
     this.createIcon();
     this.createView();
     this.inputElements = {};
-    this.outputElements = {};
+    // this.outputElements = {};
     this.app.actx.resume();
     this.active = false;
   }
@@ -146,11 +146,11 @@ class Component {
     if (doWeHaveToUpdateLines || forceUpdateLines) this.app.updateAllLines();
   }
   putLabels() {
-    if(!(this.outputLabels||[]).length) return
+    if (!(this.outputLabels || []).length) return;
     let arr = Array.from(this.container.querySelectorAll(".outputButton"));
     for (let i = 0; i < this.outputLabels.length; i++) {
       let elem = arr[i];
-      
+
       elem.style.setProperty("--label", "'" + this.outputLabels[i] + "'");
     }
   }
@@ -166,6 +166,7 @@ class Component {
     }
     this.node.parent = this;
     this.ready = true;
+    this.createInfoButton();
     this.createOutputButton();
     this.createInputButtons();
     this.createWorkletForCustomTriggers();
@@ -174,7 +175,7 @@ class Component {
     if (this.serializedData) this.loadFromSerializedData();
     else this.quickSave(true);
 
-    this.putLabels()
+    this.putLabels();
 
     setTimeout(() => {
       if (!this.app) {
@@ -376,7 +377,16 @@ class Component {
       this.app.lastOutputClicked = null;
     }
   }
-
+  createInfoButton() {
+    if (!this.infoText) return;
+    this.infoButton = document.createElement("button");
+    this.infoButton.classList.add("infoButton");
+    this.infoButton.innerText = "?";
+    this.infoButton.onclick = () => {
+      this.app.showMessage(this.infoText);
+    };
+    this.container.appendChild(this.infoButton);
+  }
   createIcon() {
     this.icon = document.createElement("icon");
     this.icon.onclick = () => {
