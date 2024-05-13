@@ -248,51 +248,59 @@ function parseMidiMessage(message) {
     command: message.data[0] >> 4,
     channel: message.data[0] & 0xf,
     note: message.data[1],
-    velocity: message.data[2] / 127
-  }
+    velocity: message.data[2] / 127,
+  };
 }
 /**
  * Handle a MIDI message from a MIDI input.
  */
-function handleMidiMessage(message,onNote,onPad,onModWheel,onPitchBend) {
-
+function handleMidiMessage(
+  message,
+  onNote,
+  onPad,
+  onModWheel,
+  onPitchBend,
+  onControlChange
+) {
   // Parse the MIDIMessageEvent.
-  const {command, channel, note, velocity} = parseMidiMessage(message)
-
+  const { command, channel, note, velocity } = parseMidiMessage(message);
+  // console.log(parseMidiMessage(message));
   // Stop command.
   // Negative velocity is an upward release rather than a downward press.
   if (command === 8) {
-    if      (channel === 0) onNote(note, -velocity)
-    else if (channel === 9) onPad(note, -velocity)
+    if (channel === 0) onNote(note, -velocity);
+    else if (channel === 9) onPad(note, -velocity);
   }
 
   // Start command.
   else if (command === 9) {
-    if      (channel === 0) onNote(note, velocity)
-    else if (channel === 9) onPad(note, velocity)
+    if (channel === 0) onNote(note, velocity);
+    else if (channel === 9) onPad(note, velocity);
   }
 
   // Knob command.
   else if (command === 11) {
-    if (note === 1) onModWheel(velocity)
+    if (note === 1) onModWheel(velocity);
+    else {
+      onControlChange(note, velocity);
+    }
   }
 
   // Pitch bend command.
   else if (command === 14) {
-    onPitchBend(velocity)
+    onPitchBend(velocity);
   }
 }
-
 
 function midi2Freq(midiNote) {
   const concertPitch = 440;
 
-  if (typeof midiNote !== 'number') {
-    throw new TypeError("'mtof' expects its first argument to be a number.")
+  if (typeof midiNote !== "number") {
+    throw new TypeError("'mtof' expects its first argument to be a number.");
   }
 
-  if (typeof concertPitch !== 'number') {
-    throw new TypeError("'mtof' expects its second argument to be a number.")
+  if (typeof concertPitch !== "number") {
+    throw new TypeError("'mtof' expects its second argument to be a number.");
   }
 
   return Math.pow(2, (midiNote - 69) / 12) * concertPitch;

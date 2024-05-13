@@ -50,10 +50,16 @@ class Midi extends Component {
       this.onNote.bind(this),
       this.onPad.bind(this),
       this.onModWheel.bind(this),
-      this.onPitchBend.bind(this)
+      this.onPitchBend.bind(this),
+      this.onControlChange.bind(this)
     );
   }
+  onControlChange(note, velocity){
+    console.log("on control change", note, velocity)
+
+  }
   onPad(note, velocity) {
+    console.log("on pad", note, velocity)
     // this.node.port.postMessage({type:"pad",note,velocity})
   }
   onModWheel(velocity) {

@@ -1,4 +1,4 @@
-class MidiWorklet extends AudioWorkletProcessor {
+class MidiFilePlayerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
     this.port.onmessage = (e) => {
@@ -40,4 +40,4 @@ class MidiWorklet extends AudioWorkletProcessor {
   }
 }
 
-registerProcessor("midi-worklet", MidiWorklet);
+registerProcessor("midi-player-worklet", MidiFilePlayerWorklet);

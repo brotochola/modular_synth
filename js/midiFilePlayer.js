@@ -89,7 +89,7 @@ class MidiFilePlayer extends Component {
     this.app.actx.audioWorklet
       .addModule("js/audioWorklets/midiPlayerWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "midi-worklet", {
+        this.node = new AudioWorkletNode(this.app.actx, "midi-player-worklet", {
           numberOfInputs: 0,
           numberOfOutputs: 2,
         });

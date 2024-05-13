@@ -2,10 +2,12 @@ class PeakDetectorComponent extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.customAudioTriggers = ["reset"];
+    this.infoText =
+      "this module outputs the highest absolute value of the input, measured in voltage/amplitude. It can be resetted with the 'reset' trigger input ";
     this.createNode();
   }
 
-  handleTriggerFromWorklet(e) {    
+  handleTriggerFromWorklet(e) {
     this.node.port.postMessage("reset");
   }
 

@@ -4,7 +4,7 @@ class ImageMaker extends Component {
 
     this.width = 215;
     this.height = 121;
-
+this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Alpha. The canvas we have in this module is 217 by 123 pixels. Which totals 26691 pixels. Digital sound signals have 48000 values/samples per second (audio pixels if you will)"
     this.totalPixels = this.height * this.width;
     this.makeImageArrayEmpty();
 
