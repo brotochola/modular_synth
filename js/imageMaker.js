@@ -20,7 +20,7 @@ class ImageMaker extends Component {
     this.loop();
     this.counter = 0;
     this.numOfFramesToFade = 5;
-    debugger;
+    
   }
 
   createButtonToToggleFullscreen() {
