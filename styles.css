@@ -11,11 +11,24 @@ app {
   overflow: hidden;
   border: none;
 }
+input {
+  outline: none;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Firefox */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
 
 component select {
   border: 1px solid green;
   border-radius: 5px;
-  background: black;
+  background: rgba(0, 0, 0, 0.5);
   max-width: calc(100% - 7px);
   outline: none;
   color: lightgreen;
@@ -225,9 +238,12 @@ component.envelopegenerator icon:after {
   width: inherit;
   height: inherit;
 }
-
+component.Midi {
+  height: 125px;
+}
 component.NumberDisplayComponent {
   height: 32px;
+  width: 220px;
 }
 
 component.memorycomponent {
@@ -265,12 +281,18 @@ component.multiplexor {
   height: 280px;
 }
 
+component .display {
+  margin-top: 30px;
+  margin-left: 5px;
+}
+
 component.multiplexor .display {
   position: absolute;
   right: 6px;
   font-weight: bold;
   font-size: 24px;
   bottom: 22px;
+  margin: 0 !important;
 }
 
 component p {
@@ -293,9 +315,12 @@ component.KeyboardComponent outputs {
 }
 
 component.KeyboardComponent input.outputButton:after {
-  content: var(--letter);
+  content: var(--label);
   position: absolute;
   top: -12px;
+  left: unset !important;
+  right: unset !important;
+  width: min-content;
 }
 
 component.imagemaker {
@@ -350,7 +375,8 @@ component.sequencer div.buttonsContainer {
   padding: 5px;
 }
 
-component.ImagePlayerWorkletVersion input.outputButton:after {
+component input.outputButton:after {
+  content: var(--label);
   position: absolute;
   width: 100px;
   font-size: 11px;
@@ -359,19 +385,6 @@ component.ImagePlayerWorkletVersion input.outputButton:after {
   line-height: 14px;
   pointer-events: none;
   touch-action: none;
-}
-
-component.ImagePlayerWorkletVersion input.outputButton:nth-child(1):after {
-  content: "R";
-}
-component.ImagePlayerWorkletVersion input.outputButton:nth-child(2):after {
-  content: "G";
-}
-component.ImagePlayerWorkletVersion input.outputButton:nth-child(3):after {
-  content: "B";
-}
-component.ImagePlayerWorkletVersion input.outputButton:nth-child(4):after {
-  content: "A";
 }
 
 component.sequencer .buttonsContainer .seqButton {
@@ -501,10 +514,11 @@ component .inputsDiv button.input:hover {
   border: 1px solid lightgreen;
 }
 
-component .inputsDiv audioparamrow input[type="number"] {
+component .inputsDiv audioparamrow input[type="number"],
+component input[type="text"] {
   width: calc(100% - 100px);
   overflow: hidden;
-  background: black;
+  background: rgba(0, 0, 0, 0.5);
   border-radius: 5px;
   border: 1px solid green;
   color: white;
@@ -566,19 +580,19 @@ component.memorycomponent .display {
   bottom: 2px;
 }
 
-component.joystickcomponent input.outputButton:after {
+/* component.joystickcomponent input.outputButton:after {
   content: var(--letter);
   left: -19px;
   position: absolute;
   text-align: right;
   width: 20px;
-}
+} */
 
 component.WebRTCSender,
 component.WebRTCReceiver {
   padding-left: 5px;
   padding-top: 38px;
-  height: 105px;
+  height: 115px;
 }
 component.WebRTCReceiver {
   padding-top: 30px;
@@ -586,8 +600,7 @@ component.WebRTCReceiver {
 }
 
 component.WebRTCSender input {
-  width: 88px;
-  margin-left: 5px;
+  width: calc(100% - 5px);
 }
 
 component.WebRTCReceiver input[type="text"] {
@@ -638,5 +651,5 @@ app > .mainContainer > canvas.imgMakerCanvas {
   left: 0px;
   position: fixed;
   z-index: -1;
-  top:0px;
+  top: 0px;
 }

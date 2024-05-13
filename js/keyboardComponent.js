@@ -3,17 +3,10 @@ class KeyboardComponent extends Component {
     super(app, serializedData);
     this.putEvents();
     this.createNode();
-    this.letters = ["a", "s", "d", "z", "x", "c"];
+    this.outputLabels = ["a", "s", "d", "f", "z", "x", "c"];
+    this.letters=this.outputLabels
   }
 
-  putLabels() {
-    let arr = Array.from(this.container.querySelectorAll(".outputButton"));
-    for (let i = 0; i < this.letters.length; i++) {
-      let elem = arr[i];
-      //   console.log(elem, i, this.letters[i]);
-      elem.style.setProperty("--letter", "'" + this.letters[i] + "'");
-    }
-  }
   putEvents() {
     this.bindedKeyUp = this.onKeyUp.bind(this);
     this.bindedKeyDown = this.onKeyDown.bind(this);
@@ -42,7 +35,7 @@ class KeyboardComponent extends Component {
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "keyboard-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: this.letters.length,
+          numberOfOutputs: this.outputLabels.length,
         });
 
         this.node.onprocessorerror = (e) => {
@@ -51,8 +44,6 @@ class KeyboardComponent extends Component {
 
         this.node.port.onmessage = (e) =>
           console.log("#keyboard worklet", e.data);
-
-        setTimeout(() => this.putLabels(), 150);
       });
   }
   remove() {

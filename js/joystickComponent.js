@@ -1,7 +1,7 @@
 class JoystickComponent extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
-
+    this.createDisplay();
     window.addEventListener("gamepadconnected", (e) => {
       this.gamepad = navigator.getGamepads()[e.gamepad.index];
       //   console.log(
@@ -12,11 +12,22 @@ class JoystickComponent extends Component {
       this.runGameLoop();
     });
   }
-
+  createDisplay() {
+    this.display = document.createElement("div");
+    this.display.classList.add("display");
+    this.container.appendChild(this.display);
+  }
+  putGamePadNameInDisplay(){
+    if(this.display.innerHTML!=this.gamepad.id){
+      this.display.innerHTML=this.gamepad.id
+    }
+  }
   runGameLoop() {
     this.gamepad = (navigator.getGamepads() || []).filter(
       (k) => k instanceof Gamepad
     )[0];
+
+    this.putGamePadNameInDisplay()
 
     if (!this.gamepad) return;
 
@@ -60,29 +71,23 @@ class JoystickComponent extends Component {
     this.app.actx.audioWorklet
       .addModule("js/audioWorklets/joystickworklet.js")
       .then(() => {
+        this.numberOfOutputs =
+          this.gamepad.buttons.length + this.gamepad.axes.length;
         this.node = new AudioWorkletNode(this.app.actx, "joystick-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs:
-            this.gamepad.buttons.length + this.gamepad.axes.length,
+          numberOfOutputs: this.numberOfOutputs,
         });
+
+        this.outputLabels = [];
+        for (let i = 0; i < this.numberOfOutputs; i++) {
+          this.outputLabels[i] = i + 1;
+        }
 
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
 
         this.node.port.onmessage = (e) => console.log("#msg", e.data);
-        setTimeout(() => this.putLabels(), 200);
       });
-  }
-  putLabels() {
-    this.outputElements = Array.from(
-      this.container.querySelectorAll(".outputButton")
-    );
-
-    for (let i = 0; i < this.outputElements.length; i++) {
-      let elem = this.outputElements[i];
-      //   console.log(elem, i, this.letters[i]);
-      elem.style.setProperty("--letter", "'" + (i + 1) + "'");
-    }
   }
 }

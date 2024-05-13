@@ -145,7 +145,15 @@ class Component {
     }
     if (doWeHaveToUpdateLines || forceUpdateLines) this.app.updateAllLines();
   }
-
+  putLabels() {
+    if(!(this.outputLabels||[]).length) return
+    let arr = Array.from(this.container.querySelectorAll(".outputButton"));
+    for (let i = 0; i < this.outputLabels.length; i++) {
+      let elem = arr[i];
+      
+      elem.style.setProperty("--label", "'" + this.outputLabels[i] + "'");
+    }
+  }
   createView() {
     //THIS WILL WAIT UNTIL THE NODE EXISTS
     if (!this.node) {
@@ -165,6 +173,8 @@ class Component {
     makeChildrenStopPropagation(this.container);
     if (this.serializedData) this.loadFromSerializedData();
     else this.quickSave(true);
+
+    this.putLabels()
 
     setTimeout(() => {
       if (!this.app) {

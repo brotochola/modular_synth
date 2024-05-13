@@ -11,50 +11,20 @@ https://brotochola.github.io/modular_synth
 -------------------------
 
 TODO:
-* add multiplayer with firebase
-    + EASY WAY: 
-        - the person leading puts the whole instrument on each change
-        - the other user fetch the whole thing, and check, like react, what gotta be updated, using the id of the components
-    + EVENT BASED:
-        - give each user an id and save it in the localStorage
-        - keep track in firebase who is online
-        - all users leave events with userID and timestamp
-        - all the changes are picked up by the rest of the users (checking to not fall into loops)
-        - pickup all events between the last pickup and now
-        - apply changes
-    + ANOTER WAY:
-        - components: { id:{connections:[{},{}]}, id:{connections:[{},{}]}}
-        - when a component is created it creates a new collection with its data
-        - each component updates only its own representation in firestore, including serialized connections coming from it
-        - The data structure in firestore shuold be like:
-            + main collection
-                * document of a patch
-                    - collection of components
-                        + doc of the component including its connections
-                * document of another patch
-      
 
-* fix saving with selects, inputs, images, etc
+
 * add explanations
-* upload/download json for instruments
-* add midi features
-* for audio player, add param to control currentTime
+* add midi input
+* distorsion: add input for amount
+* do something with the wave shaper
+* mouse: make 3 outputs: wheel, x and y
+* do the opposite of a multiplexor
+* do something better with the background
+* reverb: add type (get a few from the reverb.js website)
+* webcam same as imagePlayer but with webcam
+* mic: choose from all inputs available
 
-* nicer ui:
-https://g200kg.github.io/webaudio-controls/docs/howitworks.html
 
-* add drum machine, maybe with individual components:
-
-https://dev.opera.com/articles/drum-sounds-webaudio/
-
-* CONNECT WITH WEBRTC:
-
-urls: 'turn:openrelay.metered.ca:80',
-username: 'openrelayproject',
-credentials: 'openrelayproject'
-
-https://webrtc.github.io/samples/src/content/peerconnection/trickle-ice/
-https://gist.github.com/sagivo/3a4b2f2c7ac6e1b5267c2f1f59ac6c6b
 
 
 

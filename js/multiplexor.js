@@ -31,7 +31,7 @@ class Multiplexor extends Component {
         };
 
         this.node.port.onmessage = (e) => {
-          if (e.data.which) {
+          if (e.data.which && e.data.which != this.display.innerHTML) {
             this.display.innerHTML = e.data.which;
           }
         };

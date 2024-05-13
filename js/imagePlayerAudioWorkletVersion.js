@@ -7,6 +7,7 @@ class ImagePlayerWorkletVersion extends Component {
     this.createNode();
     this.imageDataParsed = [{ r: 0, g: 0, b: 0 }];
     this.valuesToSave = ["base64", "filename"];
+    this.outputLabels = ["R", "G", "B", "A"];
   }
 
   createInputFile() {
@@ -29,7 +30,7 @@ class ImagePlayerWorkletVersion extends Component {
       this.node.stop();
     } catch (e) {}
     let file = this.inputFile.files[0];
-    
+
     if (file) {
       this.img.src = URL.createObjectURL(file);
       let reader = new FileReader();
@@ -39,7 +40,7 @@ class ImagePlayerWorkletVersion extends Component {
       };
       reader.readAsArrayBuffer(file);
     } else if ((this.serializedData || {}).base64) {
-      this.img.src = "data:image/png;base64,"+this.serializedData.base64;
+      this.img.src = "data:image/png;base64," + this.serializedData.base64;
     }
   }
 
