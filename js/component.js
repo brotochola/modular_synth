@@ -614,4 +614,14 @@ class Component {
 
     return sortObjectKeysAlphabetically(obj);
   }
+  waitUntilImReady(cb, counter) {
+    if (!counter) counter = 1;
+    else counter++;
+
+    if (!this.ready)
+      setTimeout(() => {
+        this.waitUntilImReady(cb, counter);
+      }, 25);
+    else cb();
+  }
 }

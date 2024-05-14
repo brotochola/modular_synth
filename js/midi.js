@@ -18,6 +18,13 @@ class Midi extends Component {
     this.createDisplay();
     this.createNode();
     this.outputLabels = ["freq", "velocity", "mod wheel", "pitch bend"];
+    this.visibleOutputs = {
+      freq: { numOfOutput: 0 },
+      velocity: { numOfOutput: 1 },
+      modWheel: { numOfOutput: 2 },
+      pitchBend: { numOfOutput: 3 },
+    };
+    this.valuesToSave = ["visibleOutputs", "controlChangesToBeSaved"];
   }
   createDisplay() {
     this.display = document.createElement("div");
@@ -43,6 +50,55 @@ class Midi extends Component {
       input.value.onmidimessage = (e) => this.gotMIDImessage(e);
     }
   }
+  getOutputElementFromID(id) {
+    let outputs = Array.from(this.container.querySelectorAll(".outputButton"));
+    return outputs[this.visibleOutputs[id].numOfOutput];
+  }
+
+  updateUI() {
+    console.log("update ui midi input");
+
+    let outputs = Array.from(this.container.querySelectorAll(".outputButton"));
+    let visibleChannels = Object.keys(this.visibleOutputs);
+    for (let i = 0; i < outputs.length; i++) {
+      //IF THIS OUTPUT CHECKBOX ELEMENT IS ALREADY VISIBLE, DONT BOTHER AND LEAVE IT
+      if (outputs[i].style.display == "block") continue;
+      let shouldItBeVisible = false;
+      let label;
+      //SO I CHECK EACH OUTPUT AGAINST EACH OF MY SAVED VISIBLE OUTPUT MIDI CHANNELS/MESSAGES
+      for (let j = 0; j < visibleChannels.length; j++) {
+        label = visibleChannels[j];
+        let channel = this.visibleOutputs[visibleChannels[j]];
+        //IF THE NUMBER OF OUTPUT SAVED MATCHES, WE SHOW THIS OUTPUT
+        if (channel.numOfOutput == i) {
+          shouldItBeVisible = true;
+          break;
+        }
+      }
+
+      if (shouldItBeVisible) {
+        outputs[i].style.display = "block";
+        outputs[i].style.getPropety;
+        outputs[i].style.setProperty("--label", "'" + label + "'");
+      } else {
+        outputs[i].style.display = "none";
+      }
+    }
+
+    this.container.style.height = 60 + visibleChannels.length * 16 + "px";
+
+    if (this.serializedData.controlChangesToBeSaved) {
+      let keys = Object.keys(this.serializedData.controlChangesToBeSaved);
+      for (let k of keys) {
+        this.node.port.postMessage({
+          type: "controlChange",
+          velocity: this.serializedData.controlChangesToBeSaved[k],
+          numOfOutput: k,
+        });
+      }
+      this.serializedData.controlChangesToBeSaved = null;
+    }
+  }
 
   gotMIDImessage(messageData) {
     handleMidiMessage(
@@ -54,12 +110,38 @@ class Midi extends Component {
       this.onControlChange.bind(this)
     );
   }
-  onControlChange(note, velocity){
-    console.log("on control change", note, velocity)
+  addToVisibleOutputs(note) {
+    if (!this.visibleOutputs[note]) {
+      let keys = Object.keys(this.visibleOutputs);
+      const numOfOutput = keys.length;
+      this.visibleOutputs[note] = {
+        numOfOutput,
+      };
+      // let outputs = Array.from(
+      //   this.container.querySelectorAll(".outputButton")
+      // );
+      // outputs[numOfOutput].style.setProperty("--label", "'" + note + "'");
+      this.updateUI();
+      this.app.updateAllLines();
+      this.quickSave();
+    }
+  }
+  onControlChange(note, velocity) {
+    // console.log("on control change", note, velocity);
 
+    let numOfOutput = (this.visibleOutputs[note.toString()] || {}).numOfOutput;
+
+    this.addToVisibleOutputs(note);
+    if (!numOfOutput) return;
+    this.node.port.postMessage({
+      type: "controlChange",
+      velocity,
+      numOfOutput,
+    });
   }
   onPad(note, velocity) {
-    console.log("on pad", note, velocity)
+    console.log("on pad", note, velocity);
+
     // this.node.port.postMessage({type:"pad",note,velocity})
   }
   onModWheel(velocity) {
@@ -84,26 +166,21 @@ class Midi extends Component {
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "midi-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: 4,
+          numberOfOutputs: 20,
         });
 
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
 
-        this.node.port.onmessage = (e) => console.log("#msg", e.data);
+        this.node.port.onmessage = (e) => {
+          console.log("#msg", e.data);
+          if (e.data.type == "controlChangesToBeSaved") {
+            this.controlChangesToBeSaved = e.data.controlChanges;
+          }
+        };
+        this.waitUntilImReady(this.updateUI.bind(this));
         // setTimeout(() => this.putLabels(), 200);
       });
   }
-  //   putLabels() {
-  //     this.outputElements = Array.from(
-  //       this.container.querySelectorAll(".outputButton")
-  //     );
-
-  //     for (let i = 0; i < this.outputElements.length; i++) {
-  //       let elem = this.outputElements[i];
-  //       //   console.log(elem, i, this.letters[i]);
-  //       elem.style.setProperty("--letter", "'" + (i + 1) + "'");
-  //     }
-  //   }
 }

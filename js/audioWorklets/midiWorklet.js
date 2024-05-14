@@ -6,6 +6,7 @@ class MidiWorklet extends AudioWorkletProcessor {
     this.velocity = 0;
     this.modWheel = 0;
     this.pitchBend = 0;
+    this.controlChanges = {};
     this.port.onmessage = (e) => {
       if (e.data.type == "note") {
         //HANDLE VELOCITIES
@@ -27,6 +28,12 @@ class MidiWorklet extends AudioWorkletProcessor {
         this.modWheel = e.data.velocity;
       } else if (e.data.type == "pitchBend") {
         this.pitchBend = e.data.velocity;
+      } else if (e.data.type == "controlChange") {
+        this.controlChanges[e.data.numOfOutput] = e.data.velocity;
+        this.port.postMessage({
+          type: "controlChangesToBeSaved",
+          controlChanges: this.controlChanges,
+        });
       }
     };
   }
@@ -46,6 +53,14 @@ class MidiWorklet extends AudioWorkletProcessor {
         velOutput[i] = this.velocity;
         modWheelOutput[i] = this.modWheel;
         pitchBendOutput[i] = this.pitchBend;
+      }
+
+      //CONTROL CHANGES:
+      for (let i = 4; i < outputs.length; ++i) {
+        let output = outputs[i][0];
+        for (let j = 0; j < output.length; j++) {
+          output[j] = this.controlChanges[i];
+        }
       }
 
       //THIS FORCE AN INTERRUMPTION IN THE VELOCITY IN CASE THE NOTES WERE PLAYED TOO FAST,

@@ -20,6 +20,7 @@ class JoystickComponent extends Component {
     this.container.appendChild(this.display);
   }
   putGamePadNameInDisplay() {
+    if(!this.display) return
     if (this.display.innerHTML != this.gamepad.id) {
       this.display.innerHTML = this.gamepad.id;
     }

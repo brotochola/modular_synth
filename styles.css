@@ -243,7 +243,8 @@ component.envelopegenerator icon:after {
   height: inherit;
 }
 component.Midi {
-  height: 125px;
+  height: 205px;
+  width: 125px;
 }
 component.NumberDisplayComponent {
   height: 32px;
