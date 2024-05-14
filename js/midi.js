@@ -110,12 +110,14 @@ class Midi extends Component {
     );
   }
   addToVisibleOutputs(note) {
+    // console.log("addToVisibleOutputs", note);
     if (!this.visibleOutputs[note]) {
       let keys = Object.keys(this.visibleOutputs);
       const numOfOutput = keys.length;
       this.visibleOutputs[note] = {
         numOfOutput,
       };
+      // console.log('Added',this.visibleOutputs[note])
       // let outputs = Array.from(
       //   this.container.querySelectorAll(".outputButton")
       // );
@@ -133,6 +135,7 @@ class Midi extends Component {
   }
   onControlChange(note, velocity) {
     // console.log("on control change", note, velocity);
+    this.addToVisibleOutputs("control_" + note);
 
     let numOfOutput = (this.visibleOutputs["control_" + note.toString()] || {})
       .numOfOutput;
@@ -143,10 +146,11 @@ class Midi extends Component {
       numOfOutput,
     });
     this.makeOutputElementFlash(numOfOutput);
-    this.addToVisibleOutputs("control_" + note);
   }
   onPad(note, velocity) {
-    console.log("on pad", note, velocity);
+    // console.log("on pad", note, velocity);
+    this.addToVisibleOutputs("pad_" + note);
+
     let numOfOutput = (this.visibleOutputs["pad_" + note.toString()] || {})
       .numOfOutput;
     if (!numOfOutput) return;
@@ -157,7 +161,6 @@ class Midi extends Component {
       numOfOutput,
     });
     this.makeOutputElementFlash(numOfOutput);
-    this.addToVisibleOutputs("pad_" + note);
 
     // this.node.port.postMessage({type:"pad",note,velocity})
   }
