@@ -70,9 +70,9 @@ app {
   top: 0px;
   width: 100vw;
   background-image: url(carpet.jpg);
-  background-position: calc(0.25 * var(--mainContainerX))
-    calc(0.25 * var(--mainContainerY));
-  background-size: 150% auto;
+  background-position: calc(0.25 * calc(var(--mainContainerX) + 500px))
+    calc(0.25 * calc(var(--mainContainerY) + 500px));
+  background-size: cover;
   height: 100vh;
   border-top: 1px solid gray;
 }

@@ -51,14 +51,13 @@ class Midi extends Component {
     }
   }
   getOutputElementFromID(id) {
-    let outputs = Array.from(this.container.querySelectorAll(".outputButton"));
     return outputs[this.visibleOutputs[id].numOfOutput];
   }
 
   updateUI() {
     console.log("update ui midi input");
-
-    let outputs = Array.from(this.container.querySelectorAll(".outputButton"));
+    if (!Array.isArray(this.outputsElements)) return;
+    let outputs = this.outputsElements;
     let visibleChannels = Object.keys(this.visibleOutputs);
     for (let i = 0; i < outputs.length; i++) {
       //IF THIS OUTPUT CHECKBOX ELEMENT IS ALREADY VISIBLE, DONT BOTHER AND LEAVE IT
@@ -87,7 +86,7 @@ class Midi extends Component {
 
     this.container.style.height = 60 + visibleChannels.length * 16 + "px";
 
-    if (this.serializedData.controlChangesToBeSaved) {
+    if ((this.serializedData || {}).controlChangesToBeSaved) {
       let keys = Object.keys(this.serializedData.controlChangesToBeSaved);
       for (let k of keys) {
         this.node.port.postMessage({
@@ -126,21 +125,39 @@ class Midi extends Component {
       this.quickSave();
     }
   }
+  makeOutputElementFlash(numOfOutput) {
+    let elem = (this.outputsElements || {})[numOfOutput];
+    if (!elem) return;
+    elem.classList.add("active");
+    setTimeout(() => elem.classList.remove("active"), 100);
+  }
   onControlChange(note, velocity) {
     // console.log("on control change", note, velocity);
 
-    let numOfOutput = (this.visibleOutputs[note.toString()] || {}).numOfOutput;
-
-    this.addToVisibleOutputs(note);
+    let numOfOutput = (this.visibleOutputs["control_" + note.toString()] || {})
+      .numOfOutput;
     if (!numOfOutput) return;
     this.node.port.postMessage({
       type: "controlChange",
       velocity,
       numOfOutput,
     });
+    this.makeOutputElementFlash(numOfOutput);
+    this.addToVisibleOutputs("control_" + note);
   }
   onPad(note, velocity) {
     console.log("on pad", note, velocity);
+    let numOfOutput = (this.visibleOutputs["pad_" + note.toString()] || {})
+      .numOfOutput;
+    if (!numOfOutput) return;
+    this.node.port.postMessage({
+      type: "pad",
+      note,
+      velocity,
+      numOfOutput,
+    });
+    this.makeOutputElementFlash(numOfOutput);
+    this.addToVisibleOutputs("pad_" + note);
 
     // this.node.port.postMessage({type:"pad",note,velocity})
   }
@@ -174,13 +191,22 @@ class Midi extends Component {
         };
 
         this.node.port.onmessage = (e) => {
-          console.log("#msg", e.data);
+          // console.log("#msg", e.data);
           if (e.data.type == "controlChangesToBeSaved") {
             this.controlChangesToBeSaved = e.data.controlChanges;
           }
         };
-        this.waitUntilImReady(this.updateUI.bind(this));
-        // setTimeout(() => this.putLabels(), 200);
+        this.waitUntilImReady(() => {
+          //WHEN THIS NODE IS READY
+
+          setTimeout(() => {
+            this.outputsElements = Array.from(
+              this.container.querySelectorAll(".outputButton")
+            );
+            this.updateUI();
+          }, 20);
+          // setTimeout(() => this.putLabels(), 200);
+        });
       });
   }
 }

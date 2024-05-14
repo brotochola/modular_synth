@@ -29,7 +29,6 @@ class AudioPlayer extends Component {
   }
 
   handleCustomAudioParamChanged(e) {
-    // console.log(e)
     //CUSTOM AUDIO PARAMS CAN BE WHATEVER VALUE
 
     if (e.current) this.offset = e.current;
@@ -44,19 +43,12 @@ class AudioPlayer extends Component {
 
   handleTriggerFromWorklet(e) {
     //TRIGGER ONLY CHECKS 1 OR 0
-    // console.log(e)
     if (e.current != 0) this.triggerAudio();
-    // else {
-    //   try {
-    //     this.node.stop();
-    //   } catch (e) {}
-    // }
   }
 
   triggerAudio() {
     if (this.node && this.audioBuffer) {
       this.handleOnChange();
-      this.node.loop = false;
       this.node.start(0, this.offset);
     }
   }
@@ -87,14 +79,6 @@ class AudioPlayer extends Component {
     this.container.appendChild(this.inputFile);
   }
 
-  //   createAudioBuffer() {
-  //     // Create a MediaElementAudioSourceNode
-  //     // Feed the HTMLMediaElement into it
-  //     this.node = this.app.actx.createMediaElementSource(this.audio);
-  //
-  //     this.node.loop = true;
-  //     // this.node.start(0);
-  //   }
   handleOnChange() {
     if (!(this.inputFile.files || [])[0] && !this.audioBuffer) {
       return console.warn("no file selected or no audio buffer loaded");
@@ -109,11 +93,11 @@ class AudioPlayer extends Component {
 
     //CREATE THE AUDIO BUFFER SOURCE OBJECT
     this.node = this.app.actx.createBufferSource();
+    this.node.loop = false;
 
     //IF THE AUDIOBUFFER IS ALREADY LOADED AND DECODED, WE USE THAT
     if (this.audioBuffer && this.currentAudioFile == this.inputFile.files[0]) {
       this.node.buffer = this.audioBuffer;
-      this.node.loop = true;
       this.app.resetAllConnections();
     } else {
       //IF NOT WE GOTTA LOAD THE AUDIO FILE
@@ -125,7 +109,6 @@ class AudioPlayer extends Component {
         this.arrayBuffer = copyArrayBuffer(reader.result);
         this.audioBuffer = await this.app.actx.decodeAudioData(reader.result);
         this.node.buffer = this.audioBuffer;
-        this.node.loop = true;
         this.quickSave();
         this.app.resetAllConnections();
         this.updateButton();

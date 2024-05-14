@@ -7,6 +7,7 @@ class MidiWorklet extends AudioWorkletProcessor {
     this.modWheel = 0;
     this.pitchBend = 0;
     this.controlChanges = {};
+    this.pads = {};
     this.port.onmessage = (e) => {
       if (e.data.type == "note") {
         //HANDLE VELOCITIES
@@ -30,10 +31,14 @@ class MidiWorklet extends AudioWorkletProcessor {
         this.pitchBend = e.data.velocity;
       } else if (e.data.type == "controlChange") {
         this.controlChanges[e.data.numOfOutput] = e.data.velocity;
+        //I SEND IT BACK TO THE COMPONENT BC I WANNA SAVE THIS VALUES, SO THE NEXT TIME YOU LOAD THE SAME PATCH
+        //THE CONTROLS OF THIS MIDI INTERFASE WILL START AT THE SAME VALUES
         this.port.postMessage({
           type: "controlChangesToBeSaved",
           controlChanges: this.controlChanges,
         });
+      } else if (e.data.type == "pad") {
+        this.controlChanges[e.data.numOfOutput] = e.data.velocity;
       }
     };
   }
