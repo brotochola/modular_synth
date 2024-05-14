@@ -10,18 +10,16 @@ class MidiWorklet extends AudioWorkletProcessor {
     this.pads = {};
     this.port.onmessage = (e) => {
       if (e.data.type == "note") {
-        //HANDLE VELOCITIES
-        if (e.data.note != this.note) {
-          //IF YOU PRESS A SECOND KEY BEFORE YOU RELEASED THE FIRST, THE VELOCITY STAYS IN 1
-          this.velocity = 0;
-          this.rememberVelocity = e.data.velocity;
+        if (e.data.velocity == 0) {
+          if (this.note == e.data.note) {
+            this.note = 0;
+            this.velocity = 0;
+          }
         } else {
-          this.velocity = e.data.velocity;
-        }
-        //HANDLE NOTES
-        if (e.data.velocity == 0 && this.note == e.data.note) {
-          this.note = 0;
-        } else {
+          if (e.data.note != this.note) {
+            this.velocity = 0;
+            this.rememberVelocity = e.data.velocity;
+          }
           this.note = e.data.note;
           this.freq = this.midi2Freq(e.data.note);
         }
