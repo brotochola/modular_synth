@@ -186,7 +186,7 @@ class Midi extends Component {
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "midi-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: 20,
+          numberOfOutputs: 28, //16 controllers + 8 pads + freq, velocity, pitch bend, mod wheel
         });
 
         this.node.onprocessorerror = (e) => {

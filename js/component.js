@@ -350,17 +350,18 @@ class Component {
     this.quickSave();
   }
   onAudioParamClicked(audioParam) {
-    // console.log("audio param clicked", audioParam);
-
     if (this.inputElements[audioParam].button.classList.contains("connected")) {
+      //DISCONNECTING...
       let componentFromWhichThisConnectionComes = Connection.getComponentFrom(
         this,
         audioParam
       );
-
       this.disconnect(audioParam);
-
       setTimeout(() => componentFromWhichThisConnectionComes.quickSave(), 10);
+      if ((this.customAudioParams || []).includes(audioParam)) {
+        //THIS IS A CUSTOM AUDIO PARAM THAT WAS CLICKED
+        this.handleCustomAudioParamChanged({ current: 0 });
+      }
     } else {
       if (!this.app.lastOutputClicked) return;
 
@@ -372,10 +373,18 @@ class Component {
         audioParam,
         numberOfOutput
       );
+      if ((this.customAudioParams || []).includes(audioParam)) {
+        //THIS IS A CUSTOM AUDIO PARAM THAT WAS CLICKED
+        this.resetAudioParams()
+      }
 
       this.app.lastOutputClicked.compo.quickSave();
       this.app.lastOutputClicked = null;
     }
+  }
+  resetAudioParams(){
+    //FORCES THE CUSTOM AUDIO PARAMS WORKLET TO TRIGGER THE VALUE AGAIN
+    this.customAudioParamsWorkletNode.port.postMessage({ reset: true });
   }
   createInfoButton() {
     if (!this.infoText) return;

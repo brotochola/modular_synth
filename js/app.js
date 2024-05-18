@@ -29,6 +29,7 @@ class App {
     this.putBPMInButton();
 
     this.generateUserAndSessionIDs();
+    document.addEventListener('contextmenu', event => event.preventDefault());
 
     window.addEventListener(
       "keydown",
@@ -383,6 +384,10 @@ class App {
   }
   addEnvelope() {
     this.components.push(new EnvelopeGenerator(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
+  addConstantValueNode() {
+    this.components.push(new ConstantValueNode(this));
     //   this.saveListOfComponentsInFirestore();
   }
   addOscillator() {

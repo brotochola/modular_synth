@@ -169,6 +169,9 @@ component.WebRTCSender icon:after {
 component.reverb icon:after {
   content: "⛪";
 }
+component.constantvaluenode icon:after {
+  content: "🅺";
+}
 
 component.WebRTCReceiver icon:after {
   content: "📨";
@@ -270,7 +273,7 @@ textarea {
   background: rgba(0, 0, 0, 0.5);
   position: relative;
   border-color: green;
-  color: lightgreen;
+  color: white;
   border-radius: 5px;
   border-left-width: 0px;
   outline: lightgreen;
@@ -670,4 +673,16 @@ component button.infoButton {
   padding: 0px;
   height: 18px;
   padding-left: 3px;
+}
+
+component.constantvaluenode {
+  height: 36px;
+}
+
+component.constantvaluenode button.input.offset {
+  display: none;
+}
+component.constantvaluenode input.offset {
+  margin: 0 auto;
+  margin-bottom: 2px;
 }
