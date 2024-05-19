@@ -386,6 +386,11 @@ class App {
     this.components.push(new EnvelopeGenerator(this));
     //   this.saveListOfComponentsInFirestore();
   }
+  addRackCover() {
+    this.components.push(new RackCover(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
+  
   addConstantValueNode() {
     this.components.push(new ConstantValueNode(this));
     //   this.saveListOfComponentsInFirestore();
@@ -651,7 +656,7 @@ class App {
     }
   }
   addSerializedComponent(comp) {
-    console.log("## adding serialized component", comp, comp);
+    // console.log("## adding serialized component",  comp);
     if (!comp) {
       return console.log("trying to add a null serialized component??");
     }

@@ -14,8 +14,6 @@ TODO:
 
 
 * add explanations
-* add midi input
-* distorsion: add input for amount
 * do something with the wave shaper
 * mouse: make 3 outputs: wheel, x and y
 * do the opposite of a multiplexor
@@ -23,7 +21,12 @@ TODO:
 * reverb: add type (get a few from the reverb.js website)
 * webcam same as imagePlayer but with webcam
 * mic: choose from all inputs available
-
+* add UI elements:
+    * led
+    * button
+    * fader
+    * knob
+    * rack cover (this components should go on top of the cables canvas)
 
 
 

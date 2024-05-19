@@ -42,7 +42,7 @@ component {
 }
 
 app canvas.linesCanvas {
-  z-index: 999;
+  z-index: 1;
   position: absolute;
   top: 0px;
   /* width: 100%;
@@ -685,4 +685,18 @@ component.constantvaluenode button.input.offset {
 component.constantvaluenode input.offset {
   margin: 0 auto;
   margin-bottom: 2px;
+}
+
+component.rackcover {
+  z-index: 2;
+  resize:both;
+  box-shadow: none;
+  /* pointer-events: none; */
+
+  border: none;
+  width: 180px;
+  height: 100px;
+  background-position: calc(100% - var(--posX)) calc(100% - var(--posY));
+  background-image: url(aluminium.jpg);
+  backdrop-filter: none;
 }

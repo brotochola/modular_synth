@@ -52,6 +52,7 @@ class Component {
     // this.startListeningToChangesInThiscomponent();
   }
   loadFromSerializedData(cb) {
+    console.log("#load from serialized data", this, this.serializedData);
     if (!this.serializedData) return;
 
     if (this.node) {
@@ -375,14 +376,14 @@ class Component {
       );
       if ((this.customAudioParams || []).includes(audioParam)) {
         //THIS IS A CUSTOM AUDIO PARAM THAT WAS CLICKED
-        this.resetAudioParams()
+        this.resetAudioParams();
       }
 
       this.app.lastOutputClicked.compo.quickSave();
       this.app.lastOutputClicked = null;
     }
   }
-  resetAudioParams(){
+  resetAudioParams() {
     //FORCES THE CUSTOM AUDIO PARAMS WORKLET TO TRIGGER THE VALUE AGAIN
     this.customAudioParamsWorkletNode.port.postMessage({ reset: true });
   }
@@ -466,6 +467,10 @@ class Component {
       -box.x + e.clientX - this.dragStartedAt[0] + "px";
     this.container.style.top =
       -box.y + e.clientY - this.dragStartedAt[1] + "px";
+
+    this.container.style.setProperty("--posX", this.container.style.left);
+    this.container.style.setProperty("--posY", this.container.style.top);
+
     this.quickSave();
     this.app.updateAllLines();
   }
@@ -513,15 +518,6 @@ class Component {
     this.container.onmousedown = () => {
       this.toggleActive();
     };
-
-    this.container.style.setProperty(
-      "--posX",
-      (Math.random() * 100).toFixed(2) + "%"
-    );
-    this.container.style.setProperty(
-      "--posY",
-      (Math.random() * 100).toFixed(2) + "%"
-    );
 
     if (this.createdBy == this.app.userID) {
       this.container.classList.add("mine");
@@ -623,6 +619,13 @@ class Component {
 
     return sortObjectKeysAlphabetically(obj);
   }
+  waitAndSave() {
+    clearTimeout(this.timer);
+    this.timer = setTimeout(() => {
+      this.quickSave();
+    }, 200);
+  }
+
   waitUntilImReady(cb, counter) {
     if (!counter) counter = 1;
     else counter++;

@@ -9,12 +9,6 @@ class Text extends Component {
     this.loadFromSerializedData();
     this.textEl.value = this.text || "...";
   }
-  waitAndSave() {
-    clearTimeout(this.timer);
-    this.timer = setTimeout(() => {
-      this.quickSave();
-    }, 200);
-  }
 
   createInput() {
     this.textEl = document.createElement("textarea");
