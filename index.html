@@ -1,6 +1,8 @@
 <html>
 
 <head>
+    <script src="//unpkg.com/brain.js"></script>
+  
     <script src="js/external/peerjs.min.js"></script>
 
 
@@ -16,6 +18,9 @@
     <script src="js/component.js"></script>
     <script src="js/reverb.js"></script>
     <script src="js/compressor.js"></script>
+    <script src="js/aiComponent.js"></script>
+    <script src="js/aiComponent2.js"></script>
+
     <script src="js/constantValueNode.js"></script>
     <script src="js/midi.js"></script>
     <script src="js/peakDetectorComponent.js"></script>
@@ -74,26 +79,28 @@
 <body>
     <div class="buttons">
         <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
-        <button onclick="app.addOscillator()">∿ add osc</button>
-        <button onclick="app.addWaveShaper()"> add wave shaper</button>
-        <button onclick="app.addMidiInput()"> add midi input</button>
-        <button onclick="app.addMidiPlayer()">🎹 add midi player</button>
+        <button onclick="app.addOscillator()">🚴🏿 add osc</button>
+        <!-- <button onclick="app.addWaveShaper()"> add wave shaper</button> -->
+        <button onclick="app.addMidiInput()">🎹 add midi input</button>
+        <button onclick="app.addMidiPlayer()">🎼 add midi file player</button>
         <button onclick="app.addConstantValueNode()">🅺 add constant</button>
 
         <button onclick="app.addAudioPlayer()">🎶 add Audio Player</button>
         <button onclick="app.addMic()">🎤 add mic</button>
         <button onclick="app.addNoise()">👾 add noise</button>
         <hr>
-        <button onclick="app.addFilter()">⩥ add filter</button>
-        <button onclick="app.addCustomProcessor()">❓ add CustomProcessor</button>
+        <button onclick="app.addFilter()">🤖 add filter</button>
+        <button onclick="app.addCustomProcessor()">🧩 add Math Processor</button>
         <button onclick="app.addGainNode()">📢 add gain node</button>
-        <button onclick="app.addCompressor()"> add compressor</button>
+        <button onclick="app.addCompressor()">➗ add compressor</button>
         <button onclick="app.addDelay()">⏰ add Delay</button>
         <button onclick="app.addReverb()">⛪ add reverb</button>
         <button onclick="app.addDistortion()">🤘 add distortion</button>
+        <button onclick="app.addAiComponent()">###  add ai comp</button>
+
         <hr>
         <button onclick="app.addSequencer()">📈 add sequencer</button>
-        <button onclick="app.addEnvelope()">⛰️ add env</button>
+        <button onclick="app.addEnvelope()">〽️ add env</button>
         <button onclick="app.addMouse()">🖱️ add mouse</button>
         <button onclick="app.addKeyboard()">⌨ add keyboard</button>
         <button onclick="app.addJoystick()">🎮 add Joystick</button>
@@ -105,7 +112,7 @@
         <button onclick="app.addNumberDisplay()">#️⃣ add number display</button>
         <button onclick="app.addFrequencyAnalizer()">🖥️ Freq Analizer</button>
         <button onclick="app.addVisualizer()">📺 add visualizer</button>
-        <button onclick="app.addPeakDetector()"> add peak detector</button>
+        <button onclick="app.addPeakDetector()">⛰️ add peak detector</button>
         <hr>
 
 

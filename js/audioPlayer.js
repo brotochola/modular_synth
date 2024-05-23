@@ -77,6 +77,12 @@ class AudioPlayer extends Component {
     this.inputFile.accept = "audio/*";
     this.inputFile.onchange = (e) => this.handleOnChange(e);
     this.container.appendChild(this.inputFile);
+
+    this.buttonToTriggerInputFile = document.createElement("button")
+    this.buttonToTriggerInputFile.innerHTML="Choose file..."
+    this.buttonToTriggerInputFile.classList.add("triggerInputFile")
+    this.buttonToTriggerInputFile.onclick = () => this.inputFile.click()
+    this.container.appendChild(this.buttonToTriggerInputFile);
   }
 
   handleOnChange() {
@@ -84,6 +90,8 @@ class AudioPlayer extends Component {
       return console.warn("no file selected or no audio buffer loaded");
     }
     this.playButton.style.display = "block";
+    this.buttonToTriggerInputFile.style.display="none"
+    
     this.playing = false;
     try {
       this.node.stop();

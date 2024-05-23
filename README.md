@@ -12,7 +12,8 @@ https://brotochola.github.io/modular_synth
 
 TODO:
 
-
+* midi is owned by users
+* audio file player, and image player, add a normal button and hide the input[file]
 * add explanations
 * do something with the wave shaper
 * mouse: make 3 outputs: wheel, x and y
@@ -27,7 +28,8 @@ TODO:
     * fader
     * knob
     * rack cover (this components should go on top of the cables canvas)
-
+* PITCH DETECTOR:
+    https://glitch.com/edit/#!/essentiajs-pitchmelodia?path=script.js%3A1%3A0
 
 
 

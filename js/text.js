@@ -8,10 +8,17 @@ class Text extends Component {
     makeChildrenStopPropagation(this.container);
     this.loadFromSerializedData();
     this.textEl.value = this.text || "...";
+    this.firstTime=true
   }
 
   createInput() {
     this.textEl = document.createElement("textarea");
+    this.textEl.onclick = e=>{
+      if(this.textEl.value=="..." && this.firstTime) {
+        this.textEl.value=""
+        this.firstTime=false
+      }
+    }
     this.textEl.oninput = (e) => {
       this.text = this.textEl.value;
       this.waitAndSave();

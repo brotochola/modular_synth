@@ -10,11 +10,7 @@ class Multiplexor extends Component {
     this.createDisplay();
   }
 
-  createDisplay() {
-    this.display = document.createElement("div");
-    this.display.classList.add("display");
-    this.container.appendChild(this.display);
-  }
+
 
   createNode() {
     this.app.actx.audioWorklet

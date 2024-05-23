@@ -13,6 +13,7 @@ class MidiFilePlayer extends Component {
     this.midiPlayer.on("midiEvent", (e) => this.handleMidiEvent(e));
     this.createNode();
     this.valuesToSave = ["base64", "filename"];
+    this.outputLabels = ["note", "trigger"];
 
     //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
     this.customAudioTriggers = ["trigger"];

@@ -25,25 +25,31 @@ class Distortion extends Component {
   handleCustomAudioParamChanged(e) {
     if (e.current < 0) return;
     if (e.current != undefined && e.current != null) this.amount = e.current;
-    this.node.curve = this.makeDistortionCurve();
+    this.makeDistortionCurve();
   }
 
   makeDistortionCurve() {
     this.totalAmount = Number(this.amount) + Number(this.amountFromInput || 0);
-
-    let n_samples = 256,
-      curve = new Float32Array(n_samples);
-    for (let i = 0; i < n_samples; ++i) {
-      let x = (i * 2) / n_samples - 1;
-      curve[i] =
-        ((Math.PI + this.totalAmount) * x) /
-        (Math.PI + this.amount * Math.abs(x));
-    }
-    return curve;
+    this.node.port.postMessage({distortion:this.totalAmount})
   }
 
   createNode() {
-    this.node = this.app.actx.createWaveShaper();
-    this.node.curve = this.makeDistortionCurve();
+    this.app.actx.audioWorklet
+      .addModule("js/audioWorklets/distortionWorklet.js")
+      .then(() => {
+        this.node = new AudioWorkletNode(this.app.actx, "distortion-worklet", {
+          numberOfInputs: 1,
+          numberOfOutputs: 1,
+        });
+
+        this.node.onprocessorerror = (e) => {
+          console.error(e);
+        };
+
+        this.updateNodeWithFormula();
+        this.node.port.onmessage = (e) => {
+          console.warn(this.id + " !!!! :", e.data);
+        };
+      });
   }
 }

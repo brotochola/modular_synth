@@ -25,9 +25,5 @@ class NumberDisplayComponent extends Component {
     this.display.textContent = e.data.number.toFixed(3);
   }
 
-  createDisplay() {
-    this.display = document.createElement("div");
-    this.display.classList.add("display")
-    this.container.appendChild(this.display);
-  }
+
 }

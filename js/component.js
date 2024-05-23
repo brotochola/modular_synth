@@ -18,11 +18,22 @@ class Component {
 
     this.createContainer();
     this.createIcon();
+    this.createDeleteButton();
     this.createView();
     this.inputElements = {};
     // this.outputElements = {};
     this.app.actx.resume();
     this.active = false;
+  }
+  createDeleteButton() {
+    if (!this.isThisComponentMine()) return;
+    this.deleteButton = document.createElement("button");
+    this.deleteButton.classList.add("deleteButton");
+    this.container.appendChild(this.deleteButton);
+    this.deleteButton.innerHTML = "🗑️";
+    this.deleteButton.onclick = () => {
+      this.remove();
+    };
   }
 
   async quickSave(alsoSaveTheUpdatedListOfComponents) {
@@ -523,6 +534,9 @@ class Component {
       this.container.classList.add("mine");
     }
   }
+  isThisComponentMine() {
+    return this.createdBy == this.app.userID;
+  }
   toggleActive() {
     if (this.active) {
       for (let c of this.app.components) {
@@ -542,6 +556,12 @@ class Component {
     window.tc = this;
     // console.log(this);
   }
+  createDisplay() {
+    this.display = document.createElement("div");
+    this.display.classList.add("display");
+    this.container.appendChild(this.display);
+  }
+  
   updateBPM() {}
 
   createOutputButton() {

@@ -13,8 +13,8 @@ class CustomProcessorComponent extends Component {
   createInfo() {
     this.infoBox = document.createElement("p");
     this.infoBox.onclick = (e) => this.toggleActive();
-    this.infoBox.innerText =
-      "y is the output, x1, x2, x3, x4 are the 4 inputs at each frame, but also you can use it like: inputChannel1[i], being the i between 0 and 127";
+    this.infoBox.innerHTML ="<br>";
+      // "y is the output, x1, x2, x3, x4 are the 4 inputs at each frame, but also you can use it like: inputChannel1[i], being the i between 0 and 127";
     this.container.appendChild(this.infoBox);
   }
   createNode() {

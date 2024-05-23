@@ -14,11 +14,7 @@ class JoystickComponent extends Component {
       this.runGameLoop();
     });
   }
-  createDisplay() {
-    this.display = document.createElement("div");
-    this.display.classList.add("display");
-    this.container.appendChild(this.display);
-  }
+
   putGamePadNameInDisplay() {
     if(!this.display) return
     if (this.display.innerHTML != this.gamepad.id) {

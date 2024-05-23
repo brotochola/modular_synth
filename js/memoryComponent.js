@@ -5,11 +5,7 @@ class MemoryComponent extends Component {
     this.createNode();
     this.createDisplay();
   }
-  createDisplay() {
-    this.display = document.createElement("div");
-    this.display.classList.add("display");
-    this.container.appendChild(this.display);
-  }
+
   createNode() {
     this.app.actx.audioWorklet
       .addModule("js/audioWorklets/memoryWorklet.js")

@@ -29,14 +29,21 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-component select {
+component select, component select option {
   border: 1px solid green;
   border-radius: 5px;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5) !important;
   max-width: calc(100% - 7px);
   outline: none;
   color: lightgreen;
+  height: 21px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: capitalize;
+  padding-left: 2px;
 }
+
+
 component {
   color: lightgreen;
 }
@@ -154,7 +161,7 @@ component.active {
 
 component icon {
   position: absolute;
-  left: 5px;
+  left: 3px;
   top: 5px;
   width: 20px;
   filter: sepia(100%) saturate(60%) brightness(80%) hue-rotate(68deg);
@@ -162,7 +169,19 @@ component icon {
 }
 component.mic icon:after {
   content: "🎤";
+
 }
+component.peakdetectorcomponent icon:after {
+  content: "⛰️";
+
+}
+
+component.compressor icon:after {
+  content: "➗";
+}
+
+
+
 component.WebRTCSender icon:after {
   content: "📭";
 }
@@ -172,6 +191,18 @@ component.reverb icon:after {
 component.constantvaluenode icon:after {
   content: "🅺";
 }
+component.sequencer icon:after {
+  content: "📈";
+}
+
+component.audioplayer icon:after {
+  content: "🎶";
+}
+
+component.KeyboardComponent  icon:after {
+  content: "⌨";
+}
+
 
 component.WebRTCReceiver icon:after {
   content: "📨";
@@ -187,7 +218,7 @@ component.distortion icon:after {
   content: "🤘";
 }
 
-component.imageplayer icon:after {
+component.ImagePlayerWorkletVersion  icon:after {
   content: "🖼️";
 }
 
@@ -212,7 +243,7 @@ component.joystickcomponent icon:after {
 }
 
 component.oscillator icon:after {
-  content: "∿";
+  content: "🚴🏿";
 }
 
 component.NoiseGenWithWorklet icon:after {
@@ -232,22 +263,29 @@ component.delay icon:after {
 }
 
 component.filter icon:after {
-  content: "⩥";
+  content: "🤖";
+}
+component.midi icon:after {
+  content: "🎹";
+}
+component.midifileplayer icon:after {
+  content: "🎼";
+}
+component.CustomProcessorComponent icon:after {
+  content: "🧩";
 }
 
+
+
+
 component.envelopegenerator icon:after {
-  content: " ";
-  background-image: url(https://www.svgrepo.com/show/510368/adsr.svg);
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
-  position: absolute;
-  width: inherit;
-  height: inherit;
+  
+  content: "〽️";
+  
 }
 component.Midi {
   height: 205px;
-  width: 125px;
+  width: 160px;
 }
 component.NumberDisplayComponent {
   height: 32px;
@@ -263,26 +301,30 @@ component.joystickcomponent {
 }
 
 component.CustomProcessorComponent {
-  height: 273px;
+  height: 210px;
 }
 
 textarea {
   height: 76px;
-  width: 100%;
-  /* top:20px; */
+  width: calc(100% - 10px);
+  left: 5px;
   background: rgba(0, 0, 0, 0.5);
   position: relative;
   border-color: green;
   color: white;
   border-radius: 5px;
-  border-left-width: 0px;
+  border-left-width: 1px;
   outline: lightgreen;
-  border-right-width: 0px;
+  border-right-width: 1px;
   border-top-width: 1px;
+  margin-top: 5px;
+  resize: none;
 }
 
-textarea {
-  resize: none;
+component.text textarea {
+left:0px;
+width:100%;
+margin:0;
 }
 
 component.multiplexor {
@@ -292,6 +334,7 @@ component.multiplexor {
 component .display {
   margin-top: 30px;
   margin-left: 5px;
+  font-size:14px;
 }
 
 component.multiplexor .display {
@@ -314,8 +357,8 @@ component.envelopegenerator {
   height: 180px;
 }
 component.BPMOutputComponent {
-  height: 28px;
-  width: 100px;
+  height: 34px;
+  width: 115px;
 }
 
 component.KeyboardComponent outputs {
@@ -376,6 +419,7 @@ component.ImagePlayerWorkletVersion canvas {
 component.sequencer {
   width: 300px;
   height: 280px;
+  padding-top: 10px;
 }
 
 component.sequencer div.buttonsContainer {
@@ -419,7 +463,7 @@ component input[type="file"] {
   top: 5px;
   left: 5px;
   z-index: 99;
-  display: block;
+  display: none;
 
   width: 142px;
   overflow: visible;
@@ -428,23 +472,7 @@ component input[type="file"] {
   outline: none;
 }
 
-component input[type="file"]:after {
-  content: " choose file";
-  padding: 4px;
-  border-radius: 5px;
-  width: 132px;
-  line-height: 18px;
-  box-sizing: content-box;
-  height: 20px;
-  color: lightgreen;
-  background: black;
-  border: 1px solid green;
-  position: absolute;
-  top: 0px;
-  left: 0px;
-}
-component input[type="file"] {
-}
+
 
 component .inputsDiv {
   position: absolute;
@@ -496,17 +524,21 @@ component .outputButton:hover {
   outline: 1px solid lightgreen;
 }
 
-component button.playButton {
+component button.playButton, component .triggerInputFile {
   display: block;
   position: relative;
   left: 5px;
-  height: 25px;
-  top: 5px;
+  height: 30px;
+  top: 36px;
   text-overflow: ellipsis;
   overflow: hidden;
-  width: calc(100% - 15px);
+  width: calc(100% - 10px);
   white-space: nowrap;
 }
+
+
+
+
 
 component .inputsDiv button.input,
 button {
@@ -536,15 +568,15 @@ component input[type="text"] {
   color: white;
 }
 component.Compressor {
-  height: 147px;
+  height: 177px;
 }
 component.filter {
-  height: 170px;
+  height: 174px;
 }
 
 component.AudioPlayer {
   height: 166px;
-  width: 250px;
+  width: 150px;
 }
 
 audioparamrow {
@@ -666,10 +698,9 @@ app .messageBox.visible {
 component button.infoButton {
   width: 16px;
   position: absolute;
-  right: 5px;
+  left: 30px;
   font-size: 14px;
-  top: 5px;
-  /* aspect-ratio: 2; */
+  top: 7px;  
   padding: 0px;
   height: 18px;
   padding-left: 3px;
@@ -689,7 +720,7 @@ component.constantvaluenode input.offset {
 
 component.rackcover {
   z-index: 2;
-  resize:both;
+  resize: both;
   box-shadow: none;
   /* pointer-events: none; */
 
@@ -699,4 +730,29 @@ component.rackcover {
   background-position: calc(100% - var(--posX)) calc(100% - var(--posY));
   background-image: url(aluminium.jpg);
   backdrop-filter: none;
+}
+
+component .deleteButton {
+  width: 19px;
+  position: absolute;
+  right: 5px;
+  font-size: 10px;
+  display: none;
+  top: 5px;
+  padding: 0px;
+  height: 18px;
+  border-color: #aa0000;
+  padding-left: 2px;
+}
+
+component:hover .deleteButton {
+  display: block;
+}
+
+component .deleteButton:hover {
+  background: rgba(250, 0, 0, 0.5);
+}
+
+component.Oscillator {
+  height: 103px;
 }

@@ -6,11 +6,7 @@ class CounterComponent extends Component {
     this.createNode();
     this.createDisplay();
   }
-  createDisplay() {
-    this.display = document.createElement("div");
-    this.display.classList.add("display");
-    this.container.appendChild(this.display);
-  }
+
   handleTriggerFromWorklet(e) {
     // console.log(e);
     if (e.channelTriggered == 0 && e.current == 1 && e.lastVal == 0) {

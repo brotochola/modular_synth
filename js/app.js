@@ -399,6 +399,11 @@ class App {
     this.components.push(new Oscillator(this));
     //   this.saveListOfComponentsInFirestore();
   }
+
+  addAiComponent(){
+    this.components.push(new AiComponent(this));
+  }
+
   addPeakDetector() {
     this.components.push(new PeakDetectorComponent(this));
   }

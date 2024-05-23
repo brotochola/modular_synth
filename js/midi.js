@@ -26,11 +26,7 @@ class Midi extends Component {
     };
     this.valuesToSave = ["visibleOutputs", "controlChangesToBeSaved"];
   }
-  createDisplay() {
-    this.display = document.createElement("div");
-    this.display.classList.add("display");
-    this.container.appendChild(this.display);
-  }
+
   // on success
   onMIDISuccess(midiData) {
     // this is all our MIDI data

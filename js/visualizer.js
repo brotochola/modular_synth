@@ -3,7 +3,7 @@ class Visualizer extends Component {
     super(app,serializedData);
     this.node = app.actx.createAnalyser();
     
-    this.node.fftSize = 1024;
+    this.node.fftSize = 512;
 
     this.bufferLength = this.node.frequencyBinCount;
     this.dataArray = new Uint8Array(this.bufferLength);

@@ -305,3 +305,11 @@ function midi2Freq(midiNote) {
 
   return Math.pow(2, (midiNote - 69) / 12) * concertPitch;
 }
+
+function generateAnArrayWithRandomValues(length,val) {
+  let arr = [];
+  for (i = 0; i < length; i++) {
+    arr.push(val?val:Math.random() * 2 - 1);
+  }
+  return arr
+}

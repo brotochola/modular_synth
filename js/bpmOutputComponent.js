@@ -7,11 +7,7 @@ class BPMOutputComponent extends Component {
     this.createDisplay();
 
   }
-  createDisplay() {
-    this.display = document.createElement("div");
-    this.display.classList.add("display");
-    this.container.appendChild(this.display);
-  }
+
 
   updateBPM(){
     if(!(this.node||{}).port) return
