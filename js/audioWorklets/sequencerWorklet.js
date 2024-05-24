@@ -31,23 +31,19 @@ class SequencerWorklet extends AudioWorkletProcessor {
 
     for (let i = 0; i < outputChannel.length; ++i) {
       outputChannel[i] = (this.sequence || [])[this.currentNote];
-      if (this.prevNote != this.currentNote) triggerOutputChannel[i] = 1;
-      else triggerOutputChannel[i] = 0;
-
-      // this.port.postMessage({
-      //   data: "hola",
-      //   note: this.sequence[this.currentNote],
-      // });
-
-      // this.port.postMessage(inputChannel1[i], inputChannel2[i]);
-      // this.port.postMessage(outputChannel[i]);
-
-      // this.port.postMessage({ data: "hola", output: outputChannel[i] });
-
-      // outputChannel[i] = inputChannel[i] * 0.5;
+      // console.log(this.prevNote,this.currentNote, i)
     }
 
-    this.prevNote = this.currentNote;
+    if (this.prevNote != outputChannel[0] && outputChannel[0]!=0) {
+      for (let i = 0; i < triggerOutputChannel.length; ++i) {
+        triggerOutputChannel[i] = 1;
+      }
+    } else {
+      for (let i = 0; i < triggerOutputChannel.length; ++i) {
+        triggerOutputChannel[i] = 0;
+      }
+    }
+    this.prevNote = outputChannel[0];
 
     // this.port.postMessage({ data: "hola", counter });
     // this.lastTime = Date.now();
