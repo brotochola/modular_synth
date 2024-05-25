@@ -29,7 +29,7 @@ class App {
     this.putBPMInButton();
 
     this.generateUserAndSessionIDs();
-    document.addEventListener('contextmenu', event => event.preventDefault());
+    document.addEventListener("contextmenu", (event) => event.preventDefault());
 
     window.addEventListener(
       "keydown",
@@ -221,6 +221,14 @@ class App {
       }
     }
 
+    //THE POSITION OF THE OUTPUT COMPONENT IS SAVED IN THE INFO OF THE PATCH
+    //AND NOT AS A SEPARATED COMPONENT
+    if (e.outputX ) {
+      let output = this.getOutputComponent();      
+      output.container.style.left = e.outputX;
+      output.container.style.top = e.outputY;
+    }
+
     //GET BPM
     if (e.bpm) {
       this.bpm = e.bpm;
@@ -390,7 +398,7 @@ class App {
     this.components.push(new RackCover(this));
     //   this.saveListOfComponentsInFirestore();
   }
-  
+
   addConstantValueNode() {
     this.components.push(new ConstantValueNode(this));
     //   this.saveListOfComponentsInFirestore();
@@ -400,7 +408,7 @@ class App {
     //   this.saveListOfComponentsInFirestore();
   }
 
-  addAiComponent(){
+  addAiComponent() {
     this.components.push(new AiComponent(this));
   }
 

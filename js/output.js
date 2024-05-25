@@ -27,5 +27,7 @@ class Output extends Component {
     //OVERWRITE THIS METHOD BC THIS COMPONENT YOU CANNOT DELETE
   }
 
-  quickSave() {}
+  quickSave() {
+    this.app.saveListOfComponentsInFirestore()
+  }
 }

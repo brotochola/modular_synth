@@ -78,10 +78,10 @@ class AudioPlayer extends Component {
     this.inputFile.onchange = (e) => this.handleOnChange(e);
     this.container.appendChild(this.inputFile);
 
-    this.buttonToTriggerInputFile = document.createElement("button")
-    this.buttonToTriggerInputFile.innerHTML="Choose file..."
-    this.buttonToTriggerInputFile.classList.add("triggerInputFile")
-    this.buttonToTriggerInputFile.onclick = () => this.inputFile.click()
+    this.buttonToTriggerInputFile = document.createElement("button");
+    this.buttonToTriggerInputFile.innerHTML = "Choose file...";
+    this.buttonToTriggerInputFile.classList.add("triggerInputFile");
+    this.buttonToTriggerInputFile.onclick = () => this.inputFile.click();
     this.container.appendChild(this.buttonToTriggerInputFile);
   }
 
@@ -90,8 +90,8 @@ class AudioPlayer extends Component {
       return console.warn("no file selected or no audio buffer loaded");
     }
     this.playButton.style.display = "block";
-    this.buttonToTriggerInputFile.style.display="none"
-    
+    this.buttonToTriggerInputFile.style.display = "none";
+
     this.playing = false;
     try {
       this.node.stop();
@@ -106,6 +106,7 @@ class AudioPlayer extends Component {
     //IF THE AUDIOBUFFER IS ALREADY LOADED AND DECODED, WE USE THAT
     if (this.audioBuffer && this.currentAudioFile == this.inputFile.files[0]) {
       this.node.buffer = this.audioBuffer;
+      this.haveISavedTheBase64File=true
       this.app.resetAllConnections();
     } else {
       //IF NOT WE GOTTA LOAD THE AUDIO FILE
@@ -140,4 +141,6 @@ class AudioPlayer extends Component {
 
     this.updateButton();
   }
+
+
 }
