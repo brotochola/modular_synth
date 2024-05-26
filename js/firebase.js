@@ -39,6 +39,24 @@ async function createInstanceOfComponentInFirestore(
   return ret;
 }
 
+async function createBase64FileInFirebase(patchName, base64, filename) {
+  let ret = await collectionRef
+    .doc(patchName)
+    .collection("files")
+    .doc(filename)
+    .set({ base64 });
+
+  return ret;
+}
+
+async function getBase64FileFromFirebase(patchName, filename) {
+  return (
+    await (
+      await collectionRef.doc(patchName).collection("files").doc(filename)
+    ).get()
+  ).data();
+}
+
 async function putBPMInFireStore(patchName, bpm) {
   collectionRef.doc(patchName).set({ bpm: bpm });
 }

@@ -9,7 +9,7 @@ class AudioPlayer extends Component {
     //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
     this.customAudioTriggers = ["trigger"];
     this.customAudioParams = ["offset"];
-    this.valuesToSave = ["base64", "filename"];
+    this.valuesToSave = ["filename"];
     this.offset = 0;
 
     this.infoText =
@@ -106,7 +106,7 @@ class AudioPlayer extends Component {
     //IF THE AUDIOBUFFER IS ALREADY LOADED AND DECODED, WE USE THAT
     if (this.audioBuffer && this.currentAudioFile == this.inputFile.files[0]) {
       this.node.buffer = this.audioBuffer;
-      this.haveISavedTheBase64File=true
+      this.haveISavedTheBase64File = true;
       this.app.resetAllConnections();
     } else {
       //IF NOT WE GOTTA LOAD THE AUDIO FILE
@@ -115,6 +115,11 @@ class AudioPlayer extends Component {
         // console.log(reader.result);
         this.base64 = arrayBufferToBase64(reader.result);
         this.filename = this.inputFile.files[0].name;
+        createBase64FileInFirebase(
+          this.app.patchName,
+          this.base64,
+          this.filename
+        );
         this.arrayBuffer = copyArrayBuffer(reader.result);
         this.audioBuffer = await this.app.actx.decodeAudioData(reader.result);
         this.node.buffer = this.audioBuffer;
@@ -131,16 +136,21 @@ class AudioPlayer extends Component {
   }
   async updateUI() {
     //THIS METHOD IS EXECUTED FROM THE COMPONENT CLASS, WHEN THIS COMPONENT ALREADY LOADED THE SAVED DATA
+    // console.log("#update ui audioplayer", this.id)
+    if (this.filename && !this.base64) {
+      // console.log("it has a filename but no base64", this.filename)
+      this.base64 = (
+        await getBase64FileFromFirebase(this.app.patchName, this.filename)
+      ).base64;
+      // console.log("got base64?", this.base64)
+      if (this.base64) {
+        this.audioBuffer = await this.app.actx.decodeAudioData(
+          base64ToArrayBuffer(this.base64)
+        );
+        this.handleOnChange();
+      }
 
-    if (this.base64) {
-      this.audioBuffer = await this.app.actx.decodeAudioData(
-        base64ToArrayBuffer(this.base64)
-      );
-      this.handleOnChange();
+      this.updateButton();
     }
-
-    this.updateButton();
   }
-
-
 }
