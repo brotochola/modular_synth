@@ -40,6 +40,7 @@ async function createInstanceOfComponentInFirestore(
 }
 
 async function createBase64FileInFirebase(patchName, base64, filename) {
+  console.log("#saving file", filename)
   let ret = await collectionRef
     .doc(patchName)
     .collection("files")

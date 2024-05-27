@@ -407,6 +407,12 @@ class App {
     this.components.push(new Oscillator(this));
     //   this.saveListOfComponentsInFirestore();
   }
+  addWebcamPlayer() {
+    this.components.push(new WebcamPlayer(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
+
+  
 
   addAiComponent() {
     this.components.push(new AiComponent(this));

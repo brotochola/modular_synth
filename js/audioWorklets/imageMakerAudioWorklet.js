@@ -15,6 +15,9 @@ class imageMakerAudioWorklet extends AudioWorkletProcessor {
   }
 
   process(inputs, outputs) {
+    // if ((((inputs || [])[4] || [])[0] || [])[0] == 1) {
+    //   this.port.postMessage({ reset: 1 });
+    // }
     this.port.postMessage(
       inputs.map((input) => {
         return input.map((channel) => {

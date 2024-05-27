@@ -169,8 +169,13 @@ component icon {
 }
 component.mic icon:after {
   content: "🎤";
+}
+component.webcamplayer icon:after {
+  content: "🤳🏻";
 
 }
+
+
 component.peakdetectorcomponent icon:after {
   content: "⛰️";
 
@@ -441,6 +446,7 @@ component input.outputButton:after {
   line-height: 11px;
   pointer-events: none;
   touch-action: none;
+  text-shadow: -1px 0px 3px black;
 }
 
 component.sequencer .buttonsContainer .seqButton {
@@ -755,4 +761,12 @@ component .deleteButton:hover {
 
 component.Oscillator {
   height: 103px;
+}
+
+.ImagePlayerWorkletVersion button.triggerInputFile {
+  width: max-content;
+}
+.webcamplayer canvas {
+  width: 100%;
+  height: 100%;
 }

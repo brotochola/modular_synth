@@ -1,4 +1,4 @@
-class ImagePlayerWorklet extends AudioWorkletProcessor {
+class WebcamPlayerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
     this.pixelCount = 0;
@@ -6,9 +6,9 @@ class ImagePlayerWorklet extends AudioWorkletProcessor {
     this.port.onmessage = (e) => {
       // console.log(e.data);
       this.imageDataParsed = e.data;
-      this.port.postMessage({
-        msg: "el worklet del imageplayer recibio la data..",
-      });
+    //   this.port.postMessage({
+    //     msg: "el worklet del imageplayer recibio la data..",
+    //   });
     };
   }
 
@@ -112,4 +112,4 @@ class ImagePlayerWorklet extends AudioWorkletProcessor {
   }
 }
 
-registerProcessor("image-player-worklet", ImagePlayerWorklet);
+registerProcessor("webcam-player-worklet", WebcamPlayerWorklet);

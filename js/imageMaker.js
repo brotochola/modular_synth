@@ -36,6 +36,8 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
     };
     this.container.appendChild(this.toggle);
   }
+
+  
   createCanvas() {
     this.canvas = document.createElement("canvas");
     this.canvas.width = this.width;
@@ -57,6 +59,7 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
     this.app.actx.audioWorklet
       .addModule("js/audioWorklets/imageMakerAudioWorklet.js")
       .then(() => {
+        this.createdAt=this.app.actx.currentTime
         this.node = new AudioWorkletNode(this.app.actx, "image-maker-worklet", {
           numberOfInputs: 4,
           numberOfOutputs: 0,
@@ -72,15 +75,15 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
       });
   }
   handleDataFromWorklet(e) {
-    // console.log("#",e.data)
+    
     this.dataFromWorklet = e.data;
     this.pixelCounter += 128;
-    for (let i = 0; i < e.data.length; i++) {
+    for (let i = 0; i < 4; i++) {
       //4 inputs: rgba
       let color = i == 0 ? "r" : i == 1 ? "g" : i == 2 ? "b" : "a";
       //channel data, the values of audio, that i'm going to use as pixel values
       //[0] becase i dont care about stereo audio signals
-      let channel = e.data[i][0] || [];
+      let channel = (e.data[i]||[])[0] || [];
       for (let v = 0; v < channel.length; v++) {
         let pixelNumber = (this.pixelCounter + v) % this.totalPixels;
         this.imageArray[pixelNumber * 4 + i] = channel[v];
@@ -92,6 +95,15 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
       this.pixelCounter = this.pixelCounter - this.totalPixels;
 
       this.makeImage();
+    }
+      
+    if(e.data.reset){
+      // console.log("#reset ")
+      // alert(1)
+      //SYNCHANNEL
+      // this.pixelCounter = 0
+      // this.makeImage();
+
     }
   }
 

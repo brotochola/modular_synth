@@ -46,7 +46,7 @@ class Distortion extends Component {
           console.error(e);
         };
 
-        this.updateNodeWithFormula();
+        // this.updateNodeWithFormula();
         this.node.port.onmessage = (e) => {
           console.warn(this.id + " !!!! :", e.data);
         };

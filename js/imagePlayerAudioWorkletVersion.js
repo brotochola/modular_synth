@@ -6,8 +6,8 @@ class ImagePlayerWorkletVersion extends Component {
 
     this.createNode();
     this.imageDataParsed = [{ r: 0, g: 0, b: 0 }];
-    this.valuesToSave = ["base64", "filename"];
-    this.outputLabels = ["R", "G", "B", "A"];
+    this.valuesToSave = ["filename"];
+    this.outputLabels = ["R", "G", "B", "A"/*, "sync"*/];
   }
 
   createInputFile() {
@@ -23,6 +23,15 @@ class ImagePlayerWorkletVersion extends Component {
     this.inputFile.setAttribute("type", "file");
     this.inputFile.onchange = (e) => this.handleOnChange(e);
     this.container.appendChild(this.inputFile);
+
+    this.buttonToTriggerInputFile = document.createElement("button");
+    this.buttonToTriggerInputFile.innerHTML = "Choose file...";
+    this.buttonToTriggerInputFile.classList.add("triggerInputFile");
+    this.buttonToTriggerInputFile.onclick = () => this.inputFile.click();
+    this.container.appendChild(this.buttonToTriggerInputFile);
+  }
+  makeButtonInvisible() {
+    this.buttonToTriggerInputFile.style.display = "none";
   }
 
   handleOnChange(e) {
@@ -37,16 +46,27 @@ class ImagePlayerWorkletVersion extends Component {
       reader.onload = async () => {
         this.base64 = arrayBufferToBase64(reader.result);
         this.filename = file.name;
+        this.makeButtonInvisible();
+        createBase64FileInFirebase(
+          this.app.patchName,
+          this.base64,
+          this.filename
+        );
+        this.quickSave();
       };
       reader.readAsArrayBuffer(file);
-    } else if ((this.serializedData || {}).base64) {
-      this.img.src = "data:image/png;base64," + this.serializedData.base64;
+    } else if (this.base64) {
+      this.makeButtonInvisible();
+      this.img.src = "data:image/png;base64," + this.base64;
     }
   }
 
   handleImgOnLoad() {
-    this.canvas.width = this.img.naturalWidth;
-    this.canvas.height = this.img.naturalHeight;
+    //PARA SONIDO ESTA BUENO USAR EL TAMAÑO ORIGINAL
+    //PARA IMAGEN NO
+    //ACA DEBERIA HABER UN CHECKBOX
+    this.canvas.width = 215; //this.img.naturalWidth;
+    this.canvas.height = 121; //this.img.naturalHeight;
     this.ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height);
     this.imageData = this.ctx.getImageData(
       0,
@@ -79,6 +99,7 @@ class ImagePlayerWorkletVersion extends Component {
     this.app.actx.audioWorklet
       .addModule("js/audioWorklets/imagePlayerAudioWorklet.js")
       .then(() => {
+        this.createdAt = this.app.actx.currentTime;
         this.node = new AudioWorkletNode(
           this.app.actx,
           "image-player-worklet",
@@ -98,16 +119,26 @@ class ImagePlayerWorkletVersion extends Component {
       });
   }
   handleDataFromWorklet(e) {
-    console.log("data q viene del worklet", e.data);
+    if (e.data.pixelCount) {
+      this.pixelCounter = e.data.pixelCount;
+    }
+    // console.log("data q viene del worklet", e.data);
     // debugger
   }
 
   async updateUI() {
     //THIS METHOD IS EXECUTED FROM THE COMPONENT CLASS, WHEN THIS COMPONENT ALREADY LOADED THE SAVED DATA
 
+    if (this.filename && !this.base64) {
+      // alert(this.filename)
+      this.base64 = (
+        await getBase64FileFromFirebase(this.app.patchName, this.filename)
+      ).base64;
+      // console.log()
+    }
+
     if (this.base64) {
       // base64ToArrayBuffer(this.base64)
-
       this.handleOnChange();
     }
   }
