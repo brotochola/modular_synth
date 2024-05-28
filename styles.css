@@ -72,6 +72,7 @@ app canvas.linesCanvas {
 }
 
 app {
+  --scale:1;
   position: absolute;
   left: 0px;
   top: 0px;
@@ -79,7 +80,7 @@ app {
   background-image: url(carpet.jpg);
   background-position: calc(0.25 * calc(var(--mainContainerX) + 500px))
     calc(0.25 * calc(var(--mainContainerY) + 500px));
-  background-size: cover;
+    background-size: calc(calc(95 + 5* var(--scale))* 1%) auto;
   height: 100vh;
   border-top: 1px solid gray;
 }
@@ -91,8 +92,9 @@ app .mainContainer {
   z-index: 1;
   top: -500px;
   left: -500px;
-  /* background-image: url(carpet.jpg); */
+  filter:blur(0px);
   background-size: 25%;
+  transition:filter 0.1s ease-out;
 }
 
 .buttons {
@@ -138,6 +140,7 @@ component.text textarea {
 }
 
 component {
+  
   /* background-image: url(leather.jpg); */
   background-size: 225%;
   background-position-x: var(--posX);
@@ -775,4 +778,9 @@ component.Oscillator {
   left: 5px;
   position: relative;
   width: calc(100% - 10px);
+}
+
+app.zooming  .mainContainer{
+  filter:blur(calc(var(--scale) * 6px) );
+  
 }

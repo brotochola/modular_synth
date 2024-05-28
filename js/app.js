@@ -273,9 +273,9 @@ class App {
 
       if (event.deltaY < 0) {
         this.container.style.left =
-          x - Math.abs(widthsDiff) - (difX * this.scale) * 0.2 + "px";
+          x - Math.abs(widthsDiff) - difX * this.scale * 0.2 + "px";
         this.container.style.top =
-          y - Math.abs(widthsDiff) - (difY * this.scale) * 0.2 + "px";
+          y - Math.abs(widthsDiff) - difY * this.scale * 0.2 + "px";
       } else {
         this.container.style.left = x + Math.abs(widthsDiff) + "px";
         this.container.style.top = y + Math.abs(heightsDiff) + "px";
@@ -283,7 +283,14 @@ class App {
       this.container.style.zoom = this.scale * 100 + "%";
       // event.preventDefault();
       // this.updateAllLines();
+      this.container.parentNode.style.setProperty("--scale", this.scale);
       this.lastScale = this.scale;
+
+      this.container.parentNode.classList.add("zooming");
+      clearTimeout(this.wheelTimeoutVar);
+      this.wheelTimeoutVar = setTimeout(() => {
+        this.container.parentNode.classList.remove("zooming");
+      },50);
     };
     this.scale = 1;
   }
