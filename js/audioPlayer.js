@@ -139,11 +139,12 @@ class AudioPlayer extends Component {
     // console.log("#update ui audioplayer", this.id)
     if (this.filename && !this.base64) {
       // console.log("it has a filename but no base64", this.filename)
-      this.base64 = (
-        await getBase64FileFromFirebase(this.app.patchName, this.filename)
-      ).base64;
-      // console.log("got base64?", this.base64)
-      if (this.base64) {
+      let dataFromFirebase = await getBase64FileFromFirebase(
+        this.app.patchName,
+        this.filename
+      );
+      if (dataFromFirebase) {
+        this.base64 = dataFromFirebase.base64;
         this.audioBuffer = await this.app.actx.decodeAudioData(
           base64ToArrayBuffer(this.base64)
         );

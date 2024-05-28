@@ -12,16 +12,13 @@ https://brotochola.github.io/modular_synth
 
 TODO:
 
+* tapper module
 * midi is owned by users
-* audio file player, and image player, add a normal button and hide the input[file]
 * add explanations
 * do something with the wave shaper
 * mouse: make 3 outputs: wheel, x and y
 * do the opposite of a multiplexor
-* do something better with the background
 * reverb: add type (get a few from the reverb.js website)
-* webcam same as imagePlayer but with webcam
-* mic: choose from all inputs available
 * add UI elements:
     * led
     * button
@@ -30,7 +27,9 @@ TODO:
     * rack cover (this components should go on top of the cables canvas)
 * PITCH DETECTOR:
     https://glitch.com/edit/#!/essentiajs-pitchmelodia?path=script.js%3A1%3A0
-
+https://chatgpt.com/g/g-2DQzU5UZl-code-copilot/c/e7d926fe-c152-406f-a7f6-f9bb5e13f694
+* overdrive & distortion:
+https://chatgpt.com/c/1dcba5bc-1ede-492f-97cf-d9175695ffef
 
 
 ------------------

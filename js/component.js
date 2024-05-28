@@ -429,6 +429,20 @@ class Component {
     // this=null
   }
 
+  resetMyConnections() {
+    for (let c of this.connections) {
+      c.reset();
+    }
+
+    this.app.components.map((k) =>
+      k.connections.map((c) => {
+        if (c.to == this) {
+          c.reset();
+        }
+      })
+    );
+  }
+
   remove() {
     if (this.unsubscribeToFireStore instanceof Function)
       this.unsubscribeToFireStore();
@@ -561,7 +575,7 @@ class Component {
     this.display.classList.add("display");
     this.container.appendChild(this.display);
   }
-  
+
   updateBPM() {}
 
   createOutputButton() {

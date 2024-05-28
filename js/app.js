@@ -223,8 +223,8 @@ class App {
 
     //THE POSITION OF THE OUTPUT COMPONENT IS SAVED IN THE INFO OF THE PATCH
     //AND NOT AS A SEPARATED COMPONENT
-    if (e.outputX ) {
-      let output = this.getOutputComponent();      
+    if (e.outputX) {
+      let output = this.getOutputComponent();
       output.container.style.left = e.outputX;
       output.container.style.top = e.outputY;
     }
@@ -407,12 +407,22 @@ class App {
     this.components.push(new Oscillator(this));
     //   this.saveListOfComponentsInFirestore();
   }
+  addPitchDetector() {
+    this.components.push(new PitchDetectorComponent(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
+  // addBPMDetector() {
+  //   this.components.push(new BPMDetector(this));
+  //   //   this.saveListOfComponentsInFirestore();
+  // }
+  addLerpComponent() {
+    this.components.push(new LerpComponent(this));
+  }
+
   addWebcamPlayer() {
     this.components.push(new WebcamPlayer(this));
     //   this.saveListOfComponentsInFirestore();
   }
-
-  
 
   addAiComponent() {
     this.components.push(new AiComponent(this));
