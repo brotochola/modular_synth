@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zoom Image on Mouse Wheel</title>
+<style>
+  #zoomable {
+    width: 400px;
+    height: 300px;
+    overflow: hidden;
+    position: relative;
+    border: 1px solid #000;
+  }
+  .content img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transition: transform 0.1s;
+  }
+</style>
+</head>
+<body>
+
+<div id="zoomable">
+  <div class="content">
+    <img src="https://via.placeholder.com/800" alt="Zoomable Image" id="zoomImage">
+  </div>
+</div>
+
+<script>
+  const zoomable = document.getElementById('zoomable');
+  const image = document.getElementById('zoomImage');
+  let zoom = 1;
+
+  function handleWheel(event) {
+    event.preventDefault();
+
+    const scaleFactor = 0.1;
+    let delta = Math.sign(event.deltaY) * scaleFactor;
+    let newZoom = zoom - delta;
+
+    // Set a minimum and maximum zoom level
+    newZoom = Math.max(0.5, Math.min(newZoom, 3));
+
+    const rect = zoomable.getBoundingClientRect();
+    const offsetX = event.clientX - rect.left;
+    const offsetY = event.clientY - rect.top;
+
+    // Calculate the new positions
+    const prevZoom = zoom;
+    const dx = (offsetX - (image.offsetLeft - zoomable.scrollLeft)) * (newZoom / prevZoom - 1);
+    const dy = (offsetY - (image.offsetTop - zoomable.scrollTop)) * (newZoom / prevZoom - 1);
+
+    // Update the zoom level
+    zoom = newZoom;
+    image.style.transform = `scale(${zoom})`;
+
+    // Adjust the position to compensate for the zooming
+    image.style.left = `${image.offsetLeft - dx}px`;
+    image.style.top = `${image.offsetTop - dy}px`;
+  }
+
+  zoomable.addEventListener('wheel', handleWheel);
+</script>
+
+</body>
+</html>

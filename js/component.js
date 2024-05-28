@@ -489,9 +489,15 @@ class Component {
     e.preventDefault();
     let box = this.app.container.getBoundingClientRect();
     this.container.style.left =
-      -box.x + e.clientX - this.dragStartedAt[0] + "px";
+      -box.x +
+      e.clientX / this.app.scale -
+      this.dragStartedAt[0] / this.app.scale +
+      "px";
     this.container.style.top =
-      -box.y + e.clientY - this.dragStartedAt[1] + "px";
+      -box.y +
+      e.clientY / this.app.scale -
+      this.dragStartedAt[1] / this.app.scale +
+      "px";
 
     this.container.style.setProperty("--posX", this.container.style.left);
     this.container.style.setProperty("--posY", this.container.style.top);

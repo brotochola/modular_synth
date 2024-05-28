@@ -242,20 +242,50 @@ class App {
   }
 
   wheelZoom() {
-    // this.container.onwheel = (event) => {
-    //   this.scale += event.deltaY * 0.01;
-    //   // Restrict scale
-    //   this.scale = Math.min(Math.max(0.25, this.scale), 1);
-    //   // Apply scale transform
-    //   for (let el of document.querySelectorAll("component")) {
-    //     el.style.transform = `scale(${this.scale})`;
-    //   }
-    //   // this.container.style.transformOrigin =
-    //   //   event.clientX + "px " + event.clientY + "px";
-    //   event.preventDefault();
-    //   this.updateAllLines();
-    // };
-    // this.scale = 1;
+    this.container.onwheel = (event) => {
+      event.preventDefault();
+      if (
+        (this.scale == 1 && event.deltaY < 0) ||
+        (this.scale == 0.25 && event.deltaY > 0)
+      ) {
+        return;
+      }
+      this.scale -= event.deltaY * 0.0005;
+      // Restrict scale
+      this.scale = Math.min(Math.max(0.25, this.scale), 1);
+
+      let box = this.container.getBoundingClientRect();
+      let currentWidth = box.width * this.scale;
+      let lastWidth = box.width * this.lastScale;
+
+      let currentHeight = box.height * this.scale;
+      let lastHeight = box.height * this.lastScale;
+
+      let widthsDiff = ((lastWidth - currentWidth) / this.scale) * 0.2;
+      let heightsDiff = ((currentHeight - lastHeight) / this.scale) * 0.2;
+
+      let x = box.x;
+      let y = box.y;
+
+      let difX = event.x - window.innerWidth / 2;
+      let difY = event.y - window.innerHeight / 2;
+      console.log(difX, difY);
+
+      if (event.deltaY < 0) {
+        this.container.style.left =
+          x - Math.abs(widthsDiff) - (difX * this.scale) * 0.2 + "px";
+        this.container.style.top =
+          y - Math.abs(widthsDiff) - (difY * this.scale) * 0.2 + "px";
+      } else {
+        this.container.style.left = x + Math.abs(widthsDiff) + "px";
+        this.container.style.top = y + Math.abs(heightsDiff) + "px";
+      }
+      this.container.style.zoom = this.scale * 100 + "%";
+      // event.preventDefault();
+      // this.updateAllLines();
+      this.lastScale = this.scale;
+    };
+    this.scale = 1;
   }
   putBPMInButton() {
     (document.querySelector(".buttons #bpmButton") || {}).innerHTML =
@@ -326,8 +356,8 @@ class App {
     elem.appendChild(this.container);
     this.SAVE_PREFIX = "modular_synth_";
     this.container.ondragend = (e) => {
-      let x = e.clientX - this.dragStartedAt[0];
-      let y = e.clientY - this.dragStartedAt[1];
+      let x = (e.clientX - this.dragStartedAt[0]) / this.scale;
+      let y = (e.clientY - this.dragStartedAt[1]) / this.scale;
       this.container.style.left = x + "px";
       this.container.style.top = y + "px";
       this.putCSSVariablesInMainContainer(x, y);
@@ -347,6 +377,7 @@ class App {
         this.buttonsContainer.classList.remove("visible");
       }
     };
+
     let box = this.container.getBoundingClientRect();
     this.putCSSVariablesInMainContainer(box.x, box.y);
   }
