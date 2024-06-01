@@ -784,3 +784,7 @@ app.zooming  .mainContainer{
   filter:blur(calc(var(--scale) * 6px) );
   
 }
+
+component.PadSampler{
+  height:300px;
+}

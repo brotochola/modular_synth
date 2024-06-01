@@ -182,12 +182,31 @@ function unique(arr) {
 }
 
 function arrayToObject(arr) {
-  if (!Array.isArray(arr)) return arr;
+  if (
+    !Array.isArray(arr) &&
+    !(arr instanceof Uint8Array) &&
+    !(arr instanceof Uint16Array) &&
+    !(arr instanceof Uint32Array)
+  )
+    return arr;
   const obj = {};
   arr.forEach((element, index) => {
     obj[index] = element;
   });
   return obj;
+}
+
+function getHighestItemFromArrObj(obj) {
+  let sortable = [];
+  for (var item in obj) {
+    sortable.push([item, obj[item]]);
+  }
+
+  sortable.sort(function (a, b) {
+    return a[1] - b[1];
+  });
+
+  return Number(sortable[sortable.length - 1][0])
 }
 
 function objectToArray(obj) {
@@ -235,6 +254,10 @@ function makeCopyOfImageData(imageData) {
     imageData.height
   );
 }
+var toLog = function (value, min, max) {
+  var exp = (value - min) / (max - min);
+  return min * Math.pow(max / min, exp);
+};
 
 function sigmoid(x) {
   return 1 / (1 + Math.exp(-x));
@@ -306,10 +329,10 @@ function midi2Freq(midiNote) {
   return Math.pow(2, (midiNote - 69) / 12) * concertPitch;
 }
 
-function generateAnArrayWithRandomValues(length,val) {
+function generateAnArrayWithRandomValues(length, val) {
   let arr = [];
   for (i = 0; i < length; i++) {
-    arr.push(val?val:Math.random() * 2 - 1);
+    arr.push(val ? val : Math.random() * 2 - 1);
   }
-  return arr
+  return arr;
 }

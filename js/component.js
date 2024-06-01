@@ -454,7 +454,11 @@ class Component {
       removeComponentFromFirestore(this.app.patchName, this.id);
     }
 
-    setTimeout(() => this.clearAll(), 50);
+    setTimeout(() => {
+      this.app.updateAllLines()
+      this.clearAll()
+      
+    }, 50);
   }
   connect(compo, input, numberOfOutput) {
     // console.log("#connect", compo, input);

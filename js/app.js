@@ -449,6 +449,21 @@ class App {
     this.components.push(new PitchDetectorComponent(this));
     //   this.saveListOfComponentsInFirestore();
   }
+  addPadSampler() {
+    this.components.push(new PadSampler(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
+  
+
+  addSpectrogram() {
+    this.components.push(new Spectrogram(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
+
+  addPitchDetector2() {
+    this.components.push(new PitchDetector2(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
   // addBPMDetector() {
   //   this.components.push(new BPMDetector(this));
   //   //   this.saveListOfComponentsInFirestore();

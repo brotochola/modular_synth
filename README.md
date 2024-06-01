@@ -12,6 +12,19 @@ https://brotochola.github.io/modular_synth
 
 TODO:
 
+
+* SAMPLER IN AUDIO WORKLET:
+    https://www.youtube.com/watch?v=XAch1Q0Iodc&ab_channel=Thought-Forms
+* RECORDER NODE:
+    https://github.com/cwilso/AudioRecorder/blob/master/js/main.js#L152
+    https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaStreamDestination?retiredLocale=de
+* in and out node for each component to have more complex components
+* PLAY PAUSE BUTTONS
+    * connected among all users in the same session
+    * keep track of all users connected to the same session, and send them sync messages using rtc data channel
+* requestanimationframe for example in the number display
+* component: draw an automation on a canvas and have an input for frequency, or a trigger
+* ARPEGGIATOR
 * tapper module
 * midi is owned by users
 * add explanations
@@ -25,9 +38,7 @@ TODO:
     * fader
     * knob
     * rack cover (this components should go on top of the cables canvas)
-* PITCH DETECTOR:
-    https://glitch.com/edit/#!/essentiajs-pitchmelodia?path=script.js%3A1%3A0
-https://chatgpt.com/g/g-2DQzU5UZl-code-copilot/c/e7d926fe-c152-406f-a7f6-f9bb5e13f694
+* BPM DETECTOR: https://github.com/qiuxiang/aubiojs?tab=readme-ov-file
 * overdrive & distortion:
 https://chatgpt.com/c/1dcba5bc-1ede-492f-97cf-d9175695ffef
 

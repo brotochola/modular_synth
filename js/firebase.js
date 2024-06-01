@@ -40,7 +40,8 @@ async function createInstanceOfComponentInFirestore(
 }
 
 async function createBase64FileInFirebase(patchName, base64, filename) {
-  console.log("#saving file", filename)
+  console.log("#saving file", filename);
+  if (!patchName) return console.warn("no patch name");
   let ret = await collectionRef
     .doc(patchName)
     .collection("files")
@@ -51,6 +52,8 @@ async function createBase64FileInFirebase(patchName, base64, filename) {
 }
 
 async function getBase64FileFromFirebase(patchName, filename) {
+  if (!patchName) return console.warn("no patch name");
+
   return (
     await (
       await collectionRef.doc(patchName).collection("files").doc(filename)
