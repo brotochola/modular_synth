@@ -71,7 +71,7 @@ class App {
   createMessageBox() {
     this.messageBox = document.createElement("div");
     this.messageBox.classList.add("messageBox");
-    this.container.appendChild(this.messageBox);
+    document.body.appendChild(this.messageBox);
   }
   generateUserAndSessionIDs() {
     if (!localStorage.getItem("user_id")) {
@@ -290,7 +290,7 @@ class App {
       clearTimeout(this.wheelTimeoutVar);
       this.wheelTimeoutVar = setTimeout(() => {
         this.container.parentNode.classList.remove("zooming");
-      },50);
+      }, 50);
     };
     this.scale = 1;
   }
@@ -453,7 +453,10 @@ class App {
     this.components.push(new PadSampler(this));
     //   this.saveListOfComponentsInFirestore();
   }
-  
+  addSpectrum2Image() {
+    this.components.push(new Spectrum2Image(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
 
   addSpectrogram() {
     this.components.push(new Spectrogram(this));

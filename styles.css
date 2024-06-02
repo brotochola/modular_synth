@@ -684,7 +684,7 @@ app > .mainContainer > canvas.imgMakerCanvas {
   top: 0px;
 }
 
-app .messageBox {
+ .messageBox {
   top: -50vh;
   width: max-content;
   padding: 10px;
@@ -698,9 +698,10 @@ app .messageBox {
   border-radius: 5px;
   border: 3px solid gray;
   transition: all 0.35s ease-in-out;
+  z-index: 999;
 }
 
-app .messageBox.visible {
+ .messageBox.visible {
   top: 10px;
 }
 
@@ -787,4 +788,9 @@ app.zooming  .mainContainer{
 
 component.PadSampler{
   height:300px;
+}
+
+component.spectrum2image{
+  width:520px;
+  height:390px
 }

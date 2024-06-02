@@ -15,14 +15,27 @@ class Midi extends Component {
     } else {
       console.warn("No MIDI support in your browser");
     }
+
+    this.notesOn = {};
     this.createDisplay();
     this.createNode();
-    this.outputLabels = ["freq", "velocity", "mod wheel", "pitch bend"];
+    this.outputLabels = [
+      "freq1",
+      "freq2",
+      "freq3",
+      "freq4",
+      "velocity",
+      "mod wheel",
+      "pitch bend",
+    ];
     this.visibleOutputs = {
-      freq: { numOfOutput: 0 },
-      velocity: { numOfOutput: 1 },
-      modWheel: { numOfOutput: 2 },
-      pitchBend: { numOfOutput: 3 },
+      freq1: { numOfOutput: 0 },
+      freq2: { numOfOutput: 1 },
+      freq3: { numOfOutput: 2 },
+      freq4: { numOfOutput: 3 },
+      velocity: { numOfOutput: 4 },
+      modWheel: { numOfOutput: 5 },
+      pitchBend: { numOfOutput: 6 },
     };
     this.valuesToSave = ["visibleOutputs", "controlChangesToBeSaved"];
   }
@@ -169,6 +182,9 @@ class Midi extends Component {
   onNote(note, velocity) {
     console.log("onNote", note, velocity);
     this.node.port.postMessage({ type: "note", note, velocity });
+    if (velocity) this.notesOn[note] = velocity;
+    else delete this.notesOn[note];
+    this.node.port.postMessage({ type: "notesOn", notesOn: this.notesOn });
   }
 
   // on failure
@@ -182,7 +198,7 @@ class Midi extends Component {
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "midi-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: 28, //16 controllers + 8 pads + freq, velocity, pitch bend, mod wheel
+          numberOfOutputs: 31, //16 controllers + 8 pads + freq, velocity, pitch bend, mod wheel
         });
 
         this.node.onprocessorerror = (e) => {

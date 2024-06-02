@@ -12,9 +12,9 @@ https://brotochola.github.io/modular_synth
 
 TODO:
 
+* USAR FFT (AMPLITUD DE CADA FRECUENCIA PARA GENERAR IMAGENES, DE ESTA FORMA NO HAY Q EPSERAR 48000 SAMPLES PARA GENRAR 48000 PIXELES)
 
-* SAMPLER IN AUDIO WORKLET:
-    https://www.youtube.com/watch?v=XAch1Q0Iodc&ab_channel=Thought-Forms
+* LOAD VIDEOS, 2 INPUTS: TIME OFFSET, PLAYBACKSPEED
 * RECORDER NODE:
     https://github.com/cwilso/AudioRecorder/blob/master/js/main.js#L152
     https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaStreamDestination?retiredLocale=de
