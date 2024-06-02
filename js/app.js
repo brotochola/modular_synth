@@ -16,9 +16,12 @@ class App {
   ];
   constructor(elem) {
     this.patchName = getParameterByName("patch");
+    this.admin = !!getParameterByName("admin");
 
     this.components = [];
     this.actx = new AudioContext();
+    this.actx.suspend();
+
     this.bpm = 100;
     this.createMainContainer(elem);
     this.createMessageBox();
@@ -29,7 +32,15 @@ class App {
     this.putBPMInButton();
 
     this.generateUserAndSessionIDs();
+    this.createInstanceOfRTCConnectionForUsers();
+
     document.addEventListener("contextmenu", (event) => event.preventDefault());
+
+    window.onbeforeunload = (e) => {
+      e.preventDefault();
+      e.returnValue = true;
+      removeMeAsUserInThisPatchInFirebase(this.patchName, this.userID);
+    };
 
     window.addEventListener(
       "keydown",
@@ -53,6 +64,10 @@ class App {
 
     // this.checkIfTheresAPatchToOpenInTheURL();
     setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
+  }
+
+  createInstanceOfRTCConnectionForUsers() {
+    this.rtcInstance = new RTCForUsersData(this);
   }
   showMessage(text) {
     this.messageBox.classList.add("visible");
@@ -80,6 +95,7 @@ class App {
     this.userID = localStorage.getItem("user_id");
     this.sessionID = makeid(12);
     this.container.style.setProperty("--userID", this.userID);
+    addMeAsUserInThisPatchInFirebase(this.patchName, this.userID, this.admin);
   }
   addEventsToDropFile() {
     document.body.ondrop = (ev) => {
@@ -147,7 +163,23 @@ class App {
         this.userID
       );
       this.listeningToFirestore = true;
+
+      //LISTEN TO CHANGES IN THE USERS COLLECTIONS
+      listenToChangesInUsersConnectedToThisPatch(this.patchName, (users) => {
+        this.handleChangesInUsers(users);
+      });
     });
+  }
+  handleChangesInUsers(users) {
+    this.connectedUsers = users;
+
+    if (this.rtcInstance && this.rtcInstance.state == "ready") {
+      if (!this.admin) {
+        let adminsID = this.connectedUsers.filter((k) => k.admin)[0];
+        if (!adminsID) return console.warn("there's no admin connected?");
+        this.rtcInstance.connect(adminsID.userID);
+      }
+    }
   }
 
   // async checkIfTheresAPatchToOpenInTheURL() {
@@ -682,7 +714,7 @@ class App {
 
     setTimeout(() => {
       this.resetAllConnections();
-      this.actx.resume();
+      // this.actx.resume();
       this.updateAllLines();
     }, 200);
   }
@@ -839,6 +871,19 @@ class App {
       },
       this.patchName
     );
-    // setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
+  }
+
+  play() {
+    if (this.admin) {
+      this.rtcInstance.sendMessage({ action: "play" });
+    }
+    this.actx.resume()
+  }
+
+  stop() {
+    if (this.admin) {
+      this.rtcInstance.sendMessage({ action: "stop" });
+    }
+    this.actx.suspend()
   }
 }

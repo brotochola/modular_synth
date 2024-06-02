@@ -2,7 +2,7 @@
 
 <head>
     <!-- <script src="//unpkg.com/brain.js"></script> -->
-  
+
     <script src="js/external/peerjs.min.js"></script>
 
 
@@ -84,6 +84,9 @@
     <script src="js/output.js"></script>
     <script src="js/app.js"></script>
 
+    <script src="js/rtcForUsersData.js"></script>
+
+
     <link rel="stylesheet" href="styles.css">
 
 
@@ -92,6 +95,8 @@
 <body>
     <div class="buttons">
         <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
+        <button onclick="app.play()"> play</button>
+        <button onclick="app.stop()"> stop</button>
         <button onclick="app.addOscillator()">🚴🏿 add osc</button>
         <!-- <button onclick="app.addWaveShaper()"> add wave shaper</button> -->
         <button onclick="app.addMidiInput()">🎹 add midi input</button>
@@ -103,7 +108,7 @@
         <button onclick="app.addWebcamPlayer()">🤳🏻 add Webcam</button>
         <button onclick="app.addNoise()">👾 add noise</button>
         <hr>
-        
+
         <button onclick="app.addFilter()">🤖 add filter</button>
         <button onclick="app.addCustomProcessor()">🧩 add Math Processor</button>
         <button onclick="app.addGainNode()">📢 add gain node</button>
@@ -155,7 +160,7 @@
         <button onclick="app.addRTCSender()">📭 add RTC sender</button>
         <button onclick="app.addRTCReceiver()">📨 add RTC receiver</button>
 
-        <button onclick="app.actx.resume()"> RESUME AUDIO CTX</button>
+
         <button onclick="app.resetAllConnections()">!! reset all connections</button>
 
         <button onclick="app.save()">💾 save</button>

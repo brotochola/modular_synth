@@ -22,7 +22,7 @@ class Component {
     this.createView();
     this.inputElements = {};
     // this.outputElements = {};
-    this.app.actx.resume();
+    // this.app.actx.resume();
     this.active = false;
   }
   createDeleteButton() {

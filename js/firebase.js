@@ -39,6 +39,30 @@ async function createInstanceOfComponentInFirestore(
   return ret;
 }
 
+async function addMeAsUserInThisPatchInFirebase(patchName, userID, admin) {
+  console.log("#addMeAsUserInThisPatchInFirebase", userID);
+  if (!patchName) return console.warn("no patch name");
+  let ret = await collectionRef
+    .doc(patchName)
+    .collection("users")
+    .doc(userID)
+    .set({ userID, admin });
+
+  return ret;
+}
+
+async function removeMeAsUserInThisPatchInFirebase(patchName, userID) {
+  console.log("#removeMeAsUserInThisPatchInFirebase", userID);
+  if (!patchName) return console.warn("no patch name");
+  let ret = await collectionRef
+    .doc(patchName)
+    .collection("users")
+    .doc(userID)
+    .delete();
+
+  return ret;
+}
+
 async function createBase64FileInFirebase(patchName, base64, filename) {
   console.log("#saving file", filename);
   if (!patchName) return console.warn("no patch name");
@@ -131,6 +155,40 @@ function listenToChangesInWholePatch(docName, cb) {
       cb(data);
     }
   });
+  return refToUnsubscribe;
+}
+
+async function getAllUsersConnected(patchName) {
+  return (
+    await firebase
+      .firestore()
+      .collection("modular")
+      .doc(patchName)
+      .collection("users")
+      .get()
+  ).docs.map((k) => k.data());
+}
+
+function listenToChangesInUsersConnectedToThisPatch(patchName, cb) {
+  // console.log("# listen to changes", docName, componentID)
+  const usersCollection = firebase
+    .firestore()
+    .collection("modular")
+    .doc(patchName)
+    .collection("users");
+
+  let refToUnsubscribe = usersCollection.onSnapshot((col) => {
+    if (cb instanceof Function) {
+      getAllUsersConnected(patchName).then((users) => {
+        cb(users);
+      });
+    }
+  });
+
+  getAllUsersConnected(patchName).then((users) => {
+    cb(users);
+  });
+
   return refToUnsubscribe;
 }
 

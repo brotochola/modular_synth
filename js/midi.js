@@ -180,7 +180,7 @@ class Midi extends Component {
     this.node.port.postMessage({ type: "pitchBend", velocity });
   }
   onNote(note, velocity) {
-    console.log("onNote", note, velocity);
+    // console.log("onNote", note, velocity);
     this.node.port.postMessage({ type: "note", note, velocity });
     if (velocity) this.notesOn[note] = velocity;
     else delete this.notesOn[note];
