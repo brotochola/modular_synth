@@ -29,7 +29,8 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-component select, component select option {
+component select,
+component select option {
   border: 1px solid green;
   border-radius: 5px;
   background: rgba(0, 0, 0, 0.5) !important;
@@ -42,7 +43,6 @@ component select, component select option {
   text-transform: capitalize;
   padding-left: 2px;
 }
-
 
 component {
   color: lightgreen;
@@ -72,7 +72,7 @@ app canvas.linesCanvas {
 }
 
 app {
-  --scale:1;
+  --scale: 1;
   position: absolute;
   left: 0px;
   top: 0px;
@@ -80,7 +80,7 @@ app {
   background-image: url(carpet.jpg);
   background-position: calc(0.25 * calc(var(--mainContainerX) + 500px))
     calc(0.25 * calc(var(--mainContainerY) + 500px));
-    background-size: calc(calc(95 + 5* var(--scale))* 1%) auto;
+  background-size: calc(calc(95 + 5 * var(--scale)) * 1%) auto;
   height: 100vh;
   border-top: 1px solid gray;
 }
@@ -92,9 +92,9 @@ app .mainContainer {
   z-index: 1;
   top: -500px;
   left: -500px;
-  filter:blur(0px);
+  filter: blur(0px);
   background-size: 25%;
-  transition:filter 0.1s ease-out;
+  transition: filter 0.1s ease-out;
 }
 
 .buttons {
@@ -140,7 +140,6 @@ component.text textarea {
 }
 
 component {
-  
   /* background-image: url(leather.jpg); */
   background-size: 225%;
   background-position-x: var(--posX);
@@ -175,20 +174,15 @@ component.mic icon:after {
 }
 component.webcamplayer icon:after {
   content: "🤳🏻";
-
 }
-
 
 component.peakdetectorcomponent icon:after {
   content: "⛰️";
-
 }
 
 component.compressor icon:after {
   content: "➗";
 }
-
-
 
 component.WebRTCSender icon:after {
   content: "📭";
@@ -207,10 +201,9 @@ component.audioplayer icon:after {
   content: "🎶";
 }
 
-component.KeyboardComponent  icon:after {
+component.KeyboardComponent icon:after {
   content: "⌨";
 }
-
 
 component.WebRTCReceiver icon:after {
   content: "📨";
@@ -226,7 +219,7 @@ component.distortion icon:after {
   content: "🤘";
 }
 
-component.ImagePlayerWorkletVersion  icon:after {
+component.ImagePlayerWorkletVersion icon:after {
   content: "🖼️";
 }
 
@@ -283,13 +276,8 @@ component.CustomProcessorComponent icon:after {
   content: "🧩";
 }
 
-
-
-
 component.envelopegenerator icon:after {
-  
   content: "〽️";
-  
 }
 component.Midi {
   height: 205px;
@@ -330,9 +318,9 @@ textarea {
 }
 
 component.text textarea {
-left:0px;
-width:100%;
-margin:0;
+  left: 0px;
+  width: 100%;
+  margin: 0;
 }
 
 component.multiplexor {
@@ -342,7 +330,7 @@ component.multiplexor {
 component .display {
   margin-top: 30px;
   margin-left: 5px;
-  font-size:14px;
+  font-size: 14px;
 }
 
 component.multiplexor .display {
@@ -481,8 +469,6 @@ component input[type="file"] {
   outline: none;
 }
 
-
-
 component .inputsDiv {
   position: absolute;
   overflow: hidden;
@@ -533,7 +519,8 @@ component .outputButton:hover {
   outline: 1px solid lightgreen;
 }
 
-component button.playButton, component .triggerInputFile {
+component button.playButton,
+component .triggerInputFile {
   display: block;
   position: relative;
   left: 5px;
@@ -544,10 +531,6 @@ component button.playButton, component .triggerInputFile {
   width: calc(100% - 10px);
   white-space: nowrap;
 }
-
-
-
-
 
 component .inputsDiv button.input,
 button {
@@ -684,7 +667,7 @@ app > .mainContainer > canvas.imgMakerCanvas {
   top: 0px;
 }
 
- .messageBox {
+.messageBox {
   top: -50vh;
   width: max-content;
   padding: 10px;
@@ -699,9 +682,11 @@ app > .mainContainer > canvas.imgMakerCanvas {
   border: 3px solid gray;
   transition: all 0.35s ease-in-out;
   z-index: 999;
+  line-height: 14px;
+  font-size: 13px;
 }
 
- .messageBox.visible {
+.messageBox.visible {
   top: 10px;
 }
 
@@ -710,7 +695,7 @@ component button.infoButton {
   position: absolute;
   left: 30px;
   font-size: 14px;
-  top: 7px;  
+  top: 7px;
   padding: 0px;
   height: 18px;
   padding-left: 3px;
@@ -781,16 +766,54 @@ component.Oscillator {
   width: calc(100% - 10px);
 }
 
-app.zooming  .mainContainer{
-  filter:blur(calc(var(--scale) * 6px) );
-  
+app.zooming .mainContainer {
+  filter: blur(calc(var(--scale) * 6px));
 }
 
-component.PadSampler{
-  height:300px;
+component.PadSampler {
+  height: 300px;
 }
 
-component.spectrum2image{
-  width:520px;
-  height:390px
+component.spectrum2image {
+  width: 520px;
+  height: 390px;
+}
+
+footer {
+  background: rgba(0, 0, 0, 0.5) !important;
+  backdrop-filter: blur(5px);
+  color: lightgreen;
+  border: 1px solid darkgreen;
+  border-radius: 5px;
+  display: flex;
+  position: fixed;
+  bottom: 0px;
+  gap: 10px;
+  width: 100vw;
+  padding: 5px;
+  z-index: 2;
+  height: 32px;
+  border-right-width: 0px;
+  border-left-width: 0px;
+  flex-direction: row;
+  justify-content: flex-end;
+  user-select: none;
+}
+
+footer connectedUsers {
+  font-size: 11px;
+  /* height: 70px; */
+  /* margin-bottom: 50px; */
+  margin-right: 5px;
+  line-height: 21px;
+  width: max-content;
+  text-align: right;
+  position: relative;
+}
+
+footer button {
+  width: max-content;
+}
+footer .patchName {
+  text-transform: capitalize;
 }

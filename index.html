@@ -93,10 +93,19 @@
 </head>
 
 <body>
-    <div class="buttons">
+    <footer>
+        <button onclick="app.openButtons()" class="openButtons">add modules</button>
+        <div class="patchName"></div>
+        <button onclick="app.play()" class="play">play</button>
+        <button onclick="app.stop()" class="stop">stop</button>
+       
         <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
-        <button onclick="app.play()"> play</button>
-        <button onclick="app.stop()"> stop</button>
+        <connectedUsers></connectedUsers>
+    </footer>
+    <div class="buttons">
+
+        <!-- <button onclick="app.play()"> play</button>
+        <button onclick="app.stop()"> stop</button> -->
         <button onclick="app.addOscillator()">🚴🏿 add osc</button>
         <!-- <button onclick="app.addWaveShaper()"> add wave shaper</button> -->
         <button onclick="app.addMidiInput()">🎹 add midi input</button>

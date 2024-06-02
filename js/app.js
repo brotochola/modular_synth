@@ -16,6 +16,7 @@ class App {
   ];
   constructor(elem) {
     this.patchName = getParameterByName("patch");
+    document.querySelector(".patchName").innerHTML = this.patchName;
     this.admin = !!getParameterByName("admin");
 
     this.components = [];
@@ -61,6 +62,8 @@ class App {
     this.wheelZoom();
 
     this.buttonsContainer = document.querySelector(".buttons");
+
+    this.listOfConnectedUsersElement = document.querySelector("connectedUsers");
 
     // this.checkIfTheresAPatchToOpenInTheURL();
     setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
@@ -172,7 +175,11 @@ class App {
   }
   handleChangesInUsers(users) {
     this.connectedUsers = users;
+    //UPDATE HTML
+    this.listOfConnectedUsersElement.innerHTML =
+      users.length + " Users" + (this.admin ? " (you're the admin)" : "");
 
+    //CONNECT VIA RTC
     if (this.rtcInstance && this.rtcInstance.state == "ready") {
       if (!this.admin) {
         let adminsID = this.connectedUsers.filter((k) => k.admin)[0];
@@ -301,7 +308,7 @@ class App {
 
       let difX = event.x - window.innerWidth / 2;
       let difY = event.y - window.innerHeight / 2;
-      console.log(difX, difY);
+      // console.log(difX, difY);
 
       if (event.deltaY < 0) {
         this.container.style.left =
@@ -327,7 +334,7 @@ class App {
     this.scale = 1;
   }
   putBPMInButton() {
-    (document.querySelector(".buttons #bpmButton") || {}).innerHTML =
+    (document.querySelector("#bpmButton") || {}).innerHTML =
       "change BPM (" + this.bpm + ")";
   }
   createCanvasOnTop() {
@@ -409,13 +416,13 @@ class App {
       this.dragStartedAt[0] = e.layerX;
       this.dragStartedAt[1] = e.layerY;
     };
-    this.container.onmousemove = (e) => {
-      if (e.x < 160) {
-        this.buttonsContainer.classList.add("visible");
-      } else {
-        this.buttonsContainer.classList.remove("visible");
-      }
-    };
+    // this.container.onmousemove = (e) => {
+    //   if (e.x < 160) {
+    //     this.buttonsContainer.classList.add("visible");
+    //   } else {
+    //     this.buttonsContainer.classList.remove("visible");
+    //   }
+    // };
 
     let box = this.container.getBoundingClientRect();
     this.putCSSVariablesInMainContainer(box.x, box.y);
@@ -877,13 +884,17 @@ class App {
     if (this.admin) {
       this.rtcInstance.sendMessage({ action: "play" });
     }
-    this.actx.resume()
+    this.actx.resume();
   }
 
   stop() {
     if (this.admin) {
       this.rtcInstance.sendMessage({ action: "stop" });
     }
-    this.actx.suspend()
+    this.actx.suspend();
+  }
+
+  openButtons() {
+    this.buttonsContainer.classList.toggle("visible");
   }
 }
