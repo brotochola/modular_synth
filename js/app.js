@@ -19,6 +19,8 @@ class App {
     document.querySelector(".patchName").innerHTML = this.patchName;
     this.admin = !!getParameterByName("admin");
 
+    this.playButton = document.querySelector(".play");
+
     this.components = [];
     this.actx = new AudioContext();
     this.actx.suspend();
@@ -54,6 +56,8 @@ class App {
           }
 
           this.updateAllLines();
+        } else if (e.key == " ") {
+          this.buttonsContainer.classList.toggle("visible");
         }
       },
       false
@@ -416,13 +420,10 @@ class App {
       this.dragStartedAt[0] = e.layerX;
       this.dragStartedAt[1] = e.layerY;
     };
-    // this.container.onmousemove = (e) => {
-    //   if (e.x < 160) {
-    //     this.buttonsContainer.classList.add("visible");
-    //   } else {
-    //     this.buttonsContainer.classList.remove("visible");
-    //   }
-    // };
+
+    this.container.onmousedown = (e) => {
+      this.buttonsContainer.classList.remove("visible");
+    };
 
     let box = this.container.getBoundingClientRect();
     this.putCSSVariablesInMainContainer(box.x, box.y);
@@ -881,17 +882,19 @@ class App {
   }
 
   play() {
-    if (this.admin) {
-      this.rtcInstance.sendMessage({ action: "play" });
+    if (this.actx.state == "running") {
+      if (this.admin) {
+        this.rtcInstance.sendMessage({ action: "stop" });
+      }
+      this.actx.suspend();
+      this.playButton.innerHTML = " ▶ ";
+    } else {
+      if (this.admin) {
+        this.rtcInstance.sendMessage({ action: "play" });
+      }
+      this.actx.resume();
+      this.playButton.innerHTML = " ■ ";
     }
-    this.actx.resume();
-  }
-
-  stop() {
-    if (this.admin) {
-      this.rtcInstance.sendMessage({ action: "stop" });
-    }
-    this.actx.suspend();
   }
 
   openButtons() {

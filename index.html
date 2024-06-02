@@ -1,7 +1,15 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
 
 <head>
     <!-- <script src="//unpkg.com/brain.js"></script> -->
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Free Collaborative Real-Time Web Modular Synth</title>
+
 
     <script src="js/external/peerjs.min.js"></script>
 
@@ -94,91 +102,107 @@
 
 <body>
     <footer>
-        <button onclick="app.openButtons()" class="openButtons">add modules</button>
-        <div class="patchName"></div>
-        <button onclick="app.play()" class="play">play</button>
-        <button onclick="app.stop()" class="stop">stop</button>
-       
-        <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
+        <button onclick="app.openButtons()" class="openButtons">+ Modules</button>
         <connectedUsers></connectedUsers>
+
+
+        <!-- <button onclick="app.save()">💾 save</button> -->
+        <button onclick="app.download()" class="download">💾 Download Patch</button>
+
+
+        <!-- <button onclick="app.load()">📂 load</button> -->
+
+        <!-- <button onclick="app.loadFromFireStore()">📂 load from firestore</button> -->
+
+        <!-- <button onclick="app.stop()" class="stop"> ■ </button> -->
+
+        <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
+        <button onclick="app.play()" class="play"> ▶ </button>
+        <div class="patchName"></div>
+
     </footer>
     <div class="buttons">
 
-        <!-- <button onclick="app.play()"> play</button>
-        <button onclick="app.stop()"> stop</button> -->
-        <button onclick="app.addOscillator()">🚴🏿 add osc</button>
-        <!-- <button onclick="app.addWaveShaper()"> add wave shaper</button> -->
-        <button onclick="app.addMidiInput()">🎹 add midi input</button>
-        <button onclick="app.addMidiPlayer()">🎼 add midi file player</button>
-        <button onclick="app.addConstantValueNode()">🅺 add constant</button>
+        <span class="categoryOfComponent">
+            <button onclick="app.addOscillator()">🚴🏿 Oscillator</button>
+            <!-- <button onclick="app.addWaveShaper()"> add wave shaper</button> -->
 
-        <button onclick="app.addAudioPlayer()">🎶 add Audio Player</button>
-        <button onclick="app.addMic()">🎤 add mic</button>
-        <button onclick="app.addWebcamPlayer()">🤳🏻 add Webcam</button>
-        <button onclick="app.addNoise()">👾 add noise</button>
-        <hr>
+            <button onclick="app.addMidiPlayer()">🎼 MIDI Player</button>
+            <button onclick="app.addConstantValueNode()">🅺 Constant</button>
 
-        <button onclick="app.addFilter()">🤖 add filter</button>
-        <button onclick="app.addCustomProcessor()">🧩 add Math Processor</button>
-        <button onclick="app.addGainNode()">📢 add gain node</button>
-        <button onclick="app.addCompressor()">➗ add compressor</button>
-        <button onclick="app.addDelay()">⏰ add Delay</button>
-        <button onclick="app.addReverb()">⛪ add reverb</button>
-        <button onclick="app.addDistortion()">🤘 add distortion</button>
-        <button onclick="app.addLerpComponent()">add lerp</button>
-        <button onclick="app.addPadSampler()">### add padSampler</button>
+            <button onclick="app.addAudioPlayer()">🎶 Audio Player</button>
+            <button onclick="app.addMic()">🎤 Mic/Line</button>
+            <button onclick="app.addWebcamPlayer()">🤳🏻 Webcam</button>
+            <button onclick="app.addNoise()">👾 Noise</button>
+            <button onclick="app.addImagePlayer()">🖼️ Image Player</button>
+        </span>
+        <span class="categoryOfComponent">
+            <button onclick="app.addFilter()">🤖 Filter</button>
+            <button onclick="app.addCustomProcessor()">🧮 Math Processor</button>
+            <button onclick="app.addGainNode()">📢 Gain Node</button>
+            <button onclick="app.addCompressor()">➗ Compressor</button>
+            <button onclick="app.addDelay()">⏰ Delay</button>
+            <button onclick="app.addReverb()">⛪ Reverb</button>
+            <button onclick="app.addDistortion()">🤘 Distortion</button>
+            <button onclick="app.addLerpComponent()"># Lerp</button>
+            <button onclick="app.addPadSampler()"># Pad Sampler</button>
 
-        <!-- <button onclick="app.addAiComponent()">###  add ai comp</button> -->
-
-        <hr>
-        <button onclick="app.addSequencer()">📈 add sequencer</button>
-        <button onclick="app.addEnvelope()">〽️ add env</button>
-        <button onclick="app.addMouse()">🖱️ add mouse</button>
-        <button onclick="app.addKeyboard()">⌨ add keyboard</button>
-        <button onclick="app.addJoystick()">🎮 add Joystick</button>
-
-        <!-- <button onclick="app.addMerger()">🍲 add merger</button> -->
+        </span>
+        <span class="categoryOfComponent">
 
 
-        <hr>
-        <button onclick="app.addNumberDisplay()">#️⃣ add number display</button>
-        <button onclick="app.addFrequencyAnalizer()">🖥️ Freq Analizer</button>
-        <button onclick="app.addSpectrogram()">🖥️ Spectrogram</button>
 
-        <button onclick="app.addVisualizer()">📺 add visualizer</button>
-        <button onclick="app.addPeakDetector()">⛰️ add peak detector</button>
-        <button onclick="app.addPitchDetector()">add pitch detector</button>
-        <button onclick="app.addSpectrum2Image()">### spectrum2image</button>
-        <!-- <button onclick="app.addBPMDetector()">## add bpm detector</button> -->
-
-        <hr>
+            <!-- <button onclick="app.addAiComponent()">###  add ai comp</button> -->
 
 
-        <button onclick="app.addImageMaker()">📷 add Image Maker</button>
-        <button onclick="app.addImagePlayer()">🖼️ add imagePlayer</button>
 
-        <hr>
-        <button onclick="app.addBPMOutputComponenet()">🎵 bpm output</button>
-        <button onclick="app.addMemoryComponent()">📼 add Memory</button>
-        <button onclick="app.addCounter()">🧮 add Counter</button>
-        <button onclick="app.addMultiplexor()">🔌 add multiplexor</button>
-        <hr>
-        <button onclick="app.addText()">📄 add text</button>
-        <button onclick="app.addRackCover()">ADD RACK COVER</button>
+            <button onclick="app.addMouse()">🖱️ Mouse</button>
+            <button onclick="app.addKeyboard()">⌨ Keyboard</button>
+            <button onclick="app.addJoystick()">🎮 Gamepad</button>
+            <button onclick="app.addMidiInput()">🎹 MIDI Input</button>
+            <button onclick="app.addRTCSender()">📭 RTC sender</button>
+            <button onclick="app.addRTCReceiver()">📨 RTC receiver</button>
 
-        <button onclick="app.addRTCSender()">📭 add RTC sender</button>
-        <button onclick="app.addRTCReceiver()">📨 add RTC receiver</button>
+        </span>
+        <span class="categoryOfComponent">
 
 
-        <button onclick="app.resetAllConnections()">!! reset all connections</button>
+            <button onclick="app.addSequencer()">📈 Sequencer</button>
+            <button onclick="app.addEnvelope()">〽️ ADSR</button>
 
-        <button onclick="app.save()">💾 save</button>
-        <button onclick="app.download()">⬇️ download</button>
+            <button onclick="app.addBPMOutputComponenet()">🎵 BPM Output</button>
+            <button onclick="app.addMemoryComponent()">📼 Memory</button>
+            <button onclick="app.addCounter()">🧮 Counter</button>
+            <button onclick="app.addMultiplexor()">🔌 Multiplexor</button>
+
+            <button onclick="app.addText()">📄 Text</button>
 
 
-        <button onclick="app.load()">📂 load</button>
 
-        <button onclick="app.loadFromFireStore()">📂 load from firestore</button>
+            <button onclick="app.addRackCover()">Rack Cover</button>
+
+
+            <!-- <button onclick="app.resetAllConnections()">!! reset all connections</button> -->
+        </span>
+        <span class="categoryOfComponent">
+
+
+
+            <button onclick="app.addNumberDisplay()">#️⃣ Number Display</button>
+            <button onclick="app.addFrequencyAnalizer()">🖥️ Freq Analizer</button>
+            <button onclick="app.addSpectrogram()">🖥️ Spectrogram</button>
+
+            <button onclick="app.addVisualizer()">📺 Oscilloscope</button>
+            <button onclick="app.addPeakDetector()">⛰️ Peak Detector</button>
+            <button onclick="app.addPitchDetector()"># Pitch detector</button>
+            <button onclick="app.addSpectrum2Image()">### Spectrum 2 Image</button>
+
+            <button onclick="app.addImageMaker()">📷 Image Maker</button>
+            <!-- <button onclick="app.addBPMDetector()">## add bpm detector</button> -->
+
+        </span>
+
+
     </div>
     <app></app>
     <script>

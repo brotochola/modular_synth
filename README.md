@@ -19,9 +19,7 @@ TODO:
     https://github.com/cwilso/AudioRecorder/blob/master/js/main.js#L152
     https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaStreamDestination?retiredLocale=de
 * in and out node for each component to have more complex components
-* PLAY PAUSE BUTTONS
-    * connected among all users in the same session
-    * keep track of all users connected to the same session, and send them sync messages using rtc data channel
+
 * requestanimationframe for example in the number display
 * component: draw an automation on a canvas and have an input for frequency, or a trigger
 * ARPEGGIATOR

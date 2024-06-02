@@ -100,30 +100,36 @@ app .mainContainer {
 .buttons {
   flex-wrap: wrap;
   position: fixed;
-  top: 5px;
+  bottom: 0px;
   left: 5px;
-  /* transform: translateX(-50%); */
-  width: 200px;
+  transform: translateY(200%);
+  width: 100vw;
   display: flex;
   gap: 2px;
   /* text-align: left; */
   z-index: 999;
   pointer-events: none;
   touch-action: none;
-  flex-direction: column;
-  transform: translateX(-120%);
-  transition: transform 250ms;
+  flex-direction: row;
+  /* transform: translateX(-120%); */
+  transition: transform 250ms ease-out;
+  justify-content: center;
+  z-index: 2;
 }
 .buttons.visible {
-  transform: translateX(0%);
+  transform: translateY(calc(0% - 40px));
 }
 
 .buttons button {
   pointer-events: all;
   touch-action: auto;
   text-align: left;
-  width: 160px;
-  background: #000900;
+  width: 200px;
+  height: 23px;
+  font-size: 13px;
+  padding: 10px;
+  line-height: 0px;
+  background: rgba(0, 0, 0, 0.7);
 }
 
 .buttons hr {
@@ -273,7 +279,7 @@ component.midifileplayer icon:after {
   content: "🎼";
 }
 component.CustomProcessorComponent icon:after {
-  content: "🧩";
+  content: "🧮";
 }
 
 component.envelopegenerator icon:after {
@@ -534,6 +540,7 @@ component .triggerInputFile {
 
 component .inputsDiv button.input,
 button {
+  line-height: 0px;
   width: 90px;
   height: 20px;
   overflow: hidden;
@@ -791,9 +798,10 @@ footer {
   gap: 10px;
   width: 100vw;
   padding: 5px;
-  z-index: 2;
+  z-index: 3;
   height: 32px;
   border-right-width: 0px;
+  border-bottom-width: 0px;
   border-left-width: 0px;
   flex-direction: row;
   justify-content: flex-end;
@@ -816,4 +824,73 @@ footer button {
 }
 footer .patchName {
   text-transform: capitalize;
+  width: 130px;
+  text-align: center;
+  line-height: 21px;
+}
+span.categoryOfComponent {
+  width: 210px;
+  display: flex;
+  gap: 2px;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.openButtons {
+  position: absolute;
+  left: 5px;
+  font-size: 13px;
+}
+
+button.play {
+  width: 40px;
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  footer {
+    flex-wrap: wrap;
+    height: 54px;
+    gap: 3px;
+    justify-content: space-between;
+    flex-direction: row-reverse;
+  }
+  button.openButtons {
+    bottom: 60px;
+    font-size: 16px;
+    padding: 12px;
+  }
+  footer .patchName {
+    order: 0;
+    padding-left: 3px;
+    text-align: left;
+    width: min-content;
+  }
+  button.download {
+    order: 1;
+  }
+  #bpmButton {
+    order: 2;
+  }
+  button.play {
+    order: 1;
+  }
+  .buttons {
+    height: 100vh;
+    justify-content: center;
+    flex-direction: row;
+    align-items: flex-end;
+    align-content: center;
+    flex-wrap: wrap;
+  }
+  .buttons button {
+    width: 48vw;
+  }
+  span.categoryOfComponent {
+    width: 100vw;
+    height: max-content;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    flex-direction: row;
+  }
 }
