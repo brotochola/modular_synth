@@ -181,7 +181,9 @@ class App {
     this.connectedUsers = users;
     //UPDATE HTML
     this.listOfConnectedUsersElement.innerHTML =
-      users.length + " Users" + (this.admin ? " (you're the admin)" : "");
+      users.length +
+      (users.length > 1 ? " users online" : " user online") +
+      (this.admin ? " (you're the admin)" : "");
 
     //CONNECT VIA RTC
     if (this.rtcInstance && this.rtcInstance.state == "ready") {

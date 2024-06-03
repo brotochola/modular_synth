@@ -199,7 +199,7 @@ component.reverb icon:after {
 component.constantvaluenode icon:after {
   content: "🅺";
 }
-component.sequencer icon:after {
+component.Sequencer icon:after {
   content: "📈";
 }
 
@@ -418,13 +418,13 @@ component.ImagePlayerWorkletVersion canvas {
   pointer-events: none;
 }
 
-component.sequencer {
+component.Sequencer {
   width: 300px;
   height: 280px;
   padding-top: 10px;
 }
 
-component.sequencer div.buttonsContainer {
+component.Sequencer div.buttonsContainer {
   display: flex;
   gap: 1px;
   margin-top: 20px;
@@ -444,21 +444,6 @@ component input.outputButton:after {
   pointer-events: none;
   touch-action: none;
   text-shadow: -1px 0px 3px black;
-}
-
-component.sequencer .buttonsContainer .seqButton {
-  width: 15px;
-  height: 15px;
-  border: 1px solid green;
-  background: rgba(0, 0, 0, 0.5);
-}
-component.sequencer .buttonsContainer .seqButton:hover {
-  background: #003300;
-  border: 1px solid lightgreen;
-}
-
-component.sequencer .buttonsContainer .seqButton.active {
-  background: orange;
 }
 
 component input[type="file"] {
@@ -845,6 +830,21 @@ span.categoryOfComponent {
 button.play {
   width: 40px;
   text-align: center;
+}
+
+.seqButton {
+  width: 15px;
+  height: 15px;
+  border: 1px solid green;
+  background: rgba(0, 0, 0, 0.5);
+}
+.seqButton:hover {
+  background: #003300;
+  border: 1px solid lightgreen;
+}
+
+.seqButton.active {
+  background: orange;
 }
 
 @media (max-width: 768px) {
