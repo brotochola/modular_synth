@@ -487,6 +487,10 @@ class App {
     this.components.push(new Oscillator(this));
     //   this.saveListOfComponentsInFirestore();
   }
+  addDrawer() {
+    this.components.push(new Drawer(this));
+    //   this.saveListOfComponentsInFirestore();
+  }
   addPitchDetector() {
     this.components.push(new PitchDetectorComponent(this));
     //   this.saveListOfComponentsInFirestore();

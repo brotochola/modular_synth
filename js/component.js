@@ -279,7 +279,12 @@ class Component {
   }
 
   createInputButtons() {
-    if (this.type == "Mouse" || this.type == "WebRTCReceiver") return;
+    if (
+      this.type == "Mouse" ||
+      this.type == "WebRTCReceiver" 
+      //|| this.type == "Drawer"
+    )
+      return;
     // console.log("CREATING BUTTONS FOR", this.type, this.id);
 
     //AUDIOPARAMS FROM THE NODE
@@ -455,9 +460,8 @@ class Component {
     }
 
     setTimeout(() => {
-      this.app.updateAllLines()
-      this.clearAll()
-      
+      this.app.updateAllLines();
+      this.clearAll();
     }, 50);
   }
   connect(compo, input, numberOfOutput) {

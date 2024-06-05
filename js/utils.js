@@ -336,3 +336,75 @@ function generateAnArrayWithRandomValues(length, val) {
   }
   return arr;
 }
+
+function imageValueToAudioValue(val) {
+  return (val / 255) * 2 - 1;
+}
+
+function interpolateNullsCircular(array) {
+  const result = array.slice(); // Create a copy of the array to avoid mutating the original
+
+  let start = null; // Start index of the null values sequence
+  let end = null;   // End index of the null values sequence
+
+  const n = result.length;
+  
+  // Find the first non-null value
+  let firstNonNullIndex = null;
+  for (let i = 0; i < n; i++) {
+      if (result[i] !== null) {
+          firstNonNullIndex = i;
+          break;
+      }
+  }
+
+  // Find the last non-null value
+  let lastNonNullIndex = null;
+  for (let i = n - 1; i >= 0; i--) {
+      if (result[i] !== null) {
+          lastNonNullIndex = i;
+          break;
+      }
+  }
+
+  // Handle circular interpolation for nulls at the start and end
+  if (firstNonNullIndex !== null && lastNonNullIndex !== null && firstNonNullIndex !== 0 && lastNonNullIndex !== n - 1) {
+      const startValue = result[lastNonNullIndex];
+      const endValue = result[firstNonNullIndex];
+      const rangeLength = n - lastNonNullIndex + firstNonNullIndex;
+      const step = (endValue - startValue) / rangeLength;
+
+      for (let i = lastNonNullIndex + 1; i < n; i++) {
+          result[i] = startValue + step * (i - lastNonNullIndex);
+      }
+
+      for (let i = 0; i < firstNonNullIndex; i++) {
+          result[i] = startValue + step * (n - lastNonNullIndex + i);
+      }
+  }
+
+  // Interpolate null values within the array
+  for (let i = 0; i < n; i++) {
+      if (result[i] === null) {
+          if (start === null) start = i; // Mark the start of the null values sequence
+      } else {
+          if (start !== null) {
+              end = i; // Mark the end of the null values sequence
+              
+              const startValue = result[start - 1] !== undefined ? result[start - 1] : result[lastNonNullIndex];
+              const endValue = result[end];
+              const rangeLength = end - start + 1;
+              const step = (endValue - startValue) / rangeLength;
+
+              for (let j = start; j < end; j++) {
+                  result[j] = startValue + step * (j - start + 1);
+              }
+
+              start = null;
+              end = null;
+          }
+      }
+  }
+
+  return result;
+}

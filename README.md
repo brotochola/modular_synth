@@ -19,7 +19,8 @@ TODO:
     https://github.com/cwilso/AudioRecorder/blob/master/js/main.js#L152
     https://developer.mozilla.org/en-US/docs/Web/API/AudioContext/createMediaStreamDestination?retiredLocale=de
 * in and out node for each component to have more complex components
-
+* pitch / tempo shifter:
+https://github.com/olvb/phaze/tree/master
 * requestanimationframe for example in the number display
 * component: draw an automation on a canvas and have an input for frequency, or a trigger
 * ARPEGGIATOR

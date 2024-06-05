@@ -121,6 +121,7 @@ app .mainContainer {
 }
 
 .buttons button {
+  backdrop-filter: blur(10px);
   pointer-events: all;
   touch-action: auto;
   text-align: left;
@@ -847,6 +848,19 @@ button.play {
   background: orange;
 }
 
+component.drawer icon {
+  display: none;
+}
+component.drawer {
+  width: 268px;
+  height: 161px;
+}
+component.drawer canvas {
+  cursor: crosshair;
+  left: 5px;
+  position: relative;
+  top: 5px;
+}
 @media (max-width: 768px) {
   footer {
     flex-wrap: wrap;
