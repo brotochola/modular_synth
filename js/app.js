@@ -563,7 +563,7 @@ class App {
     this.components.push(new ImagePlayerWorkletVersion(this));
   }
   addLargeVisualizer() {
-    this.components.push(new Large(this));
+    this.components.push(new LargeVisualizer(this));
   }
   addOscilloscope() {
     this.components.push(new Oscilloscope(this));

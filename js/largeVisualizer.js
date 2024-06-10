@@ -3,10 +3,10 @@ class LargeVisualizer extends Component {
     super(app, serializedData);
     this.node = app.actx.createAnalyser();
 
-    this.node.fftSize = 1024;
+    this.node.fftSize = 2048;
 
     this.bufferLength = this.node.frequencyBinCount;
-    this.dataArray = new Uint8Array(this.bufferLength);
+    this.dataArray = new Float32Array(this.bufferLength);
     // this.createInputButtons();
 
     this.stretchFactor = 100;
@@ -57,7 +57,15 @@ class LargeVisualizer extends Component {
 
   draw() {
     if (!this.node || !this.ctx) return;
-    this.node.getByteTimeDomainData(this.dataArray);
+    requestAnimationFrame(() => this.draw());
+    this.deltaTime = this.app.actx.currentTime - this.lastCall;
+
+    // if(this.deltaTime*1000 <(this.bufferLength / this.app.actx.sampleRate) * 1000){
+    //   return
+    // }
+    this.lastCall = this.app.actx.currentTime;
+
+    this.node.getFloatTimeDomainData(this.dataArray);
 
     this.imageData = this.ctx.getImageData(
       1,
@@ -74,27 +82,37 @@ class LargeVisualizer extends Component {
       0
     );
 
-    this.ctx.fillStyle = "#ffffff";
-    this.ctx.beginPath();
+    this.ctx.fillStyle = "#ffffff50";
+
+
     for (let i = 0; i < this.dataArray.length; i++) {
-      const v = this.dataArray[i] / 128.0;
-      const y = v * (this.canvas.height / 2);
+      const y =
+        this.canvas.height -
+        (this.dataArray[i] * this.canvas.height * 0.5 +
+          this.canvas.height * 0.5);
+      // const y = v * (this.canvas.height / 2);
       let x =
         this.canvas.width -
         this.dataArray.length / this.stretchFactor +
         i / this.stretchFactor -
         1;
 
-      // // if (this.lastX < x) {
-      //   this.ctx.moveTo(x, this.canvas.height - y);
-      //   this.ctx.lineTo(this.lastX, this.lastY);
-      // // }
-      // this.lastX = x;
-      // this.lastY = this.canvas.height - y;
-      this.ctx.fillRect(x, this.canvas.height - y, 0.3, 1);
-    }
-    this.ctx.stroke();
+      // if (this.lastX < x) {
+      // this.ctx.moveTo(x, y);
+      // this.ctx.lineTo(this.lastX, this.lastY);
+      // }
 
-    requestAnimationFrame(() => this.draw());
+      this.ctx.fillRect(x, y, 0.3, 0.5);
+      // this.ctx.fillRect((x + this.lastX) * 0.5, (y + this.lastY) * 0.5, 0.1, 0.5);
+
+      this.lastX = x;
+      this.lastY = y;
+    }
+    // this.ctx.stroke();
+    // this.ctx.beginPath();
+    // setTimeout(
+    //   () => this.draw(),
+    //   (this.bufferLength / this.app.actx.sampleRate) * 1000
+    // );
   }
 }
