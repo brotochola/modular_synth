@@ -1,0 +1,195 @@
+{
+  "components": [
+    {
+      "audioParams": {
+        "detune": 0,
+        "frequency": 30
+      },
+      "connections": [
+        {
+          "from": "oscilla_1",
+          "to": "gain_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "conn_1"
+        }
+      ],
+      "constructor": "Oscillator",
+      "createdBy": "user",
+      "id": "oscilla_1",
+      "node": {
+        "type": "sine"
+      },
+      "type": "Oscillator",
+      "x": "100px",
+      "y": "100px"
+    },
+    {
+      "audioParams": {
+        "gain": 0.5
+      },
+      "connections": [
+        {
+          "from": "gain_1",
+          "to": "oscilla_2",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "conn_2"
+        }
+      ],
+      "constructor": "Amp",
+      "createdBy": "user",
+      "id": "gain_1",
+      "node": {},
+      "type": "Gain",
+      "x": "200px",
+      "y": "100px"
+    },
+    {
+      "audioParams": {
+        "detune": 0,
+        "frequency": 55
+      },
+      "connections": [
+        {
+          "from": "oscilla_2",
+          "to": "filter_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "conn_3"
+        }
+      ],
+      "constructor": "Oscillator",
+      "createdBy": "user",
+      "id": "oscilla_2",
+      "node": {
+        "type": "triangle"
+      },
+      "type": "Oscillator",
+      "x": "300px",
+      "y": "100px"
+    },
+    {
+      "audioParams": {
+        "Q": 1,
+        "frequency": 100,
+        "gain": 0
+      },
+      "connections": [
+        {
+          "from": "filter_1",
+          "to": "gain_2",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "conn_4"
+        }
+      ],
+      "constructor": "Filter",
+      "createdBy": "user",
+      "id": "filter_1",
+      "node": {
+        "type": "lowpass"
+      },
+      "type": "Filter",
+      "x": "400px",
+      "y": "100px"
+    },
+    {
+      "audioParams": {
+        "gain": 0.8
+      },
+      "connections": [
+        {
+          "from": "gain_2",
+          "to": "noise_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "conn_5"
+        },
+        {
+          "from": "gain_2",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": "0",
+          "id": "conn_6"
+        }
+      ],
+      "constructor": "Gain",
+      "createdBy": "user",
+      "id": "gain_2",
+      "node": {},
+      "type": "Gain",
+      "x": "500px",
+      "y": "100px"
+    },
+    {
+      "audioParams": {},
+      "connections": [
+        {
+          "from": "noise_1",
+          "to": "filter_2",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "conn_7"
+        }
+      ],
+      "constructor": "NoiseGenWithWorklet",
+      "createdBy": "user",
+      "id": "noise_1",
+      "node": {},
+      "type": "NoiseGenWithWorklet",
+      "x": "600px",
+      "y": "100px"
+    },
+    {
+      "audioParams": {
+        "Q": 1,
+        "frequency": 200,
+        "gain": 0
+      },
+      "connections": [
+        {
+          "from": "filter_2",
+          "to": "gain_3",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "conn_8"
+        }
+      ],
+      "constructor": "Filter",
+      "createdBy": "user",
+      "id": "filter_2",
+      "node": {
+        "type": "lowpass"
+      },
+      "type": "Filter",
+      "x": "700px",
+      "y": "100px"
+    },
+    {
+      "audioParams": {
+        "gain": 0.3
+      },
+      "connections": [
+        {
+          "from": "gain_3",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": "0",
+          "id": "conn_9"
+        }
+      ],
+      "constructor": "Amp",
+      "createdBy": "user",
+      "id": "gain_3",
+      "node": {},
+      "type": "Gain",
+      "x": "800px",
+      "y": "100px"
+    }
+  ],
+  "connections": [],
+  "bpm": 120,
+  "outputX": "900px",
+  "outputY": "100px"
+}

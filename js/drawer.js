@@ -87,7 +87,7 @@ class Drawer extends Component {
 
   handleDraw(e) {
     if (this.drawing) {
-        console.log(e);
+        
 
       this.paintColumnBlack(e.layerX);
       this.paintColumnBlack(e.layerX - 1);

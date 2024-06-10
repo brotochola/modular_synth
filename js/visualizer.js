@@ -1,4 +1,4 @@
-class Visualizer extends Component {
+class Oscilloscope extends Component {
   constructor(app,serializedData) {
     super(app,serializedData);
     this.node = app.actx.createAnalyser();

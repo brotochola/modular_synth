@@ -281,7 +281,7 @@ class Component {
   createInputButtons() {
     if (
       this.type == "Mouse" ||
-      this.type == "WebRTCReceiver" 
+      this.type == "WebRTCReceiver"
       //|| this.type == "Drawer"
     )
       return;
@@ -457,6 +457,7 @@ class Component {
     this.app.components = this.app.components.filter((c) => c != this);
     if (this.app.patchName) {
       removeComponentFromFirestore(this.app.patchName, this.id);
+      this.app.saveListOfComponentsInFirestore();
     }
 
     setTimeout(() => {
@@ -481,13 +482,18 @@ class Component {
 
     let where = figureOutWhereToConnect(this, compo, input, conn);
     // debugger
-    where.whichInput
-      ? this.node.connect(
-          where.whereToConnect,
-          numberOfOutput,
-          where.whichInput
-        )
-      : this.node.connect(where.whereToConnect, numberOfOutput);
+    
+    try {
+      where.whichInput
+        ? this.node.connect(
+            where.whereToConnect,
+            numberOfOutput,
+            where.whichInput
+          )
+        : this.node.connect(where.whereToConnect, numberOfOutput);
+    } catch (e) {
+      console.warn(e);
+    }
 
     conn.redraw();
   }
@@ -674,14 +680,36 @@ class Component {
     }, 200);
   }
 
+  areMycustomTriggersAndParamsWorkletsReady() {
+    let triggersReady = false;
+    if (Array.isArray(this.customAudioTriggers)) {
+      triggersReady = !!this.customAudioTriggersWorkletNode;
+    } else {
+      triggersReady = true;
+    }
+
+    let paramsReady = false;
+    if (Array.isArray(this.customAudioParams)) {
+      paramsReady = !!this.customAudioParamsWorkletNode;
+    } else {
+      paramsReady = true;
+    }
+
+    return triggersReady && paramsReady;
+  }
+
   waitUntilImReady(cb, counter) {
     if (!counter) counter = 1;
     else counter++;
 
-    if (!this.ready)
+    if (!this.amIReady())
       setTimeout(() => {
         this.waitUntilImReady(cb, counter);
       }, 25);
     else cb();
+  }
+
+  amIReady() {
+    return this.ready && this.areMycustomTriggersAndParamsWorkletsReady();
   }
 }

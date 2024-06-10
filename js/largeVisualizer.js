@@ -1,0 +1,100 @@
+class LargeVisualizer extends Component {
+  constructor(app, serializedData) {
+    super(app, serializedData);
+    this.node = app.actx.createAnalyser();
+
+    this.node.fftSize = 1024;
+
+    this.bufferLength = this.node.frequencyBinCount;
+    this.dataArray = new Uint8Array(this.bufferLength);
+    // this.createInputButtons();
+
+    this.stretchFactor = 100;
+
+    this.width = 1024;
+
+    this.createCanvas();
+
+    this.createInputForSpeed();
+
+    this.draw();
+  }
+
+  createInputForSpeed() {
+    this.input = document.createElement("input");
+    this.input.classList.add("speed");
+    this.input.type = "number";
+    let audioparamrow = document.createElement("audioparamrow");
+
+    audioparamrow.innerHTML += "<p>Speed:</p>";
+    audioparamrow.appendChild(this.input);
+    this.inputsDiv.appendChild(audioparamrow);
+
+    this.input.value = this.stretchFactor;
+
+    this.input.onchange = (e) => {
+      this.stretchFactor = this.input.value;
+    };
+  }
+
+  createCanvas() {
+    this.canvas = document.createElement("canvas");
+    this.canvas.width = this.width;
+    this.canvas.height = 128;
+    this.canvas.onclick = (e) => this.toggleActive();
+    this.container.appendChild(this.canvas);
+    this.ctx = this.canvas.getContext("2d");
+    this.ctx.fillStyle = "#000000";
+
+    this.ctx.lineWidth = 0.3;
+    this.ctx.strokeStyle = "#ffffff";
+
+    this.imgData = this.ctx.createImageData(
+      this.canvas.width,
+      this.canvas.height
+    );
+  }
+
+  draw() {
+    if (!this.node || !this.ctx) return;
+    this.node.getByteTimeDomainData(this.dataArray);
+
+    this.imageData = this.ctx.getImageData(
+      1,
+      0,
+      this.canvas.width,
+      this.canvas.height
+    );
+    this.ctx.fillStyle = "#000000";
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.ctx.putImageData(
+      this.imageData,
+      -(this.dataArray.length / this.stretchFactor),
+      0
+    );
+
+    this.ctx.fillStyle = "#ffffff";
+    this.ctx.beginPath();
+    for (let i = 0; i < this.dataArray.length; i++) {
+      const v = this.dataArray[i] / 128.0;
+      const y = v * (this.canvas.height / 2);
+      let x =
+        this.canvas.width -
+        this.dataArray.length / this.stretchFactor +
+        i / this.stretchFactor -
+        1;
+
+      // // if (this.lastX < x) {
+      //   this.ctx.moveTo(x, this.canvas.height - y);
+      //   this.ctx.lineTo(this.lastX, this.lastY);
+      // // }
+      // this.lastX = x;
+      // this.lastY = this.canvas.height - y;
+      this.ctx.fillRect(x, this.canvas.height - y, 0.3, 1);
+    }
+    this.ctx.stroke();
+
+    requestAnimationFrame(() => this.draw());
+  }
+}

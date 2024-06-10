@@ -128,17 +128,9 @@ class App {
 
       let reader = new FileReader();
       reader.onload = async () => {
-        // this.unsubscribeFromFirestore();
         try {
           this.loadedJSON = JSON.parse(reader.result);
           this.loadFromFile(this.loadedJSON);
-          // //IF THERE IS A PATCH NAME IN THE URL, AND YOU DROP A JSON FILE THAT COULD LOAD BE LOADED
-          // //IT WILL OVERWRITE THE PATCH
-          // if (this.patchName) {
-          //   this.waitUntilAllComopnentsAreReady(() =>
-          //     setTimeout(()=>this.save(this.patchName),500)
-          //   );
-          // }
         } catch (e) {
           console.warn("error with this json file", e);
         }
@@ -455,67 +447,53 @@ class App {
   }
   addText() {
     this.components.push(new Text(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addBPMOutputComponenet() {
     this.components.push(new BPMOutputComponent(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addJoystick() {
     this.components.push(new JoystickComponent(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addEnvelope() {
     this.components.push(new EnvelopeGenerator(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addRackCover() {
     this.components.push(new RackCover(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addConstantValueNode() {
     this.components.push(new ConstantValueNode(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addOscillator() {
     this.components.push(new Oscillator(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addDrawer() {
     this.components.push(new Drawer(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addPitchDetector() {
     this.components.push(new PitchDetectorComponent(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addPadSampler() {
     this.components.push(new PadSampler(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addSpectrum2Image() {
     this.components.push(new Spectrum2Image(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addSpectrogram() {
     this.components.push(new Spectrogram(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addPitchDetector2() {
     this.components.push(new PitchDetector2(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   // addBPMDetector() {
   //   this.components.push(new BPMDetector(this));
-  //   //   this.saveListOfComponentsInFirestore();
+  //
   // }
   addLerpComponent() {
     this.components.push(new LerpComponent(this));
@@ -523,7 +501,6 @@ class App {
 
   addWebcamPlayer() {
     this.components.push(new WebcamPlayer(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addAiComponent() {
@@ -540,7 +517,6 @@ class App {
 
   addMidiInput() {
     this.components.push(new Midi(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addReverb() {
@@ -556,100 +532,81 @@ class App {
 
   addRTCReceiver() {
     this.components.push(new WebRTCReceiver(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addRTCSender() {
     this.components.push(new WebRTCSender(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addMic() {
     this.components.push(new Mic(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addDistortion() {
     this.components.push(new Distortion(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addCounter() {
     this.components.push(new CounterComponent(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addMemoryComponent() {
     this.components.push(new MemoryComponent(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addMidiPlayer() {
     this.components.push(new MidiFilePlayer(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addKeyboard() {
     this.components.push(new KeyboardComponent(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addImagePlayer() {
     this.components.push(new ImagePlayerWorkletVersion(this));
-    //   this.saveListOfComponentsInFirestore();
   }
-
-  addVisualizer() {
-    this.components.push(new Visualizer(this));
-    //   this.saveListOfComponentsInFirestore();
+  addLargeVisualizer() {
+    this.components.push(new Large(this));
+  }
+  addOscilloscope() {
+    this.components.push(new Oscilloscope(this));
   }
   addCustomProcessor() {
     this.components.push(new CustomProcessorComponent(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addFilter() {
     this.components.push(new Filter(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addGainNode() {
     this.components.push(new Amp(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   createOutputComponent() {
     this.components.push(new Output(this));
   }
   addDelay() {
     this.components.push(new Delay(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addMerger() {
     this.components.push(new Merger(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addNoise() {
     this.components.push(new NoiseGenWithWorklet(this));
-    //   this.saveListOfComponentsInFirestore();
   }
   addMouse() {
     this.components.push(new Mouse(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addImageMaker() {
     this.components.push(new ImageMaker(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addAudioPlayer() {
     this.components.push(new AudioPlayer(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addSequencer() {
     this.components.push(new Sequencer(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   addNumberDisplay() {
     this.components.push(new NumberDisplayComponent(this));
-    //   this.saveListOfComponentsInFirestore();
   }
 
   getAllConnections() {
@@ -753,7 +710,7 @@ class App {
   waitUntilAllComopnentsAreReady(cb, counter) {
     if (!counter) counter = 1;
     else counter++;
-    let notReadyComponents = this.components.filter((k) => !k.ready);
+    let notReadyComponents = this.components.filter((k) => !k.amIReady());
     let isItStillLoadingComponents =
       ((this.lastChangedFromFirestore || {}).components || []).length !=
       this.components.length - 1;

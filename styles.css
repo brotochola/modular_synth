@@ -543,7 +543,7 @@ component .inputsDiv button.input:hover {
   border: 1px solid lightgreen;
 }
 
-component .inputsDiv audioparamrow input[type="number"],
+component input[type="number"],
 component input[type="text"] {
   width: calc(100% - 100px);
   overflow: hidden;
@@ -851,6 +851,29 @@ button.play {
 component.drawer icon {
   display: none;
 }
+
+component.LargeVisualizer {
+  width: 1030px;
+  height: 180px;
+}
+
+component.LargeVisualizer input.speed {
+  height: 20px;
+  width: 70px;
+  padding-left: 5px;
+}
+component.LargeVisualizer canvas {
+  background-color: black;
+}
+component.LargeVisualizer p{
+  margin:0px
+}
+component.LargeVisualizer .inputsDiv {
+  display: flex;
+  flex-direction: row-reverse;
+  align-items: flex-end;
+}
+
 component.drawer {
   width: 268px;
   height: 161px;
