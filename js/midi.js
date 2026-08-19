@@ -193,8 +193,7 @@ class Midi extends Component {
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/midiWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/midiWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "midi-worklet", {
           numberOfInputs: 0,

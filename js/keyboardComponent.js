@@ -30,8 +30,7 @@ class KeyboardComponent extends Component {
     }
   }
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/keyboardWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/keyboardWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "keyboard-worklet", {
           numberOfInputs: 0,

@@ -113,6 +113,15 @@
 
         <!-- <button onclick="app.save()">💾 save</button> -->
         <button onclick="app.download()" class="download">💾 Download Patch</button>
+        <select id="samplePatchSelect" onchange="app.loadSamplePatch(this.value)">
+            <option value="">Load sample…</option>
+            <option value="samples/mouse.json">mouse filter</option>
+            <option value="samples/elefante.json">elefante</option>
+            <option value="samples/fm-bass.json">fm-bass</option>
+            <option value="samples/seq-pluck.json">seq-pluck</option>
+            <option value="samples/ring-mod.json">ring-mod</option>
+            <option value="samples/seq-filter-mod-adsr.json">seq-filter-mod-adsr</option>
+        </select>
 
 
         <!-- <button onclick="app.load()">📂 load</button> -->

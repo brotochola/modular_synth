@@ -12,8 +12,7 @@ class LerpComponent extends Component {
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/lerpWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/lerpWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "lerp-processor", {
           numberOfInputs: 1,

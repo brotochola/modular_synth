@@ -6,8 +6,7 @@ class PitchDetectorComponent extends Component {
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/pitchDetectorWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/pitchDetectorWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "yin-processor", {
           numberOfInputs: 1,

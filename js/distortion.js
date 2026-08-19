@@ -34,8 +34,7 @@ class Distortion extends Component {
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/distortionWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/distortionWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "distortion-worklet", {
           numberOfInputs: 1,

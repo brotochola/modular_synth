@@ -12,8 +12,7 @@ class PeakDetectorComponent extends Component {
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/peakDetectorWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/peakDetectorWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(
           this.app.actx,

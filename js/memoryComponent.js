@@ -7,8 +7,7 @@ class MemoryComponent extends Component {
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/memoryWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/memoryWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "memory-worklet", {
           numberOfInputs: 1,

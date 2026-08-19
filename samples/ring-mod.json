@@ -1,0 +1,86 @@
+{
+  "bpm": 100,
+  "outputX": "760px",
+  "outputY": "220px",
+  "connections": [],
+  "components": [
+    {
+      "id": "osc_a",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "80px",
+      "y": "100px",
+      "audioParams": { "detune": 0, "frequency": 220 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "osc_a",
+          "to": "math_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c1"
+        }
+      ]
+    },
+    {
+      "id": "osc_b",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "80px",
+      "y": "300px",
+      "audioParams": { "detune": 0, "frequency": 110 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "osc_b",
+          "to": "math_1",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "c2"
+        }
+      ]
+    },
+    {
+      "id": "math_1",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "180px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["formula"],
+      "formula": "y=x1*x2",
+      "connections": [
+        {
+          "from": "math_1",
+          "to": "amp_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c3"
+        }
+      ]
+    },
+    {
+      "id": "amp_1",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "180px",
+      "audioParams": { "gain": 0.35 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_1",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": "0",
+          "id": "c4"
+        }
+      ]
+    }
+  ]
+}

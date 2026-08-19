@@ -56,8 +56,7 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/imageMakerAudioWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/imageMakerAudioWorklet.js")
       .then(() => {
         this.createdAt=this.app.actx.currentTime
         this.node = new AudioWorkletNode(this.app.actx, "image-maker-worklet", {

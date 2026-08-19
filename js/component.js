@@ -8,7 +8,6 @@ class Component {
       : this.app.userID;
     this.audioParams = [];
     this.retryCounter = 0;
-    this.dragStartedAt = [0, 0];
     this.connections = [];
     this.running = false;
     this.id = serializedData?.id
@@ -63,29 +62,36 @@ class Component {
     // this.startListeningToChangesInThiscomponent();
   }
   loadFromSerializedData(cb) {
-    console.log("#load from serialized data", this, this.serializedData);
     if (!this.serializedData) return;
 
-    if (this.node) {
+    if (this.node && this.serializedData.audioParams) {
       let keys = Object.keys(this.serializedData.audioParams);
       for (let key of keys) {
-        this.node[key].value = this.serializedData.audioParams[key];
-        this.inputElements[key].textInput.value =
-          this.serializedData.audioParams[key];
+        if (key.startsWith("in")) continue;
+        let val = this.serializedData.audioParams[key];
+        let param = this.node[key];
+        if (!(param instanceof AudioParam) && this.node.parameters) {
+          param = this.node.parameters.get(key);
+        }
+        if (param instanceof AudioParam) {
+          param.value = val;
+        }
+        let inputEl = this.inputElements[key];
+        if (inputEl && inputEl.textInput) {
+          inputEl.textInput.value = val;
+        }
       }
 
       if (this.serializedData.node?.type) {
         this.node.type = this.serializedData.node.type;
       }
     }
-    //LOAD THOSE PARAMETERS THAT WANTED TO BE SAVED FOR EACH TYPE OF COMPONENT
     if (this.serializedData.valuesToSave) {
       for (let key of this.serializedData.valuesToSave) {
         this[key] = this.serializedData[key];
       }
     }
 
-    //POSITION:
     let doWeHaveToUpdateLines = false;
     if (
       this.container.style.left != this.serializedData.x ||
@@ -96,15 +102,18 @@ class Component {
     this.container.style.left = this.serializedData.x;
     this.container.style.top = this.serializedData.y;
 
-    this.app.waitUntilAllComopnentsAreReady(() => {
-      this.updateConnectionsFromSerializedData(
-        (this.serializedData || {}).connections || [],
-        doWeHaveToUpdateLines
-      );
-      if (cb instanceof Function) cb();
-    });
+    if (!this.app.bulkLoading) {
+      this.app.waitUntilAllComopnentsAreReady(() => {
+        this.updateConnectionsFromSerializedData(
+          (this.serializedData || {}).connections || [],
+          doWeHaveToUpdateLines
+        );
+        if (cb instanceof Function) cb();
+      });
+    } else if (cb instanceof Function) {
+      cb();
+    }
 
-    //THIS IS IMPLEMENTED IN EACH CLASS THAT INHERITES FROM THIS ONE
     if (this.updateUI instanceof Function) this.updateUI();
   }
 
@@ -129,10 +138,7 @@ class Component {
           }
         }
         if (!found) {
-          //ADD IT
-
-          // debugger
-          setTimeout(() => this.app.addSerializedConnection(incomingConn), 50);
+          this.app.addSerializedConnection(incomingConn);
           doWeHaveToUpdateLines = true;
         }
       }
@@ -229,8 +235,7 @@ class Component {
   createWorkletForCustomParams() {
     if (!Array.isArray(this.customAudioParams)) return;
 
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/customAudioParamsWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/customAudioParamsWorklet.js")
       .then(() => {
         this.customAudioParamsWorkletNode = new AudioWorkletNode(
           this.app.actx,
@@ -255,8 +260,7 @@ class Component {
   createWorkletForCustomTriggers() {
     if (!Array.isArray(this.customAudioTriggers)) return;
 
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/triggerWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/triggerWorklet.js")
       .then(() => {
         this.customAudioTriggersWorkletNode = new AudioWorkletNode(
           this.app.actx,
@@ -341,12 +345,17 @@ class Component {
         textInput.type = "number";
         textInput.onchange = (e) => this.onParamChanged(e, inp);
         textInput.onkeydown = (e) => e.stopImmediatePropagation();
-        textInput.max = 2000;
-        textInput.min = 0;
-        textInput.value = !this.node.parameters
-          ? this.node[inp].value.toString()
-          : this.node.parameters.get(inp).value.toString();
-        textInput.step = 1;
+        let limits = this.getParamInputLimits(inp);
+        if (limits.min != null) textInput.min = limits.min;
+        if (limits.max != null) textInput.max = limits.max;
+        textInput.step = limits.step;
+        let currentVal = 0;
+        if (this.node.parameters && this.node.parameters.get(inp)) {
+          currentVal = this.node.parameters.get(inp).value;
+        } else if (this.node[inp]) {
+          currentVal = this.node[inp].value;
+        }
+        textInput.value = currentVal.toString();
       }
 
       this.inputElements[inp] = { button, textInput };
@@ -357,12 +366,29 @@ class Component {
     }
   }
 
+  getParamInputLimits(name) {
+    if (name == "frequency" || name == "detune" || name == "baseHz") {
+      return { min: 0, max: 20000, step: 0.1 };
+    }
+    if (name == "Q") {
+      return { min: 0.0001, max: 100, step: 0.01 };
+    }
+    if (name == "gain") {
+      return { min: 0, max: 100000, step: 0.01 };
+    }
+    if (name == "delayTime") {
+      return { min: 0, max: 1, step: 0.001 };
+    }
+    return { min: 0, step: 0.01 };
+  }
+
   onParamChanged(event, param) {
     event.stopPropagation();
+    let val = Number(event.target.value);
     if (this.node?.parameters?.get(param)) {
-      this.node.parameters.get(param).value = event.target.value;
+      this.node.parameters.get(param).value = val;
     } else {
-      this.node[param].value = event.target.value;
+      this.node[param].value = val;
     }
     this.quickSave();
   }
@@ -415,9 +441,6 @@ class Component {
   }
   createIcon() {
     this.icon = document.createElement("icon");
-    this.icon.onclick = () => {
-      this.toggleActive();
-    };
     this.container.appendChild(this.icon);
   }
   disconnect(audioParam) {
@@ -466,23 +489,28 @@ class Component {
     }, 50);
   }
   connect(compo, input, numberOfOutput) {
-    // console.log("#connect", compo, input);
+    numberOfOutput = parseInt(numberOfOutput);
+    if (isNaN(numberOfOutput)) numberOfOutput = 0;
+    for (let existing of this.connections) {
+      if (
+        existing.to == compo &&
+        existing.audioParam == input &&
+        parseInt(existing.numberOfOutput) == numberOfOutput
+      ) {
+        return;
+      }
+    }
 
-    //CREATE CONNECTION INSTANCE
     let conn = new Connection(this, compo, input, numberOfOutput, this.app);
-    //ADD CLASS TO HTML ELEMENT
     try {
       compo.inputElements[input].button.classList.add("connected");
     } catch (e) {
       console.log(e);
-      // debugger;
     }
-    //ADD THE CONNECTION INSTANCE TO THE ARRAY OF CONNECTIONS OF THIS COMPONENT
     this.connections.push(conn);
 
     let where = figureOutWhereToConnect(this, compo, input, conn);
-    // debugger
-    
+
     try {
       where.whichInput
         ? this.node.connect(
@@ -498,38 +526,52 @@ class Component {
     conn.redraw();
   }
 
-  ondragend(e) {
+  isDragIgnoreTarget(el) {
+    return !!el.closest("button, input, select, textarea, outputs, canvas");
+  }
+
+  onPointerDown(e) {
+    if (e.button != 0) return;
+    if (this.isDragIgnoreTarget(e.target)) return;
     e.stopPropagation();
     e.preventDefault();
-    let box = this.app.container.getBoundingClientRect();
-    this.container.style.left =
-      -box.x +
-      e.clientX / this.app.scale -
-      this.dragStartedAt[0] / this.app.scale +
-      "px";
-    this.container.style.top =
-      -box.y +
-      e.clientY / this.app.scale -
-      this.dragStartedAt[1] / this.app.scale +
-      "px";
+    this.toggleActive();
+    let s = this.app.scale || 1;
+    let el = this.container.getBoundingClientRect();
+    this._dragging = true;
+    this._grabX = (e.clientX - el.left) / s;
+    this._grabY = (e.clientY - el.top) / s;
+    this.container.setPointerCapture(e.pointerId);
+  }
 
+  onPointerMove(e) {
+    if (!this._dragging) return;
+    let s = this.app.scale || 1;
+    let rack = this.app.container.getBoundingClientRect();
+    this.container.style.left =
+      (e.clientX - rack.left) / s - this._grabX + "px";
+    this.container.style.top =
+      (e.clientY - rack.top) / s - this._grabY + "px";
     this.container.style.setProperty("--posX", this.container.style.left);
     this.container.style.setProperty("--posY", this.container.style.top);
-
-    this.quickSave();
     this.app.updateAllLines();
   }
-  ondragstart(e) {
-    this.dragStartedAt[0] = e.layerX;
-    this.dragStartedAt[1] = e.layerY;
+
+  onPointerUp(e) {
+    if (!this._dragging) return;
+    this._dragging = false;
+    this.quickSave();
+    this.app.updateAllLines();
   }
 
   createContainer() {
     this.container = document.createElement("component");
     this.container.component = this;
-    this.container.draggable = true;
-    this.container.ondragend = (e) => this.ondragend(e);
-    this.container.ondragstart = (e) => this.ondragstart(e);
+    this.container.draggable = false;
+    this.container.addEventListener("pointerdown", (e) => this.onPointerDown(e));
+    this.container.addEventListener("pointermove", (e) => this.onPointerMove(e));
+    this.container.addEventListener("pointerup", (e) => this.onPointerUp(e));
+    this.container.addEventListener("pointercancel", (e) => this.onPointerUp(e));
 
     if ((this.serializedData || {}).x && (this.serializedData || {}).y) {
       this.container.style.left = this.serializedData.x;
@@ -559,10 +601,6 @@ class Component {
     this.inputsDiv = document.createElement("div");
     this.inputsDiv.classList.add("inputsDiv");
     this.container.appendChild(this.inputsDiv);
-
-    this.container.onmousedown = () => {
-      this.toggleActive();
-    };
 
     if (this.createdBy == this.app.userID) {
       this.container.classList.add("mine");
@@ -652,15 +690,19 @@ class Component {
       obj.node.type = this.node.type;
     }
     for (let audioParam of this.audioParams || []) {
-      if (this.node && this.node[audioParam]) {
-        obj.audioParams[audioParam] = this.node[audioParam].value;
+      if (audioParam.startsWith("in")) continue;
+      let param = this.node && this.node[audioParam];
+      if (!(param instanceof AudioParam) && this.node?.parameters) {
+        param = this.node.parameters.get(audioParam);
       }
-      obj.audioParams = sortObjectKeysAlphabetically(obj.audioParams);
+      if (param instanceof AudioParam) {
+        obj.audioParams[audioParam] = param.value;
+      }
     }
-    //these parameters are set on each class:
+    obj.audioParams = sortObjectKeysAlphabetically(obj.audioParams);
     if (Array.isArray(this.valuesToSave)) {
       for (let key of this.valuesToSave) {
-        if (this[key]) obj[key] = this[key];
+        if (this[key] != null) obj[key] = this[key];
       }
       obj.valuesToSave = this.valuesToSave.sort();
     }

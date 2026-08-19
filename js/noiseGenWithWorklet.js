@@ -4,8 +4,7 @@ class NoiseGenWithWorklet extends Component {
     this.infoText =
       "Standard white noise generator, which it's actually all possible frequencies at random amplitudes, and/or subsequent random voltage values";
 
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/whiteNoiseWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/whiteNoiseWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(
           this.app.actx,

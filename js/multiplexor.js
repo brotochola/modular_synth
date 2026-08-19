@@ -13,8 +13,7 @@ class Multiplexor extends Component {
 
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/multiplexorWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/multiplexorWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "multiplexor-worklet", {
           numberOfInputs: 8,

@@ -28,8 +28,7 @@ class PadSampler extends Component {
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/padSamplerWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/padSamplerWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "pad-sampler", {
           numberOfInputs: 8,

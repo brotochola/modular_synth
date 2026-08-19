@@ -96,8 +96,7 @@ class ImagePlayerWorkletVersion extends Component {
     this.node.port.postMessage(this.imageDataParsed);
   }
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/imagePlayerAudioWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/imagePlayerAudioWorklet.js")
       .then(() => {
         this.createdAt = this.app.actx.currentTime;
         this.node = new AudioWorkletNode(

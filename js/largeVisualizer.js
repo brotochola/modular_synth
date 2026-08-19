@@ -43,7 +43,7 @@ class LargeVisualizer extends Component {
     this.canvas.height = 128;
     this.canvas.onclick = (e) => this.toggleActive();
     this.container.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
     this.ctx.fillStyle = "#000000";
 
     this.ctx.lineWidth = 0.3;
@@ -51,7 +51,7 @@ class LargeVisualizer extends Component {
 
     this.imgData = this.ctx.createImageData(
       this.canvas.width,
-      this.canvas.height
+      this.canvas.height,
     );
   }
 
@@ -71,7 +71,7 @@ class LargeVisualizer extends Component {
       1,
       0,
       this.canvas.width,
-      this.canvas.height
+      this.canvas.height,
     );
     this.ctx.fillStyle = "#000000";
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
@@ -79,11 +79,10 @@ class LargeVisualizer extends Component {
     this.ctx.putImageData(
       this.imageData,
       -(this.dataArray.length / this.stretchFactor),
-      0
+      0,
     );
 
     this.ctx.fillStyle = "#ffffff50";
-
 
     for (let i = 0; i < this.dataArray.length; i++) {
       const y =
@@ -102,7 +101,7 @@ class LargeVisualizer extends Component {
       // this.ctx.lineTo(this.lastX, this.lastY);
       // }
 
-      this.ctx.fillRect(x, y, 0.3, 0.5);
+      this.ctx.fillRect(x, y, 1, 1);
       // this.ctx.fillRect((x + this.lastX) * 0.5, (y + this.lastY) * 0.5, 0.1, 0.5);
 
       this.lastX = x;

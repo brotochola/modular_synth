@@ -7,8 +7,7 @@ class NumberDisplayComponent extends Component {
     this.createNode();
   }
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/numberDisplay.js")
+    this.app.loadWorklet("js/audioWorklets/numberDisplay.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "number-display", {
           numberOfInputs: 1,

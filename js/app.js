@@ -26,6 +26,10 @@ class App {
     this.actx.suspend();
 
     this.bpm = 100;
+    this.scale = 1;
+    this.lastScale = 1;
+    this.bulkLoading = false;
+    this._workletModules = {};
     this.createMainContainer(elem);
     this.createMessageBox();
     this.createOutputComponent();
@@ -281,55 +285,36 @@ class App {
   wheelZoom() {
     this.container.onwheel = (event) => {
       event.preventDefault();
-      if (
-        (this.scale == 1 && event.deltaY < 0) ||
-        (this.scale == 0.25 && event.deltaY > 0)
-      ) {
-        return;
-      }
-      this.scale -= event.deltaY * 0.0005;
-      // Restrict scale
-      this.scale = Math.min(Math.max(0.25, this.scale), 1);
+      let oldS = this.scale;
+      let newS = Math.min(Math.max(oldS - event.deltaY * 0.0005, 0.25), 1);
+      if (newS === oldS) return;
 
       let box = this.container.getBoundingClientRect();
-      let currentWidth = box.width * this.scale;
-      let lastWidth = box.width * this.lastScale;
+      let localX = (event.clientX - box.left) / oldS;
+      let localY = (event.clientY - box.top) / oldS;
 
-      let currentHeight = box.height * this.scale;
-      let lastHeight = box.height * this.lastScale;
+      this.scale = newS;
+      this.lastScale = newS;
+      this.container.style.transformOrigin = "0 0";
+      this.container.style.transform = "scale(" + newS + ")";
+      this.container.style.zoom = "";
 
-      let widthsDiff = ((lastWidth - currentWidth) / this.scale) * 0.2;
-      let heightsDiff = ((currentHeight - lastHeight) / this.scale) * 0.2;
-
-      let x = box.x;
-      let y = box.y;
-
-      let difX = event.x - window.innerWidth / 2;
-      let difY = event.y - window.innerHeight / 2;
-      // console.log(difX, difY);
-
-      if (event.deltaY < 0) {
-        this.container.style.left =
-          x - Math.abs(widthsDiff) - difX * this.scale * 0.2 + "px";
-        this.container.style.top =
-          y - Math.abs(widthsDiff) - difY * this.scale * 0.2 + "px";
-      } else {
-        this.container.style.left = x + Math.abs(widthsDiff) + "px";
-        this.container.style.top = y + Math.abs(heightsDiff) + "px";
-      }
-      this.container.style.zoom = this.scale * 100 + "%";
-      // event.preventDefault();
-      // this.updateAllLines();
+      let parent = this.container.offsetParent.getBoundingClientRect();
+      let left = event.clientX - parent.left - localX * newS;
+      let top = event.clientY - parent.top - localY * newS;
+      this.container.style.left = left + "px";
+      this.container.style.top = top + "px";
+      this.putCSSVariablesInMainContainer(left, top);
       this.container.parentNode.style.setProperty("--scale", this.scale);
-      this.lastScale = this.scale;
+      this.updateAllLines();
 
       this.container.parentNode.classList.add("zooming");
       clearTimeout(this.wheelTimeoutVar);
       this.wheelTimeoutVar = setTimeout(() => {
         this.container.parentNode.classList.remove("zooming");
+        this.updateAllLines();
       }, 50);
     };
-    this.scale = 1;
   }
   putBPMInButton() {
     (document.querySelector("#bpmButton") || {}).innerHTML =
@@ -345,41 +330,36 @@ class App {
     this.ctx = this.canvas.getContext("2d");
   }
   drawLine(from, to, color) {
+    if (!from || !to) return;
     this.ctx.beginPath();
     let box = this.container.getBoundingClientRect();
     let fromBox = from.getBoundingClientRect();
     let toBox = to.getBoundingClientRect();
-
-    // let x1 = parseInt(from.container.style.left.replace("px",""))
-    // let y1 = parseInt(from.container.style.top.replace("px",""))
-    // let x2 = parseInt(tp.container.style.left.replace("px",""))
-    // let y2 = parseInt(to.container.style.top.replace("px",""))
+    let s = this.scale || 1;
 
     this.ctx.lineWidth = 3;
     this.ctx.strokeStyle = color || "red";
-    let startX = fromBox.x - box.x + fromBox.width / 2;
-    let startY = fromBox.y - box.y + fromBox.height / 2;
+    let startX = (fromBox.left + fromBox.width / 2 - box.left) / s;
+    let startY = (fromBox.top + fromBox.height / 2 - box.top) / s;
     this.ctx.moveTo(startX, startY);
 
-    let endX = toBox.x - box.x + toBox.height / 2;
-    let endY = toBox.y - box.y + toBox.height / 2;
-    // let deviation = 100;
-    // this.ctx.bezierCurveTo(
-    //   startX + deviation,
-    //   startY,
-    //   endX - deviation,
-    //   endY,
-    //   endX,
-    //   endY
-    // );
+    let endX = (toBox.left + toBox.width / 2 - box.left) / s;
+    let endY = (toBox.top + toBox.height / 2 - box.top) / s;
 
     this.ctx.bezierCurveTo(endX, startY, startX, endY, endX, endY);
     this.ctx.stroke();
-    // this.ctx.endPath();
+  }
+
+  loadWorklet(url) {
+    if (!this._workletModules[url]) {
+      this._workletModules[url] = this.actx.audioWorklet.addModule(url);
+    }
+    return this._workletModules[url];
   }
 
   getNextBeat() {
-    let durationOf4Beats = (60 / 120) * 4;
+    let bpm = this.bpm || 120;
+    let durationOf4Beats = (60 / bpm) * 4;
     return durationOf4Beats - (this.actx.currentTime % durationOf4Beats);
   }
 
@@ -393,30 +373,47 @@ class App {
   createMainContainer(elem) {
     this.container = document.createElement("div");
     this.container.classList.add("mainContainer");
-
-    this.container.draggable = true;
-    this.dragStartedAt = [0, 0];
+    this.container.draggable = false;
+    this.container.style.transformOrigin = "0 0";
+    this.container.style.transform = "scale(1)";
+    this.container.style.zoom = "";
 
     elem.appendChild(this.container);
     this.SAVE_PREFIX = "modular_synth_";
-    this.container.ondragend = (e) => {
-      let x = (e.clientX - this.dragStartedAt[0]) / this.scale;
-      let y = (e.clientY - this.dragStartedAt[1]) / this.scale;
+
+    this.container.addEventListener("pointerdown", (e) => {
+      if (e.button != 0) return;
+      if (e.target != this.container && e.target != this.canvas) return;
+      this.makeAllComponentsInactive();
+      if (this.buttonsContainer) this.buttonsContainer.classList.remove("visible");
+      this._panning = true;
+      this._panStartX = e.clientX;
+      this._panStartY = e.clientY;
+      this._panLeft = parseFloat(getComputedStyle(this.container).left) || 0;
+      this._panTop = parseFloat(getComputedStyle(this.container).top) || 0;
+      this.container.setPointerCapture(e.pointerId);
+    });
+
+    this.container.addEventListener("pointermove", (e) => {
+      if (!this._panning) return;
+      // origin 0 0: left/top already match viewport px; /scale made zoom-out pan fly
+      let x = this._panLeft + (e.clientX - this._panStartX);
+      let y = this._panTop + (e.clientY - this._panStartY);
       this.container.style.left = x + "px";
       this.container.style.top = y + "px";
       this.putCSSVariablesInMainContainer(x, y);
       this.updateAllLines();
-      e.preventDefault();
-      e.stopImmediatePropagation();
-    };
-    this.container.ondragstart = (e) => {
-      this.makeAllComponentsInactive();
-      this.dragStartedAt[0] = e.layerX;
-      this.dragStartedAt[1] = e.layerY;
-    };
+    });
 
-    this.container.onmousedown = (e) => {
-      this.buttonsContainer.classList.remove("visible");
+    this.container.addEventListener("pointerup", () => {
+      this._panning = false;
+    });
+    this.container.addEventListener("pointercancel", () => {
+      this._panning = false;
+    });
+
+    this.container.onmousedown = () => {
+      if (this.buttonsContainer) this.buttonsContainer.classList.remove("visible");
     };
 
     let box = this.container.getBoundingClientRect();
@@ -438,12 +435,14 @@ class App {
   }
 
   updateAllLines() {
-    this.ctx.clearRect(0, 0, 9999, 9999);
-    setTimeout(() => {
+    if (this._linesRaf) return;
+    this._linesRaf = requestAnimationFrame(() => {
+      this._linesRaf = 0;
+      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       for (let c of this.getAllConnections()) {
         c.redraw();
       }
-    }, 10);
+    });
   }
   addText() {
     this.components.push(new Text(this));
@@ -661,33 +660,58 @@ class App {
     for (let comp of this.components) {
       if (!(comp instanceof Output)) obj.components.push(comp.serialize());
     }
-    // for (let conn of this.getAllConnections()) {
-    //   obj.connections.push(conn.serialize());
-    // }
+    for (let conn of this.getAllConnections()) {
+      obj.connections.push(conn.serialize());
+    }
     return obj;
   }
 
   loadFromFile(obj) {
+    this.bulkLoading = true;
     if (obj.bpm) this.bpm = obj.bpm;
     this.putBPMInButton();
 
-    //REMOVE ALL
-    for (let c of this.components) {
+    for (let c of this.components.slice()) {
+      if (c instanceof Output) continue;
       c.remove();
     }
-    //PUT THE OUTPUT WHERE IT WAS SAVED:
     this.updatePositionOfOutPutComponent(obj);
 
-    //CREATE ALL COMPONENTS
-    for (let comp of obj.components) {
+    for (let comp of obj.components || []) {
       this.addSerializedComponent(comp);
     }
 
-    setTimeout(() => {
-      this.resetAllConnections();
-      // this.actx.resume();
+    this.whenAllComponentsReady().then(() => {
+      this.applySerializedConnections(obj);
+      this.bulkLoading = false;
       this.updateAllLines();
-    }, 200);
+    });
+  }
+
+  applySerializedConnections(obj) {
+    let conns = [];
+    if (Array.isArray(obj.connections)) {
+      for (let c of obj.connections) conns.push(c);
+    }
+    for (let comp of obj.components || []) {
+      if (!Array.isArray(comp.connections)) continue;
+      for (let c of comp.connections) conns.push(c);
+    }
+    for (let conn of conns) {
+      this.addSerializedConnection(conn);
+    }
+  }
+
+  async loadSamplePatch(path) {
+    if (!path) return;
+    try {
+      let res = await fetch(path);
+      this.loadFromFile(await res.json());
+    } catch (e) {
+      console.warn("could not load sample patch", path, e);
+    }
+    let sel = document.getElementById("samplePatchSelect");
+    if (sel) sel.value = "";
   }
 
   async loadFromFireStore() {
@@ -707,50 +731,57 @@ class App {
     outputCompo.container.style.top = savedData.outputY;
   }
 
-  waitUntilAllComopnentsAreReady(cb, counter) {
-    if (!counter) counter = 1;
-    else counter++;
-    let notReadyComponents = this.components.filter((k) => !k.amIReady());
-    let isItStillLoadingComponents =
-      ((this.lastChangedFromFirestore || {}).components || []).length !=
-      this.components.length - 1;
-    if (notReadyComponents.length > 0 || isItStillLoadingComponents) {
-      if (counter > 20) {
-        return console.warn(
-          "components didn't load :(",
-          "notReadyComponents",
-          notReadyComponents.length,
-          "isItStillLoadingComponents:",
-          isItStillLoadingComponents
-        );
-      }
-      setTimeout(() => this.waitUntilAllComopnentsAreReady(cb, counter), 250);
-    } else {
-      if (cb instanceof Function) cb();
-    }
+  whenAllComponentsReady() {
+    return new Promise((resolve) => {
+      let tries = 0;
+      const tick = () => {
+        let notReady = this.components.filter((k) => !k.amIReady());
+        if (notReady.length === 0) {
+          resolve();
+          return;
+        }
+        tries++;
+        if (tries > 200) {
+          console.warn(
+            "components didn't load :(",
+            notReady.map((k) => k.type + ":" + k.id)
+          );
+          resolve();
+          return;
+        }
+        setTimeout(tick, 25);
+      };
+      tick();
+    });
   }
+
+  waitUntilAllComopnentsAreReady(cb) {
+    this.whenAllComponentsReady().then(() => {
+      if (cb instanceof Function) cb();
+    });
+  }
+
   addSerializedConnection(conn) {
-    // console.log("## adding serialized connection", conn);
-    let componentsFrom = app.components.filter((k) => k.id == conn.from);
-    let componentsTo = app.components.filter((k) => k.id == conn.to);
-    if (componentsFrom.length && componentsTo.length) {
-      componentsFrom[0].connect(
-        componentsTo[0],
-        conn.audioParam,
-        parseInt(conn.numberOfOutput)
-      );
+    if (!conn) return;
+    let from = this.getComponentByID(conn.from);
+    let to = this.getComponentByID(conn.to);
+    if (from && to) {
+      from.connect(to, conn.audioParam, parseInt(conn.numberOfOutput));
     } else {
-      return console.warn("Couldn't find the components", conn);
+      console.warn("Couldn't find the components", conn);
     }
   }
   addSerializedComponent(comp) {
-    // console.log("## adding serialized component",  comp);
     if (!comp) {
       return console.log("trying to add a null serialized component??");
     }
-    if (comp.type == "Output" || comp.id == "output") return; //console.warn("YOU CANT CREATE OUTPUT COMPONENTS");
-    let c = eval(comp.constructor);
-    this.components.push(new c(this, comp));
+    if (comp.type == "Output" || comp.id == "output") return;
+    let Ctor = App.COMPONENT_CLASSES[comp.constructor];
+    if (!Ctor) {
+      console.warn("Unknown component constructor", comp.constructor);
+      return;
+    }
+    this.components.push(new Ctor(this, comp));
   }
 
   deepSaveAllComponents() {
@@ -864,3 +895,51 @@ class App {
     this.buttonsContainer.classList.toggle("visible");
   }
 }
+
+App.COMPONENT_CLASSES = {
+  Oscillator,
+  Amp,
+  Gain: Amp,
+  Filter,
+  Delay,
+  Compressor,
+  Reverb,
+  Distortion,
+  NoiseGenWithWorklet,
+  CustomProcessorComponent,
+  Sequencer,
+  EnvelopeGenerator,
+  ConstantValueNode,
+  Mouse,
+  KeyboardComponent,
+  JoystickComponent,
+  Midi,
+  MidiFilePlayer,
+  AudioPlayer,
+  Mic,
+  ImagePlayerWorkletVersion,
+  WebcamPlayer,
+  Oscilloscope,
+  Merger,
+  Multiplexor,
+  LerpComponent,
+  CounterComponent,
+  MemoryComponent,
+  PeakDetectorComponent,
+  PitchDetectorComponent,
+  NumberDisplayComponent,
+  BPMOutputComponent,
+  Text,
+  RackCover,
+  Drawer,
+  PadSampler,
+  WaveShaper,
+  FrequencyAnalizer,
+  Spectrogram,
+  LargeVisualizer,
+  Spectrum2Image,
+  ImageMaker,
+  WebRTCSender,
+  WebRTCReceiver,
+  Output,
+};

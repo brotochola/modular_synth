@@ -45,10 +45,8 @@ class Connection {
     let fromEl = this.from.outputs.querySelector(
       '.outputButton[numberOfOutput="' + this.numberOfOutput + '"]'
     );
-    let toEl = (this.to.inputElements[this.audioParam]||{}).button;
-    if(!toEl) {
-      console.log("epa")
-    }
+    let toEl = (this.to.inputElements[this.audioParam] || {}).button;
+    if (!fromEl || !toEl) return;
     this.app.drawLine(fromEl, toEl, color);
   }
 
@@ -119,7 +117,7 @@ class Connection {
     if (c2 instanceof Connection) {
       sc2 = c2.serialize();
     } else {
-      sc1 = c2;
+      sc2 = c2;
     }
 
     return (

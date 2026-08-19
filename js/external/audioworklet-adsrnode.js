@@ -14,6 +14,7 @@ class AdsrNode extends AudioWorkletNode {
     this.trigger = this.parameters.get('trigger');
   }
   static Initialize(actx){
+    if (AdsrNode._modulePromise) return AdsrNode._modulePromise;
     const adsrproc=`
     registerProcessor('webaudio-adsr', class extends AudioWorkletProcessor {
       constructor(options){
@@ -73,6 +74,8 @@ class AdsrNode extends AudioWorkletNode {
       }
     });
     `;
-    return actx.audioWorklet.addModule('data:text/javascript,'+encodeURI(adsrproc));
+    if (AdsrNode._modulePromise) return AdsrNode._modulePromise;
+    AdsrNode._modulePromise = actx.audioWorklet.addModule('data:text/javascript,'+encodeURI(adsrproc));
+    return AdsrNode._modulePromise;
   }
 }

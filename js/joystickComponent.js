@@ -28,14 +28,24 @@ class JoystickComponent extends Component {
 
     this.putGamePadNameInDisplay();
 
-    if (!this.gamepad) return;
+    if (!this.gamepad) {
+      requestAnimationFrame(() => this.runGameLoop());
+      return;
+    }
 
-    try {
-      this.axes = JSON.parse(JSON.stringify(this.gamepad.axes));
-      this.buttons = JSON.parse(
-        JSON.stringify(this.gamepad.buttons.map((k) => k.pressed))
-      );
-    } catch (e) {}
+    let nAxes = this.gamepad.axes.length;
+    let nButtons = this.gamepad.buttons.length;
+    if (!this.axes || this.axes.length !== nAxes) {
+      this.axes = new Float32Array(nAxes);
+      this.prevAxes = new Float32Array(nAxes);
+    }
+    if (!this.buttons || this.buttons.length !== nButtons) {
+      this.buttons = new Uint8Array(nButtons);
+    }
+    for (let i = 0; i < nAxes; i++) this.axes[i] = this.gamepad.axes[i];
+    for (let i = 0; i < nButtons; i++) {
+      this.buttons[i] = this.gamepad.buttons[i].pressed ? 1 : 0;
+    }
 
     if (
       !Array.isArray(this.outputElements) ||
@@ -51,22 +61,18 @@ class JoystickComponent extends Component {
       this.outputElements.length &&
       this.outputElements[0] instanceof HTMLElement
     ) {
-      for (let i = 0; i < this.buttons.length + this.axes.length; i++) {
-        if (i >= this.buttons.length) {
-          let idx = i - this.buttons.length;
-          
+      for (let i = 0; i < nButtons + nAxes; i++) {
+        if (i >= nButtons) {
+          let idx = i - nButtons;
           if (this.axes[idx] != this.prevAxes[idx]) {
             this.outputElements[i].classList.add("active");
           } else {
             this.outputElements[i].classList.remove("active");
           }
+        } else if (this.buttons[i]) {
+          this.outputElements[i].classList.add("active");
         } else {
-          let idx = i;
-          if (this.buttons[idx]) {
-            this.outputElements[i].classList.add("active");
-          } else {
-            this.outputElements[i].classList.remove("active");
-          }
+          this.outputElements[i].classList.remove("active");
         }
       }
     }
@@ -75,15 +81,13 @@ class JoystickComponent extends Component {
       this.node.port.postMessage({ axes: this.axes, buttons: this.buttons });
     }
 
-    // this.prevButtons = JSON.parse(JSON.stringify(this.buttons));
-    this.prevAxes = JSON.parse(JSON.stringify(this.axes));
+    this.prevAxes.set(this.axes);
 
     requestAnimationFrame(() => this.runGameLoop());
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/joystickworklet.js")
+    this.app.loadWorklet("js/audioWorklets/joystickworklet.js")
       .then(() => {
         this.numberOfOutputs =
           this.gamepad.buttons.length + this.gamepad.axes.length;
@@ -100,8 +104,6 @@ class JoystickComponent extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-
-        this.node.port.onmessage = (e) => console.log("#msg", e.data);
       });
   }
 }

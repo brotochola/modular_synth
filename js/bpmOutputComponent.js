@@ -17,8 +17,7 @@ class BPMOutputComponent extends Component {
     (this.display||{}).innerHTML = this.val;
   }
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/bpmOutputWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/bpmOutputWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "bpm-worklet", {
           numberOfInputs: 0,

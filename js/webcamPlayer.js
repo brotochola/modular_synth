@@ -79,8 +79,7 @@ class WebcamPlayer extends Component {
     this.node.port.postMessage(this.imageDataParsed);
   }
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/webcamPlayerWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/webcamPlayerWorklet.js")
       .then(() => {
         this.createdAt = this.app.actx.currentTime;
         this.node = new AudioWorkletNode(

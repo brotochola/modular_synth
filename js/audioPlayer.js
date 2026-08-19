@@ -59,7 +59,7 @@ class AudioPlayer extends Component {
       this.handleOnChange();
     } else {
       this.playing = true;
-      this.node.start(this.app.getNextBeat());
+      this.node.start();
     }
 
     this.updateButton();

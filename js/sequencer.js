@@ -7,7 +7,7 @@ class Sequencer extends Component {
     this.numberOfSemitones = 13;
     this.numberOfSteps = 16;
     if (!this.sequence) this.initSequence();
-    this.outputLabels = ["relative note", "trigger"];
+    this.outputLabels = ["relative note", "trigger", "Hz"];
     this.createNode();
     this.createbuttons();
   }
@@ -108,12 +108,11 @@ class Sequencer extends Component {
   }
 
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/sequencerWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/sequencerWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "sequencer-worklet", {
           numberOfInputs: 0,
-          numberOfOutputs: 2,
+          numberOfOutputs: 3,
         });
 
         this.node.onprocessorerror = (e) => {

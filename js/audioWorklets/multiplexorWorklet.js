@@ -14,37 +14,30 @@ class MultiplexorWorklet extends AudioWorkletProcessor {
   }
 
   process(inputs, outputs, parameters) {
-    this.port.postMessage({ which: this.which });
-
-    // this.port.postMessage({ parameters: parameters });
-    try {
-      //try to get the last value of the last input
-      let tempWhich = parameters.which[0];
-      // this.port.postMessage({ tempWhich});
-      if (
-        !isNaN(tempWhich) &&
-        tempWhich != undefined &&
-        tempWhich != 0 &&
-        tempWhich < 128
-      ) {
-        this.which = Math.abs(Math.round(tempWhich));
-      } else {
-        //if there's no input, use the last saved
-        this.which = this.lastWhich;
-      }
-      if (this.which != this.lastWhich) {
-        this.port.postMessage({ which: this.which });
-      }
-
-      for (let i = 0; i < outputs[0][0].length; i++) {
-        let inputValue = ((inputs[this.which] || [])[0] || [])[i];
-        // this.port.postMessage(inputValue);
-        outputs[0][0][i] = inputValue || 0;
-      }
-      this.lastWhich = this.which;
-    } catch (e) {
-      this.port.postMessage(e);
+    let tempWhich = parameters.which[0];
+    if (!isNaN(tempWhich) && tempWhich != undefined && tempWhich != 0 && tempWhich < 128) {
+      this.which = Math.abs(Math.round(tempWhich));
+    } else {
+      this.which = this.lastWhich;
     }
+    if (this.which != this.lastWhich) {
+      this.port.postMessage({ which: this.which });
+    }
+
+    let out = outputs[0] && outputs[0][0];
+    if (!out) return true;
+    let inputCh = (inputs[this.which] && inputs[this.which][0]) || null;
+    let n = out.length;
+    if (inputCh) {
+      for (let i = 0; i < n; i++) {
+        out[i] = inputCh[i] || 0;
+      }
+    } else {
+      for (let i = 0; i < n; i++) {
+        out[i] = 0;
+      }
+    }
+    this.lastWhich = this.which;
     return true;
   }
 }

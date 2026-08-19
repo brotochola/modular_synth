@@ -26,8 +26,7 @@ class CounterComponent extends Component {
     this.display.innerHTML = this.val;
   }
   createNode() {
-    this.app.actx.audioWorklet
-      .addModule("js/audioWorklets/counterWorklet.js")
+    this.app.loadWorklet("js/audioWorklets/counterWorklet.js")
       .then(() => {
         this.node = new AudioWorkletNode(this.app.actx, "counter-worklet", {
           numberOfInputs: 0,

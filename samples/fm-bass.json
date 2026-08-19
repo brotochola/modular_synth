@@ -1,0 +1,103 @@
+{
+  "bpm": 110,
+  "outputX": "720px",
+  "outputY": "180px",
+  "connections": [],
+  "components": [
+    {
+      "id": "osc_mod",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "80px",
+      "y": "120px",
+      "audioParams": { "detune": 0, "frequency": 32 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "osc_mod",
+          "to": "amp_mod",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c1"
+        }
+      ]
+    },
+    {
+      "id": "amp_mod",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "280px",
+      "y": "120px",
+      "audioParams": { "gain": 40 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_mod",
+          "to": "osc_car",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c2"
+        }
+      ]
+    },
+    {
+      "id": "osc_car",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "480px",
+      "y": "120px",
+      "audioParams": { "detune": 0, "frequency": 55 },
+      "node": { "type": "triangle" },
+      "connections": [
+        {
+          "from": "osc_car",
+          "to": "filt_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c3"
+        }
+      ]
+    },
+    {
+      "id": "filt_1",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "280px",
+      "y": "320px",
+      "audioParams": { "Q": 4, "frequency": 420, "gain": 0 },
+      "node": { "type": "lowpass" },
+      "connections": [
+        {
+          "from": "filt_1",
+          "to": "amp_out",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c4"
+        }
+      ]
+    },
+    {
+      "id": "amp_out",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "500px",
+      "y": "320px",
+      "audioParams": { "gain": 0.45 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_out",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": "0",
+          "id": "c5"
+        }
+      ]
+    }
+  ]
+}

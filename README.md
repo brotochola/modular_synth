@@ -41,6 +41,8 @@ https://github.com/olvb/phaze/tree/master
 * overdrive & distortion:
 https://chatgpt.com/c/1dcba5bc-1ede-492f-97cf-d9175695ffef
 
+* agregar mono output al coso de midi
+
 
 ------------------
 
