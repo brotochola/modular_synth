@@ -1,4 +1,5 @@
 class App {
+  static HISTORY_CAP = 40;
   static signalignServers = [
     "stun.l.google.com",
     "stun1.l.google.com:19302",
@@ -29,12 +30,18 @@ class App {
     this.scale = 1;
     this.lastScale = 1;
     this.bulkLoading = false;
+    this.restoringHistory = false;
+    this.syncingRemote = false;
+    this.history = [];
+    this.historyIndex = 0;
+    this._loadGen = 0;
     this._workletModules = {};
     this.createMainContainer(elem);
     this.createMessageBox();
     this.createOutputComponent();
     this.createCanvasOnTop();
     this.addEventsToDropFile();
+    this.initHistory();
 
     this.putBPMInButton();
 
@@ -52,7 +59,22 @@ class App {
     window.addEventListener(
       "keydown",
       (e) => {
+        let typing = App.isTypingTarget(e.target);
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "z") {
+          if (typing) return;
+          e.preventDefault();
+          if (e.shiftKey) this.redo();
+          else this.undo();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "y") {
+          if (typing) return;
+          e.preventDefault();
+          this.redo();
+          return;
+        }
         if (e.key == "Delete") {
+          if (typing) return;
           for (let c of this.components.filter((k) => k.active)) {
             c.remove();
             this.saveListOfComponentsInFirestore();
@@ -61,7 +83,9 @@ class App {
 
           this.updateAllLines();
         } else if (e.key == " ") {
+          if (typing) return;
           this.buttonsContainer.classList.toggle("visible");
+          if (this.historyPanel) this.historyPanel.classList.remove("visible");
         }
       },
       false
@@ -227,6 +251,7 @@ class App {
     if (e.sessionID == this.sessionID && e.userID == this.userID) {
       return; // console.warn("THESEA RE YOUR OWN CHANGES");
     }
+    this.syncingRemote = true;
     if (e.components) {
       //THIS IS ONLY A LIST OF IDS IN THE DOC
       //INSIDE THIS DOC THERE'S A COLLECTION WITH ALL THE DOCUMENTS
@@ -242,7 +267,12 @@ class App {
             (serializedComponent) => {
               //COMPONENT DOESN'T EXIST IN THIS FRONTEND
               if (serializedComponent) {
+                this.syncingRemote = true;
                 this.addSerializedComponent(serializedComponent);
+                this.waitUntilAllComopnentsAreReady(() => {
+                  this.syncingRemote = false;
+                  this.resetHistory();
+                });
               }
             }
           );
@@ -280,6 +310,10 @@ class App {
     }
 
     this.updateAllLines();
+    this.waitUntilAllComopnentsAreReady(() => {
+      this.syncingRemote = false;
+      this.resetHistory();
+    });
   }
 
   wheelZoom() {
@@ -570,6 +604,9 @@ class App {
   addCustomProcessor() {
     this.components.push(new CustomProcessorComponent(this));
   }
+  addMixer() {
+    this.components.push(new Mixer(this));
+  }
   addFilter() {
     this.components.push(new Filter(this));
   }
@@ -666,7 +703,11 @@ class App {
     return obj;
   }
 
-  loadFromFile(obj) {
+  loadFromFile(obj, fromHistory) {
+    if (!obj) return;
+    if ((this.bulkLoading || this.restoringHistory) && !fromHistory) return;
+    this._loadGen++;
+    let gen = this._loadGen;
     this.bulkLoading = true;
     if (obj.bpm) this.bpm = obj.bpm;
     this.putBPMInButton();
@@ -682,9 +723,28 @@ class App {
     }
 
     this.whenAllComponentsReady().then(() => {
+      if (gen != this._loadGen) return;
       this.applySerializedConnections(obj);
-      this.bulkLoading = false;
       this.updateAllLines();
+      if (fromHistory) {
+        if (this.history[this.historyIndex]) {
+          this.history[this.historyIndex].snap = this.clonePatch(
+            this.serialize()
+          );
+        }
+        this.deepSaveAllComponents();
+        this.saveListOfComponentsInFirestore();
+      } else {
+        this.pushHistoryEntry(
+          "Load patch",
+          this.clonePatch(this.serialize())
+        );
+      }
+      setTimeout(() => {
+        this.bulkLoading = false;
+        this.restoringHistory = false;
+        this.renderHistoryPanel();
+      }, 0);
     });
   }
 
@@ -827,6 +887,7 @@ class App {
       c.updateBPM();
     }
     this.putBPMInButton();
+    this.afterEdit();
   }
 
   download() {
@@ -893,6 +954,213 @@ class App {
 
   openButtons() {
     this.buttonsContainer.classList.toggle("visible");
+    if (this.historyPanel) this.historyPanel.classList.remove("visible");
+  }
+
+  openHistory() {
+    if (!this.historyPanel) return;
+    this.historyPanel.classList.toggle("visible");
+    if (this.historyPanel.classList.contains("visible")) {
+      if (this.buttonsContainer) this.buttonsContainer.classList.remove("visible");
+      this.renderHistoryPanel();
+    }
+  }
+
+  static isTypingTarget(el) {
+    if (!el) return false;
+    let tag = (el.tagName || "").toLowerCase();
+    return (
+      tag == "input" ||
+      tag == "textarea" ||
+      tag == "select" ||
+      el.isContentEditable
+    );
+  }
+
+  clonePatch(obj) {
+    return JSON.parse(JSON.stringify(obj));
+  }
+
+  snapsEqual(a, b) {
+    return JSON.stringify(a) == JSON.stringify(b);
+  }
+
+  initHistory() {
+    this.historyPanel = document.querySelector(".historyPanel");
+    this.historyList = document.querySelector(".historyList");
+    this.undoButton = document.querySelector(".undo");
+    this.redoButton = document.querySelector(".redo");
+    this.history = [
+      { label: "Start", snap: this.clonePatch(this.serialize()) },
+    ];
+    this.historyIndex = 0;
+    this.renderHistoryPanel();
+  }
+
+  resetHistory() {
+    this.history = [
+      { label: "Start", snap: this.clonePatch(this.serialize()) },
+    ];
+    this.historyIndex = 0;
+    this.renderHistoryPanel();
+  }
+
+  pushHistoryEntry(label, snap) {
+    this.history = this.history.slice(0, this.historyIndex + 1);
+    this.history.push({ label: label || "Edit", snap });
+    this.historyIndex = this.history.length - 1;
+    // ponytail: cap 40 full-patch snapshots. Named commands if the list gets noisy.
+    while (this.history.length > App.HISTORY_CAP) {
+      this.history.shift();
+      this.historyIndex--;
+    }
+    if (this.historyIndex < 0) this.historyIndex = 0;
+    this.renderHistoryPanel();
+  }
+
+  afterEdit() {
+    if (this.bulkLoading || this.restoringHistory || this.syncingRemote) return;
+    if (!this.history.length) this.initHistory();
+    let now = this.clonePatch(this.serialize());
+    let current = this.history[this.historyIndex];
+    if (current && this.snapsEqual(current.snap, now)) return;
+    let label = current ? App.diffLabel(current.snap, now) : "Edit";
+    this.pushHistoryEntry(label, now);
+  }
+
+  restoreHistoryIndex(i) {
+    if (i < 0 || i >= this.history.length) return;
+    if (this.bulkLoading || this.restoringHistory) return;
+    if (i == this.historyIndex) return;
+    this.historyIndex = i;
+    this.restoringHistory = true;
+    this.loadFromFile(this.history[i].snap, true);
+    this.renderHistoryPanel();
+  }
+
+  undo() {
+    this.restoreHistoryIndex(this.historyIndex - 1);
+  }
+
+  redo() {
+    this.restoreHistoryIndex(this.historyIndex + 1);
+  }
+
+  jumpToHistory(i) {
+    this.restoreHistoryIndex(i);
+  }
+
+  renderHistoryPanel() {
+    if (this.undoButton) this.undoButton.disabled = this.historyIndex <= 0;
+    if (this.redoButton) {
+      this.redoButton.disabled = this.historyIndex >= this.history.length - 1;
+    }
+    if (!this.historyList) return;
+    this.historyList.innerHTML = "";
+    for (let i = 0; i < this.history.length; i++) {
+      let row = document.createElement("button");
+      row.type = "button";
+      row.classList.add("historyRow");
+      if (i == this.historyIndex) row.classList.add("current");
+      if (i > this.historyIndex) row.classList.add("future");
+      row.textContent = this.history[i].label;
+      row.onclick = () => this.jumpToHistory(i);
+      this.historyList.appendChild(row);
+    }
+    let currentRow = this.historyList.querySelector(".historyRow.current");
+    if (currentRow) currentRow.scrollIntoView({ block: "nearest" });
+  }
+
+  static patchTypeName(comp) {
+    return String((comp && (comp.type || comp.constructor)) || "module").replace(
+      /Component$/,
+      ""
+    );
+  }
+
+  static collectConns(obj) {
+    let list = [];
+    let seen = {};
+    let add = (c) => {
+      if (!c) return;
+      let k =
+        c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput;
+      if (seen[k]) return;
+      seen[k] = true;
+      list.push(c);
+    };
+    for (let c of (obj && obj.connections) || []) add(c);
+    for (let comp of (obj && obj.components) || []) {
+      for (let c of comp.connections || []) add(c);
+    }
+    return list;
+  }
+
+  static compsById(obj) {
+    let map = {};
+    for (let c of (obj && obj.components) || []) {
+      if (c && c.id) map[c.id] = c;
+    }
+    return map;
+  }
+
+  static diffLabel(prev, now) {
+    prev = prev || {};
+    now = now || {};
+    if (prev.bpm != now.bpm) return "BPM " + now.bpm;
+    if (prev.outputX != now.outputX || prev.outputY != now.outputY) {
+      return "Move Output";
+    }
+    let prevMap = App.compsById(prev);
+    let nowMap = App.compsById(now);
+    for (let id of Object.keys(nowMap)) {
+      if (!prevMap[id]) return "Add " + App.patchTypeName(nowMap[id]);
+    }
+    for (let id of Object.keys(prevMap)) {
+      if (!nowMap[id]) return "Delete " + App.patchTypeName(prevMap[id]);
+    }
+    let prevConns = App.collectConns(prev);
+    let nowConns = App.collectConns(now);
+    let prevKeys = {};
+    for (let c of prevConns) {
+      prevKeys[c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput] =
+        c;
+    }
+    let nowKeys = {};
+    for (let c of nowConns) {
+      nowKeys[c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput] =
+        c;
+    }
+    for (let k of Object.keys(nowKeys)) {
+      if (!prevKeys[k]) {
+        let c = nowKeys[k];
+        let from = App.patchTypeName(nowMap[c.from] || prevMap[c.from]);
+        let to = App.patchTypeName(nowMap[c.to] || prevMap[c.to]);
+        return "Cable " + from + " → " + to + " " + c.audioParam;
+      }
+    }
+    for (let k of Object.keys(prevKeys)) {
+      if (!nowKeys[k]) {
+        let c = prevKeys[k];
+        let to = App.patchTypeName(prevMap[c.to] || nowMap[c.to]);
+        return "Unplug " + to + " " + c.audioParam;
+      }
+    }
+    for (let id of Object.keys(nowMap)) {
+      let a = prevMap[id];
+      let b = nowMap[id];
+      if (!a) continue;
+      let pa = a.audioParams || {};
+      let pb = b.audioParams || {};
+      let keys = Object.keys(pb);
+      for (let key of keys) {
+        if (pa[key] != pb[key]) {
+          return App.patchTypeName(b) + " " + key;
+        }
+      }
+      if (a.x != b.x || a.y != b.y) return "Move " + App.patchTypeName(b);
+    }
+    return "Edit";
   }
 }
 
@@ -907,6 +1175,7 @@ App.COMPONENT_CLASSES = {
   Distortion,
   NoiseGenWithWorklet,
   CustomProcessorComponent,
+  Mixer,
   Sequencer,
   EnvelopeGenerator,
   ConstantValueNode,

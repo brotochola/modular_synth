@@ -120,6 +120,49 @@ app .mainContainer {
   transform: translateY(calc(0% - 40px));
 }
 
+.historyPanel {
+  position: fixed;
+  bottom: 0;
+  right: 8px;
+  transform: translateY(110%);
+  width: 280px;
+  z-index: 2;
+  pointer-events: none;
+  transition: transform 250ms ease-out;
+}
+.historyPanel.visible {
+  transform: translateY(calc(0% - 40px));
+  pointer-events: all;
+}
+.historyList {
+  overflow-y: auto;
+  max-height: 40vh;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.85);
+  border: 1px solid darkgreen;
+  border-radius: 5px;
+  backdrop-filter: blur(10px);
+}
+.historyRow {
+  text-align: left;
+  width: 100%;
+  background: transparent;
+  color: lightgreen;
+  border: none;
+  border-bottom: 1px solid #0a2a0a;
+  font-size: 12px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+.historyRow.current {
+  background: rgba(0, 80, 0, 0.55);
+  color: #fff;
+}
+.historyRow.future {
+  opacity: 0.4;
+}
+
 .buttons button {
   backdrop-filter: blur(10px);
   pointer-events: all;
@@ -282,6 +325,9 @@ component.midifileplayer icon:after {
 component.CustomProcessorComponent icon:after {
   content: "🧮";
 }
+component.Mixer icon:after {
+  content: "🎚️";
+}
 
 component.envelopegenerator icon:after {
   content: "〽️";
@@ -305,6 +351,45 @@ component.joystickcomponent {
 
 component.CustomProcessorComponent {
   height: 210px;
+}
+
+component.Mixer {
+  width: 220px;
+  height: 340px;
+}
+
+component.Mixer .inputsDiv {
+  bottom: 108px;
+  height: calc(100% - 112px);
+}
+
+component.Mixer .faders {
+  display: flex;
+  gap: 4px;
+  justify-content: space-around;
+  position: absolute;
+  bottom: 4px;
+  left: 4px;
+  right: 22px;
+  z-index: 2;
+}
+
+component.Mixer .fader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-size: 10px;
+  color: lightgreen;
+}
+
+component.Mixer .fader input[type="range"] {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  appearance: slider-vertical;
+  width: 16px;
+  height: 88px;
+  padding: 0;
+  margin: 0;
 }
 
 textarea {
@@ -808,6 +893,9 @@ footer connectedUsers {
 footer button {
   width: max-content;
 }
+footer button:disabled {
+  opacity: 0.4;
+}
 footer .patchName {
   text-transform: capitalize;
   width: 130px;
@@ -865,8 +953,8 @@ component.LargeVisualizer input.speed {
 component.LargeVisualizer canvas {
   background-color: black;
 }
-component.LargeVisualizer p{
-  margin:0px
+component.LargeVisualizer p {
+  margin: 0px;
 }
 component.LargeVisualizer .inputsDiv {
   display: flex;

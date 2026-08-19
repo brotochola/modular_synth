@@ -90,6 +90,7 @@
     <script src="js/imagePlayerAudioWorkletVersion.js"></script>
 
     <script src="js/customProcessorComponent.js"></script>
+    <script src="js/mixer.js"></script>
 
 
     <script src="js/output.js"></script>
@@ -119,6 +120,8 @@
             <option value="samples/seq-pluck.json">seq-pluck</option>
             <option value="samples/ring-mod.json">ring-mod</option>
             <option value="samples/seq-filter-mod-adsr.json">seq-filter-mod-adsr</option>
+            <option value="samples/house-dino.json">house-dino</option>
+            <option value="samples/house-dino-mixer.json">house-dino mixer</option>
         </select>
 
 
@@ -129,6 +132,9 @@
         <!-- <button onclick="app.stop()" class="stop"> ■ </button> -->
 
         <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
+        <button onclick="app.undo()" class="undo" disabled>Undo</button>
+        <button onclick="app.redo()" class="redo" disabled>Redo</button>
+        <button onclick="app.openHistory()" class="openHistory">History</button>
         <button onclick="app.play()" class="play"> ▶ </button>
         <div class="patchName"></div>
 
@@ -152,6 +158,7 @@
         <span class="categoryOfComponent">
             <button onclick="app.addFilter()">🤖 Filter</button>
             <button onclick="app.addCustomProcessor()">🧮 Math Processor</button>
+            <button onclick="app.addMixer()">🎚️ Mixer</button>
             <button onclick="app.addGainNode()">📢 Gain Node</button>
             <button onclick="app.addCompressor()">➗ Compressor</button>
             <button onclick="app.addDelay()">⏰ Delay</button>
@@ -217,6 +224,9 @@
         </span>
 
 
+    </div>
+    <div class="historyPanel">
+        <div class="historyList"></div>
     </div>
     <app></app>
     <script>

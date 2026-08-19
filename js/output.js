@@ -28,6 +28,7 @@ class Output extends Component {
   }
 
   quickSave() {
+    setTimeout(() => this.app.afterEdit(), 0);
     this.app.saveListOfComponentsInFirestore()
   }
 }

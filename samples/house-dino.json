@@ -1,0 +1,920 @@
+{
+  "bpm": 124,
+  "outputX": "1520px",
+  "outputY": "960px",
+  "connections": [],
+  "components": [
+    {
+      "id": "txt_kick",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "40px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["text"],
+      "text": "KICK  negras",
+      "connections": []
+    },
+    {
+      "id": "seq_kick",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "130px",
+      "audioParams": { "baseHz": 440 },
+      "node": {},
+      "valuesToSave": ["sequence"],
+      "sequence": {
+        "0": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        "1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "4": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        "5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "6": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "7": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "8": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        "9": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "10": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "11": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "12": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        "13": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "14": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "15": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "connections": [
+        {
+          "from": "seq_kick",
+          "to": "env_kick",
+          "audioParam": "trigger",
+          "numberOfOutput": "1",
+          "id": "ck1"
+        },
+        {
+          "from": "seq_kick",
+          "to": "env_kick_pitch",
+          "audioParam": "trigger",
+          "numberOfOutput": "1",
+          "id": "ck2"
+        }
+      ]
+    },
+    {
+      "id": "env_kick",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "380px",
+      "y": "130px",
+      "audioParams": {
+        "attack": 0.002,
+        "attackcurve": 0.5,
+        "decay": 0.18,
+        "release": 0.14,
+        "sustain": 0,
+        "trigger": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_kick",
+          "to": "amp_kick",
+          "audioParam": "gain",
+          "numberOfOutput": "0",
+          "id": "ck3"
+        }
+      ]
+    },
+    {
+      "id": "env_kick_pitch",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "380px",
+      "y": "280px",
+      "audioParams": {
+        "attack": 0.001,
+        "attackcurve": 0.5,
+        "decay": 0.055,
+        "release": 0.04,
+        "sustain": 0,
+        "trigger": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_kick_pitch",
+          "to": "amp_kick_pitch",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "ck4"
+        },
+        {
+          "from": "env_kick_pitch",
+          "to": "amp_click",
+          "audioParam": "gain",
+          "numberOfOutput": "0",
+          "id": "ck5"
+        }
+      ]
+    },
+    {
+      "id": "osc_kick",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "600px",
+      "y": "130px",
+      "audioParams": { "detune": 0, "frequency": 50 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "osc_kick",
+          "to": "amp_kick",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "ck6"
+        }
+      ]
+    },
+    {
+      "id": "amp_kick_pitch",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "600px",
+      "y": "280px",
+      "audioParams": { "gain": 180 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_kick_pitch",
+          "to": "osc_kick",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "ck7"
+        }
+      ]
+    },
+    {
+      "id": "amp_kick",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "130px",
+      "audioParams": { "gain": 0 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_kick",
+          "to": "mix",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "ck8"
+        }
+      ]
+    },
+    {
+      "id": "noise_click",
+      "constructor": "NoiseGenWithWorklet",
+      "type": "NoiseGenWithWorklet",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "280px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "noise_click",
+          "to": "amp_click",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "ck9"
+        }
+      ]
+    },
+    {
+      "id": "amp_click",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "280px",
+      "audioParams": { "gain": 0 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_click",
+          "to": "mix",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "ck10"
+        }
+      ]
+    },
+    {
+      "id": "txt_hat",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "440px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["text"],
+      "text": "HAT  offbeat 8ths",
+      "connections": []
+    },
+    {
+      "id": "seq_hat",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "530px",
+      "audioParams": { "baseHz": 440 },
+      "node": {},
+      "valuesToSave": ["sequence"],
+      "sequence": {
+        "0": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "2": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        "3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "6": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        "7": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "8": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "9": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "10": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        "11": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "12": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "13": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "14": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
+        "15": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "connections": [
+        {
+          "from": "seq_hat",
+          "to": "env_hat",
+          "audioParam": "trigger",
+          "numberOfOutput": "1",
+          "id": "ch1"
+        }
+      ]
+    },
+    {
+      "id": "env_hat",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "380px",
+      "y": "530px",
+      "audioParams": {
+        "attack": 0.001,
+        "attackcurve": 0.5,
+        "decay": 0.04,
+        "release": 0.025,
+        "sustain": 0,
+        "trigger": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_hat",
+          "to": "amp_hat",
+          "audioParam": "gain",
+          "numberOfOutput": "0",
+          "id": "ch2"
+        }
+      ]
+    },
+    {
+      "id": "noise_hat",
+      "constructor": "NoiseGenWithWorklet",
+      "type": "NoiseGenWithWorklet",
+      "createdBy": "user",
+      "x": "600px",
+      "y": "530px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "noise_hat",
+          "to": "filt_hat_hp",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "ch3"
+        }
+      ]
+    },
+    {
+      "id": "filt_hat_hp",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "530px",
+      "audioParams": { "Q": 0.8, "detune": 0, "frequency": 8000, "gain": 0 },
+      "node": { "type": "highpass" },
+      "connections": [
+        {
+          "from": "filt_hat_hp",
+          "to": "filt_hat_bp",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "ch4"
+        }
+      ]
+    },
+    {
+      "id": "filt_hat_bp",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "530px",
+      "audioParams": { "Q": 3.5, "detune": 0, "frequency": 10000, "gain": 0 },
+      "node": { "type": "bandpass" },
+      "connections": [
+        {
+          "from": "filt_hat_bp",
+          "to": "amp_hat",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "ch5"
+        }
+      ]
+    },
+    {
+      "id": "amp_hat",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1260px",
+      "y": "530px",
+      "audioParams": { "gain": 0 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_hat",
+          "to": "mix",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "ch6"
+        }
+      ]
+    },
+    {
+      "id": "txt_dino",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "850px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["text"],
+      "text": "DINO  FM roar agresivo",
+      "connections": []
+    },
+    {
+      "id": "osc_mod",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "960px",
+      "audioParams": { "detune": 0, "frequency": 23 },
+      "node": { "type": "sawtooth" },
+      "connections": [
+        {
+          "from": "osc_mod",
+          "to": "amp_index",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cd1"
+        }
+      ]
+    },
+    {
+      "id": "amp_index",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "240px",
+      "y": "960px",
+      "audioParams": { "gain": 210 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_index",
+          "to": "osc_car",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "cd2"
+        }
+      ]
+    },
+    {
+      "id": "osc_car",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "440px",
+      "y": "960px",
+      "audioParams": { "detune": 0, "frequency": 34 },
+      "node": { "type": "triangle" },
+      "connections": [
+        {
+          "from": "osc_car",
+          "to": "filt_dino",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cd3"
+        }
+      ]
+    },
+    {
+      "id": "filt_dino",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "640px",
+      "y": "960px",
+      "audioParams": { "Q": 4, "detune": 0, "frequency": 1100, "gain": 0 },
+      "node": { "type": "lowpass" },
+      "connections": [
+        {
+          "from": "filt_dino",
+          "to": "crush_dino",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cd4"
+        }
+      ]
+    },
+    {
+      "id": "crush_dino",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "840px",
+      "y": "960px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["formula"],
+      "formula": "y=Math.tanh(x1*7)",
+      "connections": [
+        {
+          "from": "crush_dino",
+          "to": "amp_dino",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cd10"
+        }
+      ]
+    },
+    {
+      "id": "amp_dino",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "960px",
+      "audioParams": { "gain": 0.72 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_dino",
+          "to": "mix",
+          "audioParam": "in_2",
+          "numberOfOutput": "0",
+          "id": "cd5"
+        }
+      ]
+    },
+    {
+      "id": "osc_lfo",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "1140px",
+      "audioParams": { "detune": 0, "frequency": 0.28 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "osc_lfo",
+          "to": "amp_lfo",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cd6"
+        },
+        {
+          "from": "osc_lfo",
+          "to": "amp_mouth",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cd11"
+        }
+      ]
+    },
+    {
+      "id": "amp_lfo",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "240px",
+      "y": "1140px",
+      "audioParams": { "gain": 95 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_lfo",
+          "to": "amp_index",
+          "audioParam": "gain",
+          "numberOfOutput": "0",
+          "id": "cd7"
+        }
+      ]
+    },
+    {
+      "id": "amp_mouth",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "840px",
+      "y": "1140px",
+      "audioParams": { "gain": 700 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_mouth",
+          "to": "filt_dino",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "cd12"
+        }
+      ]
+    },
+    {
+      "id": "osc_wander",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "440px",
+      "y": "1140px",
+      "audioParams": { "detune": 0, "frequency": 0.11 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "osc_wander",
+          "to": "amp_wander",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cd8"
+        }
+      ]
+    },
+    {
+      "id": "amp_wander",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "640px",
+      "y": "1140px",
+      "audioParams": { "gain": 18 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_wander",
+          "to": "osc_car",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "cd9"
+        }
+      ]
+    },
+    {
+      "id": "osc_s_mod",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "1320px",
+      "audioParams": { "detune": 0, "frequency": 71 },
+      "node": { "type": "square" },
+      "connections": [
+        {
+          "from": "osc_s_mod",
+          "to": "amp_s_idx",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cs1"
+        }
+      ]
+    },
+    {
+      "id": "amp_s_idx",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "240px",
+      "y": "1320px",
+      "audioParams": { "gain": 340 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_s_idx",
+          "to": "osc_s_car",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "cs2"
+        }
+      ]
+    },
+    {
+      "id": "osc_s_car",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "440px",
+      "y": "1320px",
+      "audioParams": { "detune": 0, "frequency": 230 },
+      "node": { "type": "triangle" },
+      "connections": [
+        {
+          "from": "osc_s_car",
+          "to": "amp_scree",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cs3"
+        }
+      ]
+    },
+    {
+      "id": "amp_scree",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "640px",
+      "y": "1320px",
+      "audioParams": { "gain": 0.55 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_scree",
+          "to": "mix",
+          "audioParam": "in_2",
+          "numberOfOutput": "0",
+          "id": "cs4"
+        }
+      ]
+    },
+    {
+      "id": "txt_bass",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "1500px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["text"],
+      "text": "BASS  seq sucio",
+      "connections": []
+    },
+    {
+      "id": "seq_bass",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "1560px",
+      "audioParams": { "baseHz": 55 },
+      "node": {},
+      "valuesToSave": ["sequence"],
+      "sequence": {
+        "0": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "3": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "4": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "6": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "7": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "8": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "9": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "10": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+        "11": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "12": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "13": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "14": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "15": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "connections": [
+        {
+          "from": "seq_bass",
+          "to": "env_bass",
+          "audioParam": "trigger",
+          "numberOfOutput": "1",
+          "id": "cb8"
+        },
+        {
+          "from": "seq_bass",
+          "to": "osc_bass",
+          "audioParam": "frequency",
+          "numberOfOutput": "2",
+          "id": "cb9"
+        }
+      ]
+    },
+    {
+      "id": "env_bass",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "380px",
+      "y": "1480px",
+      "audioParams": {
+        "attack": 0.004,
+        "attackcurve": 0.5,
+        "decay": 0.1,
+        "release": 0.22,
+        "sustain": 0.45,
+        "trigger": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_bass",
+          "to": "amp_bass",
+          "audioParam": "gain",
+          "numberOfOutput": "0",
+          "id": "cb10"
+        }
+      ]
+    },
+    {
+      "id": "osc_bass",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "380px",
+      "y": "1600px",
+      "audioParams": { "detune": 0, "frequency": 0 },
+      "node": { "type": "sawtooth" },
+      "connections": [
+        {
+          "from": "osc_bass",
+          "to": "filt_bass",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cb1"
+        }
+      ]
+    },
+    {
+      "id": "filt_bass",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "1600px",
+      "audioParams": { "Q": 7, "detune": 0, "frequency": 620, "gain": 0 },
+      "node": { "type": "lowpass" },
+      "connections": [
+        {
+          "from": "filt_bass",
+          "to": "crush_bass",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cb2"
+        }
+      ]
+    },
+    {
+      "id": "crush_bass",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "1600px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["formula"],
+      "formula": "y=Math.tanh(x1*(8+10*x2))",
+      "connections": [
+        {
+          "from": "crush_bass",
+          "to": "amp_bass",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cb3"
+        }
+      ]
+    },
+    {
+      "id": "amp_bass",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "1600px",
+      "audioParams": { "gain": 0 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_bass",
+          "to": "mix",
+          "audioParam": "in_3",
+          "numberOfOutput": "0",
+          "id": "cb4"
+        }
+      ]
+    },
+    {
+      "id": "osc_evol_cut",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "380px",
+      "y": "1780px",
+      "audioParams": { "detune": 0, "frequency": 0.047 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "osc_evol_cut",
+          "to": "amp_evol_cut",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "cb5"
+        }
+      ]
+    },
+    {
+      "id": "amp_evol_cut",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "1780px",
+      "audioParams": { "gain": 520 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_evol_cut",
+          "to": "filt_bass",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "cb6"
+        }
+      ]
+    },
+    {
+      "id": "osc_evol_drv",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "1780px",
+      "audioParams": { "detune": 0, "frequency": 0.073 },
+      "node": { "type": "triangle" },
+      "connections": [
+        {
+          "from": "osc_evol_drv",
+          "to": "crush_bass",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "cb7"
+        }
+      ]
+    },
+    {
+      "id": "mix",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1280px",
+      "y": "960px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["formula"],
+      "formula": "y=x1*1.2+x2*0.12+x3*0.26+x4*0.4",
+      "connections": [
+        {
+          "from": "mix",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": "0",
+          "id": "cm1"
+        }
+      ]
+    }
+  ]
+}

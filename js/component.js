@@ -36,6 +36,7 @@ class Component {
   }
 
   async quickSave(alsoSaveTheUpdatedListOfComponents) {
+    setTimeout(() => this.app.afterEdit(), 0);
     if (!this.app.patchName) return;
     if (this.id == "output") return;
     this.app.updateAllLines();
@@ -478,6 +479,7 @@ class Component {
     this.container.parentElement.removeChild(this.container);
 
     this.app.components = this.app.components.filter((c) => c != this);
+    this.app.afterEdit();
     if (this.app.patchName) {
       removeComponentFromFirestore(this.app.patchName, this.id);
       this.app.saveListOfComponentsInFirestore();

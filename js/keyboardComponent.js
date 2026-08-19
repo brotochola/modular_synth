@@ -14,6 +14,7 @@ class KeyboardComponent extends Component {
     window.addEventListener("keyup", this.bindedKeyUp, false);
   }
   onKeyDown(e) {
+    if (e.ctrlKey || e.metaKey) return;
     for (let i = 0; i < this.letters.length; i++) {
       if (e.key == this.letters[i]) {
         this.node.port.postMessage({ type: "down", which: i });
@@ -22,6 +23,7 @@ class KeyboardComponent extends Component {
     }
   }
   onKeyUp(e) {
+    if (e.ctrlKey || e.metaKey) return;
     for (let i = 0; i < this.letters.length; i++) {
       if (e.key == this.letters[i]) {
         this.node.port.postMessage({ type: "up", which: i });
