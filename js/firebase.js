@@ -105,6 +105,7 @@ async function getDocFromFirebase(name) {
   let loadadDoc = (await collectionRef.doc(name).get()).data() || {};
 
   ret.bpm = loadadDoc.bpm;
+  ret.cables = loadadDoc.cables;
   ret.outputX = loadadDoc.outputX;
   ret.outputY = loadadDoc.outputY;
 

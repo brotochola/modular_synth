@@ -134,6 +134,7 @@
         <!-- <button onclick="app.stop()" class="stop"> ■ </button> -->
 
         <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
+        <button onclick="app.openCables()" class="openCables">Cables</button>
         <button onclick="app.undo()" class="undo" disabled>Undo</button>
         <button onclick="app.redo()" class="redo" disabled>Redo</button>
         <button onclick="app.openHistory()" class="openHistory">History</button>
@@ -229,6 +230,23 @@
     </div>
     <div class="historyPanel">
         <div class="historyList"></div>
+    </div>
+    <div class="cablePanel">
+        <label>Tension min <span data-val="tensionMin">40</span>
+            <input type="range" name="tensionMin" min="0" max="200" step="1" value="40">
+        </label>
+        <label>Tension k <span data-val="tensionK">0.35</span>
+            <input type="range" name="tensionK" min="0" max="1" step="0.01" value="0.35">
+        </label>
+        <label>Sag base <span data-val="sagBase">18</span>
+            <input type="range" name="sagBase" min="0" max="80" step="1" value="18">
+        </label>
+        <label>Sag k <span data-val="sagK">0.2</span>
+            <input type="range" name="sagK" min="0" max="1" step="0.01" value="0.2">
+        </label>
+        <label>Sag max <span data-val="sagMax">140</span>
+            <input type="range" name="sagMax" min="20" max="400" step="1" value="140">
+        </label>
     </div>
     <app></app>
     <script>

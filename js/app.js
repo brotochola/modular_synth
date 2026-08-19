@@ -1,5 +1,12 @@
 class App {
   static HISTORY_CAP = 40;
+  static CABLE_DEFAULTS = {
+    tensionMin: 40,
+    tensionK: 0.35,
+    sagBase: 18,
+    sagK: 0.2,
+    sagMax: 140,
+  };
   static signalignServers = [
     "stun.l.google.com",
     "stun1.l.google.com:19302",
@@ -27,6 +34,7 @@ class App {
     this.actx.suspend();
 
     this.bpm = 100;
+    this.cables = Object.assign({}, App.CABLE_DEFAULTS);
     this.scale = 1;
     this.lastScale = 1;
     this.bulkLoading = false;
@@ -86,6 +94,7 @@ class App {
           if (typing) return;
           this.buttonsContainer.classList.toggle("visible");
           if (this.historyPanel) this.historyPanel.classList.remove("visible");
+          if (this.cablePanel) this.cablePanel.classList.remove("visible");
         }
       },
       false,
@@ -94,6 +103,7 @@ class App {
     this.wheelZoom();
 
     this.buttonsContainer = document.querySelector(".buttons");
+    this.bindCablePanel();
 
     this.listOfConnectedUsersElement = document.querySelector("connectedUsers");
 
@@ -315,6 +325,7 @@ class App {
       }
       this.putBPMInButton();
     }
+    if (e.cables) this.applyCableParams(e.cables);
 
     this.updateAllLines();
     this.waitUntilAllComopnentsAreReady(() => {
@@ -382,11 +393,7 @@ class App {
   }
   drawLine(from, to, color) {
     if (!from || !to) return;
-    const TENSION_MIN = 40;
-    const TENSION_K = 0.35;
-    const SAG_BASE = 18;
-    const SAG_K = 0.2;
-    const SAG_MAX = 140;
+    let p = this.cables || App.CABLE_DEFAULTS;
 
     let canvasBox = this._cableCanvasBox || this.canvas.getBoundingClientRect();
     let fromBox = from.getBoundingClientRect();
@@ -399,8 +406,8 @@ class App {
 
     let dx = endX - startX;
     let dist = Math.hypot(dx, endY - startY);
-    let tension = Math.max(TENSION_MIN, Math.abs(dx) * TENSION_K);
-    let sag = Math.min(SAG_MAX, SAG_BASE + dist * SAG_K);
+    let tension = Math.max(p.tensionMin, Math.abs(dx) * p.tensionK);
+    let sag = Math.min(p.sagMax, p.sagBase + dist * p.sagK);
 
     this.ctx.beginPath();
     this.ctx.strokeStyle = color || "red";
@@ -459,6 +466,7 @@ class App {
       this.makeAllComponentsInactive();
       if (this.buttonsContainer)
         this.buttonsContainer.classList.remove("visible");
+      if (this.cablePanel) this.cablePanel.classList.remove("visible");
       this._panning = true;
       this._panStartX = e.clientX;
       this._panStartY = e.clientY;
@@ -727,6 +735,7 @@ class App {
       components: [],
       connections: [],
       bpm: this.bpm,
+      cables: Object.assign({}, this.cables),
       outputX: serializedOutputComponent.x,
       outputY: serializedOutputComponent.y,
     };
@@ -748,6 +757,7 @@ class App {
     this.bulkLoading = true;
     if (obj.bpm) this.bpm = obj.bpm;
     this.putBPMInButton();
+    this.applyCableParams(obj.cables);
 
     for (let c of this.components.slice()) {
       if (c instanceof Output) continue;
@@ -960,6 +970,7 @@ class App {
     await saveInFireStore(
       {
         bpm: this.bpm,
+        cables: Object.assign({}, this.cables),
         components: listOfSerializedComponents,
         outputX: serializedOutputComponent.x,
         outputY: serializedOutputComponent.y,
@@ -989,6 +1000,7 @@ class App {
   openButtons() {
     this.buttonsContainer.classList.toggle("visible");
     if (this.historyPanel) this.historyPanel.classList.remove("visible");
+    if (this.cablePanel) this.cablePanel.classList.remove("visible");
   }
 
   openHistory() {
@@ -997,8 +1009,68 @@ class App {
     if (this.historyPanel.classList.contains("visible")) {
       if (this.buttonsContainer)
         this.buttonsContainer.classList.remove("visible");
+      if (this.cablePanel) this.cablePanel.classList.remove("visible");
       this.renderHistoryPanel();
     }
+  }
+
+  openCables() {
+    if (!this.cablePanel) return;
+    this.cablePanel.classList.toggle("visible");
+    if (this.cablePanel.classList.contains("visible")) {
+      if (this.buttonsContainer)
+        this.buttonsContainer.classList.remove("visible");
+      if (this.historyPanel) this.historyPanel.classList.remove("visible");
+    }
+  }
+
+  applyCableParams(cables) {
+    let d = App.CABLE_DEFAULTS;
+    let src = cables || {};
+    let num = (v, fallback) => {
+      v = parseFloat(v);
+      return isNaN(v) ? fallback : v;
+    };
+    this.cables = {
+      tensionMin: num(src.tensionMin, d.tensionMin),
+      tensionK: num(src.tensionK, d.tensionK),
+      sagBase: num(src.sagBase, d.sagBase),
+      sagK: num(src.sagK, d.sagK),
+      sagMax: num(src.sagMax, d.sagMax),
+    };
+    this.syncCableSliders();
+    this.updateAllLines();
+  }
+
+  syncCableSliders() {
+    if (!this.cablePanel) return;
+    for (let key of Object.keys(this.cables)) {
+      let input = this.cablePanel.querySelector('[name="' + key + '"]');
+      if (input) input.value = this.cables[key];
+      let out = this.cablePanel.querySelector('[data-val="' + key + '"]');
+      if (out) out.textContent = input ? input.value : this.cables[key];
+    }
+  }
+
+  bindCablePanel() {
+    this.cablePanel = document.querySelector(".cablePanel");
+    if (!this.cablePanel) return;
+    this.cablePanel.addEventListener("input", (e) => {
+      let name = e.target.name;
+      if (!name || !(name in this.cables)) return;
+      let v = parseFloat(e.target.value);
+      if (isNaN(v)) return;
+      this.cables[name] = v;
+      let out = this.cablePanel.querySelector('[data-val="' + name + '"]');
+      if (out) out.textContent = e.target.value;
+      this.updateAllLines();
+    });
+    this.cablePanel.addEventListener("change", (e) => {
+      if (!e.target.name || !(e.target.name in this.cables)) return;
+      this.saveListOfComponentsInFirestore();
+      this.afterEdit();
+    });
+    this.syncCableSliders();
   }
 
   static isTypingTarget(el) {
@@ -1141,6 +1213,9 @@ class App {
     prev = prev || {};
     now = now || {};
     if (prev.bpm != now.bpm) return "BPM " + now.bpm;
+    if (JSON.stringify(prev.cables || {}) != JSON.stringify(now.cables || {})) {
+      return "Cables";
+    }
     if (prev.outputX != now.outputX || prev.outputY != now.outputY) {
       return "Move Output";
     }
