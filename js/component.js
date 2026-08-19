@@ -36,7 +36,10 @@ class Component {
   }
 
   async quickSave(alsoSaveTheUpdatedListOfComponents) {
-    setTimeout(() => this.app.afterEdit(), 0);
+    if (!this.app) return;
+    setTimeout(() => {
+      if (this.app) this.app.afterEdit();
+    }, 0);
     if (!this.app.patchName) return;
     if (this.id == "output") return;
     this.app.updateAllLines();
@@ -174,6 +177,7 @@ class Component {
     }
   }
   createView() {
+    if (!this.app) return;
     //THIS WILL WAIT UNTIL THE NODE EXISTS
     if (!this.node) {
       if (this.retryCounter > 200) {
@@ -197,11 +201,8 @@ class Component {
     this.putLabels();
 
     setTimeout(() => {
-      if (!this.app) {
-        console.log("no app??");
-      } else if (this.app.patchName) {
-        this.startListeningToChangesInThiscomponent();
-      }
+      if (!this.app || !this.app.patchName) return;
+      this.startListeningToChangesInThiscomponent();
     }, 2000);
   }
   // stopListeningToChanges() {

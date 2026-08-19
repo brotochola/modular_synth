@@ -88,7 +88,7 @@ class App {
           if (this.historyPanel) this.historyPanel.classList.remove("visible");
         }
       },
-      false
+      false,
     );
 
     this.wheelZoom();
@@ -101,6 +101,13 @@ class App {
     setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
   }
 
+  spaceOutComponents(numPx) {
+    Array.from(document.querySelectorAll("component")).map((k) => {
+      k.style.left = parseInt(k.style.left) * numPx + "px";
+      k.style.top = parseInt(k.style.top) * numPx + "px";
+    });
+    this.updateAllLines();
+  }
   createInstanceOfRTCConnectionForUsers() {
     this.rtcInstance = new RTCForUsersData(this);
   }
@@ -115,7 +122,7 @@ class App {
     clearTimeout(this.messageBoxTimeoutVar);
     this.messageBoxTimeoutVar = setTimeout(
       () => this.messageBox.classList.remove("visible"),
-      delay
+      delay,
     );
   }
   createMessageBox() {
@@ -187,7 +194,7 @@ class App {
           this.handleChangesInThisPatchFromFirestore(e);
         },
         this.sesstionID,
-        this.userID
+        this.userID,
       );
       this.listeningToFirestore = true;
 
@@ -274,7 +281,7 @@ class App {
                   this.resetHistory();
                 });
               }
-            }
+            },
           );
         }
       }
@@ -282,7 +289,7 @@ class App {
       //CHECK IF I GOTTA REMOVE SOME COMPONENT FROM THIS FRONTEND:
 
       let componentsWeHaveToRemove = this.components.filter(
-        (k) => !e.components.includes(k.id)
+        (k) => !e.components.includes(k.id),
       );
       // if(componentsWeHaveToRemove.length ==this.components.length) {}
 
@@ -357,30 +364,55 @@ class App {
   createCanvasOnTop() {
     this.canvas = document.createElement("canvas");
     this.canvas.classList.add("linesCanvas");
-    this.canvas.width = this.container.getBoundingClientRect().width;
-    this.canvas.height = this.container.getBoundingClientRect().height;
-    this.container.appendChild(this.canvas);
-    // this.canvas.onclick = (e) => console.log(e);
+    this.appEl.appendChild(this.canvas);
     this.ctx = this.canvas.getContext("2d");
+    this.sizeCableCanvas();
+    window.addEventListener("resize", () => {
+      this.sizeCableCanvas();
+      this.updateAllLines();
+    });
+  }
+  sizeCableCanvas() {
+    let w = this.appEl.clientWidth;
+    let h = this.appEl.clientHeight;
+    if (this.canvas.width !== w) this.canvas.width = w;
+    if (this.canvas.height !== h) this.canvas.height = h;
+    this.ctx.lineCap = "round";
+    this.ctx.lineWidth = 3;
   }
   drawLine(from, to, color) {
     if (!from || !to) return;
-    this.ctx.beginPath();
-    let box = this.container.getBoundingClientRect();
+    const TENSION_MIN = 40;
+    const TENSION_K = 0.35;
+    const SAG_BASE = 18;
+    const SAG_K = 0.2;
+    const SAG_MAX = 140;
+
+    let canvasBox = this._cableCanvasBox || this.canvas.getBoundingClientRect();
     let fromBox = from.getBoundingClientRect();
     let toBox = to.getBoundingClientRect();
-    let s = this.scale || 1;
 
-    this.ctx.lineWidth = 3;
+    let startX = fromBox.left + fromBox.width / 2 - canvasBox.left;
+    let startY = fromBox.top + fromBox.height / 2 - canvasBox.top;
+    let endX = toBox.left + toBox.width / 2 - canvasBox.left;
+    let endY = toBox.top + toBox.height / 2 - canvasBox.top;
+
+    let dx = endX - startX;
+    let dist = Math.hypot(dx, endY - startY);
+    let tension = Math.max(TENSION_MIN, Math.abs(dx) * TENSION_K);
+    let sag = Math.min(SAG_MAX, SAG_BASE + dist * SAG_K);
+
+    this.ctx.beginPath();
     this.ctx.strokeStyle = color || "red";
-    let startX = (fromBox.left + fromBox.width / 2 - box.left) / s;
-    let startY = (fromBox.top + fromBox.height / 2 - box.top) / s;
     this.ctx.moveTo(startX, startY);
-
-    let endX = (toBox.left + toBox.width / 2 - box.left) / s;
-    let endY = (toBox.top + toBox.height / 2 - box.top) / s;
-
-    this.ctx.bezierCurveTo(endX, startY, startX, endY, endX, endY);
+    this.ctx.bezierCurveTo(
+      startX + tension,
+      startY + sag,
+      endX - tension,
+      endY + sag,
+      endX,
+      endY,
+    );
     this.ctx.stroke();
   }
 
@@ -405,6 +437,7 @@ class App {
   }
 
   createMainContainer(elem) {
+    this.appEl = elem;
     this.container = document.createElement("div");
     this.container.classList.add("mainContainer");
     this.container.draggable = false;
@@ -415,20 +448,26 @@ class App {
     elem.appendChild(this.container);
     this.SAVE_PREFIX = "modular_synth_";
 
-    this.container.addEventListener("pointerdown", (e) => {
+    elem.addEventListener("pointerdown", (e) => {
       if (e.button != 0) return;
-      if (e.target != this.container && e.target != this.canvas) return;
+      if (
+        e.target.closest(
+          "component, footer, .buttons, .historyPanel, .messageBox",
+        )
+      )
+        return;
       this.makeAllComponentsInactive();
-      if (this.buttonsContainer) this.buttonsContainer.classList.remove("visible");
+      if (this.buttonsContainer)
+        this.buttonsContainer.classList.remove("visible");
       this._panning = true;
       this._panStartX = e.clientX;
       this._panStartY = e.clientY;
       this._panLeft = parseFloat(getComputedStyle(this.container).left) || 0;
       this._panTop = parseFloat(getComputedStyle(this.container).top) || 0;
-      this.container.setPointerCapture(e.pointerId);
+      elem.setPointerCapture(e.pointerId);
     });
 
-    this.container.addEventListener("pointermove", (e) => {
+    elem.addEventListener("pointermove", (e) => {
       if (!this._panning) return;
       // origin 0 0: left/top already match viewport px; /scale made zoom-out pan fly
       let x = this._panLeft + (e.clientX - this._panStartX);
@@ -439,16 +478,12 @@ class App {
       this.updateAllLines();
     });
 
-    this.container.addEventListener("pointerup", () => {
+    elem.addEventListener("pointerup", () => {
       this._panning = false;
     });
-    this.container.addEventListener("pointercancel", () => {
+    elem.addEventListener("pointercancel", () => {
       this._panning = false;
     });
-
-    this.container.onmousedown = () => {
-      if (this.buttonsContainer) this.buttonsContainer.classList.remove("visible");
-    };
 
     let box = this.container.getBoundingClientRect();
     this.putCSSVariablesInMainContainer(box.x, box.y);
@@ -472,10 +507,12 @@ class App {
     if (this._linesRaf) return;
     this._linesRaf = requestAnimationFrame(() => {
       this._linesRaf = 0;
+      this._cableCanvasBox = this.canvas.getBoundingClientRect();
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
       for (let c of this.getAllConnections()) {
         c.redraw();
       }
+      this._cableCanvasBox = null;
     });
   }
   addText() {
@@ -650,7 +687,7 @@ class App {
     this.components.map((k) =>
       k.connections.map((c) => {
         ret.push(c);
-      })
+      }),
     );
 
     return ret;
@@ -669,7 +706,7 @@ class App {
         if (c.to == compo && c.audioParam == audioParam) {
           c.remove();
         }
-      })
+      }),
     );
   }
 
@@ -680,7 +717,7 @@ class App {
         if (c.to == compo || c.from == compo) {
           c.remove();
         }
-      })
+      }),
     );
   }
 
@@ -729,16 +766,13 @@ class App {
       if (fromHistory) {
         if (this.history[this.historyIndex]) {
           this.history[this.historyIndex].snap = this.clonePatch(
-            this.serialize()
+            this.serialize(),
           );
         }
         this.deepSaveAllComponents();
         this.saveListOfComponentsInFirestore();
       } else {
-        this.pushHistoryEntry(
-          "Load patch",
-          this.clonePatch(this.serialize())
-        );
+        this.pushHistoryEntry("Load patch", this.clonePatch(this.serialize()));
       }
       setTimeout(() => {
         this.bulkLoading = false;
@@ -804,7 +838,7 @@ class App {
         if (tries > 200) {
           console.warn(
             "components didn't load :(",
-            notReady.map((k) => k.type + ":" + k.id)
+            notReady.map((k) => k.type + ":" + k.id),
           );
           resolve();
           return;
@@ -853,7 +887,7 @@ class App {
   save(name) {
     if (!name) {
       name = prompt(
-        "name the instrument, it will be saved in localStorage and in firebase"
+        "name the instrument, it will be saved in localStorage and in firebase",
       );
     }
     if (!name) return;
@@ -894,7 +928,7 @@ class App {
     downloader(
       JSON.stringify(this.serialize()),
       "application/json",
-      "my_patch.json"
+      "my_patch.json",
     );
   }
 
@@ -932,7 +966,7 @@ class App {
         sessionID: this.sessionID,
         userID: this.userID,
       },
-      this.patchName
+      this.patchName,
     );
   }
 
@@ -961,7 +995,8 @@ class App {
     if (!this.historyPanel) return;
     this.historyPanel.classList.toggle("visible");
     if (this.historyPanel.classList.contains("visible")) {
-      if (this.buttonsContainer) this.buttonsContainer.classList.remove("visible");
+      if (this.buttonsContainer)
+        this.buttonsContainer.classList.remove("visible");
       this.renderHistoryPanel();
     }
   }
@@ -1072,10 +1107,9 @@ class App {
   }
 
   static patchTypeName(comp) {
-    return String((comp && (comp.type || comp.constructor)) || "module").replace(
-      /Component$/,
-      ""
-    );
+    return String(
+      (comp && (comp.type || comp.constructor)) || "module",
+    ).replace(/Component$/, "");
   }
 
   static collectConns(obj) {
@@ -1083,8 +1117,7 @@ class App {
     let seen = {};
     let add = (c) => {
       if (!c) return;
-      let k =
-        c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput;
+      let k = c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput;
       if (seen[k]) return;
       seen[k] = true;
       list.push(c);
@@ -1123,13 +1156,15 @@ class App {
     let nowConns = App.collectConns(now);
     let prevKeys = {};
     for (let c of prevConns) {
-      prevKeys[c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput] =
-        c;
+      prevKeys[
+        c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput
+      ] = c;
     }
     let nowKeys = {};
     for (let c of nowConns) {
-      nowKeys[c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput] =
-        c;
+      nowKeys[
+        c.from + ">" + c.to + ":" + c.audioParam + "#" + c.numberOfOutput
+      ] = c;
     }
     for (let k of Object.keys(nowKeys)) {
       if (!prevKeys[k]) {

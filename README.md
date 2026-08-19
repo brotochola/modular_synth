@@ -111,6 +111,7 @@ Scale 0–1 controllers with Gain before they hit `frequency` (Hz) or they will 
 | **ring-mod** | Two sines multiplied in the Math Processor. |
 | **elefante** | Slow FM tone plus filtered noise, mixed to Output. |
 | **house-dino mixer** | Same as house-dino; bus is a Mixer instead of a Math formula. |
+| **talker** | Formant voice: saw glottis + noise, four parallel bandpass (F1–F4). Six sequencers spell *hello how are you*. |
 
 ---
 
