@@ -1,0 +1,180 @@
+{
+  "bpm": 100,
+  "outputX": "1080px",
+  "outputY": "520px",
+  "connections": [],
+  "components": [
+    {
+      "id": "lfo_x",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "60px",
+      "y": "80px",
+      "audioParams": { "detune": 0, "frequency": 0.15 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "lfo_x",
+          "to": "shader_1",
+          "audioParam": "x1",
+          "numberOfOutput": "0",
+          "id": "c_lfo_x"
+        },
+        {
+          "from": "lfo_x",
+          "to": "amp_f",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c_lfo_f"
+        }
+      ]
+    },
+    {
+      "id": "lfo_y",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "60px",
+      "y": "260px",
+      "audioParams": { "detune": 0, "frequency": 0.23 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "lfo_y",
+          "to": "shader_1",
+          "audioParam": "x2",
+          "numberOfOutput": "0",
+          "id": "c_lfo_y"
+        }
+      ]
+    },
+    {
+      "id": "lfo_c",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "60px",
+      "y": "440px",
+      "audioParams": { "detune": 0, "frequency": 0.07 },
+      "node": { "type": "sine" },
+      "connections": [
+        {
+          "from": "lfo_c",
+          "to": "shader_1",
+          "audioParam": "x3",
+          "numberOfOutput": "0",
+          "id": "c_lfo_c"
+        }
+      ]
+    },
+    {
+      "id": "mouse_1",
+      "constructor": "Mouse",
+      "type": "Mouse",
+      "createdBy": "user",
+      "x": "60px",
+      "y": "620px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "mouse_1",
+          "to": "shader_1",
+          "audioParam": "x4",
+          "numberOfOutput": "1",
+          "id": "c_mouse_y"
+        }
+      ]
+    },
+    {
+      "id": "shader_1",
+      "constructor": "Shader",
+      "type": "Shader",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "80px",
+      "audioParams": { "x1": 0, "x2": 0, "x3": 0, "x4": 0 },
+      "node": {},
+      "valuesToSave": ["shader"],
+      "shader": "precision mediump float;\nuniform vec2 u_res;\nuniform float u_time;\nuniform float x1, x2, x3, x4;\nuniform sampler2D u_cam;\nuniform float u_hasCam;\nvoid main() {\n  vec2 uv = gl_FragCoord.xy / u_res;\n  vec2 p = uv * 2.0 - 1.0;\n  p.x *= u_res.x / u_res.y;\n  p *= 1.0 + x4 * 1.5;\n  float a = atan(p.y, p.x) + x3 * 3.14159;\n  float r = length(p);\n  float v = sin(r * (8.0 + x1 * 12.0) - u_time * 2.0) + sin(a * (4.0 + x2 * 6.0) + u_time);\n  vec3 synth = vec3(0.5 + 0.5 * sin(v + x3), 0.5 + 0.5 * sin(v + 2.0), 0.5 + 0.5 * sin(v + 4.0));\n  vec3 cam = texture2D(u_cam, uv).rgb;\n  gl_FragColor = vec4(mix(synth, cam, u_hasCam * 0.5), 1.0);\n}",
+      "connections": []
+    },
+    {
+      "id": "osc_1",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "520px",
+      "audioParams": { "detune": 0, "frequency": 110 },
+      "node": { "type": "sawtooth" },
+      "connections": [
+        {
+          "from": "osc_1",
+          "to": "filt_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c_osc"
+        }
+      ]
+    },
+    {
+      "id": "amp_f",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "560px",
+      "y": "400px",
+      "audioParams": { "gain": 700 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_f",
+          "to": "filt_1",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c_amp_f"
+        }
+      ]
+    },
+    {
+      "id": "filt_1",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "560px",
+      "y": "520px",
+      "audioParams": { "Q": 6, "frequency": 800, "gain": 0 },
+      "node": { "type": "lowpass" },
+      "connections": [
+        {
+          "from": "filt_1",
+          "to": "amp_o",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c_filt"
+        }
+      ]
+    },
+    {
+      "id": "amp_o",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "780px",
+      "y": "520px",
+      "audioParams": { "gain": 0.28 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_o",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": "0",
+          "id": "c_out"
+        }
+      ]
+    }
+  ]
+}

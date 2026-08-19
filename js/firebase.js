@@ -86,7 +86,8 @@ async function getBase64FileFromFirebase(patchName, filename) {
 }
 
 async function putBPMInFireStore(patchName, bpm) {
-  collectionRef.doc(patchName).set({ bpm: bpm });
+  if (!patchName) return;
+  collectionRef.doc(patchName).set({ bpm: bpm }, { merge: true });
 }
 
 async function removeComponentFromFirestore(patchName, id) {
@@ -120,7 +121,17 @@ async function getDocFromFirebase(name) {
     })
   );
 
-  if (ret.components.length == 0) return null;
+  if (ret.components.length == 0) {
+    let listed = (loadadDoc.components || []).length;
+    if (listed) {
+      console.warn(
+        "patch lists " +
+          listed +
+          " modules but firestore has no component docs. Open the patch locally and save again.",
+      );
+    }
+    return null;
+  }
 
   return ret;
 }

@@ -58,15 +58,9 @@ class WebRTCReceiver extends Component {
     this.onConnectionOpen();
   }
   createView() {
-    this.createInfoButton()
-
+    this.createInfoButton();
     this.ready = true;
-    if (this.app.patchName) {
-      listenToChangesInComponent(this.app.patchName, this.id, (data) => {
-        this.updateFromSerialized(data);
-      });
-    }
-    super.createView()
+    super.createView();
   }
 
   remove(forceRemove) {

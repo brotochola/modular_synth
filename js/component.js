@@ -66,7 +66,7 @@ class Component {
     // this.startListeningToChangesInThiscomponent();
   }
   loadFromSerializedData(cb) {
-    if (!this.serializedData) return;
+    if (!this.serializedData || !this.container) return;
 
     if (this.node && this.serializedData.audioParams) {
       let keys = Object.keys(this.serializedData.audioParams);
@@ -643,6 +643,7 @@ class Component {
     if (
       this.type.toLowerCase() == "output" ||
       this.type.toLowerCase() == "imagemaker" ||
+      this.type.toLowerCase() == "shader" ||
       this.type.toLowerCase() == "numberdisplaycomponent" ||
       this.type.toLowerCase() == "visualizer" ||
       this.type.toLowerCase() == "frequencyanalizer"
@@ -669,6 +670,7 @@ class Component {
     this.app.lastOutputClicked = { compo: this, output: outputButton };
   }
   updateFromSerialized(other) {
+    if (!this.container || !this.app) return;
     if (other instanceof Component) {
       this.serializedData = other.serialize();
     } else {

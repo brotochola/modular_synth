@@ -112,6 +112,7 @@ Scale 0–1 controllers with Gain before they hit `frequency` (Hz) or they will 
 | **elefante** | Slow FM tone plus filtered noise, mixed to Output. |
 | **house-dino mixer** | Same as house-dino; bus is a Mixer instead of a Math formula. |
 | **talker** | Formant voice: saw glottis + noise, four parallel bandpass (F1–F4). Six sequencers spell *hello how are you*. |
+| **shader lfo** | Three slow sines into Shader `x1…x3`, mouse Y into `x4` (zoom). Same LFO opens a saw through a lowpass. |
 
 ---
 
@@ -188,7 +189,7 @@ Examples: white noise, ADSR, 16-step sequencer, mouse, keyboard, joystick, MIDI,
 
 **Image Player** downsamples the file to 215×121, packs `{r,g,b,a}` per pixel, and the worklet walks that array at sample rate. Four outputs, values `(channel/255)*2-1`. **Webcam** does the same from a `<video>` each frame.
 
-**Image Maker** is the inverse: four audio inputs fill a 215×121 RGBA buffer (~26 691 pixels). At 48 kHz that is roughly two frames per second of new image, with opacity fading between updates.
+**Image Maker** is the inverse: four audio inputs fill a 215×121 RGBA buffer (~26 691 pixels). At 48 kHz that is roughly two frames per second of new image, with opacity fading between updates. **Shader** is the GPU path: a fragment shader every video frame, uniforms `x1…x4` sampled from the rack (CV, not scanline), optional webcam as a texture.
 
 **Drawer** is a 256-sample looping `AudioBufferSourceNode`. You draw a waveform on a canvas; columns become sample values.
 
@@ -289,7 +290,8 @@ Grouped like the **+ Modules** palette.
 | **Peak Detector** | Highest abs amplitude; `reset` trigger. |
 | **Pitch detector** | YIN-style pitch → audio-rate Hz. |
 | **Spectrum 2 Image** | FFT bins written into pixels. |
-| **Image Maker** | Audio → RGBA canvas (fullscreen toggle). |
+| **Image Maker** | Audio → RGBA canvas, scanline (~2 fps). |
+| **Shader** | WebGL fragment shader, CV uniforms `x1…x4`, optional webcam texture. |
 | **Text** | Label on the rack. |
 | **Rack Cover** | Decorative panel over cables. |
 | **Output** | Always present. This is the speakers. |

@@ -30,9 +30,8 @@ class Text extends Component {
   createView() {
     this.ready = true;
     if (this.app.patchName) {
-      listenToChangesInComponent(this.app.patchName, this.id, (data) => {
-        if (data) this.updateFromSerialized(data);
-      });
+      // same path as Component: filter own session + store unsubscribe for remove()
+      setTimeout(() => this.startListeningToChangesInThiscomponent(), 2000);
       if (!this.serializedData) this.quickSave(true);
     }
   }

@@ -192,26 +192,30 @@ class App {
     };
   }
 
-  startListeningToFirestoreChanges() {
+  async startListeningToFirestoreChanges() {
     if (!this.patchName) return;
     if (this.listeningToFirestore) return;
-    this.waitUntilAllComopnentsAreReady(() => {
-      this.functionToUnsubscribeFromFirestore = listenToChangesInWholePatch(
-        this.patchName,
-        (e) => {
-          console.log("#!!! changes", e);
-          this.lastChangedFromFirestore = e;
-          this.handleChangesInThisPatchFromFirestore(e);
-        },
-        this.sesstionID,
-        this.userID,
-      );
-      this.listeningToFirestore = true;
+    this.listeningToFirestore = true;
 
-      //LISTEN TO CHANGES IN THE USERS COLLECTIONS
-      listenToChangesInUsersConnectedToThisPatch(this.patchName, (users) => {
-        this.handleChangesInUsers(users);
-      });
+    let loaded = await getDocFromFirebase(this.patchName);
+    if (loaded) {
+      this.loadFromFile(loaded);
+      await this.whenAllComponentsReady();
+    }
+
+    this.functionToUnsubscribeFromFirestore = listenToChangesInWholePatch(
+      this.patchName,
+      (e) => {
+        console.log("#!!! changes", e);
+        this.lastChangedFromFirestore = e;
+        this.handleChangesInThisPatchFromFirestore(e);
+      },
+      this.sesstionID,
+      this.userID,
+    );
+
+    listenToChangesInUsersConnectedToThisPatch(this.patchName, (users) => {
+      this.handleChangesInUsers(users);
     });
   }
   handleChangesInUsers(users) {
@@ -226,7 +230,12 @@ class App {
     if (this.rtcInstance && this.rtcInstance.state == "ready") {
       if (!this.admin) {
         let adminsID = this.connectedUsers.filter((k) => k.admin)[0];
-        if (!adminsID) return console.warn("there's no admin connected?");
+        if (!adminsID) {
+          if (this.connectedUsers.length > 1) {
+            console.warn("there's no admin connected?");
+          }
+          return;
+        }
         this.rtcInstance.connect(adminsID.userID);
       }
     }
@@ -265,6 +274,7 @@ class App {
 
   handleChangesInThisPatchFromFirestore(e) {
     if (!e) return;
+    if (this.bulkLoading || this.restoringHistory) return;
     if (e.sessionID == this.sessionID && e.userID == this.userID) {
       return; // console.warn("THESEA RE YOUR OWN CHANGES");
     }
@@ -677,6 +687,9 @@ class App {
   addImageMaker() {
     this.components.push(new ImageMaker(this));
   }
+  addShader() {
+    this.components.push(new Shader(this));
+  }
 
   addAudioPlayer() {
     this.components.push(new AudioPlayer(this));
@@ -779,7 +792,6 @@ class App {
             this.serialize(),
           );
         }
-        this.deepSaveAllComponents();
         this.saveListOfComponentsInFirestore();
       } else {
         this.pushHistoryEntry("Load patch", this.clonePatch(this.serialize()));
@@ -889,9 +901,11 @@ class App {
   }
 
   deepSaveAllComponents() {
-    for (let comp of this.components) {
-      comp.quickSave();
-    }
+    return Promise.all(
+      this.components
+        .filter((c) => c.id != "output")
+        .map((c) => c.quickSave()),
+    );
   }
 
   save(name) {
@@ -904,7 +918,6 @@ class App {
     this.patchName = name;
     let serialized = this.serialize();
     localStorage[this.SAVE_PREFIX + name] = JSON.stringify(serialized);
-    this.deepSaveAllComponents();
     this.saveListOfComponentsInFirestore();
   }
   load() {
@@ -954,31 +967,30 @@ class App {
 
   async saveListOfComponentsInFirestore() {
     if (!this.patchName) return;
-    //I STOP THE LISTENING, SAVE, AND START LISTENING AGAIN
-    // this.unsubscribeFromFirestore();
-    let serializedOutputComponent = this.getOutputComponent().serialize();
-    let listOfSerializedComponents = this.components
-      .filter((k) => k.id != "output")
-      .map((k) => k.id);
+    if (this._savingPatch) return;
+    this._savingPatch = true;
+    try {
+      await this.deepSaveAllComponents();
+      let serializedOutputComponent = this.getOutputComponent().serialize();
+      let listOfSerializedComponents = this.components
+        .filter((k) => k.id != "output")
+        .map((k) => k.id);
 
-    // console.log("# SAVING LIST OF COMPONENTS", listOfSerializedComponents);
-    //I'M SAVING THE SESSION ID, WHICH IS A RANDOM VALUE EACH TIME YOU OPEN THE APP
-    //AND THE USER ID THAT STAYS THE SAME, SAVED IN THE LOCALSTORAGE.
-    //THE IDEA IS THAT IF IT'S YOUR CHANGES, AND YOU DID THEM NOW, THIS FRONTEND
-    //SHOULD NOT UPDATE ANYTHING
-    //IF IT'S YOUR OWN CHANGES FROM A PREVIOUS SESSION, GO AHEAD AND UPDATE
-    await saveInFireStore(
-      {
-        bpm: this.bpm,
-        cables: Object.assign({}, this.cables),
-        components: listOfSerializedComponents,
-        outputX: serializedOutputComponent.x,
-        outputY: serializedOutputComponent.y,
-        sessionID: this.sessionID,
-        userID: this.userID,
-      },
-      this.patchName,
-    );
+      await saveInFireStore(
+        {
+          bpm: this.bpm,
+          cables: Object.assign({}, this.cables),
+          components: listOfSerializedComponents,
+          outputX: serializedOutputComponent.x,
+          outputY: serializedOutputComponent.y,
+          sessionID: this.sessionID,
+          userID: this.userID,
+        },
+        this.patchName,
+      );
+    } finally {
+      this._savingPatch = false;
+    }
   }
 
   play() {
@@ -1318,6 +1330,7 @@ App.COMPONENT_CLASSES = {
   LargeVisualizer,
   Spectrum2Image,
   ImageMaker,
+  Shader,
   WebRTCSender,
   WebRTCReceiver,
   Output,

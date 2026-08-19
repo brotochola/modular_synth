@@ -423,7 +423,6 @@ component.Mixer .fader {
 component.Mixer .fader input[type="range"] {
   writing-mode: vertical-lr;
   direction: rtl;
-  appearance: slider-vertical;
   width: 16px;
   height: 88px;
   padding: 0;
@@ -507,6 +506,61 @@ component input.outputButton.active:after {
 component.imagemaker {
   width: 320px;
   height: 200px;
+}
+
+component.Shader {
+  width: 420px;
+  height: 280px;
+}
+
+component.Shader textarea {
+  height: 90px;
+  font-size: 10px;
+  font-family: monospace;
+  width: calc(100% - 230px);
+}
+
+component.Shader button.togglefullscreen {
+  width: max-content;
+  margin: 5px;
+  right: 0px;
+  position: absolute;
+}
+
+component.Shader label.camToggle {
+  position: absolute;
+  right: 8px;
+  top: 28px;
+  z-index: 2;
+  font-size: 11px;
+  color: lightgreen;
+}
+
+component.Shader pre.shaderError {
+  display: none;
+  position: absolute;
+  left: 5px;
+  bottom: 4px;
+  right: 220px;
+  max-height: 48px;
+  overflow: auto;
+  margin: 0;
+  padding: 2px 4px;
+  font-size: 9px;
+  color: #f66;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 3;
+}
+
+component.Shader canvas.shaderCanvas {
+  bottom: 2px;
+  right: 2px;
+  position: absolute;
+  width: 213px;
+  height: 120px;
+  border: 1px solid gray;
+  pointer-events: none;
+  touch-action: none;
 }
 
 component.imagemaker button.togglefullscreen {
@@ -774,7 +828,8 @@ component.WebRTCSender:not(.mine) * {
   color: lightgreen;
 }
 
-app > .mainContainer > canvas.imgMakerCanvas {
+app > .mainContainer > canvas.imgMakerCanvas,
+app > .mainContainer > canvas.shaderCanvas {
   width: 100vw;
   height: 100vw;
   left: 0px;
