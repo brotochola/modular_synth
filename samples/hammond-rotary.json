@@ -1,0 +1,2268 @@
+{
+  "bpm": 52,
+  "outputX": "2860px",
+  "outputY": "360px",
+  "connections": [],
+  "components": [
+    {
+      "id": "txt_hammond",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "20px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": [
+        "text"
+      ],
+      "text": "HAMMOND  G7 F7 C7 C7",
+      "connections": []
+    },
+    {
+      "id": "txt_drawbars",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "1640px",
+      "y": "280px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": [
+        "text"
+      ],
+      "text": "DRAWBARS  g0=16'  g1=8'  g2=4'  g3=2 2/3'",
+      "connections": []
+    },
+    {
+      "id": "seq_v1",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "80px",
+      "audioParams": {
+        "baseHz": 130.81
+      },
+      "node": {},
+      "valuesToSave": [
+        "sequence"
+      ],
+      "sequence": {
+        "0": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "15": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "connections": [
+        {
+          "from": "seq_v1",
+          "to": "osc_8_1",
+          "audioParam": "frequency",
+          "numberOfOutput": "2",
+          "id": "c1"
+        },
+        {
+          "from": "seq_v1",
+          "to": "amp_16_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c2"
+        },
+        {
+          "from": "seq_v1",
+          "to": "amp_4_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c3"
+        },
+        {
+          "from": "seq_v1",
+          "to": "amp_3_1",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c4"
+        }
+      ]
+    },
+    {
+      "id": "osc_8_1",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "400px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_8_1",
+          "to": "mixer_8",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c5"
+        }
+      ]
+    },
+    {
+      "id": "amp_16_1",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "520px",
+      "audioParams": {
+        "gain": 0.5
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_16_1",
+          "to": "osc_16_1",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c6"
+        }
+      ]
+    },
+    {
+      "id": "osc_16_1",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "220px",
+      "y": "520px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_16_1",
+          "to": "mixer_16",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c7"
+        }
+      ]
+    },
+    {
+      "id": "amp_4_1",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "640px",
+      "audioParams": {
+        "gain": 2
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_4_1",
+          "to": "osc_4_1",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c8"
+        }
+      ]
+    },
+    {
+      "id": "osc_4_1",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "220px",
+      "y": "640px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_4_1",
+          "to": "mixer_4",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c9"
+        }
+      ]
+    },
+    {
+      "id": "amp_3_1",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "760px",
+      "audioParams": {
+        "gain": 3
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_3_1",
+          "to": "osc_3_1",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c10"
+        }
+      ]
+    },
+    {
+      "id": "osc_3_1",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "220px",
+      "y": "760px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_3_1",
+          "to": "mixer_3",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c11"
+        }
+      ]
+    },
+    {
+      "id": "seq_v2",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "80px",
+      "audioParams": {
+        "baseHz": 164.81
+      },
+      "node": {},
+      "valuesToSave": [
+        "sequence"
+      ],
+      "sequence": {
+        "0": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "15": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "connections": [
+        {
+          "from": "seq_v2",
+          "to": "osc_8_2",
+          "audioParam": "frequency",
+          "numberOfOutput": "2",
+          "id": "c12"
+        },
+        {
+          "from": "seq_v2",
+          "to": "amp_16_2",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c13"
+        },
+        {
+          "from": "seq_v2",
+          "to": "amp_4_2",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c14"
+        },
+        {
+          "from": "seq_v2",
+          "to": "amp_3_2",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c15"
+        }
+      ]
+    },
+    {
+      "id": "osc_8_2",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "400px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_8_2",
+          "to": "mixer_8",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "c16"
+        }
+      ]
+    },
+    {
+      "id": "amp_16_2",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "520px",
+      "audioParams": {
+        "gain": 0.5
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_16_2",
+          "to": "osc_16_2",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c17"
+        }
+      ]
+    },
+    {
+      "id": "osc_16_2",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "540px",
+      "y": "520px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_16_2",
+          "to": "mixer_16",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "c18"
+        }
+      ]
+    },
+    {
+      "id": "amp_4_2",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "640px",
+      "audioParams": {
+        "gain": 2
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_4_2",
+          "to": "osc_4_2",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c19"
+        }
+      ]
+    },
+    {
+      "id": "osc_4_2",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "540px",
+      "y": "640px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_4_2",
+          "to": "mixer_4",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "c20"
+        }
+      ]
+    },
+    {
+      "id": "amp_3_2",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "760px",
+      "audioParams": {
+        "gain": 3
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_3_2",
+          "to": "osc_3_2",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c21"
+        }
+      ]
+    },
+    {
+      "id": "osc_3_2",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "540px",
+      "y": "760px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_3_2",
+          "to": "mixer_3",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "c22"
+        }
+      ]
+    },
+    {
+      "id": "seq_v3",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "680px",
+      "y": "80px",
+      "audioParams": {
+        "baseHz": 196
+      },
+      "node": {},
+      "valuesToSave": [
+        "sequence"
+      ],
+      "sequence": {
+        "0": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "15": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "connections": [
+        {
+          "from": "seq_v3",
+          "to": "osc_8_3",
+          "audioParam": "frequency",
+          "numberOfOutput": "2",
+          "id": "c23"
+        },
+        {
+          "from": "seq_v3",
+          "to": "amp_16_3",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c24"
+        },
+        {
+          "from": "seq_v3",
+          "to": "amp_4_3",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c25"
+        },
+        {
+          "from": "seq_v3",
+          "to": "amp_3_3",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c26"
+        }
+      ]
+    },
+    {
+      "id": "osc_8_3",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "680px",
+      "y": "400px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_8_3",
+          "to": "mixer_8",
+          "audioParam": "in_2",
+          "numberOfOutput": "0",
+          "id": "c27"
+        }
+      ]
+    },
+    {
+      "id": "amp_16_3",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "680px",
+      "y": "520px",
+      "audioParams": {
+        "gain": 0.5
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_16_3",
+          "to": "osc_16_3",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c28"
+        }
+      ]
+    },
+    {
+      "id": "osc_16_3",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "860px",
+      "y": "520px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_16_3",
+          "to": "mixer_16",
+          "audioParam": "in_2",
+          "numberOfOutput": "0",
+          "id": "c29"
+        }
+      ]
+    },
+    {
+      "id": "amp_4_3",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "680px",
+      "y": "640px",
+      "audioParams": {
+        "gain": 2
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_4_3",
+          "to": "osc_4_3",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c30"
+        }
+      ]
+    },
+    {
+      "id": "osc_4_3",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "860px",
+      "y": "640px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_4_3",
+          "to": "mixer_4",
+          "audioParam": "in_2",
+          "numberOfOutput": "0",
+          "id": "c31"
+        }
+      ]
+    },
+    {
+      "id": "amp_3_3",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "680px",
+      "y": "760px",
+      "audioParams": {
+        "gain": 3
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_3_3",
+          "to": "osc_3_3",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c32"
+        }
+      ]
+    },
+    {
+      "id": "osc_3_3",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "860px",
+      "y": "760px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_3_3",
+          "to": "mixer_3",
+          "audioParam": "in_2",
+          "numberOfOutput": "0",
+          "id": "c33"
+        }
+      ]
+    },
+    {
+      "id": "seq_v4",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "1000px",
+      "y": "80px",
+      "audioParams": {
+        "baseHz": 233.08
+      },
+      "node": {},
+      "valuesToSave": [
+        "sequence"
+      ],
+      "sequence": {
+        "0": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "15": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "connections": [
+        {
+          "from": "seq_v4",
+          "to": "osc_8_4",
+          "audioParam": "frequency",
+          "numberOfOutput": "2",
+          "id": "c34"
+        },
+        {
+          "from": "seq_v4",
+          "to": "amp_16_4",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c35"
+        },
+        {
+          "from": "seq_v4",
+          "to": "amp_4_4",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c36"
+        },
+        {
+          "from": "seq_v4",
+          "to": "amp_3_4",
+          "audioParam": "in_0",
+          "numberOfOutput": "2",
+          "id": "c37"
+        }
+      ]
+    },
+    {
+      "id": "osc_8_4",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "1000px",
+      "y": "400px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_8_4",
+          "to": "mixer_8",
+          "audioParam": "in_3",
+          "numberOfOutput": "0",
+          "id": "c38"
+        }
+      ]
+    },
+    {
+      "id": "amp_16_4",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1000px",
+      "y": "520px",
+      "audioParams": {
+        "gain": 0.5
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_16_4",
+          "to": "osc_16_4",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c39"
+        }
+      ]
+    },
+    {
+      "id": "osc_16_4",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "1180px",
+      "y": "520px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_16_4",
+          "to": "mixer_16",
+          "audioParam": "in_3",
+          "numberOfOutput": "0",
+          "id": "c40"
+        }
+      ]
+    },
+    {
+      "id": "amp_4_4",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1000px",
+      "y": "640px",
+      "audioParams": {
+        "gain": 2
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_4_4",
+          "to": "osc_4_4",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c41"
+        }
+      ]
+    },
+    {
+      "id": "osc_4_4",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "1180px",
+      "y": "640px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_4_4",
+          "to": "mixer_4",
+          "audioParam": "in_3",
+          "numberOfOutput": "0",
+          "id": "c42"
+        }
+      ]
+    },
+    {
+      "id": "amp_3_4",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1000px",
+      "y": "760px",
+      "audioParams": {
+        "gain": 3
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_3_4",
+          "to": "osc_3_4",
+          "audioParam": "frequency",
+          "numberOfOutput": "0",
+          "id": "c43"
+        }
+      ]
+    },
+    {
+      "id": "osc_3_4",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "1180px",
+      "y": "760px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_3_4",
+          "to": "mixer_3",
+          "audioParam": "in_3",
+          "numberOfOutput": "0",
+          "id": "c44"
+        }
+      ]
+    },
+    {
+      "id": "mixer_16",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1360px",
+      "y": "80px",
+      "audioParams": {
+        "g0": 1,
+        "g1": 1,
+        "g2": 1,
+        "g3": 1,
+        "master": 0.28
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "mixer_16",
+          "to": "drawbars",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c45"
+        }
+      ]
+    },
+    {
+      "id": "mixer_8",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1360px",
+      "y": "440px",
+      "audioParams": {
+        "g0": 1,
+        "g1": 1,
+        "g2": 1,
+        "g3": 1,
+        "master": 0.28
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "mixer_8",
+          "to": "drawbars",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "c46"
+        }
+      ]
+    },
+    {
+      "id": "mixer_4",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1360px",
+      "y": "800px",
+      "audioParams": {
+        "g0": 1,
+        "g1": 1,
+        "g2": 1,
+        "g3": 1,
+        "master": 0.28
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "mixer_4",
+          "to": "drawbars",
+          "audioParam": "in_2",
+          "numberOfOutput": "0",
+          "id": "c47"
+        }
+      ]
+    },
+    {
+      "id": "mixer_3",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1360px",
+      "y": "1160px",
+      "audioParams": {
+        "g0": 1,
+        "g1": 1,
+        "g2": 1,
+        "g3": 1,
+        "master": 0.28
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "mixer_3",
+          "to": "drawbars",
+          "audioParam": "in_3",
+          "numberOfOutput": "0",
+          "id": "c48"
+        }
+      ]
+    },
+    {
+      "id": "drawbars",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1640px",
+      "y": "440px",
+      "audioParams": {
+        "g0": 0.7,
+        "g1": 1,
+        "g2": 0.85,
+        "g3": 0.45,
+        "master": 0.7
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "drawbars",
+          "to": "filt_lp",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c49"
+        },
+        {
+          "from": "drawbars",
+          "to": "filt_hp",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c50"
+        },
+        {
+          "from": "drawbars",
+          "to": "mix_leslie",
+          "audioParam": "in_2",
+          "numberOfOutput": "0",
+          "id": "c51"
+        }
+      ]
+    },
+    {
+      "id": "filt_lp",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "1920px",
+      "y": "280px",
+      "audioParams": {
+        "Q": 0.7,
+        "detune": 0,
+        "frequency": 800,
+        "gain": 0
+      },
+      "node": {
+        "type": "lowpass"
+      },
+      "connections": [
+        {
+          "from": "filt_lp",
+          "to": "delay_drum",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c52"
+        }
+      ]
+    },
+    {
+      "id": "filt_hp",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "1920px",
+      "y": "480px",
+      "audioParams": {
+        "Q": 0.7,
+        "detune": 0,
+        "frequency": 800,
+        "gain": 0
+      },
+      "node": {
+        "type": "highpass"
+      },
+      "connections": [
+        {
+          "from": "filt_hp",
+          "to": "delay_horn",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c53"
+        }
+      ]
+    },
+    {
+      "id": "delay_drum",
+      "constructor": "Delay",
+      "type": "Delay",
+      "createdBy": "user",
+      "x": "2140px",
+      "y": "280px",
+      "audioParams": {
+        "delayTime": 0.012
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "delay_drum",
+          "to": "amp_drum",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c54"
+        }
+      ]
+    },
+    {
+      "id": "delay_horn",
+      "constructor": "Delay",
+      "type": "Delay",
+      "createdBy": "user",
+      "x": "2140px",
+      "y": "480px",
+      "audioParams": {
+        "delayTime": 0.008
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "delay_horn",
+          "to": "amp_horn",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c55"
+        }
+      ]
+    },
+    {
+      "id": "amp_drum",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "2360px",
+      "y": "280px",
+      "audioParams": {
+        "gain": 0.55
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_drum",
+          "to": "mix_leslie",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c56"
+        }
+      ]
+    },
+    {
+      "id": "amp_horn",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "2360px",
+      "y": "480px",
+      "audioParams": {
+        "gain": 0.5
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_horn",
+          "to": "mix_leslie",
+          "audioParam": "in_1",
+          "numberOfOutput": "0",
+          "id": "c57"
+        }
+      ]
+    },
+    {
+      "id": "lfo_drum",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "1920px",
+      "y": "700px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0.65
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "lfo_drum",
+          "to": "amp_lfo_d_del",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c58"
+        },
+        {
+          "from": "lfo_drum",
+          "to": "amp_lfo_d_trem",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c59"
+        }
+      ]
+    },
+    {
+      "id": "amp_lfo_d_del",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "2140px",
+      "y": "700px",
+      "audioParams": {
+        "gain": 0.003
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_lfo_d_del",
+          "to": "delay_drum",
+          "audioParam": "delayTime",
+          "numberOfOutput": "0",
+          "id": "c60"
+        }
+      ]
+    },
+    {
+      "id": "amp_lfo_d_trem",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "2360px",
+      "y": "700px",
+      "audioParams": {
+        "gain": 0.22
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_lfo_d_trem",
+          "to": "amp_drum",
+          "audioParam": "gain",
+          "numberOfOutput": "0",
+          "id": "c61"
+        }
+      ]
+    },
+    {
+      "id": "lfo_horn",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "1920px",
+      "y": "840px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0.95
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "lfo_horn",
+          "to": "amp_lfo_h_del",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c62"
+        },
+        {
+          "from": "lfo_horn",
+          "to": "amp_lfo_h_trem",
+          "audioParam": "in_0",
+          "numberOfOutput": "0",
+          "id": "c63"
+        }
+      ]
+    },
+    {
+      "id": "amp_lfo_h_del",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "2140px",
+      "y": "840px",
+      "audioParams": {
+        "gain": 0.0025
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_lfo_h_del",
+          "to": "delay_horn",
+          "audioParam": "delayTime",
+          "numberOfOutput": "0",
+          "id": "c64"
+        }
+      ]
+    },
+    {
+      "id": "amp_lfo_h_trem",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "2360px",
+      "y": "840px",
+      "audioParams": {
+        "gain": 0.28
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_lfo_h_trem",
+          "to": "amp_horn",
+          "audioParam": "gain",
+          "numberOfOutput": "0",
+          "id": "c65"
+        }
+      ]
+    },
+    {
+      "id": "mix_leslie",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "2580px",
+      "y": "360px",
+      "audioParams": {
+        "g0": 0.65,
+        "g1": 0.65,
+        "g2": 0.22,
+        "g3": 0,
+        "master": 1
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "mix_leslie",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": "0",
+          "id": "c66"
+        }
+      ]
+    }
+  ]
+}

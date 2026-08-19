@@ -1,6 +1,7 @@
 * {
   font-family: "courier new";
   box-sizing: border-box;
+  user-select: none;
 }
 
 body,
