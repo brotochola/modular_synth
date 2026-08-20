@@ -1,4 +1,5 @@
 class ConstantValueNode extends Component {
+  static name = "Constant";
   constructor(app, serializedData) {
     super(app, serializedData);
 

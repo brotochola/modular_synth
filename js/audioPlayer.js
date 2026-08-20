@@ -1,4 +1,5 @@
 class AudioPlayer extends Component {
+  static name = "Audio Player";
   constructor(app, serializedData) {
     super(app, serializedData);
 

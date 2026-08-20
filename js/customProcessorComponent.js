@@ -1,4 +1,5 @@
 class CustomProcessorComponent extends Component {
+  static name = "Math Processor";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =

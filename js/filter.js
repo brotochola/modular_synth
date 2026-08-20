@@ -1,4 +1,5 @@
 class Filter extends Component {
+  static name = "Filter";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =

@@ -1,4 +1,5 @@
 class Midi extends Component {
+  static name = "MIDI";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =

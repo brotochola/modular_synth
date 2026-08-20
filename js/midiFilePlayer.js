@@ -1,4 +1,5 @@
 class MidiFilePlayer extends Component {
+  static name = "MIDI Player";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.outputValue = 0;

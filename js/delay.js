@@ -1,4 +1,5 @@
 class Delay extends Component {
+  static name = "Delay";
   constructor(app,serializedData) {
     super(app,serializedData);
 

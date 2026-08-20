@@ -1,4 +1,5 @@
 class Merger extends Component {
+  static name = "Merger";
   constructor(app,serializedData) {
     super(app,serializedData);
 

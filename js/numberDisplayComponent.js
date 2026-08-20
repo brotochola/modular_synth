@@ -1,4 +1,5 @@
 class NumberDisplayComponent extends Component {
+  static name = "Number Display";
   constructor(app, serializedData) {
     super(app, serializedData);
 

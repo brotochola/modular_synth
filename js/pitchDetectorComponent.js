@@ -1,4 +1,5 @@
 class PitchDetectorComponent extends Component {
+  static name = "Pitch Detector";
   constructor(app, serializedData) {
     super(app, serializedData);
 

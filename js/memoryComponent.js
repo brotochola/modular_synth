@@ -1,4 +1,5 @@
 class MemoryComponent extends Component {
+  static name = "Memory";
   constructor(app, serializedData) {
     super(app, serializedData);
 

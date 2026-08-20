@@ -1,4 +1,5 @@
 class LargeVisualizer extends Component {
+  static name = "Large Visualizer";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.node = app.actx.createAnalyser();

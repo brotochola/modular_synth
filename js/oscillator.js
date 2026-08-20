@@ -1,4 +1,5 @@
 class Oscillator extends Component {
+  static name = "Oscillator";
   constructor(app, serializedData) {
     super(app, serializedData);
 

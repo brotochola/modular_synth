@@ -1519,6 +1519,10 @@ class App {
   }
 
   static patchTypeName(comp) {
+    let Ctor =
+      (comp && App.COMPONENT_CLASSES[comp.constructor]) ||
+      (comp && App.COMPONENT_CLASSES[comp.type]);
+    if (Ctor) return Ctor.name;
     return String(
       (comp && (comp.type || comp.constructor)) || "module",
     ).replace(/Component$/, "");
@@ -1663,3 +1667,11 @@ App.COMPONENT_CLASSES = {
   WebRTCReceiver,
   Output,
 };
+
+for (let key of Object.keys(App.COMPONENT_CLASSES)) {
+  if (key == "Gain") continue;
+  App.COMPONENT_CLASSES[key].classKey = key;
+}
+if (LerpComponent.name != "lerp" || LerpComponent.classKey != "LerpComponent") {
+  console.error("component title/classKey mismatch");
+}

@@ -1,4 +1,5 @@
 class Spectrum2Image extends Component {
+  static name = "Spectrum 2 Image";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.node = app.actx.createAnalyser();

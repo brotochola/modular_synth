@@ -1032,7 +1032,7 @@ component .triggerInputFile:hover {
   color: var(--accent);
 }
 
-component .inputsDiv button.input {
+component button.input {
   line-height: 0px;
   width: 72px;
   min-width: 72px;
@@ -1048,13 +1048,13 @@ component .inputsDiv button.input {
   letter-spacing: 0.3px;
   padding-left: 6px;
 }
-component .inputsDiv button.input:hover {
+component button.input:hover {
   background: #0a1812;
   border: 1px solid var(--accent);
   color: var(--accent);
 }
 
-component .inputsDiv button.input.connected {
+component button.input.connected {
   border-color: var(--accent);
   box-shadow: inset 3px 0 0 var(--accent);
 }

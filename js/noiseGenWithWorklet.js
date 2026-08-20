@@ -1,4 +1,5 @@
 class NoiseGenWithWorklet extends Component {
+  static name = "Noise";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =

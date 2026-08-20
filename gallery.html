@@ -160,7 +160,7 @@
         var Ctor = App.COMPONENT_CLASSES[name];
         var label = document.createElement("div");
         label.className = "gallery-label";
-        label.textContent = name;
+        label.textContent = Ctor.name || name;
         root.appendChild(label);
 
         var wrap = document.createElement("div");

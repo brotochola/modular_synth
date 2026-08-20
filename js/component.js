@@ -1,7 +1,8 @@
 class Component {
   constructor(app, serializedData) {
     this.app = app;
-    this.type = this.constructor.name;
+    // classKey survives static name (Function.name is the title)
+    this.type = this.constructor.classKey || this.constructor.name;
     this.serializedData = serializedData;
     this.createdBy = (this.serializedData || {}).createdBy
       ? (this.serializedData || {}).createdBy
@@ -698,7 +699,7 @@ class Component {
 
     this.titleElement = document.createElement("span");
     this.titleElement.classList.add("component-title");
-    this.titleElement.innerText = this.type;
+    this.titleElement.innerText = this.constructor.name;
     this.headerLeft.appendChild(this.titleElement);
 
     this.headerRight = document.createElement("div");
@@ -870,7 +871,7 @@ class Component {
       id: this.id,
       audioParams: {},
       type: this.type,
-      constructor: this.constructor.name,
+      constructor: this.type,
       node: {},
     };
     // if (this.formula) {

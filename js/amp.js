@@ -1,4 +1,5 @@
 class Amp extends Component {
+  static name = "Gain";
   constructor(app,serializedData) {
     super(app,serializedData);
 

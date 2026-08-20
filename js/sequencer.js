@@ -1,4 +1,5 @@
 class Sequencer extends Component {
+  static name = "Sequencer";
   static oneSemitone = 1.059463;
   constructor(app, serializedData) {
     super(app, serializedData);

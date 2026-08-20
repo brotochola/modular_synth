@@ -1,4 +1,5 @@
 class Output extends Component {
+  static name = "Output";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.node = null;

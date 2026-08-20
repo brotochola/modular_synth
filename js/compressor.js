@@ -1,4 +1,5 @@
 class Compressor extends Component {
+  static name = "Compressor";
   constructor(app, serializedData) {
     super(app, serializedData);
 

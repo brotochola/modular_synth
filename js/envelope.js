@@ -1,4 +1,5 @@
 class EnvelopeGenerator extends Component {
+  static name = "ADSR";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.createNode();

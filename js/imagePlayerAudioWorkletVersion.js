@@ -1,4 +1,5 @@
 class ImagePlayerWorkletVersion extends Component {
+  static name = "Image Player";
   constructor(app, serializedData) {
     super(app, serializedData);
 

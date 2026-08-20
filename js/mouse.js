@@ -1,4 +1,5 @@
 class Mouse extends Component {
+  static name = "Mouse";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.outputLabels = ["X", "Y"];

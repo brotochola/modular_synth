@@ -1,4 +1,5 @@
 class Spectrogram extends Component {
+  static name = "Spectrogram";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.node = app.actx.createAnalyser();

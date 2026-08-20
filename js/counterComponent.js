@@ -1,4 +1,5 @@
 class CounterComponent extends Component {
+  static name = "Counter";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.customAudioTriggers = ["+", "-"];

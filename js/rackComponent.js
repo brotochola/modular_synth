@@ -1,4 +1,5 @@
 class RackCover extends Component {
+  static name = "Rack Cover";
   constructor(app, serializedData) {
     super(app, serializedData);
 

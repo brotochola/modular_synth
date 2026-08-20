@@ -1,4 +1,5 @@
 class Text extends Component {
+  static name = "Text";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.node = null;

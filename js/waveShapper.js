@@ -1,4 +1,5 @@
 class WaveShaper extends Component {
+  static name = "Wave Shaper";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.length = 32;

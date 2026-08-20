@@ -1,4 +1,5 @@
 class Mic extends Component {
+  static name = "Mic";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =

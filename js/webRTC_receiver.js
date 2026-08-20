@@ -1,4 +1,5 @@
 class WebRTCReceiver extends Component {
+  static name = "RTC Receiver";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.ready = true;

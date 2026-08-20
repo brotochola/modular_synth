@@ -1,4 +1,5 @@
 class Multiplexor extends Component {
+  static name = "Multiplexor";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.which = 0;

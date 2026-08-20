@@ -1,4 +1,5 @@
 class AiComponent2 extends Component {
+  static name = "AI";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.net = new brain.NeuralNetwork({

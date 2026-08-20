@@ -1,4 +1,5 @@
 class Mixer extends Component {
+  static name = "Mixer";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =

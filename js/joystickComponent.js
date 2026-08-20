@@ -1,4 +1,5 @@
 class JoystickComponent extends Component {
+  static name = "Gamepad";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.valuesToSave = ["sourceUserID"];

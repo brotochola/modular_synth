@@ -1,4 +1,5 @@
 class FrequencyAnalizer extends Component {
+  static name = "Freq Analyzer";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.node = app.actx.createAnalyser();

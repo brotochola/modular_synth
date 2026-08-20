@@ -1,4 +1,5 @@
 class PeakDetectorComponent extends Component {
+  static name = "Peak Detector";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.customAudioTriggers = ["reset"];

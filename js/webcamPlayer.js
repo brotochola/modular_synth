@@ -1,4 +1,5 @@
 class WebcamPlayer extends Component {
+  static name = "Webcam";
   constructor(app, serializedData) {
     super(app, serializedData);
 

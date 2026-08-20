@@ -1,4 +1,5 @@
 class Shader extends Component {
+  static name = "Shader";
   static WIDTH = 640;
   static HEIGHT = 360;
   static VERT = [

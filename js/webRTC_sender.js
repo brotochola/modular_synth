@@ -1,4 +1,5 @@
 class WebRTCSender extends Component {
+  static name = "RTC Sender";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.peerID = this.id + "_" + this.app.userID;

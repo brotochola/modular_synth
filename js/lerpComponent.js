@@ -1,4 +1,5 @@
 class LerpComponent extends Component {
+  static name = "lerp";
   constructor(app, serializedData) {
     super(app, serializedData);
 

@@ -1,4 +1,5 @@
 class PadSampler extends Component {
+  static name = "Pad Sampler";
   constructor(app, serializedData) {
     super(app, serializedData);
 

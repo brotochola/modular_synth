@@ -1,4 +1,5 @@
 class Drawer extends Component {
+  static name = "Drawer";
   constructor(app, serializedData) {
     super(app, serializedData);
 

@@ -1,4 +1,5 @@
 class ImageMaker extends Component {
+  static name = "Image Maker";
   constructor(app, serializedData) {
     super(app, serializedData);
 

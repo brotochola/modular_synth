@@ -1,4 +1,5 @@
 class Distortion extends Component {
+  static name = "Distortion";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.amount = 0;

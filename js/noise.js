@@ -1,4 +1,5 @@
 class Noise extends Component {
+  static name = "Noise";
   constructor(app,serializedData) {
     super(app,serializedData);
 

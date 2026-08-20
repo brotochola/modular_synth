@@ -1,4 +1,5 @@
 class Reverb extends Component {
+  static name = "Reverb";
   constructor(app, serializedData) {
     super(app, serializedData);
 

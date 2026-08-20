@@ -1,4 +1,5 @@
 class KeyboardComponent extends Component {
+  static name = "Keyboard";
   constructor(app, serializedData) {
     super(app, serializedData);
     this.outputLabels = [
