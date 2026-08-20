@@ -142,6 +142,26 @@ function arrayBufferToBase64(buffer) {
   }
   return window.btoa(binary);
 }
+
+async function gzipArrayBuffer(buffer) {
+  const stream = new Blob([buffer])
+    .stream()
+    .pipeThrough(new CompressionStream("gzip"));
+  return await new Response(stream).arrayBuffer();
+}
+
+async function gunzipArrayBuffer(buffer) {
+  const stream = new Blob([buffer])
+    .stream()
+    .pipeThrough(new DecompressionStream("gzip"));
+  return await new Response(stream).arrayBuffer();
+}
+
+async function base64ToAudioArrayBuffer(base64, encoding) {
+  let buf = base64ToArrayBuffer(base64);
+  if (encoding === "gzip") buf = await gunzipArrayBuffer(buf);
+  return buf;
+}
 function downloader(data, type, name) {
   let blob = new Blob([data], { type });
   let url = window.URL.createObjectURL(blob);

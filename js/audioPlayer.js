@@ -9,7 +9,7 @@ class AudioPlayer extends Component {
     //THIS PARAMS ARE ADDED AS AN INPUT, WITH NO INPUT TEXT
     this.customAudioTriggers = ["trigger"];
     this.customAudioParams = ["offset"];
-    this.valuesToSave = ["filename"];
+    this.valuesToSave = ["audioEncoding", "base64", "filename"];
     this.offset = 0;
 
     this.infoText =
@@ -114,6 +114,7 @@ class AudioPlayer extends Component {
       reader.onload = async () => {
         // console.log(reader.result);
         this.base64 = arrayBufferToBase64(reader.result);
+        this.audioEncoding = undefined;
         this.filename = this.inputFile.files[0].name;
         createBase64FileInFirebase(
           this.app.patchName,
@@ -136,21 +137,32 @@ class AudioPlayer extends Component {
   }
   async updateUI() {
     //THIS METHOD IS EXECUTED FROM THE COMPONENT CLASS, WHEN THIS COMPONENT ALREADY LOADED THE SAVED DATA
-    // console.log("#update ui audioplayer", this.id)
-    if (this.filename && !this.base64) {
-      // console.log("it has a filename but no base64", this.filename)
+    if (this.base64) {
+      let raw = await base64ToAudioArrayBuffer(this.base64, this.audioEncoding);
+      this.audioBuffer = await this.app.actx.decodeAudioData(
+        copyArrayBuffer(raw)
+      );
+      this.handleOnChange();
+      this.updateButton();
+      return;
+    }
+    if (this.filename) {
       let dataFromFirebase = await getBase64FileFromFirebase(
         this.app.patchName,
         this.filename
       );
       if (dataFromFirebase) {
         this.base64 = dataFromFirebase.base64;
+        this.audioEncoding = dataFromFirebase.audioEncoding;
+        let raw = await base64ToAudioArrayBuffer(
+          this.base64,
+          this.audioEncoding
+        );
         this.audioBuffer = await this.app.actx.decodeAudioData(
-          base64ToArrayBuffer(this.base64)
+          copyArrayBuffer(raw)
         );
         this.handleOnChange();
       }
-
       this.updateButton();
     }
   }
