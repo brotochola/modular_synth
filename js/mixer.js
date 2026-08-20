@@ -2,17 +2,23 @@ class Mixer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "Four-channel mixer. Each input has a level fader (g0…g3) and there is a master. Levels are AudioParams: patch into them to automate or sidechain. Same summing as Math Processor y=x1*g0+x2*g1+x3*g2+x4*g3, but with sliders.";
+      "Four-channel mixer. Each channel: audio in on top, level fader below (g0…g3), plus master. Patch into g0…g3 to automate levels.";
     this.gainNames = ["g0", "g1", "g2", "g3", "master"];
+    this.channelGains = ["g0", "g1", "g2", "g3"];
+    // Skip default param rows — channel strips own the jacks + faders
     this.uiParamWidgets = {
-      g0: "fader",
-      g1: "fader",
-      g2: "fader",
-      g3: "fader",
-      master: "fader",
+      g0: "none",
+      g1: "none",
+      g2: "none",
+      g3: "none",
+      master: "none",
+      in_0: "none",
+      in_1: "none",
+      in_2: "none",
+      in_3: "none",
     };
     this.createNode();
-    this.waitUntilImReady(() => this.createFaders());
+    this.waitUntilImReady(() => this.createChannelStrips());
   }
 
   getParamInputLimits(name) {
@@ -35,29 +41,77 @@ class Mixer extends Component {
     });
   }
 
-  createFaders() {
+  /** Build one jack button and register it in inputElements */
+  makeJack(name, label) {
+    let button = document.createElement("button");
+    button.onclick = (e) => this.onAudioParamClicked(name);
+    button.classList.add("input", name);
+    button.title = name;
+    button.innerText = label || name;
+    this.inputElements[name] = { button, textInput: null, knob: null };
+    return button;
+  }
+
+  createChannelStrips() {
     if (this.faders) return;
+    // Drop empty default rows for skipped widgets
+    if (this.inputsDiv) this.inputsDiv.innerHTML = "";
+
     this.faders = document.createElement("div");
-    this.faders.className = "faders";
+    this.faders.className = "faders mixer-strips";
     this.sliders = {};
-    for (let name of this.gainNames) {
+
+    for (let i = 0; i < 4; i++) {
+      let gainName = this.channelGains[i];
+      let inName = "in_" + i;
+      let strip = document.createElement("div");
+      strip.className = "mixer-strip";
+
+      let audioJack = this.makeJack(inName, "ch" + (i + 1));
+      audioJack.classList.add("mixer-audio-in");
+      strip.appendChild(audioJack);
+
+      let cvJack = this.makeJack(gainName, gainName);
+      cvJack.classList.add("mixer-cv-in");
+      strip.appendChild(cvJack);
+
       let slider = createSlider({
         min: 0,
         max: 2,
         step: 0.01,
-        value: this.node.parameters.get(name).value,
+        value: this.node.parameters.get(gainName).value,
         vertical: true,
-        label: name,
-        onChange: (val) => this.onFaderInput(name, val),
+        label: gainName,
+        onChange: (val) => this.onFaderInput(gainName, val),
       });
-      this.faders.appendChild(slider.el);
-      this.sliders[name] = slider;
+      strip.appendChild(slider.el);
+      this.sliders[gainName] = slider;
+      this.faders.appendChild(strip);
     }
-    if (this.body) {
-      this.body.appendChild(this.faders);
-    } else {
-      this.container.appendChild(this.faders);
-    }
+
+    // Master strip — spacer (no audio in) + CV jack + fader
+    let masterStrip = document.createElement("div");
+    masterStrip.className = "mixer-strip mixer-strip-master";
+    let spacer = document.createElement("div");
+    spacer.className = "mixer-strip-spacer";
+    masterStrip.appendChild(spacer);
+    let masterJack = this.makeJack("master", "mst");
+    masterJack.classList.add("mixer-cv-in");
+    masterStrip.appendChild(masterJack);
+    let masterSlider = createSlider({
+      min: 0,
+      max: 2,
+      step: 0.01,
+      value: this.node.parameters.get("master").value,
+      vertical: true,
+      label: "master",
+      onChange: (val) => this.onFaderInput("master", val),
+    });
+    masterStrip.appendChild(masterSlider.el);
+    this.sliders.master = masterSlider;
+    this.faders.appendChild(masterStrip);
+
+    (this.main || this.body || this.container).appendChild(this.faders);
     this.syncFadersFromParams();
   }
 

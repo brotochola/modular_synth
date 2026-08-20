@@ -21,7 +21,7 @@ class Mic extends Component {
 
   async addSelectWithAllTheAudioInputs() {
     this.sel = document.createElement("select");
-    this.container.appendChild(this.sel);
+    (this.main || this.container).appendChild(this.sel);
     this.audioInputs = [];
     this.sel.onchange = (e) => {
       console.log(this.sel.value);

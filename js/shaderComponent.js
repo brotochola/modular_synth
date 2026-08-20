@@ -56,11 +56,11 @@ class Shader extends Component {
     this.canvas.width = Shader.WIDTH;
     this.canvas.height = Shader.HEIGHT;
     this.canvas.classList.add("shaderCanvas");
-    this.container.appendChild(this.canvas);
+    (this.main || this.container).appendChild(this.canvas);
 
     this.errorBox = document.createElement("pre");
     this.errorBox.classList.add("shaderError");
-    this.container.appendChild(this.errorBox);
+    (this.main || this.container).appendChild(this.errorBox);
 
     this.gl = this.canvas.getContext("webgl");
     if (!this.gl) {
@@ -157,7 +157,7 @@ class Shader extends Component {
     this.inputText.onclick = (e) => {
       if (this.active) this.toggleActive();
     };
-    this.container.appendChild(this.inputText);
+    (this.main || this.container).appendChild(this.inputText);
   }
 
   handleInputChange(e) {
@@ -175,7 +175,7 @@ class Shader extends Component {
     this.camCheck.onchange = () => this.toggleCam(this.camCheck.checked);
     this.camLabel.appendChild(this.camCheck);
     this.camLabel.appendChild(document.createTextNode(" cam"));
-    this.container.appendChild(this.camLabel);
+    (this.main || this.container).appendChild(this.camLabel);
   }
 
   toggleCam(on) {
@@ -225,12 +225,12 @@ class Shader extends Component {
     this.toggle.innerHTML = "Toggle Fullscreen";
     this.toggle.onclick = () => {
       if (this.canvas.parentNode == this.app.container) {
-        this.container.append(this.canvas);
+        (this.main || this.container).append(this.canvas);
       } else {
         this.app.container.append(this.canvas);
       }
     };
-    this.container.appendChild(this.toggle);
+    (this.main || this.container).appendChild(this.toggle);
   }
 
   createNode() {

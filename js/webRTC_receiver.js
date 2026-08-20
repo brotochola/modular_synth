@@ -4,7 +4,7 @@ class WebRTCReceiver extends Component {
     this.ready = true;
 
     this.p = document.createElement("p");
-    this.container.appendChild(this.p);
+    (this.main || this.container).appendChild(this.p);
 
     this.p.innerText = "Loading...";
     this.peerID = this.id + "_" + this.app.userID;

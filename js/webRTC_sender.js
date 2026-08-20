@@ -9,14 +9,14 @@ class WebRTCSender extends Component {
     this.counter = 0;
     this.button = document.createElement("button");
     this.p = document.createElement("p");
-    this.container.appendChild(this.p);
+    (this.main || this.container).appendChild(this.p);
     this.p.style.display = "none";
     this.button.innerHTML = "connect";
     this.input = document.createElement("input");
     this.input.type = "text";
     this.input.placeholder = "peer's id";
-    this.container.appendChild(this.button);
-    this.container.appendChild(this.input);
+    (this.main || this.container).appendChild(this.button);
+    (this.main || this.container).appendChild(this.input);
     this.connected = false;
     this.button.onclick = () => this.handleButtonClick();
     this.sessionID = this.app.sessionID;

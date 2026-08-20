@@ -35,7 +35,7 @@ class WebcamPlayer extends Component {
     this.canvas = document.createElement("canvas");
     this.canvas.willReadFrequently = true;
 
-    this.container.appendChild(this.canvas);
+    (this.main || this.container).appendChild(this.canvas);
 
     this.canvas.width = 215; //this.img.naturalWidth;
     this.canvas.height = 121; //this.img.naturalHeight;

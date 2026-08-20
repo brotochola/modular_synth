@@ -42,7 +42,7 @@ class LargeVisualizer extends Component {
     this.canvas.width = this.width;
     this.canvas.height = 128;
     this.canvas.onclick = (e) => this.toggleActive();
-    this.container.appendChild(this.canvas);
+    (this.main || this.container).appendChild(this.canvas);
     this.ctx = this.canvas.getContext("2d", { willReadFrequently: true });
     this.ctx.fillStyle = "#000000";
 

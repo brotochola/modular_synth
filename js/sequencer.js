@@ -38,8 +38,10 @@ class Sequencer extends Component {
         this.buttonsContainer.appendChild(button);
       }
     }
-    if (this.body) {
-      this.body.insertBefore(this.buttonsContainer, this.inputsDiv);
+    if (this.main) {
+      this.main.appendChild(this.buttonsContainer);
+    } else if (this.body) {
+      this.body.appendChild(this.buttonsContainer);
     } else {
       this.container.appendChild(this.buttonsContainer);
     }

@@ -29,7 +29,9 @@ class Drawer extends Component {
     this.canvas.onmouseup = (e) => {
       this.drawing = false;
     };
-    if (this.body) {
+    if (this.main) {
+      this.main.appendChild(this.canvas);
+    } else if (this.body) {
       this.body.appendChild(this.canvas);
     } else {
       this.container.appendChild(this.canvas);

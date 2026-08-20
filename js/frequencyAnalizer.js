@@ -18,7 +18,7 @@ class FrequencyAnalizer extends Component {
     this.canvas.width = 180;
     this.canvas.height = 70;
     this.canvas.onclick = (e) => this.toggleActive();
-    this.container.appendChild(this.canvas);
+    (this.main || this.container).appendChild(this.canvas);
   }
 
   draw() {

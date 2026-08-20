@@ -6,7 +6,7 @@ class Multiplexor extends Component {
     this.text = document.createElement("p");
     this.text.innerHTML =
       "The 'which' input sets which input will come out from the output<br> If it has a 0 as which, it will output a 0";
-    this.container.appendChild(this.text);
+    (this.main || this.container).appendChild(this.text);
     this.createDisplay();
   }
 

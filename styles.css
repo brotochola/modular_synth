@@ -284,12 +284,15 @@ component {
   background-size: 225%;
   background-position-x: var(--posX);
   background-position-y: var(--posY);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(93, 255, 194, 0.08);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(93, 255, 194, 0.08);
   position: absolute;
   border-radius: var(--radius);
   border: 1px solid var(--panel-edge);
   width: 180px;
-  height: 120px;
+  height: auto;
+  min-height: 80px;
   background: var(--panel);
   backdrop-filter: blur(8px);
   overflow: hidden;
@@ -299,7 +302,9 @@ component {
 
 component.active {
   outline: 2px solid var(--accent);
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45), 0 0 18px var(--accent-dim);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    0 0 18px var(--accent-dim);
 }
 
 .component-header {
@@ -321,14 +326,8 @@ component.active {
   gap: 5px;
   overflow: hidden;
   max-width: calc(100% - 46px);
-}
-
-.component-header .header-right {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-left: auto;
-  flex-shrink: 0;
+  flex: 1;
+  min-width: 0;
 }
 
 .component-header .component-title {
@@ -340,16 +339,34 @@ component.active {
   overflow: hidden;
   text-overflow: ellipsis;
   text-transform: uppercase;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.component-header .header-left select,
+.component-header .header-left .ui-select,
+.component-header .header-left .bpmRateSelect {
+  flex-shrink: 0;
+  max-width: 90px;
 }
 
 .component-body {
   flex: 1;
-  position: relative;
   display: flex;
   flex-direction: column;
   padding: 6px;
   gap: 6px;
   overflow: hidden;
+  width: 100%;
+  min-height: 0;
+}
+
+.component-main {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   width: 100%;
 }
 
@@ -480,72 +497,102 @@ component.envelopegenerator icon:after {
   content: "〽️";
 }
 component.Midi {
-  height: 205px;
+  height: auto;
+  min-height: 120px;
   width: 160px;
 }
 component.NumberDisplayComponent {
-  height: 62px;
+  height: auto;
+  min-height: 56px;
   width: 190px;
 }
 
 component.memorycomponent {
-  height: 65px;
+  height: auto;
+  min-height: 56px;
   width: 170px;
 }
 
 component.JoystickComponent {
-  height: 475px;
+  height: auto;
+  min-height: 200px;
+  width: 220px;
 }
 
 component.JoystickComponent .display {
-  margin-top: 52px;
-  margin-right: 18px;
+  margin: 0;
   font-size: 11px;
-  max-width: calc(100% - 28px);
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 component.CustomProcessorComponent {
-  height: 210px;
+  width: 220px;
+  height: auto;
+  min-height: 160px;
 }
 
 component.Mixer {
-  width: 260px;
-  height: 270px;
+  width: 280px;
+  height: auto;
+  min-height: 200px;
 }
 
 component.Mixer .inputsDiv {
+  display: none;
+}
+
+component.Mixer .faders,
+component.Mixer .mixer-strips {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap;
-  gap: 3px;
-  margin-bottom: 4px;
-  position: relative;
+  gap: 6px;
+  justify-content: space-around;
+  align-items: flex-end;
   width: 100%;
+  margin-top: 0;
+  padding: 4px 0;
+  flex: 1;
 }
 
-component.Mixer .inputsDiv button.input {
-  width: 44px;
-  min-width: 44px;
-  padding: 0 3px;
+component.Mixer .mixer-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  min-width: 40px;
+}
+
+component.Mixer .mixer-strip-master {
+  border-left: 1px solid var(--panel-edge);
+  padding-left: 6px;
+  margin-left: 2px;
+}
+
+component.Mixer .mixer-strip button.input {
+  width: 36px;
+  min-width: 36px;
+  height: 18px;
+  padding: 0 2px;
   font-size: 9px;
   text-align: center;
+  line-height: 1;
 }
 
-component.Mixer .faders {
-  display: flex;
-  gap: 4px;
-  justify-content: space-around;
-  position: relative;
-  width: 100%;
-  margin-top: auto;
-  padding-bottom: 4px;
+component.Mixer .mixer-strip .mixer-audio-in {
+  border-color: var(--accent);
 }
 
-component.Mixer .fader,
-component.Mixer .ui-slider-vertical {
+component.Mixer .mixer-strip-spacer {
+  width: 36px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+component.Mixer .mixer-strip .ui-slider-vertical {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -554,8 +601,7 @@ component.Mixer .ui-slider-vertical {
   gap: 2px;
 }
 
-component.Mixer .fader input[type="range"],
-component.Mixer .ui-slider-vertical input[type="range"] {
+component.Mixer .mixer-strip .ui-slider-vertical input[type="range"] {
   writing-mode: vertical-lr;
   direction: rtl;
   width: 16px;
@@ -584,7 +630,8 @@ textarea {
 
 component.text {
   width: 180px;
-  height: 85px;
+  height: auto;
+  min-height: 80px;
 }
 
 component.text textarea {
@@ -604,7 +651,9 @@ component.text textarea {
 }
 
 component.multiplexor {
-  height: 280px;
+  height: auto;
+  min-height: 200px;
+  width: 220px;
 }
 
 component .display {
@@ -628,11 +677,8 @@ component .display {
 }
 
 component.multiplexor .display {
-  position: absolute;
-  right: 6px;
   font-weight: bold;
   font-size: 24px;
-  bottom: 22px;
   margin: 0 !important;
 }
 
@@ -644,12 +690,14 @@ component p {
 }
 
 component.envelopegenerator {
-  height: 300px;
   width: 210px;
+  height: auto;
+  min-height: 200px;
 }
 component.KeyboardComponent {
   width: 300px;
-  height: 175px;
+  height: auto;
+  min-height: 160px;
 }
 
 component.KeyboardComponent outputs {
@@ -685,7 +733,9 @@ component.KeyboardComponent input.outputButton:after {
 component input.outputButton.active {
   border-color: var(--accent);
   outline: none;
-  box-shadow: 0 0 0 1px var(--accent), 0 0 12px var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 0 12px var(--accent);
   background: radial-gradient(circle at 40% 35%, var(--accent) 0%, #0d3a2c 75%);
 }
 
@@ -695,12 +745,14 @@ component input.outputButton.active:after {
 
 component.imagemaker {
   width: 320px;
-  height: 200px;
+  height: auto;
+  min-height: 180px;
 }
 
 component.Shader {
   width: 420px;
-  height: 280px;
+  height: auto;
+  min-height: 240px;
 }
 
 component.Shader textarea {
@@ -805,21 +857,22 @@ component.ImagePlayerWorkletVersion canvas {
 
 component.Sequencer {
   width: 272px;
-  height: 290px;
-  padding: 0;
+  height: auto;
+  min-height: 240px;
   overflow: hidden;
 }
 
 component.Sequencer div.buttonsContainer {
   display: grid;
-  grid-template-columns: repeat(16, 12px);
-  grid-template-rows: repeat(13, 12px);
+  grid-template-columns: repeat(16, 15px);
+  grid-template-rows: repeat(13, 15px);
   gap: 1px;
   width: max-content;
   max-width: 100%;
-  margin: 4px auto 0 auto;
+  margin: 0 auto;
   padding: 0;
   box-sizing: content-box;
+  flex: 0 0 auto;
 }
 
 component.Sequencer .seqButton {
@@ -851,21 +904,17 @@ component.Sequencer .seqButton.active {
 }
 
 component.Sequencer .seqButton.seqColumnPlaying {
-  box-shadow: inset 0 0 0 1px #fff, 0 0 6px var(--accent-dim);
+  box-shadow:
+    inset 0 0 0 1px #fff,
+    0 0 6px var(--accent-dim);
   border-color: #fff;
 }
 
 component.Sequencer .inputsDiv {
-  bottom: 4px;
-  left: 4px;
-  width: calc(100% - 28px);
+  width: 100%;
   height: auto;
-  max-height: 72px;
-  overflow: hidden;
-}
-
-component.Sequencer outputs {
-  bottom: 4px;
+  max-height: none;
+  overflow: visible;
 }
 
 component input.outputButton:after {
@@ -902,9 +951,8 @@ component .inputsDiv {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  left: 0;
-  bottom: 0;
   gap: 4px;
+  flex: 0 0 auto;
   pointer-events: none;
   touch-action: none;
 }
@@ -915,12 +963,12 @@ component .inputsDiv * {
 }
 
 outputs {
-  position: absolute;
   display: flex;
   flex-direction: column;
-  right: 6px;
-  bottom: 6px;
+  align-self: flex-end;
+  margin-top: auto;
   gap: 4px;
+  flex: 0 0 auto;
   z-index: 5;
 }
 
@@ -932,7 +980,9 @@ component .outputButton {
   appearance: none;
   -webkit-appearance: none;
   background: radial-gradient(circle at 40% 35%, #1a2420 0%, var(--jack) 70%);
-  box-shadow: inset 0 0 0 1px #000, inset 0 2px 4px rgba(0, 0, 0, 0.8);
+  box-shadow:
+    inset 0 0 0 1px #000,
+    inset 0 2px 4px rgba(0, 0, 0, 0.8);
   width: 13px;
   height: 13px;
   margin: 1px 0;
@@ -944,12 +994,16 @@ component .outputButton {
 
 component .outputButton:hover {
   border-color: var(--accent);
-  box-shadow: inset 0 0 0 1px #000, 0 0 8px var(--accent-dim);
+  box-shadow:
+    inset 0 0 0 1px #000,
+    0 0 8px var(--accent-dim);
 }
 
 component .outputButton.active {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 0 10px var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 0 10px var(--accent);
   background: radial-gradient(circle at 40% 35%, var(--accent) 0%, #0d3a2c 75%);
 }
 
@@ -1018,12 +1072,14 @@ component input[type="text"] {
 }
 
 component.Compressor {
-  height: 290px;
+  height: auto;
+  min-height: 180px;
   width: 200px;
 }
 component.filter {
-  height: 290px;
-  width: 200px;
+  height: auto;
+  min-height: 160px;
+  width: 240px;
 }
 
 component.AudioPlayer {
@@ -1036,11 +1092,12 @@ audioparamrow {
   display: flex;
   gap: 4px;
   flex-direction: row;
+  flex-wrap: nowrap;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   width: 100%;
+  background-color: rgba(255, 255, 255, 0.05);
 }
-
 component.visualizer canvas {
   position: relative;
   left: 0;
@@ -1101,16 +1158,11 @@ component.bpmoutputcomponent .inputsDiv {
 }
 
 component.countercomponent .display {
-  position: absolute;
-  right: 25px;
-  bottom: 3px;
+  text-align: right;
 }
 component.memorycomponent .display {
   margin-right: 0px;
-  position: absolute;
-  right: 27px;
   text-align: right;
-  bottom: 2px;
 }
 
 /* component.JoystickComponent input.outputButton:after {
@@ -1123,13 +1175,15 @@ component.memorycomponent .display {
 
 component.WebRTCSender,
 component.WebRTCReceiver {
-  padding-left: 5px;
-  padding-top: 38px;
-  height: 115px;
+  padding: 0;
+  height: auto;
+  min-height: 100px;
+  width: 200px;
 }
 component.WebRTCReceiver {
-  padding-top: 30px;
-  height: 123px;
+  padding-top: 0;
+  height: auto;
+  min-height: 100px;
 }
 
 component.WebRTCSender input {
@@ -1376,7 +1430,9 @@ button.play {
 }
 
 .seqButton.seqColumnPlaying {
-  box-shadow: inset 0 0 0 1px #fff, 0 0 8px var(--accent-dim);
+  box-shadow:
+    inset 0 0 0 1px #fff,
+    0 0 8px var(--accent-dim);
   border-color: #fff;
 }
 
@@ -1408,7 +1464,8 @@ component.LargeVisualizer .inputsDiv {
 
 component.drawer {
   width: 270px;
-  height: 140px;
+  height: auto;
+  min-height: 120px;
 }
 component.drawer canvas {
   cursor: crosshair;
@@ -1481,10 +1538,11 @@ component.drawer canvas {
   height: 26px;
   border-radius: 50%;
   background:
-    radial-gradient(circle at 35% 30%, #2a3832 0%, #0c1210 70%),
-    var(--jack);
+    radial-gradient(circle at 35% 30%, #2a3832 0%, #0c1210 70%), var(--jack);
   border: 1px solid var(--panel-edge);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.06), 0 2px 6px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    inset 0 1px 2px rgba(255, 255, 255, 0.06),
+    0 2px 6px rgba(0, 0, 0, 0.4);
   position: relative;
   cursor: ns-resize;
   touch-action: none;
@@ -1561,36 +1619,44 @@ component.drawer canvas {
 .ui-led.pulse {
   background: var(--led-color);
   border-color: var(--led-color);
-  box-shadow: 0 0 8px var(--led-color), 0 0 2px #fff;
+  box-shadow:
+    0 0 8px var(--led-color),
+    0 0 2px #fff;
 }
 
 component.oscillator {
-  height: 180px;
-  width: 200px;
+  height: auto;
+  min-height: 120px;
+  width: 240px;
 }
 
 component.Amp {
-  height: 130px;
+  height: auto;
+  min-height: 100px;
   width: 170px;
 }
 
 component.delay {
-  height: 140px;
+  height: auto;
+  min-height: 100px;
   width: 175px;
 }
 
 component.reverb {
-  height: 130px;
+  height: auto;
+  min-height: 100px;
   width: 170px;
 }
 
 component.distortion {
-  height: 150px;
+  height: auto;
+  min-height: 110px;
   width: 180px;
 }
 
 component.constantvaluenode {
-  height: 120px;
+  height: auto;
+  min-height: 90px;
   width: 140px;
 }
 
@@ -1614,8 +1680,13 @@ component.imagemaker canvas {
 
 component.KeyboardComponent {
   width: 300px;
-  height: 180px;
-  background: linear-gradient(160deg, rgba(18, 24, 22, 0.9), rgba(8, 12, 10, 0.85));
+  height: auto;
+  min-height: 160px;
+  background: linear-gradient(
+    160deg,
+    rgba(18, 24, 22, 0.9),
+    rgba(8, 12, 10, 0.85)
+  );
 }
 
 component.deleteButton {

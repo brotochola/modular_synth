@@ -15,7 +15,7 @@ class CustomProcessorComponent extends Component {
     this.infoBox.onclick = (e) => this.toggleActive();
     this.infoBox.innerHTML ="<br>";
       // "y is the output, x1, x2, x3, x4 are the 4 inputs at each frame, but also you can use it like: inputChannel1[i], being the i between 0 and 127";
-    this.container.appendChild(this.infoBox);
+    (this.main || this.container).appendChild(this.infoBox);
   }
   createNode() {
     this.app.loadWorklet("js/audioWorklets/customProcessor.js")
@@ -55,7 +55,7 @@ class CustomProcessorComponent extends Component {
       this.active ? this.toggleActive() : null;
     };
     this.inputText.value = this.formula;
-    this.container.appendChild(this.inputText);
+    (this.main || this.container).appendChild(this.inputText);
   }
   updateUI() {
     this.inputText.value = this.formula;

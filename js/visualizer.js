@@ -17,7 +17,9 @@ class Oscilloscope extends Component {
     this.canvas.width = 180;
     this.canvas.height = 70;
     this.canvas.onclick=e=>this.toggleActive()
-    if (this.body) {
+    if (this.main) {
+      this.main.appendChild(this.canvas);
+    } else if (this.body) {
       this.body.appendChild(this.canvas);
     } else {
       this.container.appendChild(this.canvas);

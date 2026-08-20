@@ -1,0 +1,12 @@
+{
+  "name": "modular-synth",
+  "private": true,
+  "scripts": {
+    "gallery": "node scripts/module-gallery.mjs",
+    "gallery:shot": "node scripts/module-gallery-shot.mjs",
+    "gallery:serve": "npx --yes http-server -p 5501 -c-1 ."
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

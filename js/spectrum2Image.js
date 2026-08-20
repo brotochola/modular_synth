@@ -46,7 +46,7 @@ class Spectrum2Image extends Component {
     this.canvas.width = 512;
     this.canvas.height = this.canvas.width / 1.77777;
     this.ctx = this.canvas.getContext("2d");
-    this.container.appendChild(this.canvas);
+    (this.main || this.container).appendChild(this.canvas);
 
     this.imgData = this.ctx.createImageData(
       this.canvas.width,

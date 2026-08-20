@@ -20,7 +20,6 @@ class Filter extends Component {
     }
     this.typeSelect.onchange = (e) => this.handleTypeChange(e);
     if (this.headerLeft) {
-      if (this.titleElement) this.titleElement.style.display = "none";
       this.headerLeft.appendChild(this.typeSelect);
     } else {
       this.inputsDiv.appendChild(this.typeSelect);

@@ -350,19 +350,26 @@ class Component {
 
     this.audioParams = unique(this.audioParams);
 
-    for (let inp of [
-      ...this.audioParams,
+    // Audio inputs (in_N) first, then params / triggers
+    let ordered = [
+      ...this.audioParams.filter((p) => String(p).startsWith("in_")),
+      ...this.audioParams.filter((p) => !String(p).startsWith("in_")),
       ...(this.customAudioTriggers || []),
       ...(this.customAudioParams || []),
-    ]) {
+    ];
+
+    for (let inp of ordered) {
       // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
       if (inp == "in_0" && this.type == "Multiplexor") {
         //INPUT 0 DOESNT WORK, I USE 0 TO INDICATE THE MULTIPLEXOR HAS TO REMEMBER ITS LAST STATE
         continue;
       }
-      //CREATE THE ROW
+      let widgetMode =
+        (this.uiParamWidgets && this.uiParamWidgets[inp]) || "knob";
+      // Module owns its own UI for this jack (e.g. Mixer channel strips)
+      if (widgetMode === "none") continue;
+
       let audioParamRow = document.createElement("audioParamRow");
-      //CREATE THE BUTTON
       let button = document.createElement("button");
       button.onclick = (e) => this.onAudioParamClicked(inp);
       button.classList.add("input");
@@ -376,11 +383,8 @@ class Component {
         !inp.startsWith("in") &&
         !(this.customAudioTriggers || []).includes(inp) &&
         !(this.customAudioParams || []).includes(inp);
-      let widgetMode =
-        (this.uiParamWidgets && this.uiParamWidgets[inp]) || "knob";
 
-      //AUDIO INPUTS DON'T HAVE A TEXT TO SET THEM, DAAH
-      if (isAudioParam && widgetMode !== "fader" && widgetMode !== "none") {
+      if (isAudioParam && widgetMode !== "fader") {
         let limits = this.getParamInputLimits(inp);
         let currentVal = 0;
         if (this.node.parameters && this.node.parameters.get(inp)) {
@@ -409,7 +413,6 @@ class Component {
             this.quickSave();
           },
         });
-        // keep textInput alias for legacy sync (mixer, loadFromSerialized)
         textInput = knob.field;
         textInput.classList.add(inp);
       }
@@ -711,6 +714,11 @@ class Component {
     this.inputsDiv.classList.add("inputsDiv");
     this.body.appendChild(this.inputsDiv);
 
+    // Unique module UI (canvas, grid, faders…) — always append here, not container
+    this.main = document.createElement("div");
+    this.main.classList.add("component-main");
+    this.body.appendChild(this.main);
+
     if (this.createdBy == this.app.userID) {
       this.container.classList.add("mine");
     }
@@ -740,7 +748,9 @@ class Component {
       }
       this.quickSave();
     };
-    if (this.body) {
+    if (this.main) {
+      this.main.appendChild(this.seatSelect);
+    } else if (this.body) {
       this.body.appendChild(this.seatSelect);
     } else {
       this.container.appendChild(this.seatSelect);
@@ -806,11 +816,7 @@ class Component {
     this.display.classList.add("display");
     this.displayWrap.appendChild(this.displayLed);
     this.displayWrap.appendChild(this.display);
-    if (this.body) {
-      this.body.appendChild(this.displayWrap);
-    } else {
-      this.container.appendChild(this.displayWrap);
-    }
+    (this.main || this.body || this.container).appendChild(this.displayWrap);
   }
 
   updateBPM() {}
@@ -827,7 +833,7 @@ class Component {
       return;
     }
     this.outputs = document.createElement("outputs");
-    this.container.appendChild(this.outputs);
+    (this.body || this.container).appendChild(this.outputs);
 
     for (let i = 0; i < (this.node || {}).numberOfOutputs; i++) {
       let outputButton = document.createElement("input");

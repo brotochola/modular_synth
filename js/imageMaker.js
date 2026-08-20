@@ -29,12 +29,12 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
     this.toggle.innerHTML = "Toggle Fullscreen";
     this.toggle.onclick = () => {
       if (this.canvas.parentNode == this.app.container) {
-        this.container.append(this.canvas);
+        (this.main || this.container).append(this.canvas);
       } else {
         this.app.container.append(this.canvas);
       }
     };
-    this.container.appendChild(this.toggle);
+    (this.main || this.container).appendChild(this.toggle);
   }
 
   
@@ -45,7 +45,7 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
     this.canvas.willReadFrequently = true;
     this.canvas.classList.add("imgMakerCanvas");
 
-    this.container.appendChild(this.canvas);
+    (this.main || this.container).appendChild(this.canvas);
     this.ctx = this.canvas.getContext("2d");
 
     this.tempCanvas1 = document.createElement("canvas");

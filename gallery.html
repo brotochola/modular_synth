@@ -1,0 +1,195 @@
+<!-- Gallery: one of each module for visual QA. Same scripts as index.html -->
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Module Gallery</title>
+  <script src="js/external/peerjs.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script src="js/firebase.js"></script>
+  <script src="js/external/wheel-zoom.js"></script>
+  <script src="js/external/midiplayer.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/connection.js"></script>
+  <script src="js/cablePhysics.js"></script>
+  <script src="js/uiWidgets.js"></script>
+  <script src="js/component.js"></script>
+  <script src="js/reverb.js"></script>
+  <script src="js/compressor.js"></script>
+  <script src="js/pitchDetectorComponent.js"></script>
+  <script src="js/lerpComponent.js"></script>
+  <script src="js/spectrum2Image.js"></script>
+  <script src="js/spectrogram.js"></script>
+  <script src="js/largeVisualizer.js"></script>
+  <script src="js/padSampler.js"></script>
+  <script src="js/drawer.js"></script>
+  <script src="js/webcamPlayer.js"></script>
+  <script src="js/constantValueNode.js"></script>
+  <script src="js/midi.js"></script>
+  <script src="js/peakDetectorComponent.js"></script>
+  <script src="js/memoryComponent.js"></script>
+  <script src="js/mic.js"></script>
+  <script src="js/frequencyAnalizer.js"></script>
+  <script src="js/waveShapper.js"></script>
+  <script src="js/counterComponent.js"></script>
+  <script src="js/bpmOutputComponent.js"></script>
+  <script src="js/text.js"></script>
+  <script src="js/envelope.js"></script>
+  <script src="js/distortion.js"></script>
+  <script src="js/multiplexor.js"></script>
+  <script src="js/midiFilePlayer.js"></script>
+  <script src="js/joystickComponent.js"></script>
+  <script src="js/webRTC_sender.js"></script>
+  <script src="js/webRTC_receiver.js"></script>
+  <script src="js/amp.js"></script>
+  <script src="js/filter.js"></script>
+  <script src="js/numberDisplayComponent.js"></script>
+  <script src="js/imageMaker.js"></script>
+  <script src="js/shaderComponent.js"></script>
+  <script src="js/audioPlayer.js"></script>
+  <script src="js/sequencer.js"></script>
+  <script src="js/visualizer.js"></script>
+  <script src="js/channelMerger.js"></script>
+  <script src="js/oscillator.js"></script>
+  <script src="js/rackComponent.js"></script>
+  <script src="js/delay.js"></script>
+  <script src="js/mouse.js"></script>
+  <script src="js/noiseGenWithWorklet.js"></script>
+  <script src="js/keyboardComponent.js"></script>
+  <script src="js/imagePlayerAudioWorkletVersion.js"></script>
+  <script src="js/customProcessorComponent.js"></script>
+  <script src="js/mixer.js"></script>
+  <script src="js/output.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/rtcForUsersData.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body.gallery-mode {
+      overflow: auto !important;
+      background: #0a0e0c;
+    }
+    body.gallery-mode app {
+      position: relative !important;
+      width: 100% !important;
+      height: auto !important;
+      min-height: 100vh;
+      background: #121816 !important;
+      overflow: visible !important;
+    }
+    body.gallery-mode app .mainContainer {
+      position: relative !important;
+      width: 100% !important;
+      height: auto !important;
+      top: 0 !important;
+      left: 0 !important;
+      transform: none !important;
+      filter: none !important;
+    }
+    body.gallery-mode .linesCanvas,
+    body.gallery-mode footer,
+    body.gallery-mode .buttons,
+    body.gallery-mode .historyPanel,
+    body.gallery-mode .cablePanel,
+    body.gallery-mode .openButtons {
+      display: none !important;
+    }
+    body.gallery-mode component {
+      position: relative !important;
+      left: auto !important;
+      top: auto !important;
+      margin: 16px 24px;
+      display: flex;
+    }
+    body.gallery-mode .gallery-label {
+      font-family: "IBM Plex Mono", monospace;
+      color: #5dffc2;
+      font-size: 12px;
+      margin: 24px 24px 0;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    body.gallery-mode #gallery-root {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding-bottom: 80px;
+    }
+  </style>
+</head>
+<body class="gallery-mode">
+  <footer style="display:none">
+    <span class="patchName"></span>
+    <button class="play"></button>
+    <button class="undo"></button>
+    <button class="redo"></button>
+    <button id="bpmButton"></button>
+  </footer>
+  <div class="buttons" style="display:none"></div>
+  <div class="historyPanel" style="display:none"><div class="historyList"></div></div>
+  <div class="cablePanel" style="display:none"></div>
+  <connectedUsers style="display:none"></connectedUsers>
+  <div id="gallery-root"></div>
+  <app></app>
+  <script>
+    (async function () {
+      var appEl = document.querySelector("app");
+      var app = new App(appEl);
+      window.app = app;
+      try {
+        await Promise.race([
+          app.actx.resume(),
+          new Promise(function (r) {
+            setTimeout(r, 500);
+          }),
+        ]);
+      } catch (e) {}
+
+      var skip = new Set(["Gain", "Output"]);
+      var names = Object.keys(App.COMPONENT_CLASSES).filter(function (n) {
+        return !skip.has(n);
+      });
+
+      var root = document.getElementById("gallery-root");
+
+      for (var i = 0; i < names.length; i++) {
+        var name = names[i];
+        var Ctor = App.COMPONENT_CLASSES[name];
+        var label = document.createElement("div");
+        label.className = "gallery-label";
+        label.textContent = name;
+        root.appendChild(label);
+
+        var wrap = document.createElement("div");
+        wrap.style.display = "inline-block";
+        root.appendChild(wrap);
+
+        try {
+          var c = new Ctor(app);
+          app.components.push(c);
+          c.container.setAttribute("data-module", name);
+          wrap.appendChild(c.container);
+          c.container.style.left = "0px";
+          c.container.style.top = "0px";
+        } catch (err) {
+          wrap.textContent = "FAILED: " + name + " — " + err.message;
+          wrap.style.color = "#ff5a5a";
+          console.error(name, err);
+        }
+      }
+
+      await new Promise(function (r) {
+        setTimeout(r, 3000);
+      });
+      document.documentElement.setAttribute("data-gallery-ready", "1");
+    })().catch(function (e) {
+      console.error(e);
+      document.documentElement.setAttribute("data-gallery-ready", "1");
+      document.body.setAttribute("data-gallery-error", String(e && e.message));
+    });
+  </script>
+</body>
+</html>

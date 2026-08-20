@@ -16,19 +16,19 @@ class ImagePlayerWorkletVersion extends Component {
     this.canvas = document.createElement("canvas");
     this.canvas.willReadFrequently = true;
 
-    this.container.appendChild(this.canvas);
+    (this.main || this.container).appendChild(this.canvas);
     this.ctx = this.canvas.getContext("2d");
 
     this.inputFile = document.createElement("input");
     this.inputFile.setAttribute("type", "file");
     this.inputFile.onchange = (e) => this.handleOnChange(e);
-    this.container.appendChild(this.inputFile);
+    (this.main || this.container).appendChild(this.inputFile);
 
     this.buttonToTriggerInputFile = document.createElement("button");
     this.buttonToTriggerInputFile.innerHTML = "Choose file...";
     this.buttonToTriggerInputFile.classList.add("triggerInputFile");
     this.buttonToTriggerInputFile.onclick = () => this.inputFile.click();
-    this.container.appendChild(this.buttonToTriggerInputFile);
+    (this.main || this.container).appendChild(this.buttonToTriggerInputFile);
   }
   makeButtonInvisible() {
     this.buttonToTriggerInputFile.style.display = "none";
