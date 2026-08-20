@@ -7,6 +7,7 @@ class Connection {
     this.audioParam = audioParam;
     this.numberOfOutput = numberOfOutput;
     this.id = makeid(8);
+    if (app) app.markCablesDirty();
   }
   remove() {
     let where = figureOutWhereToConnect(
@@ -32,22 +33,14 @@ class Connection {
     this.from.connections = this.from.connections.filter(
       (k) => k.id != this.id
     );
+    if (this.app) {
+      if (this.app.cableWorld) this.app.cableWorld.freeByConnectionId(this.id);
+      this.app.markCablesDirty();
+    }
   }
 
   redraw() {
-    let color = (
-      this.from.type +
-      this.to.type +
-      this.audioParam +
-      this.numberOfOutput
-    ).toRGB();
-
-    let fromEl = this.from.outputs.querySelector(
-      '.outputButton[numberOfOutput="' + this.numberOfOutput + '"]'
-    );
-    let toEl = (this.to.inputElements[this.audioParam] || {}).button;
-    if (!fromEl || !toEl) return;
-    this.app.drawLine(fromEl, toEl, color);
+    if (this.app) this.app.markCablesDirty();
   }
 
   reset() {

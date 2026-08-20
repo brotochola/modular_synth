@@ -424,7 +424,7 @@ class Component {
       }
 
       this.app.lastOutputClicked.compo.quickSave();
-      this.app.lastOutputClicked = null;
+      this.app.clearCableGhost();
     }
   }
   resetAudioParams() {
@@ -688,6 +688,8 @@ class Component {
     e.preventDefault();
     e.stopPropagation();
     this.app.lastOutputClicked = { compo: this, output: outputButton };
+    this.app._cableMouseClient.x = e.clientX;
+    this.app._cableMouseClient.y = e.clientY;
   }
   updateFromSerialized(other) {
     if (!this.container || !this.app) return;

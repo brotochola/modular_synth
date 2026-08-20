@@ -22,6 +22,7 @@
     <script src="js/external/midiplayer.js"></script>
     <script src="js/utils.js"></script>
     <script src="js/connection.js"></script>
+    <script src="js/cablePhysics.js"></script>
 
 
     <script src="js/component.js"></script>
@@ -235,20 +236,20 @@
         <div class="historyList"></div>
     </div>
     <div class="cablePanel">
-        <label>Tension min <span data-val="tensionMin">40</span>
-            <input type="range" name="tensionMin" min="0" max="200" step="1" value="40">
+        <label>Gravity <span data-val="gravity">1800</span>
+            <input type="range" name="gravity" min="0" max="4000" step="50" value="1800">
         </label>
-        <label>Tension k <span data-val="tensionK">0.35</span>
-            <input type="range" name="tensionK" min="0" max="1" step="0.01" value="0.35">
+        <label>Stiffness <span data-val="stiffness">400</span>
+            <input type="range" name="stiffness" min="50" max="1200" step="10" value="400">
         </label>
-        <label>Sag base <span data-val="sagBase">18</span>
-            <input type="range" name="sagBase" min="0" max="80" step="1" value="18">
+        <label>Damping <span data-val="damping">0.92</span>
+            <input type="range" name="damping" min="0.8" max="0.99" step="0.01" value="0.92">
         </label>
-        <label>Sag k <span data-val="sagK">0.2</span>
-            <input type="range" name="sagK" min="0" max="1" step="0.01" value="0.2">
+        <label>Slack <span data-val="slack">1.25</span>
+            <input type="range" name="slack" min="1" max="2" step="0.01" value="1.25">
         </label>
-        <label>Sag max <span data-val="sagMax">140</span>
-            <input type="range" name="sagMax" min="20" max="400" step="1" value="140">
+        <label>Bead radius <span data-val="beadRadius">3.5</span>
+            <input type="range" name="beadRadius" min="1.5" max="8" step="0.1" value="3.5">
         </label>
     </div>
     <app></app>

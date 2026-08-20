@@ -1,11 +1,11 @@
 class App {
   static HISTORY_CAP = 40;
   static CABLE_DEFAULTS = {
-    tensionMin: 40,
-    tensionK: 0.35,
-    sagBase: 18,
-    sagK: 0.2,
-    sagMax: 140,
+    gravity: 1800,
+    stiffness: 400,
+    damping: 0.92,
+    slack: 1.25,
+    beadRadius: 3.5,
   };
   static signalignServers = [
     "stun.l.google.com",
@@ -46,10 +46,14 @@ class App {
     this._workletModules = {};
     this.remoteCursors = {};
     this._lastCursorSentAt = 0;
+    this._cablesDirty = true;
+    this._cableMouse = { x: 0, y: 0 };
+    this._cableMouseClient = { x: 0, y: 0 };
     this.createMainContainer(elem);
     this.createMessageBox();
     this.createOutputComponent();
     this.createCanvasOnTop();
+    this.initCableWorld();
     this.addEventsToDropFile();
     this.initHistory();
 
@@ -83,6 +87,10 @@ class App {
           if (typing) return;
           e.preventDefault();
           this.redo();
+          return;
+        }
+        if (e.key == "Escape") {
+          this.clearCableGhost();
           return;
         }
         if (e.key == "Delete") {
@@ -506,8 +514,27 @@ class App {
     this.sizeCableCanvas();
     window.addEventListener("resize", () => {
       this.sizeCableCanvas();
-      this.updateAllLines();
+      this.markCablesDirty();
     });
+  }
+  initCableWorld() {
+    this.cableWorld = new CableWorld();
+    this.cableWorld.setParams(this.cables);
+    this._cableLastTs = 0;
+    window.addEventListener("pointermove", (e) => {
+      this._cableMouseClient.x = e.clientX;
+      this._cableMouseClient.y = e.clientY;
+    });
+    this.startCableLoop();
+  }
+  startCableLoop() {
+    let tick = (ts) => {
+      this._cableRaf = requestAnimationFrame(tick);
+      let dt = this._cableLastTs ? (ts - this._cableLastTs) / 1000 : 0.016;
+      this._cableLastTs = ts;
+      this.runCableFrame(dt);
+    };
+    this._cableRaf = requestAnimationFrame(tick);
   }
   sizeCableCanvas() {
     let w = this.appEl.clientWidth;
@@ -517,36 +544,139 @@ class App {
     this.ctx.lineCap = "round";
     this.ctx.lineWidth = 3;
   }
-  drawLine(from, to, color) {
-    if (!from || !to) return;
-    let p = this.cables || App.CABLE_DEFAULTS;
-
-    let canvasBox = this._cableCanvasBox || this.canvas.getBoundingClientRect();
-    let fromBox = from.getBoundingClientRect();
-    let toBox = to.getBoundingClientRect();
-
-    let startX = fromBox.left + fromBox.width / 2 - canvasBox.left;
-    let startY = fromBox.top + fromBox.height / 2 - canvasBox.top;
-    let endX = toBox.left + toBox.width / 2 - canvasBox.left;
-    let endY = toBox.top + toBox.height / 2 - canvasBox.top;
-
-    let dx = endX - startX;
-    let dist = Math.hypot(dx, endY - startY);
-    let tension = Math.max(p.tensionMin, Math.abs(dx) * p.tensionK);
-    let sag = Math.min(p.sagMax, p.sagBase + dist * p.sagK);
-
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = color || "red";
-    this.ctx.moveTo(startX, startY);
-    this.ctx.bezierCurveTo(
-      startX + tension,
-      startY + sag,
-      endX - tension,
-      endY + sag,
-      endX,
-      endY,
+  jackCenterWorld(el) {
+    if (!el) return null;
+    let rack = this.container.getBoundingClientRect();
+    let s = this.scale || 1;
+    let box = el.getBoundingClientRect();
+    let cx = box.left + box.width / 2;
+    let cy = box.top + box.height / 2;
+    return {
+      x: (cx - rack.left) / s,
+      y: (cy - rack.top) / s,
+    };
+  }
+  clientToWorld(clientX, clientY) {
+    let rack = this.container.getBoundingClientRect();
+    let s = this.scale || 1;
+    return {
+      x: (clientX - rack.left) / s,
+      y: (clientY - rack.top) / s,
+    };
+  }
+  markCablesDirty() {
+    this._cablesDirty = true;
+  }
+  connectionCableColor(conn) {
+    return (
+      conn.from.type +
+      conn.to.type +
+      conn.audioParam +
+      conn.numberOfOutput
+    ).toRGB();
+  }
+  connectionJackEls(conn) {
+    let fromEl = conn.from.outputs.querySelector(
+      '.outputButton[numberOfOutput="' + conn.numberOfOutput + '"]',
     );
-    this.ctx.stroke();
+    let toEl = (conn.to.inputElements[conn.audioParam] || {}).button;
+    return { fromEl, toEl };
+  }
+  syncPhysicsCables() {
+    if (!this.cableWorld) return;
+    let conns = this.getAllConnections();
+    let live = new Set();
+    for (let conn of conns) {
+      live.add(conn.id);
+      let { fromEl, toEl } = this.connectionJackEls(conn);
+      if (!fromEl || !toEl) continue;
+      let a = this.jackCenterWorld(fromEl);
+      let b = this.jackCenterWorld(toEl);
+      if (!a || !b) continue;
+      let slot = this.cableWorld.byConnectionId.get(conn.id);
+      if (slot == null) {
+        this.cableWorld.createCable({
+          x0: a.x,
+          y0: a.y,
+          x1: b.x,
+          y1: b.y,
+          fromEl,
+          toEl,
+          connectionId: conn.id,
+          color: this.connectionCableColor(conn),
+        });
+      } else {
+        let cab = this.cableWorld.cables[slot];
+        if (cab) {
+          cab.fromEl = fromEl;
+          cab.toEl = toEl;
+          cab.color = this.connectionCableColor(conn);
+        }
+        this.cableWorld.setEndpoints(slot, a.x, a.y, b.x, b.y, true);
+      }
+    }
+    for (let [connId] of [...this.cableWorld.byConnectionId.entries()]) {
+      if (!live.has(connId)) this.cableWorld.freeByConnectionId(connId);
+    }
+    this._cablesDirty = false;
+  }
+  syncCableGhost() {
+    if (!this.cableWorld) return;
+    if (!this.lastOutputClicked || !this.lastOutputClicked.output) {
+      this.cableWorld.clearGhost();
+      return;
+    }
+    let fromEl = this.lastOutputClicked.output;
+    let a = this.jackCenterWorld(fromEl);
+    let m = this.clientToWorld(
+      this._cableMouseClient.x,
+      this._cableMouseClient.y,
+    );
+    if (!a) return;
+    this.cableWorld.ensureGhost(fromEl, a.x, a.y, m.x, m.y);
+    if (this.cableWorld.ghostSlot >= 0) {
+      this.cableWorld.setEndpoints(
+        this.cableWorld.ghostSlot,
+        a.x,
+        a.y,
+        m.x,
+        m.y,
+        true,
+      );
+    }
+  }
+  clearCableGhost() {
+    this.lastOutputClicked = null;
+    if (this.cableWorld) this.cableWorld.clearGhost();
+  }
+  runCableFrame(dt) {
+    if (!this.cableWorld || !this.ctx) return;
+    this.sizeCableCanvas();
+    this.cableWorld.setParams(this.cables);
+    this.syncPhysicsCables();
+    this.syncCableGhost();
+    this.cableWorld.step(dt);
+
+    let ctx = this.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    let rack = this.container.getBoundingClientRect();
+    let canvasBox = this.canvas.getBoundingClientRect();
+    let s = this.scale || 1;
+    ctx.setTransform(
+      s,
+      0,
+      0,
+      s,
+      rack.left - canvasBox.left,
+      rack.top - canvasBox.top,
+    );
+    this.cableWorld.draw(ctx);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  drawLine() {
+    this.markCablesDirty();
   }
 
   loadWorklet(url) {
@@ -590,6 +720,7 @@ class App {
       )
         return;
       this.makeAllComponentsInactive();
+      this.clearCableGhost();
       if (this.buttonsContainer)
         this.buttonsContainer.classList.remove("visible");
       if (this.cablePanel) this.cablePanel.classList.remove("visible");
@@ -638,16 +769,7 @@ class App {
   }
 
   updateAllLines() {
-    if (this._linesRaf) return;
-    this._linesRaf = requestAnimationFrame(() => {
-      this._linesRaf = 0;
-      this._cableCanvasBox = this.canvas.getBoundingClientRect();
-      this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      for (let c of this.getAllConnections()) {
-        c.redraw();
-      }
-      this._cableCanvasBox = null;
-    });
+    this.markCablesDirty();
   }
   addText() {
     this.components.push(new Text(this));
@@ -1160,12 +1282,13 @@ class App {
       return isNaN(v) ? fallback : v;
     };
     this.cables = {
-      tensionMin: num(src.tensionMin, d.tensionMin),
-      tensionK: num(src.tensionK, d.tensionK),
-      sagBase: num(src.sagBase, d.sagBase),
-      sagK: num(src.sagK, d.sagK),
-      sagMax: num(src.sagMax, d.sagMax),
+      gravity: num(src.gravity, d.gravity),
+      stiffness: num(src.stiffness, d.stiffness),
+      damping: num(src.damping, d.damping),
+      slack: num(src.slack, d.slack),
+      beadRadius: num(src.beadRadius, d.beadRadius),
     };
+    if (this.cableWorld) this.cableWorld.setParams(this.cables);
     this.syncCableSliders();
     this.updateAllLines();
   }
