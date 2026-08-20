@@ -6,6 +6,7 @@ class Sequencer extends Component {
 
     this.numberOfSemitones = 13;
     this.numberOfSteps = 16;
+    this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
     this.outputLabels = ["relative note", "trigger", "Hz"];
     this.createNode();
@@ -40,6 +41,27 @@ class Sequencer extends Component {
     this.container.appendChild(this.buttonsContainer);
   }
 
+  updatePlayhead(step) {
+    this.playheadStep = step;
+    let root = this.buttonsContainer || this.container;
+    if (!root) return;
+    root
+      .querySelectorAll(".seqButton.seqColumnPlaying")
+      .forEach((b) => b.classList.remove("seqColumnPlaying"));
+    root
+      .querySelectorAll("button[time='" + step + "']")
+      .forEach((b) => b.classList.add("seqColumnPlaying"));
+  }
+
+  putLabels() {
+    super.putLabels();
+    let clockBtn = this.container.querySelector("button.in_0");
+    if (clockBtn) {
+      clockBtn.innerText = "clock";
+      clockBtn.title = "clock";
+    }
+  }
+
   handleClickOnSeqButton(e) {
     let but = e.target;
 
@@ -61,7 +83,7 @@ class Sequencer extends Component {
     if (!Array.isArray(this.sequence)) {
       this.sequence = objectToArray(this.sequence);
     }
-    this.container.querySelectorAll("button").forEach((button) => {
+    this.container.querySelectorAll("button.seqButton").forEach((button) => {
       button.classList.remove("active");
     });
 
@@ -70,12 +92,13 @@ class Sequencer extends Component {
         if (this.sequence[j][i]) {
           this.container
             .querySelector(
-              "button[time='" + j + "'][semitone='" + (i + 1) + "']"
+              "button[time='" + j + "'][semitone='" + (i + 1) + "']",
             )
             .classList.add("active");
         }
       }
     }
+    this.updatePlayhead(this.playheadStep);
     this.sendToWorklet();
   }
   updateBPM() {
@@ -108,30 +131,31 @@ class Sequencer extends Component {
   }
 
   createNode() {
-    this.app.loadWorklet("js/audioWorklets/sequencerWorklet.js")
-      .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "sequencer-worklet", {
-          numberOfInputs: 0,
-          numberOfOutputs: 3,
-        });
-
-        this.node.onprocessorerror = (e) => {
-          console.error(e);
-        };
-
-        this.sendToWorklet();
-
-        // this.node.port.onmessage = (e) => console.log("########", e.data);
-
-        // this.createInputButtons();
+    this.app.loadWorklet("js/audioWorklets/sequencerWorklet.js").then(() => {
+      this.node = new AudioWorkletNode(this.app.actx, "sequencer-worklet", {
+        numberOfInputs: 1,
+        numberOfOutputs: 3,
       });
+
+      this.node.onprocessorerror = (e) => {
+        console.error(e);
+      };
+
+      this.node.port.onmessage = (e) => {
+        if (typeof e.data.currentNote === "number") {
+          this.updatePlayhead(e.data.currentNote);
+        }
+      };
+
+      this.sendToWorklet();
+    });
   }
 
   serialize() {
     let obj = super.serialize();
     if (this.sequence)
       obj.sequence = arrayToObject(
-        this.sequence.map((k) => k.map((b) => (b ? 1 : 0)))
+        this.sequence.map((k) => k.map((b) => (b ? 1 : 0))),
       );
     return obj;
   }

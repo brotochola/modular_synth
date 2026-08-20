@@ -17,12 +17,22 @@ class SequencerWorklet extends AudioWorkletProcessor {
     this.bpm = 120;
     this.durationOfOneNote = 0;
     this.durationOfLoop = 0;
+    this.currentNote = 0;
+    this.lastPostedNote = -1;
+    this.externalClock = false;
+    this.prevClockSample = 0;
     this.port.onmessage = (e) => {
       this.sequence = e.data.seq;
       this.bpm = e.data.bpm;
       this.durationOfOneNote = (60000 / this.bpm) * 0.25;
       this.durationOfLoop = this.durationOfOneNote * 16;
     };
+  }
+
+  postPlayhead() {
+    if (this.currentNote === this.lastPostedNote) return;
+    this.lastPostedNote = this.currentNote;
+    this.port.postMessage({ currentNote: this.currentNote });
   }
 
   process(inputs, outputs, parameters) {
@@ -33,9 +43,31 @@ class SequencerWorklet extends AudioWorkletProcessor {
     let hzChannel = outputs[2] && outputs[2][0];
     if (!outputChannel) return true;
     let n = outputChannel.length;
-    this.currentNote = Math.floor(
-      ((currentTime * 1000) % this.durationOfLoop) / this.durationOfOneNote
-    );
+    let clockChannel = inputs[0] && inputs[0][0];
+
+    if (clockChannel) {
+      for (let i = 0; i < clockChannel.length; ++i) {
+        let sample = clockChannel[i];
+        if (sample > this.prevClockSample + 0.01) {
+          if (!this.externalClock) {
+            this.externalClock = true;
+            this.currentNote = 0;
+          } else {
+            this.currentNote = (this.currentNote + 1) % 16;
+          }
+          this.postPlayhead();
+        }
+        this.prevClockSample = sample;
+      }
+    }
+
+    if (!this.externalClock) {
+      this.currentNote = Math.floor(
+        ((currentTime * 1000) % this.durationOfLoop) / this.durationOfOneNote
+      );
+      this.postPlayhead();
+    }
+
     let pitch = seq[this.currentNote] || 0;
     let gate = pitch != 0 ? 1 : 0;
     let baseArr = parameters.baseHz;

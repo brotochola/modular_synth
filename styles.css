@@ -523,8 +523,14 @@ component.envelopegenerator {
   height: 180px;
 }
 component.BPMOutputComponent {
-  height: 34px;
-  width: 115px;
+  height: 56px;
+  width: 130px;
+}
+
+.bpmRateSelect {
+  margin: 4px 0 0 4px;
+  font-size: 11px;
+  max-width: 56px;
 }
 
 component.KeyboardComponent {
@@ -681,7 +687,7 @@ component.ImagePlayerWorkletVersion canvas {
 
 component.Sequencer {
   width: 300px;
-  height: 280px;
+  height: 350px;
   padding-top: 10px;
 }
 
@@ -692,6 +698,10 @@ component.Sequencer div.buttonsContainer {
   flex-wrap: wrap;
   width: 275px;
   padding: 5px;
+}
+
+component.Sequencer .inputsDiv {
+  bottom: 55px;
 }
 
 component input.outputButton:after {
@@ -1110,6 +1120,10 @@ button.play {
 
 .seqButton.active {
   background: orange;
+}
+
+.seqButton.seqColumnPlaying {
+  box-shadow: inset 0 0 0 1px #00ffb4;
 }
 
 component.drawer icon {
