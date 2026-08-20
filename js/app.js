@@ -44,6 +44,8 @@ class App {
     this.historyIndex = 0;
     this._loadGen = 0;
     this._workletModules = {};
+    this.remoteCursors = {};
+    this._lastCursorSentAt = 0;
     this.createMainContainer(elem);
     this.createMessageBox();
     this.createOutputComponent();
@@ -55,6 +57,8 @@ class App {
 
     this.generateUserAndSessionIDs();
     this.createInstanceOfRTCConnectionForUsers();
+    this.bindRemotePresenceHandlers();
+    this.bindLocalCursorBroadcast();
 
     document.addEventListener("contextmenu", (event) => event.preventDefault());
 
@@ -120,6 +124,130 @@ class App {
   }
   createInstanceOfRTCConnectionForUsers() {
     this.rtcInstance = new RTCForUsersData(this);
+  }
+
+  bindRemotePresenceHandlers() {
+    this.onRemoteCursor = (msg) => this.applyRemoteCursor(msg);
+    this.onRemoteDrag = (msg) => this.applyRemoteDrag(msg, false);
+    this.onRemoteDragEnd = (msg) => this.applyRemoteDrag(msg, true);
+  }
+
+  bindLocalCursorBroadcast() {
+    window.addEventListener("pointermove", (e) => {
+      this.broadcastLocalCursor(e);
+    });
+    setInterval(() => this.pruneStaleRemoteCursors(), 1000);
+  }
+
+  clientToRackCoords(clientX, clientY) {
+    let s = this.scale || 1;
+    let rack = this.container.getBoundingClientRect();
+    return {
+      x: (clientX - rack.left) / s,
+      y: (clientY - rack.top) / s,
+    };
+  }
+
+  broadcastLocalCursor(e) {
+    if (!this.rtcInstance) return;
+    let now = performance.now();
+    if (now - this._lastCursorSentAt < 66) return;
+    this._lastCursorSentAt = now;
+    let { x, y } = this.clientToRackCoords(e.clientX, e.clientY);
+    this.rtcInstance.sendMessage({
+      type: "cursor",
+      userID: this.userID,
+      x,
+      y,
+    });
+  }
+
+  hueFromUserId(userID) {
+    let h = 0;
+    let s = String(userID || "");
+    for (let i = 0; i < s.length; i++) {
+      h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    }
+    return h % 360;
+  }
+
+  ensureRemoteCursor(userID) {
+    if (!userID || userID == this.userID) return null;
+    let entry = this.remoteCursors[userID];
+    if (entry) return entry;
+    let el = document.createElement("div");
+    el.className = "remote-cursor";
+    el.style.setProperty("--cursor-hue", this.hueFromUserId(userID));
+    let label = document.createElement("span");
+    label.className = "remote-cursor-label";
+    label.textContent = userID;
+    el.appendChild(label);
+    this.container.appendChild(el);
+    entry = { el, lastSeen: performance.now() };
+    this.remoteCursors[userID] = entry;
+    return entry;
+  }
+
+  applyRemoteCursor(msg) {
+    if (!msg || msg.userID == null || msg.x == null || msg.y == null) return;
+    let entry = this.ensureRemoteCursor(msg.userID);
+    if (!entry) return;
+    entry.el.style.left = msg.x + "px";
+    entry.el.style.top = msg.y + "px";
+    entry.lastSeen = performance.now();
+  }
+
+  applyRemoteDrag(msg, isEnd) {
+    if (!msg || !msg.componentId || msg.x == null || msg.y == null) return;
+    let compo = this.getComponentByID(msg.componentId);
+    if (!compo || !compo.container) return;
+    this.syncingRemote = true;
+    let x = typeof msg.x == "number" ? msg.x + "px" : msg.x;
+    let y = typeof msg.y == "number" ? msg.y + "px" : msg.y;
+    compo.container.style.left = x;
+    compo.container.style.top = y;
+    compo.container.style.setProperty("--posX", x);
+    compo.container.style.setProperty("--posY", y);
+    this.updateAllLines();
+    this.syncingRemote = false;
+    if (msg.userID) {
+      let entry = this.ensureRemoteCursor(msg.userID);
+      if (entry) entry.lastSeen = performance.now();
+    }
+  }
+
+  removeRemoteCursor(userID) {
+    let entry = this.remoteCursors[userID];
+    if (!entry) return;
+    if (entry.el && entry.el.parentNode) entry.el.parentNode.removeChild(entry.el);
+    delete this.remoteCursors[userID];
+  }
+
+  pruneStaleRemoteCursors() {
+    let now = performance.now();
+    for (let userID of Object.keys(this.remoteCursors)) {
+      if (now - this.remoteCursors[userID].lastSeen > 3000) {
+        this.removeRemoteCursor(userID);
+      }
+    }
+  }
+
+  syncRtcMesh(users) {
+    if (!this.rtcInstance) return;
+    let online = new Set();
+    for (let u of users || []) {
+      if (!u || !u.userID || u.userID == this.userID) continue;
+      online.add(u.userID);
+      this.rtcInstance.connect(u.userID);
+    }
+    for (let peerId of this.rtcInstance.listPeerIds()) {
+      if (!online.has(peerId)) {
+        this.rtcInstance.disconnect(peerId);
+      }
+    }
+    for (let userID of Object.keys(this.remoteCursors)) {
+      if (!online.has(userID)) this.removeRemoteCursor(userID);
+    }
   }
   showMessage(text) {
     this.messageBox.classList.add("visible");
@@ -226,19 +354,7 @@ class App {
       (users.length > 1 ? " users online" : " user online") +
       (this.admin ? " (you're the admin)" : "");
 
-    //CONNECT VIA RTC
-    if (this.rtcInstance && this.rtcInstance.state == "ready") {
-      if (!this.admin) {
-        let adminsID = this.connectedUsers.filter((k) => k.admin)[0];
-        if (!adminsID) {
-          if (this.connectedUsers.length > 1) {
-            console.warn("there's no admin connected?");
-          }
-          return;
-        }
-        this.rtcInstance.connect(adminsID.userID);
-      }
-    }
+    this.syncRtcMesh(users);
   }
 
   // async checkIfTheresAPatchToOpenInTheURL() {

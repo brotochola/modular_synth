@@ -551,18 +551,38 @@ class Component {
     if (!this._dragging) return;
     let s = this.app.scale || 1;
     let rack = this.app.container.getBoundingClientRect();
-    this.container.style.left =
-      (e.clientX - rack.left) / s - this._grabX + "px";
-    this.container.style.top =
-      (e.clientY - rack.top) / s - this._grabY + "px";
+    let x = (e.clientX - rack.left) / s - this._grabX;
+    let y = (e.clientY - rack.top) / s - this._grabY;
+    this.container.style.left = x + "px";
+    this.container.style.top = y + "px";
     this.container.style.setProperty("--posX", this.container.style.left);
     this.container.style.setProperty("--posY", this.container.style.top);
     this.app.updateAllLines();
+    if (this.app.rtcInstance && !this.app.syncingRemote) {
+      this.app.rtcInstance.sendMessage({
+        type: "drag",
+        userID: this.app.userID,
+        componentId: this.id,
+        x,
+        y,
+      });
+    }
   }
 
   onPointerUp(e) {
     if (!this._dragging) return;
     this._dragging = false;
+    let x = parseFloat(this.container.style.left) || 0;
+    let y = parseFloat(this.container.style.top) || 0;
+    if (this.app.rtcInstance && !this.app.syncingRemote) {
+      this.app.rtcInstance.sendMessage({
+        type: "dragEnd",
+        userID: this.app.userID,
+        componentId: this.id,
+        x,
+        y,
+      });
+    }
     this.quickSave();
     this.app.updateAllLines();
   }

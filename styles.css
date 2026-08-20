@@ -97,6 +97,37 @@ app .mainContainer {
   transition: filter 0.1s ease-out;
 }
 
+.remote-cursor {
+  --cursor-hue: 120;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 10px;
+  height: 10px;
+  margin-left: -5px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: hsl(var(--cursor-hue), 85%, 55%);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+  z-index: 50;
+  transform: translateZ(0);
+}
+
+.remote-cursor-label {
+  position: absolute;
+  left: 12px;
+  top: -2px;
+  white-space: nowrap;
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 2px;
+  color: #111;
+  background: hsl(var(--cursor-hue), 85%, 70%);
+  pointer-events: none;
+}
+
 .buttons {
   flex-wrap: wrap;
   position: fixed;
