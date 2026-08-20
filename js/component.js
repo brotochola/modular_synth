@@ -692,19 +692,22 @@ class Component {
     for (let u of this.app.connectedUsers || []) {
       if (u && u.userID) online.add(u.userID);
     }
-    if (!online.has(this.sourceUserID)) {
-      let prev = this.sourceUserID;
-      this.sourceUserID = this.app.userID;
-      if (this.onSeatChanged instanceof Function) {
-        this.onSeatChanged(prev, this.sourceUserID);
-      }
-      this.quickSave();
+    let ids = new Set(online);
+    for (let c of this.app.components || []) {
+      if (c && c.sourceUserID) ids.add(c.sourceUserID);
     }
+    if (this.sourceUserID) ids.add(this.sourceUserID);
     this.seatSelect.innerHTML = "";
-    for (let id of online) {
+    for (let id of ids) {
       let opt = document.createElement("option");
       opt.value = id;
-      opt.textContent = id == this.app.userID ? "You (" + id + ")" : id;
+      if (id == this.app.userID) {
+        opt.textContent = "You (" + id + ")";
+      } else if (!online.has(id)) {
+        opt.textContent = id + " (offline)";
+      } else {
+        opt.textContent = id;
+      }
       if (id == this.sourceUserID) opt.selected = true;
       this.seatSelect.appendChild(opt);
     }
