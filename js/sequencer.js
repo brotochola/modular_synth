@@ -38,7 +38,11 @@ class Sequencer extends Component {
         this.buttonsContainer.appendChild(button);
       }
     }
-    this.container.appendChild(this.buttonsContainer);
+    if (this.body) {
+      this.body.insertBefore(this.buttonsContainer, this.inputsDiv);
+    } else {
+      this.container.appendChild(this.buttonsContainer);
+    }
   }
 
   updatePlayhead(step) {

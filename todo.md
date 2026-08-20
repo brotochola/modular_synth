@@ -20,10 +20,10 @@ TODO:
 - do the opposite of a multiplexor
 - reverb: add type (get a few from the reverb.js website)
 - add UI elements:
-  - led
+  - led (done — shared .ui-led in modules)
   - button
-  - fader
-  - knob
+  - fader (done — createSlider / mixer)
+  - knob (done — createKnob on AudioParams)
   - rack cover (this components should go on top of the cables canvas)
 - BPM DETECTOR: https://github.com/qiuxiang/aubiojs?tab=readme-ov-file
 - overdrive & distortion:

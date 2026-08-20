@@ -10,7 +10,7 @@ class Filter extends Component {
 
   addTypeSelect() {
     this.typeSelect = document.createElement("select");
-    this.typeSelect.classList.add("type");
+    this.typeSelect.classList.add("type", "ui-select");
     this.typeOptions = ["lowpass", "highpass", "bandpass", "notch"];
     for (let type of this.typeOptions) {
       let option = document.createElement("option");
@@ -19,7 +19,12 @@ class Filter extends Component {
       this.typeSelect.appendChild(option);
     }
     this.typeSelect.onchange = (e) => this.handleTypeChange(e);
-    this.inputsDiv.appendChild(this.typeSelect);
+    if (this.headerLeft) {
+      if (this.titleElement) this.titleElement.style.display = "none";
+      this.headerLeft.appendChild(this.typeSelect);
+    } else {
+      this.inputsDiv.appendChild(this.typeSelect);
+    }
   }
   handleTypeChange(e) {
     this.node.type = this.typeSelect.value;

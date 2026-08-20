@@ -24,7 +24,11 @@ class Text extends Component {
       this.waitAndSave();
     };
 
-    this.container.appendChild(this.textEl);
+    if (this.body) {
+      this.body.appendChild(this.textEl);
+    } else {
+      this.container.appendChild(this.textEl);
+    }
   }
 
   createView() {

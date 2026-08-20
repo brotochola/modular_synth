@@ -21,7 +21,11 @@ class AudioPlayer extends Component {
     this.playButton.style.display = "none";
     this.playButton.classList.add("playButton");
 
-    this.container.appendChild(this.playButton);
+    if (this.body) {
+      this.body.insertBefore(this.playButton, this.inputsDiv);
+    } else {
+      this.container.appendChild(this.playButton);
+    }
 
     this.playButton.onclick = (e) => {
       this.playPause();
@@ -76,13 +80,17 @@ class AudioPlayer extends Component {
     this.inputFile.setAttribute("type", "file");
     this.inputFile.accept = "audio/*";
     this.inputFile.onchange = (e) => this.handleOnChange(e);
-    this.container.appendChild(this.inputFile);
+    (this.body || this.container).appendChild(this.inputFile);
 
     this.buttonToTriggerInputFile = document.createElement("button");
     this.buttonToTriggerInputFile.innerHTML = "Choose file...";
     this.buttonToTriggerInputFile.classList.add("triggerInputFile");
     this.buttonToTriggerInputFile.onclick = () => this.inputFile.click();
-    this.container.appendChild(this.buttonToTriggerInputFile);
+    if (this.body) {
+      this.body.insertBefore(this.buttonToTriggerInputFile, this.inputsDiv);
+    } else {
+      this.container.appendChild(this.buttonToTriggerInputFile);
+    }
   }
 
   handleOnChange() {

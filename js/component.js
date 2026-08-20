@@ -28,8 +28,13 @@ class Component {
     if (!this.isThisComponentMine()) return;
     this.deleteButton = document.createElement("button");
     this.deleteButton.classList.add("deleteButton");
-    this.container.appendChild(this.deleteButton);
     this.deleteButton.innerHTML = "🗑️";
+    this.deleteButton.title = "Delete Component";
+    if (this.headerRight) {
+      this.headerRight.appendChild(this.deleteButton);
+    } else {
+      this.container.appendChild(this.deleteButton);
+    }
     this.deleteButton.onclick = () => {
       this.remove();
     };
@@ -81,7 +86,9 @@ class Component {
           param.value = val;
         }
         let inputEl = this.inputElements[key];
-        if (inputEl && inputEl.textInput) {
+        if (inputEl && inputEl.knob) {
+          inputEl.knob.setValue(val);
+        } else if (inputEl && inputEl.textInput) {
           inputEl.textInput.value = val;
         }
       }
@@ -364,34 +371,53 @@ class Component {
       button.innerText = inp;
 
       let textInput;
-      //AUDIO INPUTS DON'T HAVE A TEXT TO SET THEM, DAAH
-      if (
+      let knob;
+      let isAudioParam =
         !inp.startsWith("in") &&
         !(this.customAudioTriggers || []).includes(inp) &&
-        !(this.customAudioParams || []).includes(inp)
-      ) {
-        textInput = document.createElement("input");
-        textInput.classList.add(inp);
-        textInput.type = "number";
-        textInput.onchange = (e) => this.onParamChanged(e, inp);
-        textInput.onkeydown = (e) => e.stopImmediatePropagation();
+        !(this.customAudioParams || []).includes(inp);
+      let widgetMode =
+        (this.uiParamWidgets && this.uiParamWidgets[inp]) || "knob";
+
+      //AUDIO INPUTS DON'T HAVE A TEXT TO SET THEM, DAAH
+      if (isAudioParam && widgetMode !== "fader" && widgetMode !== "none") {
         let limits = this.getParamInputLimits(inp);
-        if (limits.min != null) textInput.min = limits.min;
-        if (limits.max != null) textInput.max = limits.max;
-        textInput.step = limits.step;
         let currentVal = 0;
         if (this.node.parameters && this.node.parameters.get(inp)) {
           currentVal = this.node.parameters.get(inp).value;
         } else if (this.node[inp]) {
           currentVal = this.node[inp].value;
         }
-        textInput.value = currentVal.toString();
+        let useLog =
+          inp === "frequency" ||
+          inp === "baseHz" ||
+          inp === "detune" ||
+          (inp === "gain" && limits.max > 10);
+        knob = createKnob({
+          min: limits.min,
+          max: limits.max,
+          step: limits.step,
+          value: currentVal,
+          log: useLog,
+          label: inp,
+          onChange: (val) => {
+            if (this.node?.parameters?.get(inp)) {
+              this.node.parameters.get(inp).value = val;
+            } else if (this.node[inp]) {
+              this.node[inp].value = val;
+            }
+            this.quickSave();
+          },
+        });
+        // keep textInput alias for legacy sync (mixer, loadFromSerialized)
+        textInput = knob.field;
+        textInput.classList.add(inp);
       }
 
-      this.inputElements[inp] = { button, textInput };
+      this.inputElements[inp] = { button, textInput, knob };
 
       audioParamRow.appendChild(button);
-      if (textInput) audioParamRow.appendChild(textInput);
+      if (knob) audioParamRow.appendChild(knob.el);
       this.inputsDiv.appendChild(audioParamRow);
     }
   }
@@ -464,14 +490,23 @@ class Component {
     this.infoButton = document.createElement("button");
     this.infoButton.classList.add("infoButton");
     this.infoButton.innerText = "?";
+    this.infoButton.title = "Component Info";
     this.infoButton.onclick = () => {
       this.app.showMessage(this.infoText);
     };
-    this.container.appendChild(this.infoButton);
+    if (this.headerRight) {
+      this.headerRight.insertBefore(this.infoButton, this.headerRight.firstChild);
+    } else {
+      this.container.appendChild(this.infoButton);
+    }
   }
   createIcon() {
     this.icon = document.createElement("icon");
-    this.container.appendChild(this.icon);
+    if (this.headerLeft) {
+      this.headerLeft.insertBefore(this.icon, this.headerLeft.firstChild);
+    } else {
+      this.container.appendChild(this.icon);
+    }
   }
   disconnect(audioParam) {
     this.app.removeConnectionToMe(this, audioParam);
@@ -649,9 +684,32 @@ class Component {
 
     this.container.classList.add(this.type);
 
+    // Header bar
+    this.header = document.createElement("div");
+    this.header.classList.add("component-header");
+    this.container.appendChild(this.header);
+
+    this.headerLeft = document.createElement("div");
+    this.headerLeft.classList.add("header-left");
+    this.header.appendChild(this.headerLeft);
+
+    this.titleElement = document.createElement("span");
+    this.titleElement.classList.add("component-title");
+    this.titleElement.innerText = this.type;
+    this.headerLeft.appendChild(this.titleElement);
+
+    this.headerRight = document.createElement("div");
+    this.headerRight.classList.add("header-right");
+    this.header.appendChild(this.headerRight);
+
+    // Body container
+    this.body = document.createElement("div");
+    this.body.classList.add("component-body");
+    this.container.appendChild(this.body);
+
     this.inputsDiv = document.createElement("div");
     this.inputsDiv.classList.add("inputsDiv");
-    this.container.appendChild(this.inputsDiv);
+    this.body.appendChild(this.inputsDiv);
 
     if (this.createdBy == this.app.userID) {
       this.container.classList.add("mine");
@@ -682,7 +740,11 @@ class Component {
       }
       this.quickSave();
     };
-    this.container.appendChild(this.seatSelect);
+    if (this.body) {
+      this.body.appendChild(this.seatSelect);
+    } else {
+      this.container.appendChild(this.seatSelect);
+    }
     this.refreshSeatSelect();
   }
 
@@ -737,9 +799,18 @@ class Component {
     // console.log(this);
   }
   createDisplay() {
+    this.displayWrap = document.createElement("div");
+    this.displayWrap.classList.add("ui-display");
+    this.displayLed = createLed();
     this.display = document.createElement("div");
     this.display.classList.add("display");
-    this.container.appendChild(this.display);
+    this.displayWrap.appendChild(this.displayLed);
+    this.displayWrap.appendChild(this.display);
+    if (this.body) {
+      this.body.appendChild(this.displayWrap);
+    } else {
+      this.container.appendChild(this.displayWrap);
+    }
   }
 
   updateBPM() {}

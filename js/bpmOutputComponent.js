@@ -26,7 +26,7 @@ class BPMOutputComponent extends Component {
 
   createRateSelect() {
     this.rateSelect = document.createElement("select");
-    this.rateSelect.classList.add("bpmRateSelect");
+    this.rateSelect.classList.add("bpmRateSelect", "ui-select");
     for (let opt of BPMOutputComponent.RATES) {
       let el = document.createElement("option");
       el.value = String(opt.value);
@@ -39,7 +39,13 @@ class BPMOutputComponent extends Component {
       this.sendToWorklet();
       this.quickSave();
     };
-    this.container.appendChild(this.rateSelect);
+    if (this.headerLeft) {
+      this.headerLeft.appendChild(this.rateSelect);
+    } else if (this.body) {
+      this.body.appendChild(this.rateSelect);
+    } else {
+      this.container.appendChild(this.rateSelect);
+    }
   }
 
   updateBPM() {
@@ -56,6 +62,7 @@ class BPMOutputComponent extends Component {
 
   updateDisplay() {
     if (this.display) this.display.innerHTML = this.val;
+    flashLed(this.displayLed, 80);
   }
 
   loadFromSerializedData(cb) {
