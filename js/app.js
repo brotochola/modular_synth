@@ -1,9 +1,9 @@
 class App {
   static HISTORY_CAP = 40;
   static CABLE_DEFAULTS = {
-    gravity: 1800,
-    stiffness: 400,
-    damping: 0.92,
+    gravity: 2000,
+    stiffness: 900,
+    damping: 0.88,
     slack: 1.25,
     beadRadius: 3.5,
   };
@@ -655,23 +655,24 @@ class App {
     this.cableWorld.setParams(this.cables);
     this.syncPhysicsCables();
     this.syncCableGhost();
+
+    let rack = this.container.getBoundingClientRect();
+    let canvasBox = this.canvas.getBoundingClientRect();
+    let s = this.scale || 1;
+    let ox = rack.left - canvasBox.left;
+    let oy = rack.top - canvasBox.top;
+    let worldL = (0 - ox) / s;
+    let worldT = (0 - oy) / s;
+    let worldR = (this.canvas.width - ox) / s;
+    let worldB = (this.canvas.height - oy) / s;
+    this.cableWorld.updateCullFlags(worldL, worldT, worldR, worldB);
+
     this.cableWorld.step(dt);
 
     let ctx = this.ctx;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    let rack = this.container.getBoundingClientRect();
-    let canvasBox = this.canvas.getBoundingClientRect();
-    let s = this.scale || 1;
-    ctx.setTransform(
-      s,
-      0,
-      0,
-      s,
-      rack.left - canvasBox.left,
-      rack.top - canvasBox.top,
-    );
+    ctx.setTransform(s, 0, 0, s, ox, oy);
     this.cableWorld.draw(ctx);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
@@ -1293,6 +1294,19 @@ class App {
     this.updateAllLines();
   }
 
+  applyCableParamsFromPeer(cables) {
+    this.applyCableParams(cables);
+  }
+
+  broadcastCableParams() {
+    if (!this.rtcInstance) return;
+    this.rtcInstance.sendMessage({
+      type: "cableParams",
+      userID: this.userID,
+      cables: Object.assign({}, this.cables),
+    });
+  }
+
   syncCableSliders() {
     if (!this.cablePanel) return;
     for (let key of Object.keys(this.cables)) {
@@ -1314,6 +1328,8 @@ class App {
       this.cables[name] = v;
       let out = this.cablePanel.querySelector('[data-val="' + name + '"]');
       if (out) out.textContent = e.target.value;
+      if (this.cableWorld) this.cableWorld.setParams(this.cables);
+      this.broadcastCableParams();
       this.updateAllLines();
     });
     this.cablePanel.addEventListener("change", (e) => {

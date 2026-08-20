@@ -102,6 +102,12 @@ class RTCForUsersData {
       if (this.app.onRemoteDragEnd) this.app.onRemoteDragEnd(msg);
       return;
     }
+    if (msg.type == "cableParams") {
+      if (this.app.applyCableParamsFromPeer) {
+        this.app.applyCableParamsFromPeer(msg.cables);
+      }
+      return;
+    }
   }
 
   sendMessage(msg) {
