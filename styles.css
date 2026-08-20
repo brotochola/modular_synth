@@ -358,7 +358,7 @@ component.numberdisplay icon:after {
   content: "🔢";
 }
 
-component.joystickcomponent icon:after {
+component.JoystickComponent icon:after {
   content: "🎮";
 }
 
@@ -370,7 +370,7 @@ component.NoiseGenWithWorklet icon:after {
   content: "👾";
 }
 
-component.mouse icon:after {
+component.Mouse icon:after {
   content: "🖱️";
 }
 
@@ -414,8 +414,18 @@ component.memorycomponent {
   height: 60px;
 }
 
-component.joystickcomponent {
+component.JoystickComponent {
   height: 475px;
+}
+
+component.JoystickComponent .display {
+  margin-top: 52px;
+  margin-right: 18px;
+  font-size: 11px;
+  max-width: calc(100% - 28px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 component.CustomProcessorComponent {
@@ -517,17 +527,42 @@ component.BPMOutputComponent {
   width: 115px;
 }
 
+component.KeyboardComponent {
+  width: 280px;
+  height: 165px;
+}
+
 component.KeyboardComponent outputs {
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: repeat(10, 18px);
+  gap: 14px 6px;
+  flex-direction: unset;
+  right: 8px;
+  bottom: 6px;
+  padding-top: 2px;
+}
+
+component.KeyboardComponent input.outputButton {
+  position: relative;
+  overflow: visible;
 }
 
 component.KeyboardComponent input.outputButton:after {
   content: var(--label);
   position: absolute;
-  top: -12px;
-  left: unset !important;
-  right: unset !important;
-  width: min-content;
+  top: -11px;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  width: auto;
+  font-size: 9px;
+  text-align: center;
+  line-height: 9px;
+}
+
+component input.outputButton.active {
+  outline: 1px solid orange;
+  box-shadow: inset 0 0 5px 10px #332200;
 }
 
 component input.outputButton.active:after {
@@ -610,11 +645,28 @@ component.imagemaker canvas {
   touch-action: none;
 }
 
-component.mouse select,
-component.imagePlayer select {
+component select.seatSelect {
   position: absolute;
-  bottom: 5px;
-  left: 5px;
+  top: 28px;
+  left: 4px;
+  bottom: auto;
+  z-index: 2;
+  width: calc(100% - 28px);
+  max-width: calc(100% - 28px);
+  height: 20px;
+  padding: 0 4px;
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  border: 1px solid green;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.75) !important;
+  color: lightgreen;
+  box-shadow: inset 0 0 6px rgba(0, 255, 0, 0.15);
+}
+
+component select.seatSelect:focus {
+  outline: 1px solid lightgreen;
+  outline-offset: 1px;
 }
 
 component.ImagePlayerWorkletVersion canvas {
@@ -817,7 +869,7 @@ component.memorycomponent .display {
   bottom: 2px;
 }
 
-/* component.joystickcomponent input.outputButton:after {
+/* component.JoystickComponent input.outputButton:after {
   content: var(--letter);
   left: -19px;
   position: absolute;

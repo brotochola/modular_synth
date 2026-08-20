@@ -4,8 +4,10 @@ class Mouse extends Component {
     this.outputLabels = ["X", "Y"];
     this.x = 0;
     this.y = 0;
+    this.valuesToSave = ["sourceUserID"];
     this.bindedEventHandler = this.handleMouseMove.bind(this);
     window.addEventListener("mousemove", this.bindedEventHandler);
+    this.createSeatSelect();
     this.createNode();
   }
 
@@ -18,18 +20,53 @@ class Mouse extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
+      this.applyCachedRemoteIfNeeded();
       this.sendPos();
     });
   }
 
   handleMouseMove(e) {
-    this.x = e.pageX / window.innerWidth;
-    this.y = e.pageY / window.innerHeight;
+    let x = e.pageX / window.innerWidth;
+    let y = e.pageY / window.innerHeight;
+    this.app.broadcastLocalInput("mouse", { x, y });
+    if (!this.isLocalSeat()) return;
+    this.x = x;
+    this.y = y;
     this.sendPos();
   }
 
   sendPos() {
     if (this.node) this.node.port.postMessage({ x: this.x, y: this.y });
+    this.flashOutput(0);
+    this.flashOutput(1);
+  }
+
+  onRemoteInput(msg) {
+    if (!msg || msg.device != "mouse") return;
+    if (msg.userID != this.sourceUserID) return;
+    if (this.isLocalSeat()) return;
+    if (msg.x == null || msg.y == null) return;
+    this.x = msg.x;
+    this.y = msg.y;
+    this.sendPos();
+  }
+
+  applyCachedRemoteIfNeeded() {
+    if (this.isLocalSeat()) return;
+    let entry = (this.app.remoteInputs || {})[this.sourceUserID];
+    if (!entry || !entry.mouse) return;
+    this.x = entry.mouse.x;
+    this.y = entry.mouse.y;
+    this.sendPos();
+  }
+
+  onSeatChanged() {
+    this.applyCachedRemoteIfNeeded();
+  }
+
+  updateUI() {
+    this.refreshSeatSelect();
+    this.applyCachedRemoteIfNeeded();
   }
 
   remove() {

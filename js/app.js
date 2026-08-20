@@ -7,6 +7,21 @@ class App {
     slack: 1.25,
     beadRadius: 3.5,
   };
+  // analog patch-cable set: saturated, similar lightness, readable on dark rack
+  static CABLE_COLORS = [
+    "#ef5350",
+    "#ff8a65",
+    "#ffca28",
+    "#9ccc65",
+    "#26a69a",
+    "#42a5f5",
+    "#7e57c2",
+    "#ec407a",
+    "#80deea",
+    "#ffe082",
+    "#ba68c8",
+    "#ff7043",
+  ];
   static signalignServers = [
     "stun.l.google.com",
     "stun1.l.google.com:19302",
@@ -45,7 +60,9 @@ class App {
     this._loadGen = 0;
     this._workletModules = {};
     this.remoteCursors = {};
+    this.remoteInputs = {};
     this._lastCursorSentAt = 0;
+    this._lastInputSentAt = {};
     this._cablesDirty = true;
     this._cableMouse = { x: 0, y: 0 };
     this._cableMouseClient = { x: 0, y: 0 };
@@ -231,6 +248,57 @@ class App {
     delete this.remoteCursors[userID];
   }
 
+  broadcastLocalInput(device, payload) {
+    if (!this.rtcInstance) return;
+    if (!Array.isArray(this.connectedUsers) || this.connectedUsers.length < 2) {
+      return;
+    }
+    let continuous = device == "mouse" || device == "gamepad";
+    if (continuous) {
+      let now = performance.now();
+      let last = this._lastInputSentAt[device] || 0;
+      if (now - last < 66) return;
+      this._lastInputSentAt[device] = now;
+    }
+    this.rtcInstance.sendMessage({
+      type: "input",
+      device,
+      userID: this.userID,
+      ...payload,
+    });
+  }
+
+  onRemoteInput(msg) {
+    if (!msg || !msg.userID || !msg.device) return;
+    if (msg.userID == this.userID) return;
+    let entry = this.remoteInputs[msg.userID];
+    if (!entry) {
+      entry = {};
+      this.remoteInputs[msg.userID] = entry;
+    }
+    if (msg.device == "mouse") {
+      entry.mouse = { x: msg.x, y: msg.y };
+    } else if (msg.device == "keyboard") {
+      entry.keyboard = { event: msg.event, which: msg.which };
+    } else if (msg.device == "gamepad") {
+      entry.gamepad = { axes: msg.axes, buttons: msg.buttons };
+    }
+    for (let c of this.components || []) {
+      if (c && c.onRemoteInput instanceof Function) c.onRemoteInput(msg);
+    }
+  }
+
+  clearRemoteInputs(userID) {
+    if (!userID) return;
+    delete this.remoteInputs[userID];
+  }
+
+  refreshControllerSeatSelects() {
+    for (let c of this.components || []) {
+      if (c && c.refreshSeatSelect instanceof Function) c.refreshSeatSelect();
+    }
+  }
+
   pruneStaleRemoteCursors() {
     let now = performance.now();
     for (let userID of Object.keys(this.remoteCursors)) {
@@ -255,6 +323,9 @@ class App {
     }
     for (let userID of Object.keys(this.remoteCursors)) {
       if (!online.has(userID)) this.removeRemoteCursor(userID);
+    }
+    for (let userID of Object.keys(this.remoteInputs)) {
+      if (!online.has(userID)) this.clearRemoteInputs(userID);
     }
   }
   showMessage(text) {
@@ -363,6 +434,7 @@ class App {
       (this.admin ? " (you're the admin)" : "");
 
     this.syncRtcMesh(users);
+    this.refreshControllerSeatSelects();
   }
 
   // async checkIfTheresAPatchToOpenInTheURL() {
@@ -568,12 +640,13 @@ class App {
     this._cablesDirty = true;
   }
   connectionCableColor(conn) {
-    return (
-      conn.from.type +
-      conn.to.type +
-      conn.audioParam +
-      conn.numberOfOutput
-    ).toRGB();
+    let key =
+      conn.from.type + conn.to.type + conn.audioParam + conn.numberOfOutput;
+    let h = 0;
+    for (let i = 0; i < key.length; i++) {
+      h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    }
+    return App.CABLE_COLORS[h % App.CABLE_COLORS.length];
   }
   connectionJackEls(conn) {
     let fromEl = conn.from.outputs.querySelector(

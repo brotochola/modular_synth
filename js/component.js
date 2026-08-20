@@ -176,6 +176,34 @@ class Component {
       elem.style.setProperty("--label", "'" + this.outputLabels[i] + "'");
     }
   }
+  getOutputElements() {
+    if (
+      !Array.isArray(this.outputElements) ||
+      this.outputElements.length == 0 ||
+      !(this.outputElements[0] instanceof HTMLElement)
+    ) {
+      this.outputElements = Array.from(
+        this.container.querySelectorAll(".outputButton")
+      );
+    }
+    return this.outputElements;
+  }
+  setOutputActive(i, on) {
+    let el = this.getOutputElements()[i];
+    if (!el) return;
+    if (on) el.classList.add("active");
+    else el.classList.remove("active");
+  }
+  flashOutput(i, ms = 120) {
+    let el = this.getOutputElements()[i];
+    if (!el) return;
+    if (!this._flashOutputTimers) this._flashOutputTimers = {};
+    el.classList.add("active");
+    clearTimeout(this._flashOutputTimers[i]);
+    this._flashOutputTimers[i] = setTimeout(() => {
+      el.classList.remove("active");
+    }, ms);
+  }
   createView() {
     if (!this.app) return;
     //THIS WILL WAIT UNTIL THE NODE EXISTS
@@ -632,6 +660,60 @@ class Component {
   isThisComponentMine() {
     return this.createdBy == this.app.userID;
   }
+
+  createSeatSelect() {
+    this.sourceUserID =
+      (this.serializedData && this.serializedData.sourceUserID) ||
+      this.sourceUserID ||
+      this.app.userID;
+    if (!Array.isArray(this.valuesToSave)) this.valuesToSave = [];
+    if (this.valuesToSave.indexOf("sourceUserID") < 0) {
+      this.valuesToSave.push("sourceUserID");
+    }
+    this.seatSelect = document.createElement("select");
+    this.seatSelect.classList.add("seatSelect");
+    this.seatSelect.title = "Whose device feeds this module";
+    this.seatSelect.onclick = (e) => e.stopPropagation();
+    this.seatSelect.onchange = () => {
+      let prev = this.sourceUserID;
+      this.sourceUserID = this.seatSelect.value;
+      if (this.onSeatChanged instanceof Function) {
+        this.onSeatChanged(prev, this.sourceUserID);
+      }
+      this.quickSave();
+    };
+    this.container.appendChild(this.seatSelect);
+    this.refreshSeatSelect();
+  }
+
+  refreshSeatSelect() {
+    if (!this.seatSelect) return;
+    let online = new Set([this.app.userID]);
+    for (let u of this.app.connectedUsers || []) {
+      if (u && u.userID) online.add(u.userID);
+    }
+    if (!online.has(this.sourceUserID)) {
+      let prev = this.sourceUserID;
+      this.sourceUserID = this.app.userID;
+      if (this.onSeatChanged instanceof Function) {
+        this.onSeatChanged(prev, this.sourceUserID);
+      }
+      this.quickSave();
+    }
+    this.seatSelect.innerHTML = "";
+    for (let id of online) {
+      let opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = id == this.app.userID ? "You (" + id + ")" : id;
+      if (id == this.sourceUserID) opt.selected = true;
+      this.seatSelect.appendChild(opt);
+    }
+  }
+
+  isLocalSeat() {
+    return this.sourceUserID == this.app.userID;
+  }
+
   toggleActive() {
     if (this.active) {
       for (let c of this.app.components) {
@@ -683,6 +765,7 @@ class Component {
       };
       this.outputs.appendChild(outputButton);
     }
+    this.outputElements = null;
   }
   onOutputClicked(e, outputButton) {
     e.preventDefault();

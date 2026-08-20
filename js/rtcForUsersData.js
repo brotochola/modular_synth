@@ -108,6 +108,10 @@ class RTCForUsersData {
       }
       return;
     }
+    if (msg.type == "input") {
+      if (this.app.onRemoteInput) this.app.onRemoteInput(msg);
+      return;
+    }
   }
 
   sendMessage(msg) {
@@ -210,6 +214,9 @@ class RTCForUsersData {
     this.connections = this.connections.filter((k) => k.conn != conn);
     if (peerId && this.app.removeRemoteCursor) {
       this.app.removeRemoteCursor(peerId);
+    }
+    if (peerId && this.app.clearRemoteInputs) {
+      this.app.clearRemoteInputs(peerId);
     }
   }
 

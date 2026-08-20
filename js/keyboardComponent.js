@@ -1,10 +1,39 @@
 class KeyboardComponent extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.outputLabels = [
+      "q",
+      "w",
+      "e",
+      "r",
+      "t",
+      "y",
+      "u",
+      "i",
+      "o",
+      "p",
+      "a",
+      "s",
+      "d",
+      "f",
+      "g",
+      "h",
+      "j",
+      "k",
+      "l",
+      "z",
+      "x",
+      "c",
+      "v",
+      "b",
+      "n",
+      "m",
+    ];
+    this.letters = this.outputLabels;
+    this.valuesToSave = ["sourceUserID"];
     this.putEvents();
+    this.createSeatSelect();
     this.createNode();
-    this.outputLabels = ["a", "s", "d", "f", "z", "x", "c"];
-    this.letters=this.outputLabels
   }
 
   putEvents() {
@@ -13,40 +42,82 @@ class KeyboardComponent extends Component {
     window.addEventListener("keydown", this.bindedKeyDown, false);
     window.addEventListener("keyup", this.bindedKeyUp, false);
   }
+
   onKeyDown(e) {
     if (e.ctrlKey || e.metaKey) return;
     for (let i = 0; i < this.letters.length; i++) {
       if (e.key == this.letters[i]) {
-        this.node.port.postMessage({ type: "down", which: i });
+        this.app.broadcastLocalInput("keyboard", {
+          event: "down",
+          which: i,
+        });
+        if (this.isLocalSeat()) this.sendKey("down", i);
         break;
       }
     }
   }
+
   onKeyUp(e) {
     if (e.ctrlKey || e.metaKey) return;
     for (let i = 0; i < this.letters.length; i++) {
       if (e.key == this.letters[i]) {
-        this.node.port.postMessage({ type: "up", which: i });
+        this.app.broadcastLocalInput("keyboard", {
+          event: "up",
+          which: i,
+        });
+        if (this.isLocalSeat()) this.sendKey("up", i);
         break;
       }
     }
   }
-  createNode() {
-    this.app.loadWorklet("js/audioWorklets/keyboardWorklet.js")
-      .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "keyboard-worklet", {
-          numberOfInputs: 0,
-          numberOfOutputs: this.outputLabels.length,
-        });
 
-        this.node.onprocessorerror = (e) => {
-          console.error(e);
-        };
-
-        this.node.port.onmessage = (e) =>
-          console.log("#keyboard worklet", e.data);
-      });
+  sendKey(type, which) {
+    if (this.node) this.node.port.postMessage({ type, which });
+    this.setOutputActive(which, type == "down");
   }
+
+  releaseAllKeys() {
+    if (!this.node) return;
+    for (let i = 0; i < this.letters.length; i++) {
+      this.sendKey("up", i);
+    }
+  }
+
+  onRemoteInput(msg) {
+    if (!msg || msg.device != "keyboard") return;
+    if (msg.userID != this.sourceUserID) return;
+    if (this.isLocalSeat()) return;
+    if (msg.event != "down" && msg.event != "up") return;
+    if (msg.which == null) return;
+    this.sendKey(msg.event, msg.which);
+  }
+
+  onSeatChanged(prev, next) {
+    if (prev == this.app.userID && next != this.app.userID) {
+      this.releaseAllKeys();
+    }
+  }
+
+  updateUI() {
+    this.refreshSeatSelect();
+  }
+
+  createNode() {
+    this.app.loadWorklet("js/audioWorklets/keyboardWorklet.js").then(() => {
+      this.node = new AudioWorkletNode(this.app.actx, "keyboard-worklet", {
+        numberOfInputs: 0,
+        numberOfOutputs: this.outputLabels.length,
+      });
+
+      this.node.onprocessorerror = (e) => {
+        console.error(e);
+      };
+
+      this.node.port.onmessage = (e) =>
+        console.log("#keyboard worklet", e.data);
+    });
+  }
+
   remove() {
     window.removeEventListener("keydown", this.bindedKeyDown, false);
     window.removeEventListener("keyup", this.bindedKeyUp, false);
