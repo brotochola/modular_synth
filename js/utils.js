@@ -271,7 +271,7 @@ function makeCopyOfImageData(imageData) {
   return new ImageData(
     new Uint8ClampedArray(imageData.data),
     imageData.width,
-    imageData.height
+    imageData.height,
   );
 }
 var toLog = function (value, min, max) {
@@ -303,7 +303,7 @@ function handleMidiMessage(
   onPad,
   onModWheel,
   onPitchBend,
-  onControlChange
+  onControlChange,
 ) {
   // Parse the MIDIMessageEvent.
   const { command, channel, note, velocity } = parseMidiMessage(message);

@@ -39,28 +39,74 @@ async function createInstanceOfComponentInFirestore(
   return ret;
 }
 
-async function addMeAsUserInThisPatchInFirebase(patchName, userID, admin) {
-  console.log("#addMeAsUserInThisPatchInFirebase", userID);
-  if (!patchName) return console.warn("no patch name");
-  let ret = await collectionRef
-    .doc(patchName)
-    .collection("users")
-    .doc(userID)
-    .set({ userID, admin });
+const USER_STALE_MS = 15000;
 
-  return ret;
+function usersCollection(patchName) {
+  return collectionRef.doc(patchName).collection("users");
 }
 
-async function removeMeAsUserInThisPatchInFirebase(patchName, userID) {
-  console.log("#removeMeAsUserInThisPatchInFirebase", userID);
-  if (!patchName) return console.warn("no patch name");
-  let ret = await collectionRef
-    .doc(patchName)
-    .collection("users")
-    .doc(userID)
-    .delete();
+function liveCollection(patchName) {
+  return collectionRef.doc(patchName).collection("live");
+}
 
-  return ret;
+function normalizePatchUser(doc) {
+  let data = doc.data() || {};
+  data._id = doc.id;
+  if (!data.sessionID) data.sessionID = doc.id;
+  return data;
+}
+
+function isPatchUserStale(user, now, staleMs) {
+  now = now || Date.now();
+  staleMs = staleMs == null ? USER_STALE_MS : staleMs;
+  return !user || now - (user.lastSeen || 0) > staleMs;
+}
+
+function filterLivePatchUsers(users, now, staleMs) {
+  return (users || []).filter((u) => !isPatchUserStale(u, now, staleMs));
+}
+
+async function addMeAsUserInThisPatchInFirebase(patchName, presence) {
+  if (!patchName) return console.warn("no patch name");
+  let sessionID = presence && presence.sessionID;
+  if (!sessionID) return console.warn("no session id");
+  console.log("#addMeAsUserInThisPatchInFirebase", sessionID, presence.userID);
+  return usersCollection(patchName)
+    .doc(sessionID)
+    .set({
+      userID: presence.userID,
+      sessionID,
+      peerId: presence.peerId || null,
+      admin: !!presence.admin,
+      lastSeen: Date.now(),
+    });
+}
+
+async function heartbeatMeInThisPatchInFirebase(patchName, sessionID, extra) {
+  if (!patchName || !sessionID) return;
+  let payload = Object.assign({ lastSeen: Date.now() }, extra || {});
+  return usersCollection(patchName).doc(sessionID).set(payload, { merge: true });
+}
+
+async function removeMeAsUserInThisPatchInFirebase(patchName, sessionID) {
+  console.log("#removeMeAsUserInThisPatchInFirebase", sessionID);
+  if (!patchName || !sessionID) return console.warn("no patch name");
+  let usersDel = usersCollection(patchName).doc(sessionID).delete();
+  let liveDel = liveCollection(patchName).doc(sessionID).delete();
+  try {
+    await usersDel;
+  } catch (e) {}
+  try {
+    await liveDel;
+  } catch (e) {}
+}
+
+function writeLivePresence(patchName, sessionID, data) {
+  if (!patchName || !sessionID || !data) return;
+  liveCollection(patchName)
+    .doc(sessionID)
+    .set(data, { merge: true })
+    .catch((e) => console.warn("#live write failed", e));
 }
 
 async function createBase64FileInFirebase(patchName, base64, filename) {
@@ -171,37 +217,19 @@ function listenToChangesInWholePatch(docName, cb) {
 }
 
 async function getAllUsersConnected(patchName) {
-  return (
-    await firebase
-      .firestore()
-      .collection("modular")
-      .doc(patchName)
-      .collection("users")
-      .get()
-  ).docs.map((k) => k.data());
+  return (await usersCollection(patchName).get()).docs.map(normalizePatchUser);
 }
 
 function listenToChangesInUsersConnectedToThisPatch(patchName, cb) {
-  // console.log("# listen to changes", docName, componentID)
-  const usersCollection = firebase
-    .firestore()
-    .collection("modular")
-    .doc(patchName)
-    .collection("users");
-
-  let refToUnsubscribe = usersCollection.onSnapshot((col) => {
-    if (cb instanceof Function) {
-      getAllUsersConnected(patchName).then((users) => {
-        cb(users);
-      });
-    }
+  return usersCollection(patchName).onSnapshot((col) => {
+    if (cb instanceof Function) cb(col.docs.map(normalizePatchUser));
   });
+}
 
-  getAllUsersConnected(patchName).then((users) => {
-    cb(users);
+function listenToLivePresence(patchName, cb) {
+  return liveCollection(patchName).onSnapshot((snap) => {
+    if (cb instanceof Function) cb(snap);
   });
-
-  return refToUnsubscribe;
 }
 
 function listenToChangesInComponent(docName, componentID, cb) {
@@ -234,3 +262,18 @@ async function getComponentFromFirestore(docName, componentID, cb) {
     cb(doc.data());
   }
 }
+
+(function checkPresenceHelpers() {
+  let now = 100000;
+  let live = { lastSeen: now - 1000 };
+  let dead = { lastSeen: now - 20000 };
+  if (isPatchUserStale(live, now, 15000)) {
+    throw new Error("isPatchUserStale live");
+  }
+  if (!isPatchUserStale(dead, now, 15000)) {
+    throw new Error("isPatchUserStale dead");
+  }
+  if (filterLivePatchUsers([live, dead, null], now, 15000).length != 1) {
+    throw new Error("filterLivePatchUsers");
+  }
+})();

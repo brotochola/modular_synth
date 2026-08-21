@@ -257,14 +257,12 @@ class Component {
         if (!data) return;
         // console.log("#changes", this.id, data);
         //IF ITS MY CHANGES DONT DO ANYTHING
-        if (
-          data.sessionID != this.app.sessionID &&
-          data.userID != this.app.userID
-        ) {
-          this.updateFromSerialized(data);
-        } else {
-          // console.warn("## your own changes", this.type, this.id);
+        if (data.sessionID) {
+          if (data.sessionID == this.app.sessionID) return;
+        } else if (data.userID == this.app.userID) {
+          return;
         }
+        this.updateFromSerialized(data);
       }
     );
     this.listeneningToFirestore = true;
@@ -625,14 +623,8 @@ class Component {
     this.container.style.setProperty("--posX", this.container.style.left);
     this.container.style.setProperty("--posY", this.container.style.top);
     this.app.updateAllLines();
-    if (this.app.rtcInstance && !this.app.syncingRemote) {
-      this.app.rtcInstance.sendMessage({
-        type: "drag",
-        userID: this.app.userID,
-        componentId: this.id,
-        x,
-        y,
-      });
+    if (!this.app.syncingRemote) {
+      this.app.broadcastLocalDrag(this.id, x, y, false);
     }
   }
 
@@ -641,14 +633,8 @@ class Component {
     this._dragging = false;
     let x = parseFloat(this.container.style.left) || 0;
     let y = parseFloat(this.container.style.top) || 0;
-    if (this.app.rtcInstance && !this.app.syncingRemote) {
-      this.app.rtcInstance.sendMessage({
-        type: "dragEnd",
-        userID: this.app.userID,
-        componentId: this.id,
-        x,
-        y,
-      });
+    if (!this.app.syncingRemote) {
+      this.app.broadcastLocalDrag(this.id, x, y, true);
     }
     this.quickSave();
     this.app.updateAllLines();

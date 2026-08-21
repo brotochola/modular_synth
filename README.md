@@ -97,6 +97,7 @@ Scale 0–1 controllers with Gain before they hit `frequency` (Hz) or they will 
 
 - **Local.** Open the site with no query string. The patch lives in this tab until you download JSON.
 - **Shared rack.** Open `?patch=some-name`. Firestore syncs modules, cables, BPM, and uploaded audio/images for everyone on that name.
+- **Live cursors / drag.** PeerJS when the mesh is up; otherwise Firestore `live/{sessionID}` at ~4 Hz so other networks still see motion without TURN.
 - **Conductor.** `?patch=some-name&admin=1`. Play/Stop on the admin machine is sent to guests over PeerJS.
 - You own the modules you spawn (`createdBy`). Delete yours; Output is shared.
 
@@ -215,12 +216,13 @@ If the URL has `?patch=name`, Firestore collection `modular/{patch}` holds:
 
 - the patch doc (component id list, BPM, Output position, writer `userID` / `sessionID`)
 - subcollection `components` (full serialized modules)
-- `users` (who is online, who is admin)
+- `users/{sessionID}` (presence: `userID`, `peerId`, `admin`, `lastSeen`; heartbeat every 5s, stale after ~15s)
+- `live/{sessionID}` (cursor `x,y` and in-drag `dragX,dragY` when WebRTC is down)
 - `files` (audio/images as base64)
 
-Listeners skip events whose `sessionID` is this tab, so you do not echo your own edits. `user_id` is stored in `localStorage`.
+Listeners skip events whose `sessionID` is this tab, so you do not echo your own edits. `user_id` is stored in `localStorage` (stable per browser). Each tab also gets a fresh `sessionID`. PeerJS ids are `userID + "_" + sessionID`, not the raw `user_id` (avoids “ID is taken”).
 
-PeerJS ([`js/rtcForUsersData.js`](js/rtcForUsersData.js)) is a second channel: admin Play/Stop. Separate **RTC sender / receiver** modules stream the actual audio graph between peers (`MediaStreamAudioDestination` → `peer.call`).
+PeerJS ([`js/rtcForUsersData.js`](js/rtcForUsersData.js)) is the fast path: admin Play/Stop, live cursors, module drag, controller input. If no data channel is open, cursors and drag fall back to `live/`. Separate **RTC sender / receiver** modules stream the actual audio graph between peers (`MediaStreamAudioDestination` → `peer.call`).
 
 ---
 

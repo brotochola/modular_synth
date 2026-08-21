@@ -63,6 +63,10 @@ class App {
     this.remoteInputs = {};
     this._lastCursorSentAt = 0;
     this._lastInputSentAt = {};
+    this._lastLiveSentAt = 0;
+    this._pendingLive = null;
+    this._lastUserKey = "";
+    this._remoteDragging = {};
     this._cablesDirty = true;
     this._cableMouse = { x: 0, y: 0 };
     this._cableMouseClient = { x: 0, y: 0 };
@@ -78,15 +82,16 @@ class App {
 
     this.generateUserAndSessionIDs();
     this.createInstanceOfRTCConnectionForUsers();
+    this.bindPresenceLifecycle();
     this.bindRemotePresenceHandlers();
     this.bindLocalCursorBroadcast();
 
     document.addEventListener("contextmenu", (event) => event.preventDefault());
 
     window.onbeforeunload = (e) => {
+      this.leavePatchPresence();
       e.preventDefault();
       e.returnValue = true;
-      removeMeAsUserInThisPatchInFirebase(this.patchName, this.userID);
     };
 
     window.addEventListener(
@@ -151,6 +156,78 @@ class App {
     this.rtcInstance = new RTCForUsersData(this);
   }
 
+  bindPresenceLifecycle() {
+    this.writePresence();
+    this._presenceHeartbeat = setInterval(() => this.writePresenceHeartbeat(), 5000);
+    window.addEventListener("pagehide", () => this.leavePatchPresence());
+  }
+
+  writePresence() {
+    if (!this.patchName) return;
+    addMeAsUserInThisPatchInFirebase(this.patchName, {
+      userID: this.userID,
+      sessionID: this.sessionID,
+      peerId: this.rtcInstance && this.rtcInstance.peerID,
+      admin: this.admin,
+    });
+  }
+
+  writePresenceHeartbeat() {
+    if (!this.patchName || this._leftPresence) return;
+    heartbeatMeInThisPatchInFirebase(this.patchName, this.sessionID, {
+      peerId: this.rtcInstance && this.rtcInstance.peerID,
+      userID: this.userID,
+      admin: this.admin,
+    });
+  }
+
+  leavePatchPresence() {
+    if (this._leftPresence) return;
+    this._leftPresence = true;
+    if (this._presenceHeartbeat) clearInterval(this._presenceHeartbeat);
+    removeMeAsUserInThisPatchInFirebase(this.patchName, this.sessionID);
+    if (this.rtcInstance) this.rtcInstance.remove();
+  }
+
+  rotateSessionForPeer() {
+    if (this._leftPresence) return;
+    let old = this.sessionID;
+    removeMeAsUserInThisPatchInFirebase(this.patchName, old);
+    this.sessionID = makeid(12);
+    if (this.rtcInstance) this.rtcInstance.startPeer();
+    this.writePresence();
+  }
+
+  onPeerReady(id) {
+    heartbeatMeInThisPatchInFirebase(this.patchName, this.sessionID, {
+      peerId: id,
+      userID: this.userID,
+      admin: this.admin,
+    });
+  }
+
+  hasOpenRtc() {
+    return !!(this.rtcInstance && this.rtcInstance.hasOpenConnection());
+  }
+
+  userIdForPeerId(peerId) {
+    if (!peerId) return null;
+    for (let u of this.connectedUsers || []) {
+      if (u && u.peerId == peerId) return u.userID;
+    }
+    let cut = String(peerId).lastIndexOf("_");
+    return cut > 0 ? peerId.slice(0, cut) : peerId;
+  }
+
+  sessionIdForPeerId(peerId) {
+    if (!peerId) return null;
+    for (let u of this.connectedUsers || []) {
+      if (u && u.peerId == peerId) return u.sessionID;
+    }
+    let cut = String(peerId).lastIndexOf("_");
+    return cut > 0 ? peerId.slice(cut + 1) : null;
+  }
+
   bindRemotePresenceHandlers() {
     this.onRemoteCursor = (msg) => this.applyRemoteCursor(msg);
     this.onRemoteDrag = (msg) => this.applyRemoteDrag(msg, false);
@@ -174,16 +251,128 @@ class App {
   }
 
   broadcastLocalCursor(e) {
-    if (!this.rtcInstance) return;
-    let now = performance.now();
-    if (now - this._lastCursorSentAt < 66) return;
-    this._lastCursorSentAt = now;
     let { x, y } = this.clientToRackCoords(e.clientX, e.clientY);
-    this.rtcInstance.sendMessage({
-      type: "cursor",
+    this._lastPointerX = x;
+    this._lastPointerY = y;
+    if (this.hasOpenRtc()) {
+      let now = performance.now();
+      if (now - this._lastCursorSentAt < 66) return;
+      this._lastCursorSentAt = now;
+      this.rtcInstance.sendMessage({
+        type: "cursor",
+        userID: this.userID,
+        sessionID: this.sessionID,
+        x,
+        y,
+      });
+      return;
+    }
+    this.queueLivePresence({
       userID: this.userID,
+      sessionID: this.sessionID,
       x,
       y,
+    });
+  }
+
+  broadcastLocalDrag(componentId, x, y, isEnd) {
+    if (this.syncingRemote) return;
+    let msg = {
+      type: isEnd ? "dragEnd" : "drag",
+      userID: this.userID,
+      sessionID: this.sessionID,
+      componentId,
+      x,
+      y,
+    };
+    if (this.hasOpenRtc()) {
+      this.rtcInstance.sendMessage(msg);
+    } else if (!isEnd) {
+      this.queueLivePresence({
+        userID: this.userID,
+        sessionID: this.sessionID,
+        x: this._lastPointerX,
+        y: this._lastPointerY,
+        componentId,
+        dragX: x,
+        dragY: y,
+        dragging: true,
+      });
+    }
+    if (isEnd) this.clearLiveDrag(componentId, x, y);
+  }
+
+  queueLivePresence(fields) {
+    if (!this.patchName) return;
+    this._pendingLive = Object.assign(this._pendingLive || {}, fields);
+    let now = performance.now();
+    let wait = 250 - (now - (this._lastLiveSentAt || 0));
+    if (wait > 0) {
+      if (!this._liveFlushTimer) {
+        this._liveFlushTimer = setTimeout(() => this.flushLivePresence(), wait);
+      }
+      return;
+    }
+    this.flushLivePresence();
+  }
+
+  flushLivePresence() {
+    this._liveFlushTimer = null;
+    if (!this._pendingLive || !this.patchName) return;
+    this._lastLiveSentAt = performance.now();
+    let data = this._pendingLive;
+    this._pendingLive = null;
+    writeLivePresence(this.patchName, this.sessionID, data);
+  }
+
+  clearLiveDrag(componentId, x, y) {
+    if (!this.patchName) return;
+    if (this._pendingLive) {
+      this._pendingLive.dragging = false;
+      this._pendingLive.componentId = componentId;
+      this._pendingLive.dragX = x;
+      this._pendingLive.dragY = y;
+    }
+    writeLivePresence(this.patchName, this.sessionID, {
+      userID: this.userID,
+      sessionID: this.sessionID,
+      componentId,
+      dragX: x,
+      dragY: y,
+      dragging: false,
+    });
+  }
+
+  applyLivePresenceSnap(snap) {
+    if (!snap) return;
+    snap.docChanges().forEach((change) => {
+      let sessionID = change.doc.id;
+      if (sessionID == this.sessionID) return;
+      if (change.type == "removed") {
+        delete this._remoteDragging[sessionID];
+        this.removeRemoteCursor(sessionID);
+        return;
+      }
+      let data = change.doc.data() || {};
+      data.sessionID = data.sessionID || sessionID;
+      if (data.x != null && data.y != null) this.applyRemoteCursor(data);
+      if (data.componentId == null || data.dragX == null || data.dragY == null) {
+        return;
+      }
+      let dragMsg = {
+        userID: data.userID,
+        sessionID: data.sessionID,
+        componentId: data.componentId,
+        x: data.dragX,
+        y: data.dragY,
+      };
+      if (data.dragging) {
+        this._remoteDragging[sessionID] = true;
+        this.applyRemoteDrag(dragMsg, false);
+      } else if (this._remoteDragging[sessionID]) {
+        delete this._remoteDragging[sessionID];
+        this.applyRemoteDrag(dragMsg, true);
+      }
     });
   }
 
@@ -196,26 +385,29 @@ class App {
     return h % 360;
   }
 
-  ensureRemoteCursor(userID) {
-    if (!userID || userID == this.userID) return null;
-    let entry = this.remoteCursors[userID];
+  ensureRemoteCursor(userID, sessionID) {
+    let key = sessionID || userID;
+    if (!key) return null;
+    if (sessionID && sessionID == this.sessionID) return null;
+    if (!sessionID && userID == this.userID) return null;
+    let entry = this.remoteCursors[key];
     if (entry) return entry;
     let el = document.createElement("div");
     el.className = "remote-cursor";
-    el.style.setProperty("--cursor-hue", this.hueFromUserId(userID));
+    el.style.setProperty("--cursor-hue", this.hueFromUserId(userID || key));
     let label = document.createElement("span");
     label.className = "remote-cursor-label";
-    label.textContent = userID;
+    label.textContent = userID || key;
     el.appendChild(label);
     this.container.appendChild(el);
-    entry = { el, lastSeen: performance.now() };
-    this.remoteCursors[userID] = entry;
+    entry = { el, lastSeen: performance.now(), userID };
+    this.remoteCursors[key] = entry;
     return entry;
   }
 
   applyRemoteCursor(msg) {
-    if (!msg || msg.userID == null || msg.x == null || msg.y == null) return;
-    let entry = this.ensureRemoteCursor(msg.userID);
+    if (!msg || msg.x == null || msg.y == null) return;
+    let entry = this.ensureRemoteCursor(msg.userID, msg.sessionID);
     if (!entry) return;
     entry.el.style.left = msg.x + "px";
     entry.el.style.top = msg.y + "px";
@@ -235,8 +427,8 @@ class App {
     compo.container.style.setProperty("--posY", y);
     this.updateAllLines();
     this.syncingRemote = false;
-    if (msg.userID) {
-      let entry = this.ensureRemoteCursor(msg.userID);
+    if (msg.userID || msg.sessionID) {
+      let entry = this.ensureRemoteCursor(msg.userID, msg.sessionID);
       if (entry) entry.lastSeen = performance.now();
     }
   }
@@ -244,7 +436,8 @@ class App {
   removeRemoteCursor(userID) {
     let entry = this.remoteCursors[userID];
     if (!entry) return;
-    if (entry.el && entry.el.parentNode) entry.el.parentNode.removeChild(entry.el);
+    if (entry.el && entry.el.parentNode)
+      entry.el.parentNode.removeChild(entry.el);
     delete this.remoteCursors[userID];
   }
 
@@ -264,6 +457,7 @@ class App {
       type: "input",
       device,
       userID: this.userID,
+      sessionID: this.sessionID,
       ...payload,
     });
   }
@@ -310,22 +504,31 @@ class App {
 
   syncRtcMesh(users) {
     if (!this.rtcInstance) return;
-    let online = new Set();
+    let onlinePeerIds = new Set();
+    let onlineSessions = new Set();
+    let onlineUserIDs = new Set();
     for (let u of users || []) {
-      if (!u || !u.userID || u.userID == this.userID) continue;
-      online.add(u.userID);
-      this.rtcInstance.connect(u.userID);
-    }
-    for (let peerId of this.rtcInstance.listPeerIds()) {
-      if (!online.has(peerId)) {
-        this.rtcInstance.disconnect(peerId);
+      if (!u || u.sessionID == this.sessionID) continue;
+      if (u.sessionID) onlineSessions.add(u.sessionID);
+      if (u.userID) onlineUserIDs.add(u.userID);
+      if (u.peerId) {
+        onlinePeerIds.add(u.peerId);
+        this.rtcInstance.connect(u.peerId);
       }
     }
-    for (let userID of Object.keys(this.remoteCursors)) {
-      if (!online.has(userID)) this.removeRemoteCursor(userID);
+    for (let peerId of this.rtcInstance.listPeerIds()) {
+      if (!onlinePeerIds.has(peerId)) this.rtcInstance.disconnect(peerId);
+    }
+    for (let key of Object.keys(this.remoteCursors)) {
+      let entry = this.remoteCursors[key];
+      let keep =
+        onlineSessions.has(key) ||
+        onlinePeerIds.has(key) ||
+        (entry && entry.userID && onlineUserIDs.has(entry.userID));
+      if (!keep) this.removeRemoteCursor(key);
     }
     for (let userID of Object.keys(this.remoteInputs)) {
-      if (!online.has(userID)) this.clearRemoteInputs(userID);
+      if (!onlineUserIDs.has(userID)) this.clearRemoteInputs(userID);
     }
   }
   showMessage(text) {
@@ -349,12 +552,11 @@ class App {
   }
   generateUserAndSessionIDs() {
     if (!localStorage.getItem("user_id")) {
-      localStorage["user_id"] = "user_" + makeid(5);
+      localStorage["user_id"] = "user_" + makeid(8);
     }
     this.userID = localStorage.getItem("user_id");
     this.sessionID = makeid(12);
     this.container.style.setProperty("--userID", this.userID);
-    addMeAsUserInThisPatchInFirebase(this.patchName, this.userID, this.admin);
   }
   addEventsToDropFile() {
     document.body.ondrop = (ev) => {
@@ -424,17 +626,41 @@ class App {
     listenToChangesInUsersConnectedToThisPatch(this.patchName, (users) => {
       this.handleChangesInUsers(users);
     });
+
+    listenToLivePresence(this.patchName, (snap) => {
+      this.applyLivePresenceSnap(snap);
+    });
   }
   handleChangesInUsers(users) {
-    this.connectedUsers = users;
-    //UPDATE HTML
+    let now = Date.now();
+    let live = [];
+    for (let u of users || []) {
+      if (!u) continue;
+      if (u.sessionID != this.sessionID && isPatchUserStale(u, now)) {
+        removeMeAsUserInThisPatchInFirebase(
+          this.patchName,
+          u._id || u.sessionID,
+        );
+        continue;
+      }
+      live.push(u);
+    }
+    this.connectedUsers = live;
     this.listOfConnectedUsersElement.innerHTML =
-      users.length +
-      (users.length > 1 ? " users online" : " user online") +
+      live.length +
+      (live.length > 1 ? " users online" : " user online") +
       (this.admin ? " (you're the admin)" : "");
 
-    this.syncRtcMesh(users);
-    this.refreshControllerSeatSelects();
+    this.syncRtcMesh(live);
+
+    let userKey = live
+      .map((u) => u.userID || "")
+      .sort()
+      .join(",");
+    if (userKey != this._lastUserKey) {
+      this._lastUserKey = userKey;
+      this.refreshControllerSeatSelects();
+    }
   }
 
   // async checkIfTheresAPatchToOpenInTheURL() {
@@ -471,8 +697,8 @@ class App {
   handleChangesInThisPatchFromFirestore(e) {
     if (!e) return;
     if (this.bulkLoading || this.restoringHistory) return;
-    if (e.sessionID == this.sessionID && e.userID == this.userID) {
-      return; // console.warn("THESEA RE YOUR OWN CHANGES");
+    if (e.sessionID && e.sessionID == this.sessionID) {
+      return;
     }
     this.syncingRemote = true;
     if (e.components) {
@@ -1214,9 +1440,7 @@ class App {
 
   deepSaveAllComponents() {
     return Promise.all(
-      this.components
-        .filter((c) => c.id != "output")
-        .map((c) => c.quickSave()),
+      this.components.filter((c) => c.id != "output").map((c) => c.quickSave()),
     );
   }
 
@@ -1308,13 +1532,21 @@ class App {
   play() {
     if (this.actx.state == "running") {
       if (this.admin) {
-        this.rtcInstance.sendMessage({ action: "stop" });
+        this.rtcInstance.sendMessage({
+          action: "stop",
+          userID: this.userID,
+          sessionID: this.sessionID,
+        });
       }
       this.actx.suspend();
       this.playButton.innerHTML = " ▶ ";
     } else {
       if (this.admin) {
-        this.rtcInstance.sendMessage({ action: "play" });
+        this.rtcInstance.sendMessage({
+          action: "play",
+          userID: this.userID,
+          sessionID: this.sessionID,
+        });
       }
       this.actx.resume();
       this.playButton.innerHTML = " ■ ";
@@ -1376,6 +1608,7 @@ class App {
     this.rtcInstance.sendMessage({
       type: "cableParams",
       userID: this.userID,
+      sessionID: this.sessionID,
       cables: Object.assign({}, this.cables),
     });
   }

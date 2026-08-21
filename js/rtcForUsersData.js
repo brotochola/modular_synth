@@ -1,33 +1,79 @@
 class RTCForUsersData {
   constructor(app) {
     this.app = app;
-
-    this.peerID = this.app.userID;
-    this.peer = new Peer(this.peerID, {});
-
     this.connections = [];
     this.pendingConnects = new Set();
     this.state = "loading";
+    this._retryCount = 0;
+    this._handlingTaken = false;
+    this.startPeer();
+  }
 
-    this.peer.on("open", (id) => {
+  makePeerId() {
+    return this.app.userID + "_" + this.app.sessionID;
+  }
+
+  startPeer() {
+    if (this.peer) {
+      try {
+        this.peer.destroy();
+      } catch (e) {}
+      this.peer = null;
+    }
+    this.connections = [];
+    this.peerID = this.makePeerId();
+    this.state = "loading";
+    this.peer = new Peer(this.peerID, {});
+    this.bindPeerEvents();
+  }
+
+  bindPeerEvents() {
+    let peer = this.peer;
+    peer.on("open", (id) => {
+      if (this.peer != peer) return;
       console.log("connection open", id);
+      this._retryCount = 0;
+      this._handlingTaken = false;
       this.state = "ready";
+      this.peerID = id;
       for (let pendingId of this.pendingConnects) {
         this.connect(pendingId);
       }
       this.pendingConnects.clear();
+      if (this.app.onPeerReady) this.app.onPeerReady(id);
       if (this.app.connectedUsers) {
         this.app.syncRtcMesh(this.app.connectedUsers);
       }
     });
 
-    this.peer.on("connection", (conn) => {
+    peer.on("connection", (conn) => {
+      if (this.peer != peer) return;
       this.attachIncomingConnection(conn);
     });
 
-    this.peer.on("error", (err) => {
+    peer.on("error", (err) => {
+      if (this.peer != peer || this.state == "destroyed") return;
       console.warn("#peer error", err);
+      if (err && err.type == "unavailable-id") this.handleIdTaken();
     });
+  }
+
+  handleIdTaken() {
+    if (this._handlingTaken || this.state == "destroyed") return;
+    if (this._retryCount > 4) {
+      this.state = "failed";
+      console.warn("#peer id taken, giving up");
+      return;
+    }
+    this._handlingTaken = true;
+    this._retryCount++;
+    if (this.app.rotateSessionForPeer) {
+      this.app.rotateSessionForPeer();
+    } else {
+      this.app.sessionID = makeid(12);
+      this.startPeer();
+    }
+    this._handlingTaken = false;
   }
 
   peerKey(entry) {
@@ -38,10 +84,20 @@ class RTCForUsersData {
     return this.connections.some((k) => this.peerKey(k) == id);
   }
 
+  isConnOpen(conn) {
+    return (
+      conn &&
+      (conn.open === true ||
+        ((conn.dataChannel || {}).readyState == "open"))
+    );
+  }
+
+  hasOpenConnection() {
+    return this.connections.some((k) => this.isConnOpen(k.conn));
+  }
+
   listPeerIds() {
-    return this.connections
-      .map((k) => this.peerKey(k))
-      .filter(Boolean);
+    return this.connections.map((k) => this.peerKey(k)).filter(Boolean);
   }
 
   attachIncomingConnection(conn) {
@@ -79,7 +135,8 @@ class RTCForUsersData {
     }
     if (!msg || typeof msg != "object") return;
 
-    if (msg.userID && msg.userID == this.app.userID) return;
+    if (msg.sessionID && msg.sessionID == this.app.sessionID) return;
+    if (!msg.sessionID && msg.userID && msg.userID == this.app.userID) return;
 
     if (msg.action == "play") {
       if (!this.app.admin) this.app.actx.resume();
@@ -117,11 +174,7 @@ class RTCForUsersData {
   sendMessage(msg) {
     let payload = JSON.stringify(msg);
     for (let k of this.connections) {
-      let ready =
-        k.conn &&
-        ((k.conn.open === true) ||
-          ((k.conn.dataChannel || {}).readyState == "open"));
-      if (!ready) continue;
+      if (!this.isConnOpen(k.conn)) continue;
       try {
         k.conn.send(payload);
       } catch (e) {
@@ -183,11 +236,7 @@ class RTCForUsersData {
     for (let i = 0; i < this.connections.length; i++) {
       let c = this.connections[i];
       if (c.state == "connected") continue;
-      let open =
-        c.conn &&
-        (c.conn.open === true ||
-          ((c.conn.dataChannel || {}).readyState == "open"));
-      if (open) {
+      if (this.isConnOpen(c.conn)) {
         c.state = "connected";
         continue;
       }
@@ -212,11 +261,15 @@ class RTCForUsersData {
     let peerId = conn && conn.peer;
     console.log("#got disconnected", peerId);
     this.connections = this.connections.filter((k) => k.conn != conn);
-    if (peerId && this.app.removeRemoteCursor) {
-      this.app.removeRemoteCursor(peerId);
+    let userID =
+      (this.app.userIdForPeerId && this.app.userIdForPeerId(peerId)) || peerId;
+    let sessionID =
+      this.app.sessionIdForPeerId && this.app.sessionIdForPeerId(peerId);
+    if (this.app.removeRemoteCursor) {
+      this.app.removeRemoteCursor(sessionID || userID);
     }
-    if (peerId && this.app.clearRemoteInputs) {
-      this.app.clearRemoteInputs(peerId);
+    if (userID && this.app.clearRemoteInputs) {
+      this.app.clearRemoteInputs(userID);
     }
   }
 
@@ -228,6 +281,11 @@ class RTCForUsersData {
       } catch (e) {}
     }
     this.connections = [];
-    if (this.peer) this.peer.destroy();
+    if (this.peer) {
+      try {
+        this.peer.destroy();
+      } catch (e) {}
+      this.peer = null;
+    }
   }
 }
