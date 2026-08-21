@@ -808,6 +808,8 @@ class Component {
 
   updateBPM() {}
 
+  applyClockSkew(_skew) {}
+
   createOutputButton() {
     if (
       this.type.toLowerCase() == "output" ||

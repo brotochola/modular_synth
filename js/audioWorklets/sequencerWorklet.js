@@ -21,11 +21,16 @@ class SequencerWorklet extends AudioWorkletProcessor {
     this.lastPostedNote = -1;
     this.externalClock = false;
     this.prevClockSample = 0;
+    this.clockSkew = 0;
     this.port.onmessage = (e) => {
-      this.sequence = e.data.seq;
-      this.bpm = e.data.bpm;
-      this.durationOfOneNote = (60000 / this.bpm) * 0.25;
-      this.durationOfLoop = this.durationOfOneNote * 16;
+      let d = e.data || {};
+      if (d.clockSkew != null) this.clockSkew = d.clockSkew;
+      if (d.seq != null) this.sequence = d.seq;
+      if (d.bpm != null) {
+        this.bpm = d.bpm;
+        this.durationOfOneNote = (60000 / this.bpm) * 0.25;
+        this.durationOfLoop = this.durationOfOneNote * 16;
+      }
     };
   }
 
@@ -62,9 +67,10 @@ class SequencerWorklet extends AudioWorkletProcessor {
     }
 
     if (!this.externalClock) {
-      this.currentNote = Math.floor(
-        ((currentTime * 1000) % this.durationOfLoop) / this.durationOfOneNote
-      );
+      let tMs = (currentTime + (this.clockSkew || 0)) * 1000;
+      let phase =
+        ((tMs % this.durationOfLoop) + this.durationOfLoop) % this.durationOfLoop;
+      this.currentNote = Math.floor(phase / this.durationOfOneNote);
       this.postPlayhead();
     }
 

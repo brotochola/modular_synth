@@ -53,11 +53,18 @@ class BPMOutputComponent extends Component {
     this.sendToWorklet();
   }
 
+  applyClockSkew(skew) {
+    this.clockSkew = skew || 0;
+    if (!(this.node || {}).port) return;
+    this.node.port.postMessage({ clockSkew: this.clockSkew });
+  }
+
   sendToWorklet() {
     if (!(this.node || {}).port) return;
     this.node.port.postMessage({
       bpm: this.app.bpm,
       rate: this.rate,
+      clockSkew: this.clockSkew || this.app.clockSkew || 0,
     });
   }
 

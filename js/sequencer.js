@@ -112,12 +112,19 @@ class Sequencer extends Component {
     this.sendToWorklet();
   }
 
+  applyClockSkew(skew) {
+    this.clockSkew = skew || 0;
+    if (!(this.node || {}).port) return;
+    this.node.port.postMessage({ clockSkew: this.clockSkew });
+  }
+
   sendToWorklet() {
     if (!this.node) return console.warn("seq node not ready");
     this.convertArrayOfArraysIntoSmpleArray();
     this.node.port.postMessage({
       seq: this.convertedArray,
       bpm: this.app.bpm,
+      clockSkew: this.clockSkew || this.app.clockSkew || 0,
     });
   }
 

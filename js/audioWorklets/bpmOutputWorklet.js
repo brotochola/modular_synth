@@ -7,9 +7,12 @@ class BpmOutWorklet extends AudioWorkletProcessor {
     this.lastCount = -1;
     this.pulseRemaining = 0;
     this.pulseLength = Math.max(1, Math.floor(sampleRate * 0.002));
+    this.clockSkew = 0;
     this.port.onmessage = (e) => {
-      if (e.data.bpm) this.bpm = e.data.bpm;
-      if (e.data.rate != null) this.rate = e.data.rate;
+      let d = e.data || {};
+      if (d.bpm) this.bpm = d.bpm;
+      if (d.rate != null) this.rate = d.rate;
+      if (d.clockSkew != null) this.clockSkew = d.clockSkew;
     };
   }
 
@@ -18,7 +21,8 @@ class BpmOutWorklet extends AudioWorkletProcessor {
       let output = ((outputs || [])[0] || [])[0];
       if (!output) return true;
       let rate = this.rate || 1;
-      this.count = Math.floor(currentTime * (this.bpm / 60) * rate);
+      let t = currentTime + (this.clockSkew || 0);
+      this.count = Math.floor(t * (this.bpm / 60) * rate);
       if (this.count != this.lastCount) {
         this.pulseRemaining = this.pulseLength;
         this.port.postMessage({ count: this.count });

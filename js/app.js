@@ -67,6 +67,14 @@ class App {
     this._pendingLive = null;
     this._lastUserKey = "";
     this._remoteDragging = {};
+    this._prevSessions = null;
+    this._prevSessionLabels = {};
+    this.playing = false;
+    this.beatOriginMs = null;
+    this.clockOffsetMs = 0;
+    this._clockOffsetSamples = [];
+    this._timeSyncTimer = null;
+    this._beatPublishTimer = null;
     this._cablesDirty = true;
     this._cableMouse = { x: 0, y: 0 };
     this._cableMouseClient = { x: 0, y: 0 };
@@ -185,6 +193,8 @@ class App {
     if (this._leftPresence) return;
     this._leftPresence = true;
     if (this._presenceHeartbeat) clearInterval(this._presenceHeartbeat);
+    if (this._timeSyncTimer) clearInterval(this._timeSyncTimer);
+    this.stopBeatPublishLoop();
     removeMeAsUserInThisPatchInFirebase(this.patchName, this.sessionID);
     if (this.rtcInstance) this.rtcInstance.remove();
   }
@@ -206,8 +216,156 @@ class App {
     });
   }
 
+  onRtcPeerOpen() {
+    this.startTimeSyncLoop();
+    if (this.admin && this.playing) this.publishTransport(false);
+    else this.refreshClockSkew();
+  }
+
   hasOpenRtc() {
     return !!(this.rtcInstance && this.rtcInstance.hasOpenConnection());
+  }
+
+  adminNowMs() {
+    return performance.now() + (this.clockOffsetMs || 0);
+  }
+
+  startTimeSyncLoop() {
+    if (this.admin) return;
+    if (this._timeSyncTimer) return;
+    this._timeSyncTimer = setInterval(() => this.sendTimeSyncPing(), 2000);
+    this.sendTimeSyncPing();
+  }
+
+  sendTimeSyncPing() {
+    if (this.admin || !this.hasOpenRtc()) return;
+    this._timeSyncT0 = performance.now();
+    this.rtcInstance.sendMessage({
+      type: "timeSync",
+      t0: this._timeSyncT0,
+      userID: this.userID,
+      sessionID: this.sessionID,
+    });
+  }
+
+  onTimeSyncReply(msg) {
+    if (this.admin || msg.t0 == null || msg.t1 == null) return;
+    let t3 = performance.now();
+    let t0 = msg.t0;
+    let rtt = t3 - t0;
+    if (rtt < 0 || rtt > 2000) return;
+    let offset = msg.t1 + rtt / 2 - t3;
+    this._clockOffsetSamples.push({ offset, rtt });
+    if (this._clockOffsetSamples.length > 8) this._clockOffsetSamples.shift();
+    let sorted = this._clockOffsetSamples
+      .slice()
+      .sort((a, b) => a.rtt - b.rtt)
+      .slice(0, Math.max(1, Math.ceil(this._clockOffsetSamples.length / 2)));
+    let offsets = sorted.map((s) => s.offset).sort((a, b) => a - b);
+    this.clockOffsetMs = offsets[Math.floor(offsets.length / 2)];
+    this.refreshClockSkew();
+  }
+
+  refreshClockSkew() {
+    if (this.beatOriginMs == null || !this.playing) {
+      this.pushClockSkew(0);
+      return;
+    }
+    let transportSec = (this.adminNowMs() - this.beatOriginMs) / 1000;
+    let skew = transportSec - this.actx.currentTime;
+    this.pushClockSkew(skew);
+  }
+
+  pushClockSkew(skew) {
+    this.clockSkew = skew || 0;
+    for (let c of this.components || []) {
+      if (c && c.applyClockSkew instanceof Function) c.applyClockSkew(this.clockSkew);
+    }
+  }
+
+  computeBeatOriginMs() {
+    return this.adminNowMs() - this.actx.currentTime * 1000;
+  }
+
+  publishTransport(fromRemote) {
+    if (fromRemote) return;
+    let payload = {
+      type: "transport",
+      playing: !!this.playing,
+      beatOriginMs: this.beatOriginMs,
+      bpm: this.bpm,
+      userID: this.userID,
+      sessionID: this.sessionID,
+    };
+    if (this.rtcInstance) this.rtcInstance.sendMessage(payload);
+    // ponytail: Firestore backup while PeerJS retries; no Cristian lock here.
+    if (this.patchName) {
+      putTransportInFireStore(this.patchName, {
+        playing: !!this.playing,
+        beatOriginMs: this.beatOriginMs,
+        bpm: this.bpm,
+        sessionID: this.sessionID,
+        userID: this.userID,
+      });
+    }
+  }
+
+  startBeatPublishLoop() {
+    if (!this.admin) return;
+    if (this._beatPublishTimer) return;
+    this._beatPublishTimer = setInterval(() => {
+      if (!this.playing) return;
+      this.beatOriginMs = this.computeBeatOriginMs();
+      this.publishTransport(false);
+    }, 5000);
+  }
+
+  stopBeatPublishLoop() {
+    if (this._beatPublishTimer) {
+      clearInterval(this._beatPublishTimer);
+      this._beatPublishTimer = null;
+    }
+  }
+
+  applyTransport(opts) {
+    opts = opts || {};
+    let playing = !!opts.playing;
+    let fromRemote = !!opts.fromRemote;
+    let prev = this.playing;
+    this.playing = playing;
+    if (opts.bpm != null && !isNaN(opts.bpm)) {
+      this.bpm = opts.bpm;
+      for (let c of this.components) {
+        if (c.updateBPM) c.updateBPM();
+      }
+      this.putBPMInButton();
+    }
+    if (opts.beatOriginMs != null) this.beatOriginMs = opts.beatOriginMs;
+
+    if (playing) {
+      if (this.admin && !fromRemote && this.beatOriginMs == null) {
+        this.beatOriginMs = this.computeBeatOriginMs();
+      }
+      let resumeResult = this.actx.resume();
+      if (resumeResult && resumeResult.then) {
+        resumeResult.catch(() => {
+          this.showMessage("Click ▶ to unlock audio");
+        });
+      }
+      if (this.playButton) this.playButton.innerHTML = " ■ ";
+      if (this.admin && !fromRemote) this.startBeatPublishLoop();
+    } else {
+      this.actx.suspend();
+      if (this.playButton) this.playButton.innerHTML = " ▶ ";
+      if (this.admin) this.stopBeatPublishLoop();
+    }
+
+    this.refreshClockSkew();
+
+    if (fromRemote && prev != playing) {
+      this.showMessage(playing ? "Admin: play" : "Admin: pause");
+    }
+    if (this.admin && !fromRemote) this.publishTransport(false);
   }
 
   userIdForPeerId(peerId) {
@@ -610,6 +768,14 @@ class App {
     if (loaded) {
       this.loadFromFile(loaded);
       await this.whenAllComponentsReady();
+      if (loaded.playing != null || loaded.beatOriginMs != null) {
+        this.applyTransport({
+          playing: !!loaded.playing,
+          beatOriginMs: loaded.beatOriginMs,
+          bpm: loaded.bpm,
+          fromRemote: true,
+        });
+      }
     }
 
     this.functionToUnsubscribeFromFirestore = listenToChangesInWholePatch(
@@ -652,6 +818,32 @@ class App {
       (this.admin ? " (you're the admin)" : "");
 
     this.syncRtcMesh(live);
+
+    let nextSessions = new Set();
+    let nextLabels = {};
+    for (let u of live) {
+      if (!u || !u.sessionID) continue;
+      nextSessions.add(u.sessionID);
+      nextLabels[u.sessionID] = u.userID || u.sessionID;
+    }
+    if (this._prevSessions) {
+      for (let s of nextSessions) {
+        if (s == this.sessionID) continue;
+        if (!this._prevSessions.has(s)) {
+          this.showMessage((nextLabels[s] || s) + " joined");
+        }
+      }
+      for (let s of this._prevSessions) {
+        if (s == this.sessionID) continue;
+        if (!nextSessions.has(s)) {
+          this.showMessage(
+            (this._prevSessionLabels[s] || s) + " left",
+          );
+        }
+      }
+    }
+    this._prevSessions = nextSessions;
+    this._prevSessionLabels = nextLabels;
 
     let userKey = live
       .map((u) => u.userID || "")
@@ -758,6 +950,16 @@ class App {
       this.putBPMInButton();
     }
     if (e.cables) this.applyCableParams(e.cables);
+
+    if (e.playing != null || e.beatOriginMs != null) {
+      this.applyTransport({
+        playing: e.playing != null ? e.playing : this.playing,
+        beatOriginMs:
+          e.beatOriginMs != null ? e.beatOriginMs : this.beatOriginMs,
+        bpm: e.bpm,
+        fromRemote: true,
+      });
+    }
 
     this.updateAllLines();
     this.waitUntilAllComopnentsAreReady(() => {
@@ -988,8 +1190,13 @@ class App {
 
   getNextBeat() {
     let bpm = this.bpm || 120;
-    let durationOf4Beats = (60 / bpm) * 4;
-    return durationOf4Beats - (this.actx.currentTime % durationOf4Beats);
+    let barSec = (60 / bpm) * 4;
+    if (this.beatOriginMs != null && this.playing) {
+      let transportSec = (this.adminNowMs() - this.beatOriginMs) / 1000;
+      let phase = ((transportSec % barSec) + barSec) % barSec;
+      return barSec - phase;
+    }
+    return barSec - (this.actx.currentTime % barSec);
   }
 
   makeAllComponentsInactive() {
@@ -1530,26 +1737,28 @@ class App {
   }
 
   play() {
-    if (this.actx.state == "running") {
-      if (this.admin) {
-        this.rtcInstance.sendMessage({
-          action: "stop",
-          userID: this.userID,
-          sessionID: this.sessionID,
+    let remoteAdmin = (this.connectedUsers || []).some(
+      (u) => u && u.admin && u.sessionID != this.sessionID,
+    );
+    let canConduct = this.admin || !this.patchName || !remoteAdmin;
+    if (canConduct) {
+      let next = !this.playing;
+      if (next) this.beatOriginMs = this.computeBeatOriginMs();
+      this.applyTransport({ playing: next, fromRemote: false });
+      return;
+    }
+    // Guest under admin: click is autoplay gesture only.
+    if (this.playing) {
+      let resumeResult = this.actx.resume();
+      if (resumeResult && resumeResult.then) {
+        resumeResult.catch(() => {
+          this.showMessage("Click ▶ to unlock audio");
         });
       }
-      this.actx.suspend();
-      this.playButton.innerHTML = " ▶ ";
+      if (this.playButton) this.playButton.innerHTML = " ■ ";
+      this.refreshClockSkew();
     } else {
-      if (this.admin) {
-        this.rtcInstance.sendMessage({
-          action: "play",
-          userID: this.userID,
-          sessionID: this.sessionID,
-        });
-      }
-      this.actx.resume();
-      this.playButton.innerHTML = " ■ ";
+      this.showMessage("Waiting for admin play");
     }
   }
 

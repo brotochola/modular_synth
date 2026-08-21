@@ -136,6 +136,12 @@ async function putBPMInFireStore(patchName, bpm) {
   collectionRef.doc(patchName).set({ bpm: bpm }, { merge: true });
 }
 
+// ponytail: Firestore transport is backup while PeerJS retries; no Cristian lock here.
+async function putTransportInFireStore(patchName, data) {
+  if (!patchName || !data) return;
+  collectionRef.doc(patchName).set(data, { merge: true });
+}
+
 async function removeComponentFromFirestore(patchName, id) {
   collectionRef.doc(patchName).collection("components").doc(id).delete();
 }
@@ -155,6 +161,8 @@ async function getDocFromFirebase(name) {
   ret.cables = loadadDoc.cables;
   ret.outputX = loadadDoc.outputX;
   ret.outputY = loadadDoc.outputY;
+  ret.playing = loadadDoc.playing;
+  ret.beatOriginMs = loadadDoc.beatOriginMs;
 
   docs.forEach((doc) => {
     ret.components.push(doc.data());
