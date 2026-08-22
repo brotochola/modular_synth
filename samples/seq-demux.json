@@ -1,0 +1,328 @@
+{
+  "bpm": 120,
+  "outputX": "1280px",
+  "outputY": "420px",
+  "connections": [],
+  "components": [
+    {
+      "id": "txt_sd",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "20px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["text"],
+      "text": "SEQ DEMUX — alternate sequencers\nBPM x1 → demux clock (who gets pulses)\nBPM *4 → demux signal (the pulses)\nOut1 → Seq A, Out2 → Seq B (steps=2)\nOnly one sequencer runs at a time.",
+      "connections": []
+    },
+    {
+      "id": "bpm_clk",
+      "constructor": "BPMOutputComponent",
+      "type": "BPMOutputComponent",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "220px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["rate"],
+      "rate": 1,
+      "connections": [
+        {
+          "from": "bpm_clk",
+          "to": "demux_1",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c_clk"
+        }
+      ]
+    },
+    {
+      "id": "bpm_sig",
+      "constructor": "BPMOutputComponent",
+      "type": "BPMOutputComponent",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "400px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["rate"],
+      "rate": 4,
+      "connections": [
+        {
+          "from": "bpm_sig",
+          "to": "demux_1",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c_sig"
+        }
+      ]
+    },
+    {
+      "id": "demux_1",
+      "constructor": "SequentialDemux",
+      "type": "SequentialDemux",
+      "createdBy": "user",
+      "x": "280px",
+      "y": "280px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": ["steps"],
+      "steps": 2,
+      "connections": [
+        {
+          "from": "demux_1",
+          "to": "seq_a",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c_d0"
+        },
+        {
+          "from": "demux_1",
+          "to": "seq_b",
+          "audioParam": "in_0",
+          "numberOfOutput": 1,
+          "id": "c_d1"
+        }
+      ]
+    },
+    {
+      "id": "seq_a",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "540px",
+      "y": "40px",
+      "audioParams": { "baseHz": 110 },
+      "node": {},
+      "valuesToSave": ["sequence"],
+      "sequence": {
+        "0": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "1": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "2": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "4": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "5": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "6": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "7": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "8": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "9": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "10": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "11": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "12": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "13": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "14": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "15": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1]
+      },
+      "connections": [
+        {
+          "from": "seq_a",
+          "to": "env_a",
+          "audioParam": "trigger",
+          "numberOfOutput": 1,
+          "id": "c_sa_env"
+        },
+        {
+          "from": "seq_a",
+          "to": "osc_a",
+          "audioParam": "frequency",
+          "numberOfOutput": 2,
+          "id": "c_sa_osc"
+        }
+      ]
+    },
+    {
+      "id": "seq_b",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "540px",
+      "y": "420px",
+      "audioParams": { "baseHz": 165 },
+      "node": {},
+      "valuesToSave": ["sequence"],
+      "sequence": {
+        "0": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "1": [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        "2": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "3": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "4": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "5": [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        "6": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "7": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "8": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "9": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "10": [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        "11": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        "12": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        "13": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
+        "14": [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+        "15": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+      },
+      "connections": [
+        {
+          "from": "seq_b",
+          "to": "env_b",
+          "audioParam": "trigger",
+          "numberOfOutput": 1,
+          "id": "c_sb_env"
+        },
+        {
+          "from": "seq_b",
+          "to": "osc_b",
+          "audioParam": "frequency",
+          "numberOfOutput": 2,
+          "id": "c_sb_osc"
+        }
+      ]
+    },
+    {
+      "id": "osc_a",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "860px",
+      "y": "40px",
+      "audioParams": { "detune": 0, "frequency": 110 },
+      "node": { "type": "triangle" },
+      "connections": [
+        {
+          "from": "osc_a",
+          "to": "amp_a",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c_oa"
+        }
+      ]
+    },
+    {
+      "id": "osc_b",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "860px",
+      "y": "420px",
+      "audioParams": { "detune": 0, "frequency": 165 },
+      "node": { "type": "square" },
+      "connections": [
+        {
+          "from": "osc_b",
+          "to": "amp_b",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c_ob"
+        }
+      ]
+    },
+    {
+      "id": "env_a",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "860px",
+      "y": "220px",
+      "audioParams": {
+        "attack": 0.005,
+        "attackcurve": 0.5,
+        "decay": 0.15,
+        "sustain": 0,
+        "release": 0.1,
+        "trigger": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_a",
+          "to": "amp_a",
+          "audioParam": "gain",
+          "numberOfOutput": 0,
+          "id": "c_ea"
+        }
+      ]
+    },
+    {
+      "id": "env_b",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "860px",
+      "y": "600px",
+      "audioParams": {
+        "attack": 0.005,
+        "attackcurve": 0.5,
+        "decay": 0.12,
+        "sustain": 0,
+        "release": 0.08,
+        "trigger": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_b",
+          "to": "amp_b",
+          "audioParam": "gain",
+          "numberOfOutput": 0,
+          "id": "c_eb"
+        }
+      ]
+    },
+    {
+      "id": "amp_a",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1080px",
+      "y": "100px",
+      "audioParams": { "gain": 0 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_a",
+          "to": "mix_1",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c_aa"
+        }
+      ]
+    },
+    {
+      "id": "amp_b",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1080px",
+      "y": "480px",
+      "audioParams": { "gain": 0 },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_b",
+          "to": "mix_1",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c_ab"
+        }
+      ]
+    },
+    {
+      "id": "mix_1",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1080px",
+      "y": "300px",
+      "audioParams": { "g0": 0.8, "g1": 0.7, "g2": 0, "g3": 0, "master": 0.9 },
+      "node": {},
+      "connections": [
+        {
+          "from": "mix_1",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": 0,
+          "id": "c_out"
+        }
+      ]
+    }
+  ]
+}

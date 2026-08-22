@@ -456,6 +456,9 @@ component.SampleHold icon:after {
 component.SequentialSwitch icon:after {
   content: "\1F500";
 }
+component.SequentialDemux icon:after {
+  content: "\1F503";
+}
 component.Kick808 icon:after {
   content: "\1F941";
 }

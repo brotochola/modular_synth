@@ -1409,6 +1409,9 @@ class App {
   addSequentialSwitch() {
     this.components.push(new SequentialSwitch(this));
   }
+  addSequentialDemux() {
+    this.components.push(new SequentialDemux(this));
+  }
   addJoystick() {
     this.components.push(new JoystickComponent(this));
   }
@@ -2271,6 +2274,7 @@ App.COMPONENT_CLASSES = {
   Merger,
   Multiplexor,
   SequentialSwitch,
+  SequentialDemux,
   LerpComponent,
   CounterComponent,
   MemoryComponent,
