@@ -168,7 +168,10 @@ class App {
 
   bindPresenceLifecycle() {
     this.writePresence();
-    this._presenceHeartbeat = setInterval(() => this.writePresenceHeartbeat(), 5000);
+    this._presenceHeartbeat = setInterval(
+      () => this.writePresenceHeartbeat(),
+      5000,
+    );
     window.addEventListener("pagehide", () => this.leavePatchPresence());
   }
 
@@ -281,7 +284,8 @@ class App {
   pushClockSkew(skew) {
     this.clockSkew = skew || 0;
     for (let c of this.components || []) {
-      if (c && c.applyClockSkew instanceof Function) c.applyClockSkew(this.clockSkew);
+      if (c && c.applyClockSkew instanceof Function)
+        c.applyClockSkew(this.clockSkew);
     }
   }
 
@@ -516,7 +520,11 @@ class App {
       let data = change.doc.data() || {};
       data.sessionID = data.sessionID || sessionID;
       if (data.x != null && data.y != null) this.applyRemoteCursor(data);
-      if (data.componentId == null || data.dragX == null || data.dragY == null) {
+      if (
+        data.componentId == null ||
+        data.dragX == null ||
+        data.dragY == null
+      ) {
         return;
       }
       let dragMsg = {
@@ -548,10 +556,7 @@ class App {
   setComponentGrabbed(comp, userID) {
     if (!comp || !comp.container) return;
     comp.container.classList.add("grabbed");
-    comp.container.style.setProperty(
-      "--grab-hue",
-      this.hueFromUserId(userID),
-    );
+    comp.container.style.setProperty("--grab-hue", this.hueFromUserId(userID));
   }
 
   clearComponentGrabbed(comp) {
@@ -938,9 +943,7 @@ class App {
       for (let s of this._prevSessions) {
         if (s == this.sessionID) continue;
         if (!nextSessions.has(s)) {
-          this.showMessage(
-            (this._prevSessionLabels[s] || s) + " left",
-          );
+          this.showMessage((this._prevSessionLabels[s] || s) + " left");
         }
       }
     }
@@ -1439,9 +1442,9 @@ class App {
     this.components.push(new WebcamPlayer(this));
   }
 
-  addAiComponent() {
-    this.components.push(new AiComponent(this));
-  }
+  // addAiComponent2() {
+  //   this.components.push(new AiComponent2(this));
+  // }
 
   addPeakDetector() {
     this.components.push(new PeakDetectorComponent(this));
