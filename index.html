@@ -77,6 +77,11 @@
     <script src="js/shaderComponent.js"></script>
     <script src="js/audioPlayer.js"></script>
     <script src="js/sequencer.js"></script>
+    <script src="js/polySequencer.js"></script>
+    <script src="js/phoneSensors.js"></script>
+    <script src="js/sampleHold.js"></script>
+    <script src="js/scanlineSynth.js"></script>
+    <script src="js/kick808.js"></script>
 
     <script src="js/visualizer.js"></script>
     <script src="js/channelMerger.js"></script>
@@ -167,6 +172,8 @@
             <button onclick="app.addMic()">🎤 Mic/Line</button>
             <button onclick="app.addWebcamPlayer()">🤳🏻 Webcam</button>
             <button onclick="app.addNoise()">👾 Noise</button>
+            <button onclick="app.addKick808()">🥁 808 Kick</button>
+            <button onclick="app.addScanline()">📺 Scanline</button>
             <button onclick="app.addImagePlayer()">🖼️ Image Player</button>
         </span>
         <span class="categoryOfComponent">
@@ -194,6 +201,7 @@
             <button onclick="app.addKeyboard()">⌨ Keyboard</button>
             <button onclick="app.addPolyphonicKeyboard()">🎹 Poly Keyboard</button>
             <button onclick="app.addJoystick()">🎮 Gamepad</button>
+            <button onclick="app.addPhoneSensors()">📱 Phone</button>
             <button onclick="app.addMidiInput()">🎹 MIDI Input</button>
             <button onclick="app.addRTCSender()">📭 RTC sender</button>
             <button onclick="app.addRTCReceiver()">📨 RTC receiver</button>
@@ -203,6 +211,8 @@
 
 
             <button onclick="app.addSequencer()">📈 Sequencer</button>
+            <button onclick="app.addPolySequencer()">📊 Poly Seq</button>
+            <button onclick="app.addSampleHold()">S&H</button>
             <button onclick="app.addEnvelope()">〽️ ADSR</button>
 
             <button onclick="app.addBPMOutputComponenet()">🎵 BPM Output</button>

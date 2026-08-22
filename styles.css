@@ -444,6 +444,21 @@ component.constantvaluenode icon:after {
 component.Sequencer icon:after {
   content: "📈";
 }
+component.PolySequencer icon:after {
+  content: "📊";
+}
+component.PhoneSensors icon:after {
+  content: "📱";
+}
+component.SampleHold icon:after {
+  content: "\1F3B2";
+}
+component.Kick808 icon:after {
+  content: "\1F941";
+}
+component.ScanlineSynth icon:after {
+  content: "\1F4FA";
+}
 
 component.audioplayer icon:after {
   content: "🎶";
@@ -965,11 +980,23 @@ component.ImagePlayerWorkletVersion canvas {
   pointer-events: none;
 }
 
-component.Sequencer {
+component.Sequencer,
+component.PolySequencer {
   width: 272px;
   height: auto;
   min-height: 240px;
   overflow: hidden;
+}
+
+component.PolySequencer {
+  width: 300px;
+  min-height: 180px;
+  overflow: visible;
+}
+
+component.PolySequencer .component-body,
+component.PolySequencer .component-main {
+  overflow: visible;
 }
 
 component.Sequencer div.buttonsContainer {
@@ -985,7 +1012,8 @@ component.Sequencer div.buttonsContainer {
   flex: 0 0 auto;
 }
 
-component.Sequencer .seqButton {
+component.Sequencer .seqButton,
+component.PolySequencer .seqButton {
   width: 12px;
   height: 12px;
   min-width: 0;
@@ -1002,29 +1030,62 @@ component.Sequencer .seqButton {
   box-sizing: border-box;
 }
 
-component.Sequencer .seqButton:hover {
+component.Sequencer .seqButton:hover,
+component.PolySequencer .seqButton:hover {
   background: #0a1812;
   border-color: var(--accent);
 }
 
-component.Sequencer .seqButton.active {
+component.Sequencer .seqButton.active,
+component.PolySequencer .seqButton.active {
   background: var(--accent);
   border-color: var(--accent);
   box-shadow: 0 0 5px var(--accent-dim);
 }
 
-component.Sequencer .seqButton.seqColumnPlaying {
+component.Sequencer .seqButton.seqColumnPlaying,
+component.PolySequencer .seqButton.seqColumnPlaying {
   box-shadow:
     inset 0 0 0 1px #fff,
     0 0 6px var(--accent-dim);
   border-color: #fff;
 }
 
-component.Sequencer .inputsDiv {
+component.Sequencer .inputsDiv,
+component.PolySequencer .inputsDiv {
   width: 100%;
   height: auto;
   max-height: none;
   overflow: visible;
+}
+
+component.PolySequencer div.buttonsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  box-sizing: content-box;
+  flex: 0 0 auto;
+}
+
+component.PolySequencer .seqLane {
+  display: grid;
+  grid-template-columns: repeat(16, 15px) 16px;
+  gap: 1px;
+  align-items: center;
+  width: max-content;
+}
+
+component.PolySequencer .seqLane .outputButton {
+  margin: 0;
+  justify-self: center;
+}
+
+component.PolySequencer .seqLane .outputButton:after {
+  display: none;
 }
 
 component input.outputButton:after {
@@ -1428,6 +1489,12 @@ component .deleteButton:hover {
 .webcamplayer canvas {
   width: 100%;
   height: 100%;
+}
+component.ScanlineSynth canvas.scanlineCanvas {
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  background: #000;
 }
 .mic select {
   margin-top: 33px;

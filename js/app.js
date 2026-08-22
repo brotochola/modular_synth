@@ -712,8 +712,9 @@ class App {
     if (!Array.isArray(this.connectedUsers) || this.connectedUsers.length < 2) {
       return;
     }
-    let continuous = device == "mouse" || device == "gamepad";
-    if (continuous) {
+    let continuous =
+      device == "mouse" || device == "gamepad" || device == "phone";
+    if (continuous && !(device == "phone" && payload.shake)) {
       let now = performance.now();
       let last = this._lastInputSentAt[device] || 0;
       if (now - last < 66) return;
@@ -742,6 +743,16 @@ class App {
       entry.keyboard = { event: msg.event, which: msg.which };
     } else if (msg.device == "gamepad") {
       entry.gamepad = { axes: msg.axes, buttons: msg.buttons };
+    } else if (msg.device == "phone") {
+      entry.phone = {
+        tiltX: msg.tiltX,
+        tiltY: msg.tiltY,
+        heading: msg.heading,
+        accelX: msg.accelX,
+        accelY: msg.accelY,
+        accelZ: msg.accelZ,
+        shake: msg.shake,
+      };
     }
     for (let c of this.components || []) {
       if (c && c.onRemoteInput instanceof Function) c.onRemoteInput(msg);
@@ -1553,6 +1564,21 @@ class App {
   addSequencer() {
     this.components.push(new Sequencer(this));
   }
+  addPolySequencer() {
+    this.components.push(new PolySequencer(this));
+  }
+  addPhoneSensors() {
+    this.components.push(new PhoneSensors(this));
+  }
+  addSampleHold() {
+    this.components.push(new SampleHold(this));
+  }
+  addScanline() {
+    this.components.push(new ScanlineSynth(this));
+  }
+  addKick808() {
+    this.components.push(new Kick808(this));
+  }
 
   addNumberDisplay() {
     this.components.push(new NumberDisplayComponent(this));
@@ -2221,6 +2247,11 @@ App.COMPONENT_CLASSES = {
   CustomProcessorComponent,
   Mixer,
   Sequencer,
+  PolySequencer,
+  PhoneSensors,
+  SampleHold,
+  ScanlineSynth,
+  Kick808,
   EnvelopeGenerator,
   ConstantValueNode,
   Mouse,
