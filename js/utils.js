@@ -90,6 +90,9 @@ function figureOutWhereToConnect(compoSource, compoTarget, input) {
     if (input.startsWith("in")) {
       whereToConnect = compoTarget.node;
       whichInput = parseInt(input.split("_")[1]);
+    } else if ((compoTarget.namedAudioInputs || []).includes(input)) {
+      whereToConnect = compoTarget.node;
+      whichInput = compoTarget.namedAudioInputs.indexOf(input);
     } else {
       //TRY TO GET A NORMAL AUDIO PARAM
       whereToConnect = compoTarget.node[input];
@@ -161,6 +164,49 @@ async function base64ToAudioArrayBuffer(base64, encoding) {
   let buf = base64ToArrayBuffer(base64);
   if (encoding === "gzip") buf = await gunzipArrayBuffer(buf);
   return buf;
+}
+
+async function encodeBinaryAsset(arrayBuffer, { gzip = true } = {}) {
+  let buf = arrayBuffer;
+  let audioEncoding;
+  if (gzip) {
+    buf = await gzipArrayBuffer(arrayBuffer);
+    audioEncoding = "gzip";
+  }
+  return { base64: arrayBufferToBase64(buf), audioEncoding };
+}
+
+async function decodeBinaryAsset(base64, audioEncoding) {
+  return base64ToAudioArrayBuffer(base64, audioEncoding);
+}
+
+async function saveBinaryAsset(patchName, filename, arrayBuffer, opts) {
+  let encoded = await encodeBinaryAsset(arrayBuffer, opts);
+  createBase64FileInFirebase(
+    patchName,
+    encoded.base64,
+    filename,
+    encoded.audioEncoding,
+  );
+  return encoded;
+}
+
+async function loadBinaryAsset({ patchName, filename, base64, audioEncoding }) {
+  if (base64) {
+    return {
+      arrayBuffer: await decodeBinaryAsset(base64, audioEncoding),
+      base64,
+      audioEncoding,
+    };
+  }
+  if (!filename || !patchName) return null;
+  let data = await getBase64FileFromFirebase(patchName, filename);
+  if (!data || !data.base64) return null;
+  return {
+    arrayBuffer: await decodeBinaryAsset(data.base64, data.audioEncoding),
+    base64: data.base64,
+    audioEncoding: data.audioEncoding,
+  };
 }
 function downloader(data, type, name) {
   let blob = new Blob([data], { type });

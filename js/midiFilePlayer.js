@@ -2,62 +2,85 @@ class MidiFilePlayer extends Component {
   static name = "MIDI Player";
   constructor(app, serializedData) {
     super(app, serializedData);
-    this.outputValue = 0;
     this.playing = false;
-
-    this.createInputFile();
-    this.createPlayButton();
-
-    this.currentValue = 0;
-
-    this.midiPlayer = new MidiPlayer.Player(() => {});
-    this.midiPlayer.on("midiEvent", (e) => this.handleMidiEvent(e));
-    this.createNode();
+    this.namedAudioInputs = ["trigger", "stop"];
+    this.uiParamWidgets = { in_0: "none", in_1: "none" };
     this.valuesToSave = ["audioEncoding", "base64", "filename"];
     this.outputLabels = ["note", "trigger"];
 
-    this.customAudioTriggers = ["trigger"];
+    this.createInputFile();
+    this.createPlayButton();
+    this.createNode();
   }
-  handleMidiEvent(e) {
-    this.outputValue = 0;
-    if (e.name == "Note on") {
-      this.outputValue = this.noteToFreq(e.noteNumber);
-      this.updateNodeWithcurrentValue();
-    }
-  }
+
   createPlayButton() {
     this.playButton = document.createElement("button");
     this.playButton.style.display = "none";
     this.playButton.classList.add("playButton");
-
     (this.main || this.container).appendChild(this.playButton);
+    this.playButton.onclick = () => this.playPause();
+  }
 
-    this.playButton.onclick = () => {
-      this.playPause();
-    };
-  }
-  handleTriggerFromWorklet(e) {
-    if (e.current != 0) this.playPause();
-  }
   noteToFreq(note) {
-    let a = 440;
-    return (a / 32) * 2 ** ((note - 9) / 12);
+    return (440 / 32) * 2 ** ((note - 9) / 12);
+  }
+
+  flattenMidiEvents(player) {
+    let flat = [];
+    let tracks = player.getEvents() || [];
+    for (let track of tracks) {
+      for (let ev of track) {
+        if (ev.name == "Note on" && ev.velocity > 0) {
+          flat.push({ tick: ev.tick || 0, type: 1, note: ev.noteNumber });
+        } else if (
+          ev.name == "Note off" ||
+          (ev.name == "Note on" && !(ev.velocity > 0))
+        ) {
+          flat.push({ tick: ev.tick || 0, type: 0, note: ev.noteNumber });
+        }
+      }
+    }
+    flat.sort((a, b) => a.tick - b.tick || a.type - b.type);
+    return flat;
+  }
+
+  postLoadToWorklet() {
+    if (!this.node?.port || !this.arrayBuffer) return;
+    let player = new MidiPlayer.Player(() => {});
+    player.loadArrayBuffer(this.arrayBuffer);
+    let events = this.flattenMidiEvents(player);
+    this.ppqn = player.division || 480;
+    this.node.port.postMessage({
+      type: "load",
+      events,
+      ppqn: this.ppqn,
+      bpm: this.app.bpm || 120,
+    });
+  }
+
+  play() {
+    if (!this.arrayBuffer || !this.node?.port) return;
+    this.node.port.postMessage({ type: "play" });
+    this.playing = true;
+    this.updateButton();
+  }
+
+  stop() {
+    if (!this.node?.port) return;
+    this.node.port.postMessage({ type: "stop" });
+    this.playing = false;
+    this.updateButton();
   }
 
   playPause() {
     if (!this.arrayBuffer) return;
-    this.midiPlayer.setTempo(this.app.bpm);
-    if (this.playing) {
-      this.playing = false;
-      this.midiPlayer.stop();
-      this.outputValue = 0;
-      this.updateNodeWithcurrentValue();
-    } else {
-      this.midiPlayer.play();
-      this.playing = true;
-    }
+    if (this.playing) this.stop();
+    else this.play();
+  }
 
-    this.updateButton();
+  updateBPM() {
+    if (!this.node?.port) return;
+    this.node.port.postMessage({ type: "setBpm", bpm: this.app.bpm || 120 });
   }
 
   updateButton() {
@@ -80,35 +103,31 @@ class MidiFilePlayer extends Component {
   }
 
   createNode() {
-    this.app.loadWorklet("js/audioWorklets/midiPlayerWorklet.js")
-      .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "midi-player-worklet", {
-          numberOfInputs: 0,
-          numberOfOutputs: 2,
-        });
-
-        this.node.onprocessorerror = (e) => {
-          console.error(e);
-        };
-
-        this.updateNodeWithcurrentValue();
+    this.app.loadWorklet("js/audioWorklets/midiPlayerWorklet.js").then(() => {
+      this.node = new AudioWorkletNode(this.app.actx, "midi-player-worklet", {
+        numberOfInputs: 2,
+        numberOfOutputs: 2,
+        parameterData: { rate: 1 },
       });
-  }
-  updateNodeWithcurrentValue() {
-    if (!this.node?.port) return;
-    this.node.port.postMessage({
-      event: "note_on",
-      value: Math.floor(this.outputValue),
+      this.node.onprocessorerror = (e) => console.error(e);
+      this.node.port.onmessage = (e) => {
+        if (e.data && e.data.ended) {
+          this.playing = false;
+          this.updateButton();
+        }
+      };
+      if (this.arrayBuffer) this.postLoadToWorklet();
     });
   }
 
   loadMidiFromBuffer(buf) {
     this.arrayBuffer = copyArrayBuffer(buf);
-    this.midiPlayer.loadArrayBuffer(this.arrayBuffer);
+    this.playing = false;
     this.playButton.style.display = "block";
     if (this.buttonToTriggerInputFile) {
       this.buttonToTriggerInputFile.style.display = "none";
     }
+    this.postLoadToWorklet();
     this.app.resetAllConnections();
     this.updateButton();
   }
@@ -138,14 +157,14 @@ class MidiFilePlayer extends Component {
     reader.onload = async () => {
       let raw = reader.result;
       this.filename = file.name;
-      let gz = await gzipArrayBuffer(raw);
-      this.audioEncoding = "gzip";
-      this.base64 = arrayBufferToBase64(gz);
-      createBase64FileInFirebase(
+      let saved = await saveBinaryAsset(
         this.app.patchName,
-        this.base64,
         this.filename,
+        raw,
+        { gzip: true },
       );
+      this.base64 = saved.base64;
+      this.audioEncoding = saved.audioEncoding;
       this.loadMidiFromBuffer(raw);
       this.quickSave();
       this.updateButton();
@@ -156,27 +175,17 @@ class MidiFilePlayer extends Component {
   }
 
   async updateUI() {
-    if (this.base64) {
-      let raw = await base64ToAudioArrayBuffer(this.base64, this.audioEncoding);
-      this.loadMidiFromBuffer(raw);
-      this.updateButton();
-      return;
+    let loaded = await loadBinaryAsset({
+      patchName: this.app.patchName,
+      filename: this.filename,
+      base64: this.base64,
+      audioEncoding: this.audioEncoding,
+    });
+    if (loaded) {
+      this.base64 = loaded.base64;
+      this.audioEncoding = loaded.audioEncoding;
+      this.loadMidiFromBuffer(loaded.arrayBuffer);
     }
-    if (this.filename) {
-      let dataFromFirebase = await getBase64FileFromFirebase(
-        this.app.patchName,
-        this.filename,
-      );
-      if (dataFromFirebase) {
-        this.base64 = dataFromFirebase.base64;
-        this.audioEncoding = dataFromFirebase.audioEncoding;
-        let raw = await base64ToAudioArrayBuffer(
-          this.base64,
-          this.audioEncoding,
-        );
-        this.loadMidiFromBuffer(raw);
-      }
-      this.updateButton();
-    }
+    this.updateButton();
   }
 }

@@ -121,17 +121,19 @@ class AudioPlayer extends Component {
       //IF NOT WE GOTTA LOAD THE AUDIO FILE
       let reader = new FileReader();
       reader.onload = async () => {
-        // console.log(reader.result);
-        this.base64 = arrayBufferToBase64(reader.result);
-        this.audioEncoding = undefined;
         this.filename = this.inputFile.files[0].name;
-        createBase64FileInFirebase(
+        let saved = await saveBinaryAsset(
           this.app.patchName,
-          this.base64,
-          this.filename
+          this.filename,
+          reader.result,
+          { gzip: false },
         );
+        this.base64 = saved.base64;
+        this.audioEncoding = saved.audioEncoding;
         this.arrayBuffer = copyArrayBuffer(reader.result);
-        this.audioBuffer = await this.app.actx.decodeAudioData(reader.result);
+        this.audioBuffer = await this.app.actx.decodeAudioData(
+          copyArrayBuffer(reader.result),
+        );
         this.node.buffer = this.audioBuffer;
         this.quickSave();
         this.app.resetAllConnections();
@@ -146,33 +148,20 @@ class AudioPlayer extends Component {
   }
   async updateUI() {
     //THIS METHOD IS EXECUTED FROM THE COMPONENT CLASS, WHEN THIS COMPONENT ALREADY LOADED THE SAVED DATA
-    if (this.base64) {
-      let raw = await base64ToAudioArrayBuffer(this.base64, this.audioEncoding);
+    let loaded = await loadBinaryAsset({
+      patchName: this.app.patchName,
+      filename: this.filename,
+      base64: this.base64,
+      audioEncoding: this.audioEncoding,
+    });
+    if (loaded) {
+      this.base64 = loaded.base64;
+      this.audioEncoding = loaded.audioEncoding;
       this.audioBuffer = await this.app.actx.decodeAudioData(
-        copyArrayBuffer(raw)
+        copyArrayBuffer(loaded.arrayBuffer),
       );
       this.handleOnChange();
-      this.updateButton();
-      return;
     }
-    if (this.filename) {
-      let dataFromFirebase = await getBase64FileFromFirebase(
-        this.app.patchName,
-        this.filename
-      );
-      if (dataFromFirebase) {
-        this.base64 = dataFromFirebase.base64;
-        this.audioEncoding = dataFromFirebase.audioEncoding;
-        let raw = await base64ToAudioArrayBuffer(
-          this.base64,
-          this.audioEncoding
-        );
-        this.audioBuffer = await this.app.actx.decodeAudioData(
-          copyArrayBuffer(raw)
-        );
-        this.handleOnChange();
-      }
-      this.updateButton();
-    }
+    this.updateButton();
   }
 }

@@ -58,7 +58,7 @@ class Component {
 
     await createInstanceOfComponentInFirestore(
       this.app.patchName,
-      serializedMe
+      serializedMe,
     );
     if (alsoSaveTheUpdatedListOfComponents) {
       setTimeout(() => {
@@ -118,7 +118,7 @@ class Component {
       this.app.waitUntilAllComopnentsAreReady(() => {
         this.updateConnectionsFromSerializedData(
           (this.serializedData || {}).connections || [],
-          doWeHaveToUpdateLines
+          doWeHaveToUpdateLines,
         );
         if (cb instanceof Function) cb();
       });
@@ -191,7 +191,7 @@ class Component {
       !(this.outputElements[0] instanceof HTMLElement)
     ) {
       this.outputElements = Array.from(
-        this.container.querySelectorAll(".outputButton")
+        this.container.querySelectorAll(".outputButton"),
       );
     }
     return this.outputElements;
@@ -263,7 +263,7 @@ class Component {
           return;
         }
         this.updateFromSerialized(data);
-      }
+      },
     );
     this.listeneningToFirestore = true;
   }
@@ -271,7 +271,8 @@ class Component {
   createWorkletForCustomParams() {
     if (!Array.isArray(this.customAudioParams)) return;
 
-    this.app.loadWorklet("js/audioWorklets/customAudioParamsWorklet.js")
+    this.app
+      .loadWorklet("js/audioWorklets/customAudioParamsWorklet.js")
       .then(() => {
         this.customAudioParamsWorkletNode = new AudioWorkletNode(
           this.app.actx,
@@ -279,7 +280,7 @@ class Component {
           {
             numberOfInputs: this.customAudioParams.length,
             numberOfOutputs: 0,
-          }
+          },
         );
 
         this.customAudioParamsWorkletNode.onprocessorerror = (e) => {
@@ -296,26 +297,25 @@ class Component {
   createWorkletForCustomTriggers() {
     if (!Array.isArray(this.customAudioTriggers)) return;
 
-    this.app.loadWorklet("js/audioWorklets/triggerWorklet.js")
-      .then(() => {
-        this.customAudioTriggersWorkletNode = new AudioWorkletNode(
-          this.app.actx,
-          "trigger-worklet",
-          {
-            numberOfInputs: this.customAudioTriggers.length,
-            numberOfOutputs: 0,
-          }
-        );
+    this.app.loadWorklet("js/audioWorklets/triggerWorklet.js").then(() => {
+      this.customAudioTriggersWorkletNode = new AudioWorkletNode(
+        this.app.actx,
+        "trigger-worklet",
+        {
+          numberOfInputs: this.customAudioTriggers.length,
+          numberOfOutputs: 0,
+        },
+      );
 
-        this.customAudioTriggersWorkletNode.onprocessorerror = (e) => {
-          console.error(e);
-        };
-        this.customAudioTriggersWorkletNode.parent = this;
-        this.customAudioTriggersWorkletNode.port.onmessage = (e) => {
-          if (this.handleTriggerFromWorklet instanceof Function)
-            this.handleTriggerFromWorklet(e.data);
-        };
-      });
+      this.customAudioTriggersWorkletNode.onprocessorerror = (e) => {
+        console.error(e);
+      };
+      this.customAudioTriggersWorkletNode.parent = this;
+      this.customAudioTriggersWorkletNode.port.onmessage = (e) => {
+        if (this.handleTriggerFromWorklet instanceof Function)
+          this.handleTriggerFromWorklet(e.data);
+      };
+    });
   }
 
   createInputButtons() {
@@ -329,7 +329,7 @@ class Component {
 
     //AUDIOPARAMS FROM THE NODE
     this.audioParams = Object.keys(Object.getPrototypeOf(this.node)).filter(
-      (k) => this.node[k] instanceof AudioParam
+      (k) => this.node[k] instanceof AudioParam,
     );
 
     //AUDIO INPUTS
@@ -353,6 +353,7 @@ class Component {
     let ordered = [
       ...this.audioParams.filter((p) => String(p).startsWith("in_")),
       ...this.audioParams.filter((p) => !String(p).startsWith("in_")),
+      ...(this.namedAudioInputs || []),
       ...(this.customAudioTriggers || []),
       ...(this.customAudioParams || []),
     ];
@@ -380,6 +381,7 @@ class Component {
       let knob;
       let isAudioParam =
         !inp.startsWith("in") &&
+        !(this.namedAudioInputs || []).includes(inp) &&
         !(this.customAudioTriggers || []).includes(inp) &&
         !(this.customAudioParams || []).includes(inp);
 
@@ -437,6 +439,15 @@ class Component {
     if (name == "delayTime") {
       return { min: 0, max: 1, step: 0.001 };
     }
+    if (name == "time") {
+      return { min: 0.0001, max: 10, step: 0.001 };
+    }
+    if (name == "rate") {
+      return { min: 0, max: 10, step: 0.01 };
+    }
+    if (name == "offset") {
+      return { min: -1000, max: 1000, step: 0.01 };
+    }
     return { min: 0, step: 0.01 };
   }
 
@@ -455,7 +466,7 @@ class Component {
       //DISCONNECTING...
       let componentFromWhichThisConnectionComes = Connection.getComponentFrom(
         this,
-        audioParam
+        audioParam,
       );
       this.disconnect(audioParam);
       setTimeout(() => componentFromWhichThisConnectionComes.quickSave(), 10);
@@ -472,7 +483,7 @@ class Component {
       this.app.lastOutputClicked.compo.connect(
         this,
         audioParam,
-        numberOfOutput
+        numberOfOutput,
       );
       if ((this.customAudioParams || []).includes(audioParam)) {
         //THIS IS A CUSTOM AUDIO PARAM THAT WAS CLICKED
@@ -497,7 +508,10 @@ class Component {
       this.app.showMessage(this.infoText);
     };
     if (this.headerRight) {
-      this.headerRight.insertBefore(this.infoButton, this.headerRight.firstChild);
+      this.headerRight.insertBefore(
+        this.infoButton,
+        this.headerRight.firstChild,
+      );
     } else {
       this.container.appendChild(this.infoButton);
     }
@@ -534,7 +548,7 @@ class Component {
         if (c.to == this) {
           c.reset();
         }
-      })
+      }),
     );
   }
 
@@ -584,7 +598,7 @@ class Component {
         ? this.node.connect(
             where.whereToConnect,
             numberOfOutput,
-            where.whichInput
+            where.whichInput,
           )
         : this.node.connect(where.whereToConnect, numberOfOutput);
     } catch (e) {
@@ -651,10 +665,16 @@ class Component {
     this.container = document.createElement("component");
     this.container.component = this;
     this.container.draggable = false;
-    this.container.addEventListener("pointerdown", (e) => this.onPointerDown(e));
-    this.container.addEventListener("pointermove", (e) => this.onPointerMove(e));
+    this.container.addEventListener("pointerdown", (e) =>
+      this.onPointerDown(e),
+    );
+    this.container.addEventListener("pointermove", (e) =>
+      this.onPointerMove(e),
+    );
     this.container.addEventListener("pointerup", (e) => this.onPointerUp(e));
-    this.container.addEventListener("pointercancel", (e) => this.onPointerUp(e));
+    this.container.addEventListener("pointercancel", (e) =>
+      this.onPointerUp(e),
+    );
 
     if ((this.serializedData || {}).x && (this.serializedData || {}).y) {
       this.container.style.left = this.serializedData.x;

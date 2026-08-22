@@ -109,14 +109,16 @@ function writeLivePresence(patchName, sessionID, data) {
     .catch((e) => console.warn("#live write failed", e));
 }
 
-async function createBase64FileInFirebase(patchName, base64, filename) {
+async function createBase64FileInFirebase(patchName, base64, filename, audioEncoding) {
   console.log("#saving file", filename);
   if (!patchName) return console.warn("no patch name");
+  let payload = { base64 };
+  if (audioEncoding) payload.audioEncoding = audioEncoding;
   let ret = await collectionRef
     .doc(patchName)
     .collection("files")
     .doc(filename)
-    .set({ base64 });
+    .set(payload);
 
   return ret;
 }

@@ -8,12 +8,12 @@ class AdsrProcessor extends AudioWorkletProcessor {
   }
   static get parameterDescriptors() {
     return [
+      { name: "trigger", defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "a-rate" },
       { name: "attack", defaultValue: 0.1, minValue: 0, maxValue: 60, automationRate: "k-rate" },
-      { name: "attackcurve", defaultValue: 0.5, minValue: 0, maxValue: 1, automationRate: "k-rate" },
       { name: "decay", defaultValue: 0, minValue: 0, maxValue: 60, automationRate: "k-rate" },
       { name: "sustain", defaultValue: 1, minValue: 0, maxValue: 1, automationRate: "k-rate" },
       { name: "release", defaultValue: 0, minValue: 0, maxValue: 60, automationRate: "k-rate" },
-      { name: "trigger", defaultValue: 0, minValue: 0, maxValue: 1, automationRate: "a-rate" },
+      { name: "attackcurve", defaultValue: 0.5, minValue: 0, maxValue: 1, automationRate: "k-rate" },
     ];
   }
   process(inputs, outputs, parameters) {
