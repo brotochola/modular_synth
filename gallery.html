@@ -175,6 +175,31 @@
           wrap.appendChild(c.container);
           c.container.style.left = "0px";
           c.container.style.top = "0px";
+          if (name === "MidiFilePlayer") {
+            try {
+              var res = await fetch("youre only lonely L.mid");
+              var buf = await res.arrayBuffer();
+              c.loadMidiFromBuffer(buf);
+              for (var w = 0; w < 40; w++) {
+                if ((c.voices || []).length > 1 && (c.node || {}).numberOfOutputs > 2) {
+                  break;
+                }
+                await new Promise(function (r) {
+                  setTimeout(r, 100);
+                });
+              }
+              console.log(
+                "gallery MidiFilePlayer voices",
+                (c.voices || []).length,
+                "outs",
+                (c.node || {}).numberOfOutputs,
+                "labels",
+                c.outputLabels
+              );
+            } catch (e) {
+              console.warn("gallery midi load", e);
+            }
+          }
         } catch (err) {
           wrap.textContent = "FAILED: " + name + " — " + err.message;
           wrap.style.color = "#ff5a5a";
@@ -183,7 +208,7 @@
       }
 
       await new Promise(function (r) {
-        setTimeout(r, 3000);
+        setTimeout(r, 5000);
       });
       document.documentElement.setAttribute("data-gallery-ready", "1");
     })().catch(function (e) {

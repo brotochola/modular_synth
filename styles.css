@@ -165,7 +165,8 @@ app .mainContainer {
   z-index: 2;
 }
 .buttons.visible {
-  transform: translateY(calc(0% - 40px));
+  transform: translateY(0);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .historyPanel {
@@ -177,9 +178,10 @@ app .mainContainer {
   z-index: 2;
   pointer-events: none;
   transition: transform 250ms ease-out;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 .historyPanel.visible {
-  transform: translateY(calc(0% - 40px));
+  transform: translateY(0);
   pointer-events: all;
 }
 .cablePanel {
@@ -199,11 +201,12 @@ app .mainContainer {
   border-radius: var(--radius);
   backdrop-filter: blur(10px);
   padding: 10px;
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   color: var(--ink);
   font-size: 12px;
 }
 .cablePanel.visible {
-  transform: translateY(calc(0% - 40px));
+  transform: translateY(0);
   pointer-events: all;
 }
 .cablePanel label {
@@ -332,7 +335,7 @@ component.grabbed {
   align-items: center;
   gap: 5px;
   overflow: hidden;
-  max-width: calc(100% - 46px);
+  max-width: calc(100% - 22px);
   flex: 1;
   min-width: 0;
 }
@@ -493,6 +496,20 @@ component.midi icon:after {
 component.midifileplayer icon:after {
   content: "🎼";
 }
+component.midifileplayer {
+  width: 180px;
+  min-height: 120px;
+}
+
+component.midifileplayer input.outputButton:after {
+  width: 112px;
+  left: -116px;
+  font-size: 10px;
+  line-height: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 component.CustomProcessorComponent icon:after {
   content: "🧮";
 }
@@ -542,7 +559,7 @@ component.CustomProcessorComponent {
 }
 
 component.Mixer {
-  width: 280px;
+  width: 260px;
   height: auto;
   min-height: 200px;
 }
@@ -697,7 +714,7 @@ component p {
 }
 
 component.envelopegenerator {
-  width: 210px;
+  width: 176px;
   height: auto;
   min-height: 200px;
 }
@@ -727,12 +744,9 @@ component.KeyboardComponent input.outputButton {
 component.KeyboardComponent input.outputButton:after {
   content: var(--label);
   position: absolute;
-  top: -11px;
+  top: -12px;
   left: 50% !important;
-  right: auto !important;
   transform: translateX(-50%);
-  width: auto;
-  font-size: 9px;
   text-align: center;
   line-height: 9px;
 }
@@ -929,7 +943,7 @@ component input.outputButton:after {
   position: absolute;
   width: 100px;
   font-size: 11px;
-  left: -100px;
+  left: -105px;
   text-align: right;
   line-height: 11px;
   pointer-events: none;
@@ -1086,13 +1100,13 @@ component.Compressor {
 component.filter {
   height: auto;
   min-height: 160px;
-  width: 240px;
+  width: 190px;
 }
 
 component.AudioPlayer {
   height: auto;
   min-height: 200px;
-  width: 190px;
+  width: 180px;
 }
 
 audioparamrow {
@@ -1246,7 +1260,7 @@ app > .mainContainer > canvas.shaderCanvas {
 }
 
 .messageBox.visible {
-  top: 10px;
+  top: calc(48px + env(safe-area-inset-top, 0px));
 }
 
 component button.infoButton {
@@ -1319,10 +1333,6 @@ component .deleteButton:hover {
   background: rgba(250, 0, 0, 0.5);
 }
 
-component.Oscillator {
-  height: 103px;
-}
-
 .ImagePlayerWorkletVersion button.triggerInputFile {
   width: max-content;
 }
@@ -1351,49 +1361,131 @@ component.spectrum2image {
 }
 
 footer {
-  background: rgba(0, 0, 0, 0.5) !important;
-  backdrop-filter: blur(5px);
-  color: lightgreen;
-  border: 1px solid darkgreen;
-  border-radius: 5px;
+  background: var(--panel) !important;
+  backdrop-filter: blur(10px);
+  color: var(--ink);
+  border: 1px solid var(--panel-edge);
+  border-radius: 0 0 var(--radius) var(--radius);
   display: flex;
   position: fixed;
-  bottom: 0px;
-  gap: 10px;
+  top: 0;
+  left: 0;
+  gap: 6px;
   width: 100vw;
-  padding: 5px;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  padding-top: calc(6px + env(safe-area-inset-top, 0px));
+  padding-left: calc(8px + env(safe-area-inset-left, 0px));
+  padding-right: calc(8px + env(safe-area-inset-right, 0px));
   z-index: 3;
-  height: 32px;
+  min-height: 36px;
+  height: auto;
+  align-items: center;
+  flex-wrap: wrap;
+  border-top-width: 0px;
   border-right-width: 0px;
-  border-bottom-width: 0px;
   border-left-width: 0px;
   flex-direction: row;
   justify-content: flex-end;
   user-select: none;
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(93, 255, 194, 0.08);
 }
 
 footer connectedUsers {
   font-size: 11px;
-  /* height: 70px; */
-  /* margin-bottom: 50px; */
   margin-right: 5px;
-  line-height: 21px;
-  width: max-content;
+  line-height: 22px;
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-align: right;
   position: relative;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+}
+
+footer button,
+footer select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  height: 26px;
+  min-height: 26px;
+  padding: 0 10px;
+  line-height: 24px;
+  outline: none;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 footer button {
   width: max-content;
 }
-footer button:disabled {
-  opacity: 0.4;
+
+footer button:hover:not(:disabled),
+footer select:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #0a1812;
 }
+
+footer button:active:not(:disabled) {
+  background: rgba(93, 255, 194, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+footer button:disabled {
+  opacity: 0.35;
+  color: var(--ink);
+  border-color: var(--panel-edge);
+  cursor: default;
+}
+
+footer select {
+  cursor: pointer;
+  background-image:
+    linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position:
+    calc(100% - 12px) 50%,
+    calc(100% - 7px) 50%;
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 22px;
+}
+
+footer select option {
+  background: #0c1012;
+  color: var(--ink);
+}
+
 footer .patchName {
   text-transform: capitalize;
-  width: 130px;
+  max-width: 130px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-align: center;
-  line-height: 21px;
+  line-height: 26px;
+  color: var(--accent);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+footer #samplePatchSelect {
+  flex: 1 1 140px;
+  min-width: 0;
+  max-width: 220px;
 }
 span.categoryOfComponent {
   width: 210px;
@@ -1404,14 +1496,22 @@ span.categoryOfComponent {
 }
 
 .openButtons {
-  position: absolute;
-  left: 5px;
-  font-size: 13px;
+  font-size: 12px;
+  margin-right: auto;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--accent);
+  border-color: var(--accent-dim);
 }
 
 button.play {
-  width: 40px;
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
   text-align: center;
+  font-size: 13px;
+  color: var(--accent);
+  border-color: var(--accent-dim);
 }
 
 .seqButton {
@@ -1485,30 +1585,34 @@ component.drawer canvas {
 @media (max-width: 768px) {
   footer {
     flex-wrap: wrap;
-    height: 54px;
-    gap: 3px;
-    justify-content: space-between;
-    flex-direction: row-reverse;
+    height: auto;
+    gap: 6px;
+    row-gap: 6px;
+    justify-content: flex-start;
+    flex-direction: row;
+  }
+  footer button,
+  footer select {
+    min-height: 40px;
+    font-size: 14px;
   }
   button.openButtons {
-    bottom: 60px;
     font-size: 16px;
-    padding: 12px;
+    padding: 10px 12px;
+    margin-right: 0;
+  }
+  footer #samplePatchSelect {
+    flex: 1 1 140px;
+    min-width: 0;
+    max-width: 100%;
+  }
+  footer connectedUsers {
+    max-width: 40vw;
   }
   footer .patchName {
-    order: 0;
     padding-left: 3px;
     text-align: left;
-    width: min-content;
-  }
-  button.download {
-    order: 1;
-  }
-  #bpmButton {
-    order: 2;
-  }
-  button.play {
-    order: 1;
+    max-width: 40vw;
   }
   .buttons {
     height: 100vh;
@@ -1517,6 +1621,7 @@ component.drawer canvas {
     align-items: flex-end;
     align-content: center;
     flex-wrap: wrap;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
   .buttons button {
     width: 48vw;
@@ -1632,9 +1737,8 @@ component.drawer canvas {
 }
 
 component.oscillator {
-  height: auto;
-  min-height: 120px;
-  width: 240px;
+  height: 125px;
+  width: 200px;
 }
 
 component.Amp {
@@ -1668,8 +1772,8 @@ component.constantvaluenode {
 }
 
 component.output {
-  width: 150px;
-  height: 70px;
+  width: 100px;
+  height: 50px;
 }
 
 component canvas {
@@ -1686,7 +1790,7 @@ component.imagemaker canvas {
 }
 
 component.KeyboardComponent {
-  width: 300px;
+  width: 255px;
   height: auto;
   min-height: 160px;
   background: linear-gradient(

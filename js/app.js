@@ -152,6 +152,7 @@ class App {
     this.listOfConnectedUsersElement = document.querySelector("connectedUsers");
 
     // this.checkIfTheresAPatchToOpenInTheURL();
+    this.populateSavedPatches();
     setTimeout(() => this.startListeningToFirestoreChanges(), 1000);
   }
 
@@ -1109,7 +1110,7 @@ class App {
   }
   putBPMInButton() {
     (document.querySelector("#bpmButton") || {}).innerHTML =
-      "change BPM (" + this.bpm + ")";
+      "BPM (" + this.bpm + ")";
   }
   createCanvasOnTop() {
     this.canvas = document.createElement("canvas");
@@ -1672,13 +1673,50 @@ class App {
   async loadSamplePatch(path) {
     if (!path) return;
     try {
-      let res = await fetch(path);
-      this.loadFromFile(await res.json());
+      if (path.startsWith("local:")) {
+        let name = path.slice(6);
+        let raw = localStorage[this.SAVE_PREFIX + name];
+        if (!raw) {
+          console.warn("could not load saved patch", name);
+        } else {
+          this.loadFromFile(JSON.parse(raw));
+        }
+      } else {
+        let res = await fetch(path);
+        this.loadFromFile(await res.json());
+      }
     } catch (e) {
       console.warn("could not load sample patch", path, e);
     }
     let sel = document.getElementById("samplePatchSelect");
     if (sel) sel.value = "";
+  }
+
+  populateSavedPatches() {
+    let prefix = this.SAVE_PREFIX;
+    Object.keys(localStorage).forEach((key) => {
+      if (key.startsWith(prefix)) this.addSavedPatchOption(key.slice(prefix.length));
+    });
+  }
+
+  addSavedPatchOption(name) {
+    let sel = document.getElementById("samplePatchSelect");
+    if (!sel) return;
+    let value = "local:" + name;
+    for (let opt of sel.options) {
+      if (opt.value === value) return;
+    }
+    let opt = document.createElement("option");
+    opt.value = value;
+    opt.textContent = name;
+    sel.appendChild(opt);
+  }
+
+  saveLocalPatch() {
+    let name = prompt("name of this patch");
+    if (!name) return;
+    localStorage[this.SAVE_PREFIX + name] = JSON.stringify(this.serialize());
+    this.addSavedPatchOption(name);
   }
 
   async loadFromFireStore() {

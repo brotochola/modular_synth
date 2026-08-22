@@ -116,7 +116,8 @@
 
 
         <!-- <button onclick="app.save()">💾 save</button> -->
-        <button onclick="app.download()" class="download">💾 Download Patch</button>
+        <button onclick="app.download()" class="download">Download</button>
+        <button onclick="app.saveLocalPatch()" class="saveLocal">Save</button>
         <select id="samplePatchSelect" onchange="app.loadSamplePatch(this.value)">
             <option value="">Load sample…</option>
             <option value="samples/mouse.json">mouse filter</option>
@@ -142,7 +143,7 @@
 
         <!-- <button onclick="app.stop()" class="stop"> ■ </button> -->
 
-        <button onclick="app.changeBPM()" id="bpmButton">change bpm</button>
+        <button onclick="app.changeBPM()" id="bpmButton">BPM</button>
         <button onclick="app.openCables()" class="openCables">Cables</button>
         <button onclick="app.undo()" class="undo" disabled>Undo</button>
         <button onclick="app.redo()" class="redo" disabled>Redo</button>
