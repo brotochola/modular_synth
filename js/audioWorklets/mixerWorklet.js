@@ -9,6 +9,12 @@ class MixerWorklet extends AudioWorkletProcessor {
     ];
   }
 
+  constructor() {
+    super();
+    this.lastPostTime = 0;
+    this.lastPosted = null;
+  }
+
   process(inputs, outputs, parameters) {
     const out = outputs[0] && outputs[0][0];
     if (!out) return true;
@@ -38,6 +44,31 @@ class MixerWorklet extends AudioWorkletProcessor {
           x2 * (g2k ? g2[0] : g2[i]) +
           x3 * (g3k ? g3[0] : g3[i])) *
         (mk ? master[0] : master[i]);
+    }
+
+    // Live UI: post effective gains (~20 Hz). .value on main thread misses CV sum.
+    if (currentTime - this.lastPostTime >= 1 / 20) {
+      this.lastPostTime = currentTime;
+      const last = (p) => p[p.length - 1];
+      const gains = {
+        g0: last(g0),
+        g1: last(g1),
+        g2: last(g2),
+        g3: last(g3),
+        master: last(master),
+      };
+      const prev = this.lastPosted;
+      if (
+        !prev ||
+        Math.abs(gains.g0 - prev.g0) > 0.001 ||
+        Math.abs(gains.g1 - prev.g1) > 0.001 ||
+        Math.abs(gains.g2 - prev.g2) > 0.001 ||
+        Math.abs(gains.g3 - prev.g3) > 0.001 ||
+        Math.abs(gains.master - prev.master) > 0.001
+      ) {
+        this.lastPosted = gains;
+        this.port.postMessage({ gains });
+      }
     }
     return true;
   }

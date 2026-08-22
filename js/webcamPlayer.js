@@ -8,9 +8,8 @@ class WebcamPlayer extends Component {
     this.createCanvas();
 
     this.createNode();
-    this.imageDataParsed = [{ r: 0, g: 0, b: 0 }];
     this.outputLabels = ["R", "G", "B"];
-    this.loop=true
+    this.loop = true;
     navigator.getUserMedia =
       navigator.getUserMedia ||
       navigator.webkitGetUserMedia ||
@@ -40,8 +39,8 @@ class WebcamPlayer extends Component {
 
     (this.main || this.container).appendChild(this.canvas);
 
-    this.canvas.width = 215; //this.img.naturalWidth;
-    this.canvas.height = 121; //this.img.naturalHeight;
+    this.canvas.width = 215;
+    this.canvas.height = 121;
     this.ctx = this.canvas.getContext("2d");
   }
 
@@ -60,26 +59,14 @@ class WebcamPlayer extends Component {
       this.canvas.height
     );
 
-    this.imageDataParsed = [];
-    // debugger;
-    for (let i = 0; i < this.imageData.data.length / 4; i++) {
-      let idx = i * 4;
-      this.imageDataParsed.push({
-        r: this.imageData.data[idx],
-        g: this.imageData.data[idx + 1],
-        b: this.imageData.data[idx + 2],
-        a: this.imageData.data[idx + 3],
-      });
-    }
-
-    // this.createAudioBuffers();
     this.sendImgDataToWorklet();
     if (this.loop) requestAnimationFrame(() => this.runLoop());
   }
 
   sendImgDataToWorklet() {
-    // console.log("#sending data to webcam worklet");
-    this.node.port.postMessage(this.imageDataParsed);
+    if (!this.node || !this.imageData) return;
+    let buf = new Uint8Array(this.imageData.data);
+    this.node.port.postMessage(buf, [buf.buffer]);
   }
   createNode() {
     this.app.loadWorklet("js/audioWorklets/webcamPlayerWorklet.js")
@@ -97,15 +84,8 @@ class WebcamPlayer extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-
-        this.node.port.onmessage = (e) => this.handleDataFromWorklet(e);
-
-        // this.createInputButtons();
       });
   }
-  handleDataFromWorklet(e) {}
 
-  async updateUI() {
-    //THIS METHOD IS EXECUTED FROM THE COMPONENT CLASS, WHEN THIS COMPONENT ALREADY LOADED THE SAVED DATA
-  }
+  async updateUI() {}
 }

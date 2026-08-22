@@ -686,6 +686,16 @@ component.Mixer .mixer-strip .ui-slider-vertical input[type="range"] {
   accent-color: var(--accent);
 }
 
+component.Mixer .mixer-strip .mixer-gain-val {
+  font-size: 9px;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  opacity: 0.85;
+  line-height: 1;
+  min-height: 1em;
+  text-align: center;
+}
+
 textarea {
   height: 76px;
   width: calc(100% - 10px);

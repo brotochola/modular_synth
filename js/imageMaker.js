@@ -5,23 +5,18 @@ class ImageMaker extends Component {
 
     this.width = 215;
     this.height = 121;
-this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Alpha. The canvas we have in this module is 217 by 123 pixels. Which totals 26691 pixels. Digital sound signals have 48000 values/samples per second (audio pixels if you will)"
+    this.infoText =
+      "This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Alpha. The canvas we have in this module is 217 by 123 pixels. Which totals 26691 pixels. Digital sound signals have 48000 values/samples per second (audio pixels if you will)";
     this.totalPixels = this.height * this.width;
-    this.makeImageArrayEmpty();
 
     this.createCanvas();
     this.createNode();
     this.createButtonToToggleFullscreen();
-    this.pixelCounter = 0;
-    this.lineCounter = 0;
     this.lastImageProcessed = 0;
-    this.img1 = new Image();
 
-    this.startTime = this.app.actx.currentTime;
     this.loop();
     this.counter = 0;
     this.numOfFramesToFade = 5;
-    
   }
 
   createButtonToToggleFullscreen() {
@@ -38,7 +33,6 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
     (this.main || this.container).appendChild(this.toggle);
   }
 
-  
   createCanvas() {
     this.canvas = document.createElement("canvas");
     this.canvas.width = this.width;
@@ -59,7 +53,7 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
   createNode() {
     this.app.loadWorklet("js/audioWorklets/imageMakerAudioWorklet.js")
       .then(() => {
-        this.createdAt=this.app.actx.currentTime
+        this.createdAt = this.app.actx.currentTime;
         this.node = new AudioWorkletNode(this.app.actx, "image-maker-worklet", {
           numberOfInputs: 4,
           numberOfOutputs: 0,
@@ -70,67 +64,33 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
         };
 
         this.node.port.onmessage = (e) => this.handleDataFromWorklet(e);
-
-        // this.createInputButtons();
       });
   }
   handleDataFromWorklet(e) {
-    
-    this.dataFromWorklet = e.data;
-    this.pixelCounter += 128;
-    for (let i = 0; i < 4; i++) {
-      //4 inputs: rgba
-      let color = i == 0 ? "r" : i == 1 ? "g" : i == 2 ? "b" : "a";
-      //channel data, the values of audio, that i'm going to use as pixel values
-      //[0] becase i dont care about stereo audio signals
-      let channel = (e.data[i]||[])[0] || [];
-      for (let v = 0; v < channel.length; v++) {
-        let pixelNumber = (this.pixelCounter + v) % this.totalPixels;
-        this.imageArray[pixelNumber * 4 + i] = channel[v];
-      }
+    let data = e.data;
+    if (!(data instanceof Uint8ClampedArray)) {
+      data = new Uint8ClampedArray(data.buffer || data);
     }
-
-    //when it reaches the end, it makes the image
-    if (this.pixelCounter >= this.totalPixels) {
-      this.pixelCounter = this.pixelCounter - this.totalPixels;
-
-      this.makeImage();
-    }
-      
-    if(e.data.reset){
-      // console.log("#reset ")
-      // alert(1)
-      //SYNCHANNEL
-      // this.pixelCounter = 0
-      // this.makeImage();
-
-    }
+    this.imgData = new ImageData(data, this.width, this.height);
+    this.deltaTime = this.app.actx.currentTime - this.lastImageProcessed;
+    this.lastImageProcessed = this.app.actx.currentTime;
+    this.fadeImages();
   }
 
   fadeImages() {
     if (!this.ctx || isNaN(this.deltaTime)) return;
 
     this.tempCtx1.putImageData(this.imgData, 0, 0);
-
-    this.img1.src = this.tempCanvas1.toDataURL();
-
-    this.startTime = this.app.actx.currentTime;
-    //I NEED TO KNOW HOW MANY FRAMES THIS CAN PROCESS BETWEEN THE MAKEIMAGE FUNCTIONS
     this.numOfFramesToFade = this.counter;
     this.counter = 0;
   }
 
   loop() {
     if (this.imgData && this.deltaTime && this.ready) {
-      
       this.counter++;
-      //BECAUSE I KNOW HOW MANY FRAMES WERE PROCESSED BETWEEN EACH IMAGE UPDATE
-      //(WHENEVER THE IMAGE BUFFER GOT AS MANY PIXELS AS THE CANVAS NEEDS)
-      //I DRAW WITH THE EXACT AMOUNT OF OPACITY SO BY THE SUM OF EACH CONSECUTIVE
-      //DRAW I GET THE FULL OPACITY (1)
       this.ctx.globalAlpha = 1 / this.numOfFramesToFade;
       this.ctx.drawImage(
-        this.img1,
+        this.tempCanvas1,
         0,
         0,
         this.canvas.width,
@@ -139,36 +99,5 @@ this.infoText="This modules has 4 inputs: R, G, B, A, or Red, Green, Blue and Al
     }
 
     requestAnimationFrame((e) => this.loop(e));
-  }
-
-  makeImage() {
-    // debugger
-    if (!this.imgData) {
-      this.imgData = this.ctx.getImageData(
-        0,
-        0,
-        this.canvas.width,
-        this.canvas.height
-      );
-    }
-
-    for (let i = 0; i < this.imageArray.length; i++) {
-      let newVal = this.imageArray[i] || 0;
-      if (i == 3 && newVal == 0) newVal = 255; //alpha
-      this.imgData.data[i] = newVal;
-    }
-    this.deltaTime = this.app.actx.currentTime - this.lastImageProcessed;
-    this.lastImageProcessed = this.app.actx.currentTime;
-    this.fadeImages();
-    this.makeImageArrayEmpty();
-  }
-  makeImageArrayEmpty() {
-    this.imageArray = [];
-    for (let i = 0; i < this.width * this.height; i++) {
-      this.imageArray[i * 4] = 0;
-      this.imageArray[i * 4 + 1] = 0;
-      this.imageArray[i * 4 + 2] = 0;
-      this.imageArray[i * 4 + 3] = 255;
-    }
   }
 }

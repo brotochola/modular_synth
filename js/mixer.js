@@ -39,6 +39,9 @@ class Mixer extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
+      this.node.port.onmessage = (e) => {
+        if (e.data && e.data.gains) this.applyLiveGains(e.data.gains);
+      };
     });
   }
 
@@ -53,6 +56,38 @@ class Mixer extends Component {
     return button;
   }
 
+  makeGainReadout(name) {
+    let el = document.createElement("span");
+    el.className = "mixer-gain-val";
+    el.textContent = "1.00";
+    this.gainLabels[name] = el;
+    return el;
+  }
+
+  formatGain(v) {
+    return Number(v).toFixed(2);
+  }
+
+  setGainDisplay(name, val) {
+    if (this.sliders && this.sliders[name]) {
+      this.sliders[name].setValue(val);
+    }
+    if (this.gainLabels && this.gainLabels[name]) {
+      this.gainLabels[name].textContent = this.formatGain(val);
+    }
+  }
+
+  applyLiveGains(gains) {
+    if (!this.sliders) return;
+    for (let name of this.gainNames) {
+      if (gains[name] == null) continue;
+      // Don't fight the pointer while user drags that fader
+      let slider = this.sliders[name];
+      if (slider && document.activeElement === slider.range) continue;
+      this.setGainDisplay(name, gains[name]);
+    }
+  }
+
   createChannelStrips() {
     if (this.faders) return;
     // Drop empty default rows for skipped widgets
@@ -61,6 +96,7 @@ class Mixer extends Component {
     this.faders = document.createElement("div");
     this.faders.className = "faders mixer-strips";
     this.sliders = {};
+    this.gainLabels = {};
 
     for (let i = 0; i < 4; i++) {
       let gainName = this.channelGains[i];
@@ -87,6 +123,7 @@ class Mixer extends Component {
       });
       strip.appendChild(slider.el);
       this.sliders[gainName] = slider;
+      strip.appendChild(this.makeGainReadout(gainName));
       this.faders.appendChild(strip);
     }
 
@@ -110,6 +147,7 @@ class Mixer extends Component {
     });
     masterStrip.appendChild(masterSlider.el);
     this.sliders.master = masterSlider;
+    masterStrip.appendChild(this.makeGainReadout("master"));
     this.faders.appendChild(masterStrip);
 
     (this.main || this.body || this.container).appendChild(this.faders);
@@ -119,13 +157,16 @@ class Mixer extends Component {
   onFaderInput(name, val) {
     val = Number(val);
     this.node.parameters.get(name).value = val;
+    if (this.gainLabels && this.gainLabels[name]) {
+      this.gainLabels[name].textContent = this.formatGain(val);
+    }
     this.waitAndSave();
   }
 
   onParamChanged(event, param) {
     super.onParamChanged(event, param);
     if (this.sliders && this.sliders[param]) {
-      this.sliders[param].setValue(event.target.value);
+      this.setGainDisplay(param, event.target.value);
     }
   }
 
@@ -137,7 +178,7 @@ class Mixer extends Component {
     if (!this.sliders || !this.node) return;
     for (let name of this.gainNames) {
       let v = this.node.parameters.get(name).value;
-      this.sliders[name].setValue(v);
+      this.setGainDisplay(name, v);
     }
   }
 }

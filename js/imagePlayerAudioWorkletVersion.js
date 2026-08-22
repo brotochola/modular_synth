@@ -8,9 +8,8 @@ class ImagePlayerWorkletVersion extends Component {
     this.createInputFile();
 
     this.createNode();
-    this.imageDataParsed = [{ r: 0, g: 0, b: 0 }];
     this.valuesToSave = ["filename"];
-    this.outputLabels = ["R", "G", "B", "A"/*, "sync"*/];
+    this.outputLabels = ["R", "G", "B", "A"];
   }
 
   createInputFile() {
@@ -65,11 +64,8 @@ class ImagePlayerWorkletVersion extends Component {
   }
 
   handleImgOnLoad() {
-    //PARA SONIDO ESTA BUENO USAR EL TAMAÑO ORIGINAL
-    //PARA IMAGEN NO
-    //ACA DEBERIA HABER UN CHECKBOX
-    this.canvas.width = 215; //this.img.naturalWidth;
-    this.canvas.height = 121; //this.img.naturalHeight;
+    this.canvas.width = 215;
+    this.canvas.height = 121;
     this.ctx.drawImage(this.img, 0, 0, this.canvas.width, this.canvas.height);
     this.imageData = this.ctx.getImageData(
       0,
@@ -78,25 +74,13 @@ class ImagePlayerWorkletVersion extends Component {
       this.canvas.height
     );
 
-    this.imageDataParsed = [];
-    // debugger;
-    for (let i = 0; i < this.imageData.data.length / 4; i++) {
-      let idx = i * 4;
-      this.imageDataParsed.push({
-        r: this.imageData.data[idx],
-        g: this.imageData.data[idx + 1],
-        b: this.imageData.data[idx + 2],
-        a: this.imageData.data[idx + 3],
-      });
-    }
-
-    // this.createAudioBuffers();
     this.sendImgDataToWorklet();
   }
 
   sendImgDataToWorklet() {
-    console.log("#sending data to worklet");
-    this.node.port.postMessage(this.imageDataParsed);
+    if (!this.node || !this.imageData) return;
+    let buf = new Uint8Array(this.imageData.data);
+    this.node.port.postMessage(buf, [buf.buffer]);
   }
   createNode() {
     this.app.loadWorklet("js/audioWorklets/imagePlayerAudioWorklet.js")
@@ -115,32 +99,18 @@ class ImagePlayerWorkletVersion extends Component {
           console.error(e);
         };
 
-        this.node.port.onmessage = (e) => this.handleDataFromWorklet(e);
-
-        // this.createInputButtons();
+        this.sendImgDataToWorklet();
       });
-  }
-  handleDataFromWorklet(e) {
-    if (e.data.pixelCount) {
-      this.pixelCounter = e.data.pixelCount;
-    }
-    // console.log("data q viene del worklet", e.data);
-    // debugger
   }
 
   async updateUI() {
-    //THIS METHOD IS EXECUTED FROM THE COMPONENT CLASS, WHEN THIS COMPONENT ALREADY LOADED THE SAVED DATA
-
     if (this.filename && !this.base64) {
-      // alert(this.filename)
       this.base64 = (
         await getBase64FileFromFirebase(this.app.patchName, this.filename)
       ).base64;
-      // console.log()
     }
 
     if (this.base64) {
-      // base64ToArrayBuffer(this.base64)
       this.handleOnChange();
     }
   }
