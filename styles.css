@@ -577,13 +577,21 @@ component.JoystickComponent .display {
 }
 
 component.CustomProcessorComponent {
-  width: 220px;
+  width: 240px;
   height: auto;
   min-height: 160px;
 }
 
 .CustomProcessorComponent audioparamrow {
   width: min-content;
+}
+
+component.CustomProcessorComponent .inputsDiv {
+  display: grid;
+  grid-template-columns: repeat(3, min-content);
+  gap: 4px;
+  width: auto;
+  align-content: start;
 }
 
 component.Mixer {
@@ -750,6 +758,59 @@ component.KeyboardComponent {
   width: 300px;
   height: auto;
   min-height: 160px;
+}
+
+component.PolyphonicKeyboard {
+  width: 300px;
+  height: auto;
+  min-height: 140px;
+}
+
+component.PolyphonicKeyboard .poly-piano {
+  position: relative;
+  width: calc(17 * 14px);
+  height: 52px;
+  margin: 6px auto 4px;
+  user-select: none;
+  touch-action: none;
+}
+
+component.PolyphonicKeyboard .poly-piano-whites {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+component.PolyphonicKeyboard .poly-key {
+  box-sizing: border-box;
+  border: 1px solid var(--panel-edge);
+  cursor: pointer;
+}
+
+component.PolyphonicKeyboard .poly-key.white {
+  width: 14px;
+  height: 52px;
+  background: #e8ebe6;
+  border-radius: 0 0 2px 2px;
+}
+
+component.PolyphonicKeyboard .poly-key.black {
+  position: absolute;
+  top: 0;
+  width: 9px;
+  height: 30px;
+  background: #1a1f1c;
+  border-radius: 0 0 2px 2px;
+  z-index: 2;
+}
+
+component.PolyphonicKeyboard .poly-key.white.pressed {
+  background: var(--accent);
+}
+
+component.PolyphonicKeyboard .poly-key.black.pressed {
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 component.KeyboardComponent outputs {

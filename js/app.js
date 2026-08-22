@@ -1498,6 +1498,9 @@ class App {
   addKeyboard() {
     this.components.push(new KeyboardComponent(this));
   }
+  addPolyphonicKeyboard() {
+    this.components.push(new PolyphonicKeyboard(this));
+  }
 
   addImagePlayer() {
     this.components.push(new ImagePlayerWorkletVersion(this));
@@ -2222,6 +2225,7 @@ App.COMPONENT_CLASSES = {
   ConstantValueNode,
   Mouse,
   KeyboardComponent,
+  PolyphonicKeyboard,
   JoystickComponent,
   Midi,
   MidiFilePlayer,
