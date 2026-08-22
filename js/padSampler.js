@@ -42,19 +42,7 @@ class PadSampler extends Component {
           console.error(e);
         };
 
-        this.node.port.onmessage = (e) => {
-          // console.log("#pitch det 2", e.data.input);
-          if (e.data.error) {
-            console.warn("error in pitch 2", e.data.error);
-          }
-          if (e.data.input) {
-            if (this.audioBuffer) {
-              //   this.samplesFromAudioBuffer = this.audioBuffer.getChannelData(0);
-
-              this.samplesFromAudioBuffer.set(e.data.input);
-            }
-          }
-        };
+        this.sendToWorklet();
       });
   }
 
@@ -115,11 +103,9 @@ class PadSampler extends Component {
   }
 
   sendToWorklet() {
-    if (this.audioBuffer) {
-      this.node.port.postMessage({
-        audioBuffer: this.audioBuffer.getChannelData(0),
-      });
-    }
+    if (!this.node || !this.audioBuffer) return;
+    let buf = this.audioBuffer.getChannelData(0).slice();
+    this.node.port.postMessage({ audioBuffer: buf }, [buf.buffer]);
   }
   async updateUI() {
     let loaded = await loadBinaryAsset({

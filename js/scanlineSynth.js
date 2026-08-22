@@ -197,10 +197,20 @@ class ScanlineSynth extends Component {
         (0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2]) /
         255;
     }
-    this.luma = luma;
-    if (this.node) {
-      this.node.port.postMessage({ width: w, height: h, luma: luma });
+    this.sendLuma(luma);
+  }
+
+  sendLuma(luma) {
+    if (!luma) return;
+    if (!this.node) {
+      this.luma = luma;
+      return;
     }
+    this.luma = null;
+    this.node.port.postMessage(
+      { width: this.canvas.width, height: this.canvas.height, luma },
+      [luma.buffer]
+    );
   }
 
   drawRowLine() {
@@ -231,13 +241,7 @@ class ScanlineSynth extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
-      if (this.luma) {
-        this.node.port.postMessage({
-          width: this.canvas.width,
-          height: this.canvas.height,
-          luma: this.luma,
-        });
-      }
+      if (this.luma) this.sendLuma(this.luma);
     });
   }
 

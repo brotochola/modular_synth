@@ -1,15 +1,15 @@
 class PadSamplerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
-    this.audioBuffer = [];
+    this.audioBuffer = new Float32Array(0);
     this.port.onmessage = (e) => {
-      if (e.data.audioBuffer) {
-        this.audioBuffer = [
-          ...e.data.audioBuffer,
-          ...e.data.audioBuffer.reverse(),
-        ];
-        console.log("updated worklet's audio buffer", this.audioBuffer);
-      }
+      let src = e.data && e.data.audioBuffer;
+      if (!src || !src.length) return;
+      let n = src.length;
+      let buf = new Float32Array(n * 2);
+      buf.set(src);
+      for (let i = 0; i < n; i++) buf[n + i] = src[n - 1 - i];
+      this.audioBuffer = buf;
     };
 
     this.state = [];
@@ -17,12 +17,13 @@ class PadSamplerWorklet extends AudioWorkletProcessor {
   getNextSample() {
     let val = 0;
     let purgedArr = this.state.filter((k) => k.speed);
+    let len = this.audioBuffer.length;
     for (let c of purgedArr) {
       c.idx += c.speed;
-      if (c.idx > this.audioBuffer.length) {
+      if (c.idx > len) {
         c.idx = 0;
       } else if (c.idx < 0) {
-        c.idx = this.audioBuffer.length - 1;
+        c.idx = len - 1;
       }
       val += this.audioBuffer[Math.floor(c.idx)];
     }
@@ -32,8 +33,6 @@ class PadSamplerWorklet extends AudioWorkletProcessor {
 
   process(inputs, outputs) {
     let output = ((outputs || [])[0] || [])[0] || [];
-    // let input1 = (((inputs || [])[0] || [])[0] || [])[0] || 1;
-    // let input2 = (((inputs || [])[1] || [])[0] || [])[0] || 1;
 
     for (let i = 0; i < (inputs || []).length; i++) {
       let inputVal = ((inputs[i] || [])[0] || [])[0] || 0;
@@ -46,15 +45,10 @@ class PadSamplerWorklet extends AudioWorkletProcessor {
       }
     }
 
-    try {
-      if (this.audioBuffer.length) {
-        for (let i = 0; i < output.length; i++) {
-          output[i] = this.getNextSample();
-        }
+    if (this.audioBuffer.length) {
+      for (let i = 0; i < output.length; i++) {
+        output[i] = this.getNextSample();
       }
-    } catch (e) {
-      this.port.postMessage({ error: e });
-      console.warn(e);
     }
     return true;
   }
