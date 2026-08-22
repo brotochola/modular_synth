@@ -3,6 +3,8 @@ class Sequencer extends Component {
   static oneSemitone = 1.059463;
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Step sequencer. 16 steps × 13 semitones grid. A rising trigger advances the playhead. Outputs: relative note (semitone offset), a trigger when the step is on, and frequency in Hz. Draw notes on the grid; sequence saves with the patch.";
     this.valuesToSave = ["sequence"];
 
     this.numberOfSemitones = 13;

@@ -2,6 +2,8 @@ class CounterComponent extends Component {
   static name = "Counter";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Counter. Rising edges on + increment and on − decrement the count. Output is the current integer count (shown on the display). Reset by removing/re-adding or driving from zero externally.";
     this.customAudioTriggers = ["+", "-"];
     this.val = 0;
     this.createNode();

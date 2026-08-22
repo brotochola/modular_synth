@@ -2,6 +2,8 @@ class MidiFilePlayer extends Component {
   static name = "MIDI Player";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "MIDI file player. Load a .mid file, then play with the button or a rising trigger; stop input ends playback. Outputs note frequency (Hz) and a trigger pulse per note. Rate scales tempo (0.25–4×). File is saved with the patch.";
     this.playing = false;
     this.namedAudioInputs = ["trigger", "stop"];
     this.uiParamWidgets = { in_0: "none", in_1: "none" };

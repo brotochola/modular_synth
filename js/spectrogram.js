@@ -2,6 +2,8 @@ class Spectrogram extends Component {
   static name = "Spectrogram";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Spectrogram. Scrolls frequency content over time (FFT columns). Visual only — brighter rows are stronger bands.";
     this.node = app.actx.createAnalyser();
     this.createCanvas();
     this.node.fftSize = 256;

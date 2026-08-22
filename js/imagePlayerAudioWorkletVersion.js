@@ -2,6 +2,8 @@ class ImagePlayerWorkletVersion extends Component {
   static name = "Image Player";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Image player. Load a still image and stream its R, G, B, A channels as audio-rate outputs. Filename is saved with the patch. Pair with Image Maker or math modules.";
 
     this.createInputFile();
 

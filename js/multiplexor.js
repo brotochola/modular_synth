@@ -2,6 +2,8 @@ class Multiplexor extends Component {
   static name = "Multiplexor";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Multiplexor / switch. The which input selects which of the eight signal inputs is passed to the output (0-based). which at 0 with no valid channel yields silence.";
     this.which = 0;
     this.createNode();
     this.text = document.createElement("p");

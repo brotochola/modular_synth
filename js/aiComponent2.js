@@ -2,6 +2,8 @@ class AiComponent2 extends Component {
   static name = "AI";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Experimental AI module. Trains a small neural net (brain.js) on random data, then runs inference as a signal process. More toy / research than a polished synth voice.";
     this.net = new brain.NeuralNetwork({
       activation: "sigmoid", // activation function
       hiddenLayers: [512, 128],

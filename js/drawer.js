@@ -2,6 +2,8 @@ class Drawer extends Component {
   static name = "Drawer";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Drawn waveform oscillator. Sketch a shape on the canvas; it loops as an audio buffer. Good for custom periodic tones and crude wavetable-style sounds.";
 
     // this.createInputButtons();
     this.size = 256;

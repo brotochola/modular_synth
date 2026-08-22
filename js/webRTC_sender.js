@@ -2,6 +2,8 @@ class WebRTCSender extends Component {
   static name = "RTC Sender";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "WebRTC sender. Takes audio patched into this module and streams it to a remote peer. Use the button / peer id to connect; pair with a Receiver on the other side.";
     this.peerID = this.id + "_" + this.app.userID;
     this.peer = new Peer(this.peerID, {});
 

@@ -2,6 +2,8 @@ class WebcamPlayer extends Component {
   static name = "Webcam";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Webcam → audio. Streams live camera frames as R, G, B audio-rate outputs (pixel streams). Patch into Image Maker, Shader, Custom Processor, etc.";
 
     this.createCanvas();
 

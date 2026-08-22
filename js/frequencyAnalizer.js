@@ -2,6 +2,8 @@ class FrequencyAnalizer extends Component {
   static name = "Freq Analyzer";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Frequency analyzer. Shows a live bar spectrum (FFT) of the input. Visual only — helps you see harmonics and filter shape.";
     this.node = app.actx.createAnalyser();
 
     this.node.fftSize = 1024;

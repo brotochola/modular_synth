@@ -2,6 +2,8 @@ class KeyboardComponent extends Component {
   static name = "Keyboard";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Computer keyboard. Each listed key is a gate/CV output (high while held). Pick a multiplayer seat so only that user's keys drive this module.";
     this.outputLabels = [
       "q",
       "w",

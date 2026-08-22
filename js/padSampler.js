@@ -2,6 +2,8 @@ class PadSampler extends Component {
   static name = "Pad Sampler";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Pad sampler. Load one audio sample, then fire it from the play button or from any of the trigger inputs. Each hit plays the loaded buffer; useful for drums and one-shots.";
 
     this.createNode();
     this.createInputFile();

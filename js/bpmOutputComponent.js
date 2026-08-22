@@ -12,6 +12,8 @@ class BPMOutputComponent extends Component {
 
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "BPM clock. Emits pulses locked to the patch BPM. Use the rate select to multiply or divide the clock (halves, doubles, etc.). Patch the output into sequencers, ADSR triggers, MIDI player, or anything that needs a tempo.";
     this.valuesToSave = ["rate"];
     if (serializedData && serializedData.rate != null) {
       this.rate = serializedData.rate;

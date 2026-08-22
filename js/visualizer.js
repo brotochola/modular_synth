@@ -2,6 +2,8 @@ class Oscilloscope extends Component {
   static name = "Oscilloscope";
   constructor(app,serializedData) {
     super(app,serializedData);
+    this.infoText =
+      "Oscilloscope. Draws the time-domain waveform of the input. Visual only — useful to check amplitude, shape and clipping.";
     this.node = app.actx.createAnalyser();
     
     this.node.fftSize = 512;

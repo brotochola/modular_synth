@@ -2,6 +2,8 @@ class LargeVisualizer extends Component {
   static name = "Large Visualizer";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Wide scrolling oscilloscope. Draws the input waveform over time across a large canvas. Use speed to control how fast the display scrolls.";
     this.node = app.actx.createAnalyser();
 
     this.node.fftSize = 2048;

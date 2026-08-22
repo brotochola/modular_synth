@@ -2,6 +2,8 @@ class Spectrum2Image extends Component {
   static name = "Spectrum 2 Image";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Spectrum to image. Runs a high-resolution FFT on the input and packs frequency bins into canvas pixels — turns audio spectrum into a visual texture.";
     this.node = app.actx.createAnalyser();
     this.ready = true;
 

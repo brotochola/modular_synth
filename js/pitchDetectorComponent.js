@@ -2,6 +2,8 @@ class PitchDetectorComponent extends Component {
   static name = "Pitch Detector";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Pitch detector (YIN). Estimates the fundamental frequency of the input audio and outputs it as a pitch CV (Hz). Best on clear monophonic sources.";
 
     this.createNode();
   }

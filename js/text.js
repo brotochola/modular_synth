@@ -2,6 +2,8 @@ class Text extends Component {
   static name = "Text";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Patch notes. Free-text area saved with the rack — labels, instructions, or reminders. No audio.";
     this.node = null;
     this.ready = true;
     this.createInput();
@@ -36,6 +38,7 @@ class Text extends Component {
 
   createView() {
     this.ready = true;
+    this.createInfoButton();
     if (this.app.patchName) {
       // same path as Component: filter own session + store unsubscribe for remove()
       setTimeout(() => this.startListeningToChangesInThiscomponent(), 2000);

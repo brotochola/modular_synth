@@ -2,6 +2,8 @@ class WaveShaper extends Component {
   static name = "Wave Shaper";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Additive / custom-wave oscillator. Builds a PeriodicWave from harmonic amplitudes (1/n² style) and plays it as an OscillatorNode. Frequency is modulatable like a normal osc.";
     this.length = 32;
 
     this.real = new Float32Array(this.length);

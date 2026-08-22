@@ -2,6 +2,8 @@ class NumberDisplayComponent extends Component {
   static name = "Number Display";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Number display. Shows the current value of the input signal (about 3 decimals). Useful for debugging CV and reading LFOs or envelopes.";
 
     this.createDisplay();
 

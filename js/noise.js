@@ -2,6 +2,8 @@ class Noise extends Component {
   static name = "Noise";
   constructor(app,serializedData) {
     super(app,serializedData);
+    this.infoText =
+      "White noise from a looping random buffer. Continuous hiss / random CV source. Prefer the worklet Noise module if both are in the menu — same idea, different engine.";
 
     // this.osc = new OscillatorNode(this.app.actx);
     // this.osc.type = "square";

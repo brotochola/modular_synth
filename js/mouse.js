@@ -2,6 +2,8 @@ class Mouse extends Component {
   static name = "Mouse";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Mouse position as CV. Outputs normalized X and Y. Seat select picks which collaborator's cursor drives the module in multiplayer.";
     this.outputLabels = ["X", "Y"];
     this.x = 0;
     this.y = 0;

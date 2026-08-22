@@ -2,6 +2,8 @@ class Distortion extends Component {
   static name = "Distortion";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Waveshaping distortion. Soft-clips the input; higher amount means more harmonics and grit. Set amount with the number box or automate the amount input.";
     this.amount = 0;
 
     this.createNode();

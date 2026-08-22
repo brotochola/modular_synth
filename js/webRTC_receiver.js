@@ -2,6 +2,8 @@ class WebRTCReceiver extends Component {
   static name = "RTC Receiver";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "WebRTC receiver. Listens for a peer call and plays the remote audio stream into the rack. Pair with a Sender that uses the matching peer id.";
     this.ready = true;
 
     this.p = document.createElement("p");

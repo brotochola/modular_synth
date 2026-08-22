@@ -2,6 +2,8 @@ class MemoryComponent extends Component {
   static name = "Memory";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "Sample and hold / memory. Captures and holds the input value when triggered, and shows the stored number. Output stays at the last held level until the next capture.";
 
     this.createNode();
     this.createDisplay();

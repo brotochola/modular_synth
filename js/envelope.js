@@ -2,6 +2,8 @@ class EnvelopeGenerator extends Component {
   static name = "ADSR";
   constructor(app, serializedData) {
     super(app, serializedData);
+    this.infoText =
+      "ADSR envelope. While trigger (gate) stays high it runs attack then decay to sustain; when trigger falls it releases. Patch trigger from keys, MIDI, sequencers or BPM. Shape with attack, decay, sustain, release and attackcurve; output modulates amp, filter, etc.";
     this.createNode();
   }
 
