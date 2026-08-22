@@ -453,6 +453,9 @@ component.PhoneSensors icon:after {
 component.SampleHold icon:after {
   content: "\1F3B2";
 }
+component.SequentialSwitch icon:after {
+  content: "\1F500";
+}
 component.Kick808 icon:after {
   content: "\1F941";
 }

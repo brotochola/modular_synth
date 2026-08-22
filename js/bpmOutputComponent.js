@@ -1,6 +1,7 @@
 class BPMOutputComponent extends Component {
   static name = "BPM";
   static RATES = [
+    { label: "/16", value: 0.0625 },
     { label: "/8", value: 0.125 },
     { label: "/4", value: 0.25 },
     { label: "/2", value: 0.5 },

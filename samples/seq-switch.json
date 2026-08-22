@@ -1,0 +1,219 @@
+{
+  "bpm": 120,
+  "outputX": "1100px",
+  "outputY": "340px",
+  "connections": [],
+  "components": [
+    {
+      "id": "txt_ss",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "40px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": [
+        "text"
+      ],
+      "text": "SEQ SWITCH — round-robin plucks\nBPM (*2) clocks the switch + ADSR.\n4 oscs (A3 C4 E4 A4) into jacks 1–4.\nWatch the step display count 1–4.",
+      "connections": []
+    },
+    {
+      "id": "bpm_ss",
+      "constructor": "BPMOutputComponent",
+      "type": "BPMOutputComponent",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "240px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": [
+        "rate"
+      ],
+      "rate": 2,
+      "connections": [
+        {
+          "from": "bpm_ss",
+          "to": "sw_ss",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c_bpm_sw"
+        },
+        {
+          "from": "bpm_ss",
+          "to": "env_ss",
+          "audioParam": "trigger",
+          "numberOfOutput": 0,
+          "id": "c_bpm_env"
+        }
+      ]
+    },
+    {
+      "id": "osc_a",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "280px",
+      "y": "80px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 220
+      },
+      "node": {
+        "type": "square"
+      },
+      "connections": [
+        {
+          "from": "osc_a",
+          "to": "sw_ss",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c_a"
+        }
+      ]
+    },
+    {
+      "id": "osc_b",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "280px",
+      "y": "240px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 261.63
+      },
+      "node": {
+        "type": "square"
+      },
+      "connections": [
+        {
+          "from": "osc_b",
+          "to": "sw_ss",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c_b"
+        }
+      ]
+    },
+    {
+      "id": "osc_c",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "280px",
+      "y": "400px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 329.63
+      },
+      "node": {
+        "type": "square"
+      },
+      "connections": [
+        {
+          "from": "osc_c",
+          "to": "sw_ss",
+          "audioParam": "in_4",
+          "numberOfOutput": 0,
+          "id": "c_c"
+        }
+      ]
+    },
+    {
+      "id": "osc_d",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "280px",
+      "y": "560px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 440
+      },
+      "node": {
+        "type": "sawtooth"
+      },
+      "connections": [
+        {
+          "from": "osc_d",
+          "to": "sw_ss",
+          "audioParam": "in_5",
+          "numberOfOutput": 0,
+          "id": "c_d"
+        }
+      ]
+    },
+    {
+      "id": "sw_ss",
+      "constructor": "SequentialSwitch",
+      "type": "SequentialSwitch",
+      "createdBy": "user",
+      "x": "540px",
+      "y": "280px",
+      "audioParams": {},
+      "node": {},
+      "valuesToSave": [
+        "steps"
+      ],
+      "steps": 4,
+      "connections": [
+        {
+          "from": "sw_ss",
+          "to": "amp_ss",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c_sw_amp"
+        }
+      ]
+    },
+    {
+      "id": "env_ss",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "540px",
+      "y": "520px",
+      "audioParams": {
+        "attack": 0.005,
+        "attackcurve": 0.5,
+        "decay": 0.18,
+        "sustain": 0,
+        "release": 0.12,
+        "trigger": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_ss",
+          "to": "amp_ss",
+          "audioParam": "gain",
+          "numberOfOutput": 0,
+          "id": "c_env_amp"
+        }
+      ]
+    },
+    {
+      "id": "amp_ss",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "320px",
+      "audioParams": {
+        "gain": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_ss",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": 0,
+          "id": "c_out"
+        }
+      ]
+    }
+  ]
+}
