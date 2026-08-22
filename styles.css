@@ -148,25 +148,32 @@ app .mainContainer {
 .buttons {
   flex-wrap: wrap;
   position: fixed;
-  bottom: 0px;
-  left: 5px;
+  bottom: 0;
+  left: 0;
   transform: translateY(200%);
   width: 100vw;
+  box-sizing: border-box;
   display: flex;
-  gap: 2px;
-  /* text-align: left; */
-  z-index: 999;
+  gap: 8px;
+  padding: 10px;
+  z-index: 2;
   pointer-events: none;
   touch-action: none;
   flex-direction: row;
-  /* transform: translateX(-120%); */
   transition: transform 250ms ease-out;
   justify-content: center;
-  z-index: 2;
+  background: var(--panel);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--panel-edge);
+  border-bottom-width: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  box-shadow:
+    0 -8px 28px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(93, 255, 194, 0.08);
 }
 .buttons.visible {
   transform: translateY(0);
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
 }
 
 .historyPanel {
@@ -255,19 +262,36 @@ app .mainContainer {
 }
 
 .buttons button {
+  appearance: none;
+  -webkit-appearance: none;
   backdrop-filter: blur(10px);
   pointer-events: all;
   touch-action: auto;
   text-align: left;
   width: 200px;
-  height: 23px;
-  font-size: 13px;
-  padding: 10px;
-  line-height: 0px;
-  background: rgba(0, 0, 0, 0.7);
+  height: auto;
+  min-height: 28px;
+  font-size: 11px;
+  font-family: inherit;
+  letter-spacing: 0.3px;
+  padding: 6px 10px;
+  line-height: 1.2;
+  background: rgba(0, 0, 0, 0.55);
   border: 1px solid var(--panel-edge);
   color: var(--ink);
   border-radius: var(--radius);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  outline: none;
+}
+.buttons button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: #0a1812;
+}
+.buttons button:active {
+  background: rgba(93, 255, 194, 0.12);
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .buttons hr {
@@ -556,6 +580,10 @@ component.CustomProcessorComponent {
   width: 220px;
   height: auto;
   min-height: 160px;
+}
+
+.CustomProcessorComponent audioparamrow {
+  width: min-content;
 }
 
 component.Mixer {
@@ -1490,9 +1518,11 @@ footer #samplePatchSelect {
 span.categoryOfComponent {
   width: 210px;
   display: flex;
-  gap: 2px;
+  gap: 4px;
   flex-direction: column;
   justify-content: flex-start;
+  padding: 4px 6px;
+  border-left: 2px solid var(--accent-dim);
 }
 
 .openButtons {
@@ -1621,10 +1651,12 @@ component.drawer canvas {
     align-items: flex-end;
     align-content: center;
     flex-wrap: wrap;
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+    padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   }
   .buttons button {
     width: 48vw;
+    min-height: 40px;
+    font-size: 13px;
   }
   span.categoryOfComponent {
     width: 100vw;
@@ -1632,6 +1664,9 @@ component.drawer canvas {
     justify-content: flex-start;
     flex-wrap: wrap;
     flex-direction: row;
+    border-left: none;
+    border-top: 2px solid var(--accent-dim);
+    padding-top: 8px;
   }
 }
 
