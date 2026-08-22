@@ -633,22 +633,18 @@ class Component {
 
   onPointerMove(e) {
     if (!this._dragging) return;
-    let s = this.app.scale || 1;
-    let rack = this.app.container.getBoundingClientRect();
-    let x = (e.clientX - rack.left) / s - this._grabX;
-    let y = (e.clientY - rack.top) / s - this._grabY;
-    this.container.style.left = x + "px";
-    this.container.style.top = y + "px";
-    this.container.style.setProperty("--posX", this.container.style.left);
-    this.container.style.setProperty("--posY", this.container.style.top);
-    this.app.updateAllLines();
-    if (!this.app.syncingRemote) {
-      this.app.broadcastLocalDrag(this.id, x, y, false);
-    }
+    this._dragClientX = e.clientX;
+    this._dragClientY = e.clientY;
+    // Apply once per cable rAF — avoids layout thrash every pointer event
+    this.app._pendingDragComp = this;
   }
 
   onPointerUp(e) {
     if (!this._dragging) return;
+    if (this.app._pendingDragComp === this) {
+      this.app.cacheRackRect();
+      this.app.flushPendingComponentDrag();
+    }
     this._dragging = false;
     this.container.classList.remove("grabbed");
     this.container.style.removeProperty("--grab-hue");

@@ -95,9 +95,8 @@ app {
   top: 0px;
   width: 100vw;
   background-image: url(carpet.jpg);
-  background-position: calc(0.25 * calc(var(--mainContainerX) + 500px))
-    calc(0.25 * calc(var(--mainContainerY) + 500px));
-  background-size: calc(calc(95 + 5 * var(--scale)) * 1%) auto;
+  background-position: 0 0;
+  background-size: 100% auto;
   height: 100vh;
   border-top: 1px solid gray;
 }
@@ -1587,6 +1586,26 @@ footer connectedUsers {
   position: relative;
   color: var(--accent);
   letter-spacing: 0.3px;
+}
+
+footer .sysStatus {
+  font-size: 11px;
+  line-height: 22px;
+  margin-right: 8px;
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  opacity: 0.9;
+}
+
+footer .sysStatus.dim {
+  opacity: 0.45;
+  color: var(--ink);
+}
+
+footer .sysStatus.warn {
+  color: var(--danger);
+  opacity: 1;
 }
 
 footer button,

@@ -44,10 +44,12 @@ class App {
     this.admin = !!getParameterByName("admin");
 
     this.playButton = document.querySelector(".play");
+    this.sysStatusEl = document.querySelector(".sysStatus");
 
     this.components = [];
     this.actx = new AudioContext();
     this.actx.suspend();
+    this.actx.addEventListener("statechange", () => this.updateSysStatus());
 
     this.bpm = 100;
     this.cables = Object.assign({}, App.CABLE_DEFAULTS);
@@ -78,6 +80,12 @@ class App {
     this._timeSyncTimer = null;
     this._beatPublishTimer = null;
     this._cablesDirty = true;
+    this._endpointDirtyIds = new Set();
+    this._rackRect = null;
+    this._rackScale = 1;
+    this._sysFps = 60;
+    this._sysFrameMs = 16;
+    this._sysHudAt = 0;
     this._cableMouse = { x: 0, y: 0 };
     this._cableMouseClient = { x: 0, y: 0 };
     this.createMainContainer(elem);
@@ -451,6 +459,17 @@ class App {
       y,
     };
     if (this.hasOpenRtc()) {
+      if (!isEnd) {
+        let now = performance.now();
+        if (now - (this._lastDragSentAt || 0) < 50) {
+          this._pendingDragMsg = msg;
+          return;
+        }
+        this._lastDragSentAt = now;
+        this._pendingDragMsg = null;
+      } else if (this._pendingDragMsg) {
+        this._pendingDragMsg = null;
+      }
       this.rtcInstance.sendMessage(msg);
     } else if (!isEnd) {
       this.queueLivePresence({
@@ -580,7 +599,6 @@ class App {
   tickPresenceInterpolation(dt) {
     let t = 1 - Math.exp(-18 * dt);
     let epsilon = 0.5;
-    let linesDirty = false;
 
     for (let key of Object.keys(this.remoteCursors)) {
       let entry = this.remoteCursors[key];
@@ -603,7 +621,7 @@ class App {
       anim.x += (anim.targetX - anim.x) * t;
       anim.y += (anim.targetY - anim.y) * t;
       if (Math.abs(anim.x - ox) > 0.01 || Math.abs(anim.y - oy) > 0.01) {
-        linesDirty = true;
+        this.markEndpointsDirty(id);
       }
       let x = anim.x + "px";
       let y = anim.y + "px";
@@ -621,8 +639,6 @@ class App {
         delete this._remoteDragAnim[id];
       }
     }
-
-    if (linesDirty) this.updateAllLines();
   }
 
   ensureRemoteCursor(userID, sessionID) {
@@ -1107,7 +1123,8 @@ class App {
       let top = event.clientY - parent.top - localY * newS;
       this.container.style.left = left + "px";
       this.container.style.top = top + "px";
-      this.putCSSVariablesInMainContainer(left, top);
+      this.updateCarpetParallax(left, top);
+      this.updateCarpetScale();
       this.container.parentNode.style.setProperty("--scale", this.scale);
       this.updateAllLines();
 
@@ -1127,44 +1144,129 @@ class App {
     this.canvas = document.createElement("canvas");
     this.canvas.classList.add("linesCanvas");
     this.appEl.appendChild(this.canvas);
-    this.ctx = this.canvas.getContext("2d");
-    this.sizeCableCanvas();
+    this._cableWorker = null;
+    this._workerCableIds = new Set();
+    this._cableCanvasW = 0;
+    this._cableCanvasH = 0;
+    try {
+      if (typeof Worker === "undefined" || !this.canvas.transferControlToOffscreen) {
+        throw new Error("OffscreenCanvas unavailable");
+      }
+      let offscreen = this.canvas.transferControlToOffscreen();
+      this._cableWorker = new Worker("js/cableWorker.js");
+      let w = this.appEl.clientWidth || 1;
+      let h = this.appEl.clientHeight || 1;
+      this._cableCanvasW = w;
+      this._cableCanvasH = h;
+      this._cableWorker.postMessage(
+        {
+          type: "init",
+          canvas: offscreen,
+          width: w,
+          height: h,
+          params: Object.assign({}, this.cables),
+        },
+        [offscreen],
+      );
+      this.ctx = null;
+      this.cableWorld = null;
+    } catch (err) {
+      console.warn("Cable worker fallback:", err);
+      this._cableWorker = null;
+      this.ctx = this.canvas.getContext("2d");
+      this.sizeCableCanvas();
+    }
     window.addEventListener("resize", () => {
       this.sizeCableCanvas();
       this.markCablesDirty();
     });
   }
   initCableWorld() {
-    this.cableWorld = new CableWorld();
-    this.cableWorld.setParams(this.cables);
+    if (!this._cableWorker) {
+      this.cableWorld = new CableWorld();
+      this.cableWorld.setParams(this.cables);
+    }
     this._cableLastTs = 0;
     window.addEventListener("pointermove", (e) => {
       this._cableMouseClient.x = e.clientX;
       this._cableMouseClient.y = e.clientY;
     });
     this.startCableLoop();
+    this.updateSysStatus();
+    this.updateCarpetScale();
+  }
+  postCableWorker(msg, transfer) {
+    if (!this._cableWorker) return;
+    if (transfer) this._cableWorker.postMessage(msg, transfer);
+    else this._cableWorker.postMessage(msg);
+  }
+  wakeCables() {
+    if (this._cableWorker) this.postCableWorker({ type: "wake" });
+    else if (this.cableWorld) this.cableWorld.wake();
+  }
+  setCableParams(params) {
+    if (this._cableWorker) {
+      this.postCableWorker({ type: "params", params: Object.assign({}, params) });
+    } else if (this.cableWorld) {
+      this.cableWorld.setParams(params);
+    }
   }
   startCableLoop() {
     let tick = (ts) => {
       this._cableRaf = requestAnimationFrame(tick);
       let dt = this._cableLastTs ? (ts - this._cableLastTs) / 1000 : 0.016;
       this._cableLastTs = ts;
+      let t0 = performance.now();
       this.runCableFrame(dt);
+      let frameMs = performance.now() - t0;
+      let fpsInst = dt > 0 ? 1 / dt : 60;
+      this._sysFrameMs += (frameMs - this._sysFrameMs) * 0.15;
+      this._sysFps += (fpsInst - this._sysFps) * 0.15;
+      if (ts - this._sysHudAt > 250) {
+        this._sysHudAt = ts;
+        this.updateSysStatus();
+      }
     };
     this._cableRaf = requestAnimationFrame(tick);
   }
+  updateSysStatus() {
+    if (!this.sysStatusEl) return;
+    let state = (this.actx && this.actx.state) || "closed";
+    let fps = Math.round(this._sysFps || 0);
+    let load = Math.min(
+      100,
+      Math.round(((this._sysFrameMs || 0) / 16.67) * 100),
+    );
+    let n = (this.components && this.components.length) || 0;
+    this.sysStatusEl.textContent =
+      "audio " + state + " · " + fps + " fps · " + load + "% · " + n + "n";
+    this.sysStatusEl.classList.toggle("warn", load >= 80 || fps < 30);
+    this.sysStatusEl.classList.toggle("dim", state !== "running");
+  }
   sizeCableCanvas() {
-    let w = this.appEl.clientWidth;
-    let h = this.appEl.clientHeight;
+    let w = this.appEl.clientWidth || 1;
+    let h = this.appEl.clientHeight || 1;
+    if (this._cableWorker) {
+      if (w === this._cableCanvasW && h === this._cableCanvasH) return;
+      this._cableCanvasW = w;
+      this._cableCanvasH = h;
+      this.postCableWorker({ type: "resize", width: w, height: h });
+      return;
+    }
+    if (!this.canvas || !this.ctx) return;
     if (this.canvas.width !== w) this.canvas.width = w;
     if (this.canvas.height !== h) this.canvas.height = h;
     this.ctx.lineCap = "round";
     this.ctx.lineWidth = 3;
   }
+  cacheRackRect() {
+    this._rackRect = this.container.getBoundingClientRect();
+    this._rackScale = this.scale || 1;
+  }
   jackCenterWorld(el) {
     if (!el) return null;
-    let rack = this.container.getBoundingClientRect();
-    let s = this.scale || 1;
+    let rack = this._rackRect || this.container.getBoundingClientRect();
+    let s = this._rackScale != null ? this._rackScale : this.scale || 1;
     let box = el.getBoundingClientRect();
     let cx = box.left + box.width / 2;
     let cy = box.top + box.height / 2;
@@ -1174,8 +1276,8 @@ class App {
     };
   }
   clientToWorld(clientX, clientY) {
-    let rack = this.container.getBoundingClientRect();
-    let s = this.scale || 1;
+    let rack = this._rackRect || this.container.getBoundingClientRect();
+    let s = this._rackScale != null ? this._rackScale : this.scale || 1;
     return {
       x: (clientX - rack.left) / s,
       y: (clientY - rack.top) / s,
@@ -1183,6 +1285,13 @@ class App {
   }
   markCablesDirty() {
     this._cablesDirty = true;
+    this.wakeCables();
+  }
+  markEndpointsDirty(componentId) {
+    if (componentId == null) return;
+    if (!this._endpointDirtyIds) this._endpointDirtyIds = new Set();
+    this._endpointDirtyIds.add(componentId);
+    this.wakeCables();
   }
   connectionCableColor(conn) {
     let key =
@@ -1200,50 +1309,185 @@ class App {
     let toEl = (conn.to.inputElements[conn.audioParam] || {}).button;
     return { fromEl, toEl };
   }
-  syncPhysicsCables() {
+  measureConnectionEndpoints(conn) {
+    let { fromEl, toEl } = this.connectionJackEls(conn);
+    if (!fromEl || !toEl) return null;
+    let a = this.jackCenterWorld(fromEl);
+    let b = this.jackCenterWorld(toEl);
+    if (!a || !b) return null;
+    return {
+      id: conn.id,
+      x0: a.x,
+      y0: a.y,
+      x1: b.x,
+      y1: b.y,
+      color: this.connectionCableColor(conn),
+      fromEl,
+      toEl,
+    };
+  }
+  syncOneConnectionEndpoints(conn) {
+    if (!conn) return;
+    let m = this.measureConnectionEndpoints(conn);
+    if (!m) return;
+    if (this._cableWorker) return m;
     if (!this.cableWorld) return;
-    let conns = this.getAllConnections();
-    let live = new Set();
-    for (let conn of conns) {
-      live.add(conn.id);
-      let { fromEl, toEl } = this.connectionJackEls(conn);
-      if (!fromEl || !toEl) continue;
-      let a = this.jackCenterWorld(fromEl);
-      let b = this.jackCenterWorld(toEl);
-      if (!a || !b) continue;
-      let slot = this.cableWorld.byConnectionId.get(conn.id);
-      if (slot == null) {
-        this.cableWorld.createCable({
-          x0: a.x,
-          y0: a.y,
-          x1: b.x,
-          y1: b.y,
-          fromEl,
-          toEl,
-          connectionId: conn.id,
-          color: this.connectionCableColor(conn),
-        });
-      } else {
-        let cab = this.cableWorld.cables[slot];
-        if (cab) {
-          cab.fromEl = fromEl;
-          cab.toEl = toEl;
-          cab.color = this.connectionCableColor(conn);
+    let slot = this.cableWorld.byConnectionId.get(conn.id);
+    if (slot == null) {
+      this.cableWorld.createCable({
+        x0: m.x0,
+        y0: m.y0,
+        x1: m.x1,
+        y1: m.y1,
+        fromEl: m.fromEl,
+        toEl: m.toEl,
+        connectionId: conn.id,
+        color: m.color,
+      });
+      return;
+    }
+    let cab = this.cableWorld.cables[slot];
+    if (cab) {
+      cab.fromEl = m.fromEl;
+      cab.toEl = m.toEl;
+      cab.color = m.color;
+    }
+    this.cableWorld.setEndpoints(slot, m.x0, m.y0, m.x1, m.y1, true);
+  }
+  syncEndpointsForComponents(componentIds) {
+    if (!componentIds || !componentIds.size) return;
+    if (this._cableWorker) {
+      let cables = [];
+      for (let conn of this.getAllConnections()) {
+        if (!componentIds.has(conn.from.id) && !componentIds.has(conn.to.id)) {
+          continue;
         }
-        this.cableWorld.setEndpoints(slot, a.x, a.y, b.x, b.y, true);
+        let m = this.measureConnectionEndpoints(conn);
+        if (m) {
+          cables.push({
+            id: m.id,
+            x0: m.x0,
+            y0: m.y0,
+            x1: m.x1,
+            y1: m.y1,
+            color: m.color,
+          });
+          this._workerCableIds.add(m.id);
+        }
       }
+      if (cables.length) {
+        this.postCableWorker({ type: "sync", cables, wake: true });
+      }
+      return;
     }
-    for (let [connId] of [...this.cableWorld.byConnectionId.entries()]) {
-      if (!live.has(connId)) this.cableWorld.freeByConnectionId(connId);
+    if (!this.cableWorld) return;
+    for (let conn of this.getAllConnections()) {
+      if (!componentIds.has(conn.from.id) && !componentIds.has(conn.to.id)) {
+        continue;
+      }
+      this.syncOneConnectionEndpoints(conn);
     }
-    this._cablesDirty = false;
+  }
+  collectMovingComponentIds() {
+    let ids = this._endpointDirtyIds;
+    if (!ids) ids = new Set();
+    for (let c of this.components) {
+      if (c._dragging) ids.add(c.id);
+    }
+    for (let id of Object.keys(this._remoteDragAnim || {})) {
+      ids.add(id);
+    }
+    return ids;
+  }
+  syncPhysicsCables() {
+    if (this._cableWorker) {
+      this.syncPhysicsCablesWorker();
+      return;
+    }
+    if (!this.cableWorld) return;
+    if (this._cablesDirty) {
+      let conns = this.getAllConnections();
+      let live = new Set();
+      for (let conn of conns) {
+        live.add(conn.id);
+        this.syncOneConnectionEndpoints(conn);
+      }
+      for (let [connId] of [...this.cableWorld.byConnectionId.entries()]) {
+        if (!live.has(connId)) this.cableWorld.freeByConnectionId(connId);
+      }
+      this._cablesDirty = false;
+      this._endpointDirtyIds = new Set();
+      return;
+    }
+    let ids = this.collectMovingComponentIds();
+    if (!ids.size) return;
+    this.syncEndpointsForComponents(ids);
+    this._endpointDirtyIds = new Set();
+  }
+  syncPhysicsCablesWorker() {
+    if (this._cablesDirty) {
+      let cables = [];
+      let live = new Set();
+      for (let conn of this.getAllConnections()) {
+        let m = this.measureConnectionEndpoints(conn);
+        if (!m) continue;
+        live.add(conn.id);
+        cables.push({
+          id: m.id,
+          x0: m.x0,
+          y0: m.y0,
+          x1: m.x1,
+          y1: m.y1,
+          color: m.color,
+        });
+      }
+      let removeIds = [];
+      for (let id of this._workerCableIds) {
+        if (!live.has(id)) removeIds.push(id);
+      }
+      this._workerCableIds = live;
+      this.postCableWorker({
+        type: "sync",
+        full: true,
+        cables,
+        removeIds,
+        wake: true,
+      });
+      this._cablesDirty = false;
+      this._endpointDirtyIds = new Set();
+      return;
+    }
+    let ids = this.collectMovingComponentIds();
+    if (!ids.size) return;
+    this.syncEndpointsForComponents(ids);
+    this._endpointDirtyIds = new Set();
   }
   syncCableGhost() {
+    if (this._cableWorker) {
+      if (!this.lastOutputClicked || !this.lastOutputClicked.output) {
+        this.postCableWorker({ type: "sync", ghost: null });
+        return;
+      }
+      let fromEl = this.lastOutputClicked.output;
+      let a = this.jackCenterWorld(fromEl);
+      let m = this.clientToWorld(
+        this._cableMouseClient.x,
+        this._cableMouseClient.y,
+      );
+      if (!a) return;
+      this.postCableWorker({
+        type: "sync",
+        ghost: { x0: a.x, y0: a.y, x1: m.x, y1: m.y },
+        wake: true,
+      });
+      return;
+    }
     if (!this.cableWorld) return;
     if (!this.lastOutputClicked || !this.lastOutputClicked.output) {
       this.cableWorld.clearGhost();
       return;
     }
+    this.cableWorld.wake();
     let fromEl = this.lastOutputClicked.output;
     let a = this.jackCenterWorld(fromEl);
     let m = this.clientToWorld(
@@ -1265,35 +1509,96 @@ class App {
   }
   clearCableGhost() {
     this.lastOutputClicked = null;
-    if (this.cableWorld) this.cableWorld.clearGhost();
+    if (this._cableWorker) this.postCableWorker({ type: "sync", ghost: null });
+    else if (this.cableWorld) this.cableWorld.clearGhost();
+  }
+  cableViewPayload(dt) {
+    let rack = this._rackRect || this.container.getBoundingClientRect();
+    let canvasBox = this._canvasRect || this.canvas.getBoundingClientRect();
+    let s = this._rackScale || this.scale || 1;
+    let ox = rack.left - canvasBox.left;
+    let oy = rack.top - canvasBox.top;
+    let cw = this._cableWorker ? this._cableCanvasW : this.canvas.width;
+    let ch = this._cableWorker ? this._cableCanvasH : this.canvas.height;
+    return {
+      type: "view",
+      dt: dt || 0.016,
+      ox,
+      oy,
+      scale: s,
+      worldL: (0 - ox) / s,
+      worldT: (0 - oy) / s,
+      worldR: (cw - ox) / s,
+      worldB: (ch - oy) / s,
+    };
   }
   runCableFrame(dt) {
-    if (!this.cableWorld || !this.ctx) return;
+    if (!this._cableWorker && (!this.cableWorld || !this.ctx)) return;
+    if (
+      this._pendingDragMsg &&
+      this.hasOpenRtc() &&
+      performance.now() - (this._lastDragSentAt || 0) >= 50
+    ) {
+      this._lastDragSentAt = performance.now();
+      this.rtcInstance.sendMessage(this._pendingDragMsg);
+      this._pendingDragMsg = null;
+    }
     this.tickPresenceInterpolation(dt);
+
+    if (this._panning) {
+      this.updateCarpetParallax(this._panCurLeft, this._panCurTop);
+      return;
+    }
+
     this.sizeCableCanvas();
-    this.cableWorld.setParams(this.cables);
+    this.cacheRackRect();
+    this.flushPendingComponentDrag();
     this.syncPhysicsCables();
     this.syncCableGhost();
 
-    let rack = this.container.getBoundingClientRect();
-    let canvasBox = this.canvas.getBoundingClientRect();
-    let s = this.scale || 1;
-    let ox = rack.left - canvasBox.left;
-    let oy = rack.top - canvasBox.top;
-    let worldL = (0 - ox) / s;
-    let worldT = (0 - oy) / s;
-    let worldR = (this.canvas.width - ox) / s;
-    let worldB = (this.canvas.height - oy) / s;
-    this.cableWorld.updateCullFlags(worldL, worldT, worldR, worldB);
+    if (this._cableWorker) {
+      this.postCableWorker(this.cableViewPayload(dt));
+      return;
+    }
 
+    let view = this.cableViewPayload(dt);
+    this.cableWorld.updateCullFlags(
+      view.worldL,
+      view.worldT,
+      view.worldR,
+      view.worldB,
+    );
     this.cableWorld.step(dt);
-
+    this.paintCablesLocal(view);
+  }
+  paintCablesLocal(view) {
     let ctx = this.ctx;
+    let s = view.scale;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    ctx.setTransform(s, 0, 0, s, ox, oy);
+    ctx.setTransform(s, 0, 0, s, view.ox, view.oy);
     this.cableWorld.draw(ctx);
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  flushPendingComponentDrag() {
+    let comp = this._pendingDragComp;
+    if (!comp || !comp._dragging) {
+      this._pendingDragComp = null;
+      return;
+    }
+    this._pendingDragComp = null;
+    let rack = this._rackRect || this.container.getBoundingClientRect();
+    let s = this._rackScale != null ? this._rackScale : this.scale || 1;
+    let x = (comp._dragClientX - rack.left) / s - comp._grabX;
+    let y = (comp._dragClientY - rack.top) / s - comp._grabY;
+    comp.container.style.left = x + "px";
+    comp.container.style.top = y + "px";
+    comp.container.style.setProperty("--posX", comp.container.style.left);
+    comp.container.style.setProperty("--posY", comp.container.style.top);
+    this.markEndpointsDirty(comp.id);
+    if (!this.syncingRemote) {
+      this.broadcastLocalDrag(comp.id, x, y, false);
+    }
   }
   drawLine() {
     this.markCablesDirty();
@@ -1352,37 +1657,61 @@ class App {
       this._panning = true;
       this._panStartX = e.clientX;
       this._panStartY = e.clientY;
-      this._panLeft = parseFloat(getComputedStyle(this.container).left) || 0;
-      this._panTop = parseFloat(getComputedStyle(this.container).top) || 0;
+      this._panLeft = parseFloat(this.container.style.left);
+      this._panTop = parseFloat(this.container.style.top);
+      if (isNaN(this._panLeft) || isNaN(this._panTop)) {
+        let cs = getComputedStyle(this.container);
+        if (isNaN(this._panLeft)) this._panLeft = parseFloat(cs.left) || 0;
+        if (isNaN(this._panTop)) this._panTop = parseFloat(cs.top) || 0;
+      }
+      this._panCurLeft = this._panLeft;
+      this._panCurTop = this._panTop;
+      this._canvasRect = this.canvas.getBoundingClientRect();
+      this.postCableWorker({ type: "pause" });
       elem.setPointerCapture(e.pointerId);
     });
 
     elem.addEventListener("pointermove", (e) => {
       if (!this._panning) return;
-      // origin 0 0: left/top already match viewport px; /scale made zoom-out pan fly
-      let x = this._panLeft + (e.clientX - this._panStartX);
-      let y = this._panTop + (e.clientY - this._panStartY);
-      this.container.style.left = x + "px";
-      this.container.style.top = y + "px";
-      this.putCSSVariablesInMainContainer(x, y);
-      this.updateAllLines();
+      let dx = e.clientX - this._panStartX;
+      let dy = e.clientY - this._panStartY;
+      this._panCurLeft = this._panLeft + dx;
+      this._panCurTop = this._panTop + dy;
+      let s = this.scale || 1;
+      let tx = "translate(" + dx + "px," + dy + "px)";
+      this.container.style.transform = tx + " scale(" + s + ")";
+      this.canvas.style.transform = tx;
     });
 
-    elem.addEventListener("pointerup", () => {
-      this._panning = false;
-    });
-    elem.addEventListener("pointercancel", () => {
-      this._panning = false;
-    });
+    elem.addEventListener("pointerup", (e) => this.endPan(e));
+    elem.addEventListener("pointercancel", (e) => this.endPan(e));
 
     let box = this.container.getBoundingClientRect();
-    this.putCSSVariablesInMainContainer(box.x, box.y);
+    this.updateCarpetParallax(box.x, box.y);
+    this.updateCarpetScale();
   }
-  putCSSVariablesInMainContainer(x, y) {
-    document.body.style.setProperty("--mainContainerX", x + "px");
-    document.body.style.setProperty("--mainContainerY", y + "px");
-    this.container.style.setProperty("--mainContainerX", x + "px");
-    this.container.style.setProperty("--mainContainerY", y + "px");
+  endPan() {
+    if (!this._panning) return;
+    this._panning = false;
+    let s = this.scale || 1;
+    this.container.style.left = this._panCurLeft + "px";
+    this.container.style.top = this._panCurTop + "px";
+    this.container.style.transform = "scale(" + s + ")";
+    this.canvas.style.transform = "";
+    this._canvasRect = null;
+    this.updateCarpetParallax(this._panCurLeft, this._panCurTop);
+    this.postCableWorker({ type: "resume" });
+    this.markCablesDirty();
+  }
+  updateCarpetParallax(x, y) {
+    if (!this.appEl) return;
+    this.appEl.style.backgroundPosition =
+      0.25 * (x + 500) + "px " + 0.25 * (y + 500) + "px";
+  }
+  updateCarpetScale() {
+    if (!this.appEl) return;
+    let s = this.scale || 1;
+    this.appEl.style.backgroundSize = 95 + 5 * s + "% auto";
   }
 
   getOutputComponent() {
@@ -1733,7 +2062,8 @@ class App {
   populateSavedPatches() {
     let prefix = this.SAVE_PREFIX;
     Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith(prefix)) this.addSavedPatchOption(key.slice(prefix.length));
+      if (key.startsWith(prefix))
+        this.addSavedPatchOption(key.slice(prefix.length));
     });
   }
 
@@ -1986,7 +2316,7 @@ class App {
       beadRadius: num(src.beadRadius, d.beadRadius),
       cableAlpha: num(src.cableAlpha, d.cableAlpha),
     };
-    if (this.cableWorld) this.cableWorld.setParams(this.cables);
+    this.setCableParams(this.cables);
     this.syncCableSliders();
     this.updateAllLines();
   }
@@ -2026,7 +2356,7 @@ class App {
       this.cables[name] = v;
       let out = this.cablePanel.querySelector('[data-val="' + name + '"]');
       if (out) out.textContent = e.target.value;
-      if (this.cableWorld) this.cableWorld.setParams(this.cables);
+      this.setCableParams(this.cables);
       this.broadcastCableParams();
       this.updateAllLines();
     });

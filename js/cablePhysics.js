@@ -30,6 +30,16 @@ class CableWorld {
     this.slack = 0.5;
     this.beadRadius = 1.25;
     this.cableAlpha = 0.5;
+    this.awake = true;
+    this.settledFrames = 0;
+  }
+
+  static SETTLE_FRAMES = 10;
+  static VEL_EPS = 4;
+
+  wake() {
+    this.awake = true;
+    this.settledFrames = 0;
   }
 
   static beadCountForDist(dist) {
@@ -52,6 +62,7 @@ class CableWorld {
       for (let slot = 0; slot < this.maxCables; slot++) {
         if (this.cables[slot]) this.rebuildRest(slot);
       }
+      this.wake();
     }
   }
 
@@ -157,6 +168,7 @@ class CableWorld {
       this.byConnectionId.set(opts.connectionId, slot);
     }
     this.spawnBetween(slot, x0, y0, x1, y1);
+    this.wake();
     return slot;
   }
 
@@ -214,6 +226,15 @@ class CableWorld {
     cab.pinY0 = y0;
     cab.pinX1 = x1;
     cab.pinY1 = y1;
+
+    if (
+      Math.abs(x0 - oldX0) > 0.01 ||
+      Math.abs(y0 - oldY0) > 0.01 ||
+      Math.abs(x1 - oldX1) > 0.01 ||
+      Math.abs(y1 - oldY1) > 0.01
+    ) {
+      this.wake();
+    }
 
     let dist = Math.hypot(x1 - x0, y1 - y0) || 1;
     let want = CableWorld.beadCountForDist(dist);
@@ -444,8 +465,27 @@ class CableWorld {
     }
   }
 
+  maxBeadSpeedSq() {
+    let maxSq = 0;
+    let vx = this.vx;
+    let vy = this.vy;
+    for (let slot = 0; slot < this.maxCables; slot++) {
+      let cab = this.cables[slot];
+      if (!cab || cab.culled) continue;
+      let n = cab.count || this.minBeads;
+      let s = this.beadStart(slot);
+      for (let i = 1; i < n - 1; i++) {
+        let idx = s + i;
+        let sp = vx[idx] * vx[idx] + vy[idx] * vy[idx];
+        if (sp > maxSq) maxSq = sp;
+      }
+    }
+    return maxSq;
+  }
+
   step(dt) {
-    if (dt <= 0) return;
+    if (!this.awake) return false;
+    if (dt <= 0) return true;
     if (dt > 0.033) dt = 0.033;
     let sub = dt * 0.5;
     let g = this.gravity;
@@ -462,6 +502,15 @@ class CableWorld {
         this.stepCable(slot, sub, g, k, damp, x, y, vx, vy, rest);
       }
     }
+
+    let eps = CableWorld.VEL_EPS;
+    if (this.ghostSlot < 0 && this.maxBeadSpeedSq() < eps * eps) {
+      this.settledFrames++;
+      if (this.settledFrames >= CableWorld.SETTLE_FRAMES) this.awake = false;
+    } else {
+      this.settledFrames = 0;
+    }
+    return true;
   }
 
   draw(ctx) {
