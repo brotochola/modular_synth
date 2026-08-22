@@ -534,8 +534,35 @@ class CableWorld {
       ctx.strokeStyle = cab.color;
       ctx.lineWidth = lineW;
       ctx.moveTo(x[s], y[s]);
-      for (let i = 1; i < n; i++) {
-        ctx.lineTo(x[s + i], y[s + i]);
+
+      if (n < 3) {
+        for (let i = 1; i < n; i++) {
+          ctx.lineTo(x[s + i], y[s + i]);
+        }
+      } else {
+        // Uniform Catmull-Rom through beads → cubic beziers
+        for (let i = 0; i < n - 1; i++) {
+          let i0 = i === 0 ? 0 : i - 1;
+          let i1 = i;
+          let i2 = i + 1;
+          let i3 = i + 2 < n ? i + 2 : n - 1;
+          let x0 = x[s + i0];
+          let y0 = y[s + i0];
+          let x1 = x[s + i1];
+          let y1 = y[s + i1];
+          let x2 = x[s + i2];
+          let y2 = y[s + i2];
+          let x3 = x[s + i3];
+          let y3 = y[s + i3];
+          ctx.bezierCurveTo(
+            x1 + (x2 - x0) / 6,
+            y1 + (y2 - y0) / 6,
+            x2 - (x3 - x1) / 6,
+            y2 - (y3 - y1) / 6,
+            x2,
+            y2,
+          );
+        }
       }
       ctx.stroke();
     }
