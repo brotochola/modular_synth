@@ -24,11 +24,12 @@ class CableWorld {
     this.byConnectionId = new Map();
     this.ghostSlot = -1;
 
-    this.gravity = 2000;
-    this.stiffness = 900;
+    this.gravity = 4000;
+    this.stiffness = 0;
     this.damping = 0.88;
-    this.slack = 1.25;
-    this.beadRadius = 3.5;
+    this.slack = 0.5;
+    this.beadRadius = 1.25;
+    this.cableAlpha = 0.5;
   }
 
   static beadCountForDist(dist) {
@@ -46,6 +47,7 @@ class CableWorld {
     if (p.damping != null) this.damping = p.damping;
     if (p.slack != null) this.slack = p.slack;
     if (p.beadRadius != null) this.beadRadius = p.beadRadius;
+    if (p.cableAlpha != null) this.cableAlpha = p.cableAlpha;
     if (this.slack !== prevSlack) {
       for (let slot = 0; slot < this.maxCables; slot++) {
         if (this.cables[slot]) this.rebuildRest(slot);
@@ -79,10 +81,7 @@ class CableWorld {
   spawnBetween(slot, x0, y0, x1, y1, count) {
     let cab = this.cables[slot];
     let dist = Math.hypot(x1 - x0, y1 - y0) || 1;
-    let n =
-      count != null
-        ? count
-        : CableWorld.beadCountForDist(dist);
+    let n = count != null ? count : CableWorld.beadCountForDist(dist);
     if (n < this.minBeads) n = this.minBeads;
     if (n > this.maxBeads) n = this.maxBeads;
     if (cab) cab.count = n;
@@ -470,9 +469,11 @@ class CableWorld {
     let x = this.x;
     let y = this.y;
     let lineW = Math.max(1.5, r * 2);
+    let prevAlpha = ctx.globalAlpha;
 
     ctx.lineCap = "round";
     ctx.lineJoin = "round";
+    ctx.globalAlpha = prevAlpha * this.cableAlpha;
 
     for (let slot = 0; slot < this.maxCables; slot++) {
       let cab = this.cables[slot];
@@ -489,5 +490,6 @@ class CableWorld {
       }
       ctx.stroke();
     }
+    ctx.globalAlpha = prevAlpha;
   }
 }

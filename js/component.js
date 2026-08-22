@@ -609,6 +609,11 @@ class Component {
     this._dragging = true;
     this._grabX = (e.clientX - el.left) / s;
     this._grabY = (e.clientY - el.top) / s;
+    this.container.classList.add("grabbed");
+    this.container.style.setProperty(
+      "--grab-hue",
+      this.app.hueFromUserId(this.app.userID),
+    );
     this.container.setPointerCapture(e.pointerId);
   }
 
@@ -631,6 +636,8 @@ class Component {
   onPointerUp(e) {
     if (!this._dragging) return;
     this._dragging = false;
+    this.container.classList.remove("grabbed");
+    this.container.style.removeProperty("--grab-hue");
     let x = parseFloat(this.container.style.left) || 0;
     let y = parseFloat(this.container.style.top) || 0;
     if (!this.app.syncingRemote) {

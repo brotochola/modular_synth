@@ -1,11 +1,12 @@
 class App {
   static HISTORY_CAP = 40;
   static CABLE_DEFAULTS = {
-    gravity: 2000,
-    stiffness: 900,
+    gravity: 4000,
+    stiffness: 0,
     damping: 0.88,
-    slack: 1.25,
-    beadRadius: 3.5,
+    slack: 0.5,
+    beadRadius: 1.25,
+    cableAlpha: 0.5,
   };
   // analog patch-cable set: saturated, similar lightness, readable on dark rack
   static CABLE_COLORS = [
@@ -67,6 +68,7 @@ class App {
     this._pendingLive = null;
     this._lastUserKey = "";
     this._remoteDragging = {};
+    this._remoteDragAnim = {};
     this._prevSessions = null;
     this._prevSessionLabels = {};
     this.playing = false;
@@ -543,6 +545,80 @@ class App {
     return h % 360;
   }
 
+  setComponentGrabbed(comp, userID) {
+    if (!comp || !comp.container) return;
+    comp.container.classList.add("grabbed");
+    comp.container.style.setProperty(
+      "--grab-hue",
+      this.hueFromUserId(userID),
+    );
+  }
+
+  clearComponentGrabbed(comp) {
+    if (!comp || !comp.container) return;
+    if (comp._dragging) return;
+    comp.container.classList.remove("grabbed");
+    comp.container.style.removeProperty("--grab-hue");
+  }
+
+  clearRemoteDragForSession(sessionKey) {
+    if (!sessionKey) return;
+    for (let id of Object.keys(this._remoteDragAnim)) {
+      let anim = this._remoteDragAnim[id];
+      if (anim.sessionID != sessionKey && anim.userID != sessionKey) continue;
+      this.clearComponentGrabbed(this.getComponentByID(id));
+      delete this._remoteDragAnim[id];
+    }
+  }
+
+  tickPresenceInterpolation(dt) {
+    let t = 1 - Math.exp(-18 * dt);
+    let epsilon = 0.5;
+    let linesDirty = false;
+
+    for (let key of Object.keys(this.remoteCursors)) {
+      let entry = this.remoteCursors[key];
+      if (entry.targetX == null) continue;
+      entry.x += (entry.targetX - entry.x) * t;
+      entry.y += (entry.targetY - entry.y) * t;
+      entry.el.style.left = entry.x + "px";
+      entry.el.style.top = entry.y + "px";
+    }
+
+    for (let id of Object.keys(this._remoteDragAnim)) {
+      let anim = this._remoteDragAnim[id];
+      let compo = this.getComponentByID(id);
+      if (!compo || !compo.container) {
+        delete this._remoteDragAnim[id];
+        continue;
+      }
+      let ox = anim.x;
+      let oy = anim.y;
+      anim.x += (anim.targetX - anim.x) * t;
+      anim.y += (anim.targetY - anim.y) * t;
+      if (Math.abs(anim.x - ox) > 0.01 || Math.abs(anim.y - oy) > 0.01) {
+        linesDirty = true;
+      }
+      let x = anim.x + "px";
+      let y = anim.y + "px";
+      compo.container.style.left = x;
+      compo.container.style.top = y;
+      compo.container.style.setProperty("--posX", x);
+      compo.container.style.setProperty("--posY", y);
+
+      if (
+        !anim.dragging &&
+        Math.abs(anim.x - anim.targetX) < epsilon &&
+        Math.abs(anim.y - anim.targetY) < epsilon
+      ) {
+        this.clearComponentGrabbed(compo);
+        delete this._remoteDragAnim[id];
+      }
+    }
+
+    if (linesDirty) this.updateAllLines();
+  }
+
   ensureRemoteCursor(userID, sessionID) {
     let key = sessionID || userID;
     if (!key) return null;
@@ -567,8 +643,14 @@ class App {
     if (!msg || msg.x == null || msg.y == null) return;
     let entry = this.ensureRemoteCursor(msg.userID, msg.sessionID);
     if (!entry) return;
-    entry.el.style.left = msg.x + "px";
-    entry.el.style.top = msg.y + "px";
+    entry.targetX = msg.x;
+    entry.targetY = msg.y;
+    if (entry.x == null) {
+      entry.x = msg.x;
+      entry.y = msg.y;
+      entry.el.style.left = msg.x + "px";
+      entry.el.style.top = msg.y + "px";
+    }
     entry.lastSeen = performance.now();
   }
 
@@ -576,15 +658,33 @@ class App {
     if (!msg || !msg.componentId || msg.x == null || msg.y == null) return;
     let compo = this.getComponentByID(msg.componentId);
     if (!compo || !compo.container) return;
-    this.syncingRemote = true;
-    let x = typeof msg.x == "number" ? msg.x + "px" : msg.x;
-    let y = typeof msg.y == "number" ? msg.y + "px" : msg.y;
-    compo.container.style.left = x;
-    compo.container.style.top = y;
-    compo.container.style.setProperty("--posX", x);
-    compo.container.style.setProperty("--posY", y);
-    this.updateAllLines();
-    this.syncingRemote = false;
+    let x = typeof msg.x == "number" ? msg.x : parseFloat(msg.x);
+    let y = typeof msg.y == "number" ? msg.y : parseFloat(msg.y);
+    let anim = this._remoteDragAnim[msg.componentId];
+    if (!anim) {
+      anim = {
+        componentId: msg.componentId,
+        x: parseFloat(compo.container.style.left) || x,
+        y: parseFloat(compo.container.style.top) || y,
+        targetX: x,
+        targetY: y,
+        userID: msg.userID,
+        sessionID: msg.sessionID,
+        dragging: !isEnd,
+      };
+      this._remoteDragAnim[msg.componentId] = anim;
+    } else {
+      anim.targetX = x;
+      anim.targetY = y;
+      anim.userID = msg.userID;
+      anim.sessionID = msg.sessionID;
+      anim.dragging = !isEnd;
+    }
+    if (!isEnd) {
+      this.setComponentGrabbed(compo, msg.userID);
+    } else {
+      this.clearComponentGrabbed(compo);
+    }
     if (msg.userID || msg.sessionID) {
       let entry = this.ensureRemoteCursor(msg.userID, msg.sessionID);
       if (entry) entry.lastSeen = performance.now();
@@ -593,10 +693,12 @@ class App {
 
   removeRemoteCursor(userID) {
     let entry = this.remoteCursors[userID];
-    if (!entry) return;
-    if (entry.el && entry.el.parentNode)
-      entry.el.parentNode.removeChild(entry.el);
-    delete this.remoteCursors[userID];
+    if (entry) {
+      if (entry.el && entry.el.parentNode)
+        entry.el.parentNode.removeChild(entry.el);
+      delete this.remoteCursors[userID];
+    }
+    this.clearRemoteDragForSession(userID);
   }
 
   broadcastLocalInput(device, payload) {
@@ -1152,6 +1254,7 @@ class App {
   }
   runCableFrame(dt) {
     if (!this.cableWorld || !this.ctx) return;
+    this.tickPresenceInterpolation(dt);
     this.sizeCableCanvas();
     this.cableWorld.setParams(this.cables);
     this.syncPhysicsCables();
@@ -1802,6 +1905,7 @@ class App {
       damping: num(src.damping, d.damping),
       slack: num(src.slack, d.slack),
       beadRadius: num(src.beadRadius, d.beadRadius),
+      cableAlpha: num(src.cableAlpha, d.cableAlpha),
     };
     if (this.cableWorld) this.cableWorld.setParams(this.cables);
     this.syncCableSliders();

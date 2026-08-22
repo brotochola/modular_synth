@@ -307,6 +307,13 @@ component.active {
     0 0 18px var(--accent-dim);
 }
 
+component.grabbed {
+  outline: 2px solid hsl(var(--grab-hue), 85%, 55%);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.45),
+    0 0 18px hsl(var(--grab-hue), 85%, 35%);
+}
+
 .component-header {
   height: 26px;
   min-height: 26px;

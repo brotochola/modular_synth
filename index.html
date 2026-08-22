@@ -132,6 +132,7 @@
             <option value="samples/talker.json">talker</option>
             <option value="samples/shader-lfo.json">shader lfo</option>
             <option value="samples/house_n_noise_mouse.json">noisy house</option>
+            <option value="samples/fugue7.json">fugue7 midi</option>
         </select>
 
 
@@ -241,20 +242,23 @@
         <div class="historyList"></div>
     </div>
     <div class="cablePanel">
-        <label>Gravity <span data-val="gravity">2000</span>
-            <input type="range" name="gravity" min="0" max="4000" step="50" value="2000">
+        <label>Gravity <span data-val="gravity">4000</span>
+            <input type="range" name="gravity" min="0" max="8000" step="50" value="4000">
         </label>
-        <label>Stiffness <span data-val="stiffness">900</span>
-            <input type="range" name="stiffness" min="50" max="1200" step="10" value="900">
+        <label>Stiffness <span data-val="stiffness">0</span>
+            <input type="range" name="stiffness" min="0" max="2400" step="10" value="0">
         </label>
         <label>Damping <span data-val="damping">0.88</span>
-            <input type="range" name="damping" min="0.8" max="0.99" step="0.01" value="0.88">
+            <input type="range" name="damping" min="0" max="1" step="0.01" value="0.88">
         </label>
-        <label>Slack <span data-val="slack">1.25</span>
-            <input type="range" name="slack" min="1" max="2" step="0.01" value="1.25">
+        <label>Slack <span data-val="slack">0.5</span>
+            <input type="range" name="slack" min="0" max="4" step="0.01" value="0.5">
         </label>
-        <label>Bead radius <span data-val="beadRadius">3.5</span>
-            <input type="range" name="beadRadius" min="1.5" max="8" step="0.1" value="3.5">
+        <label>Bead radius <span data-val="beadRadius">1.25</span>
+            <input type="range" name="beadRadius" min="0" max="16" step="0.05" value="1.25">
+        </label>
+        <label>Alpha <span data-val="cableAlpha">0.5</span>
+            <input type="range" name="cableAlpha" min="0" max="1" step="0.01" value="0.5">
         </label>
     </div>
     <app></app>
