@@ -4,24 +4,26 @@ class MultiplexorWorklet extends AudioWorkletProcessor {
       {
         name: "which",
         defaultValue: 0,
+        minValue: 0,
+        maxValue: 7,
       },
     ];
   }
   constructor() {
     super();
     this.which = 0;
-    this.lastWhich = 0;
+    this.lastWhich = -1;
   }
 
   process(inputs, outputs, parameters) {
-    let tempWhich = parameters.which[0];
-    if (!isNaN(tempWhich) && tempWhich != undefined && tempWhich != 0 && tempWhich < 128) {
-      this.which = Math.abs(Math.round(tempWhich));
-    } else {
-      this.which = this.lastWhich;
-    }
+    let which = Math.abs(Math.round(parameters.which[0]));
+    if (isNaN(which) || which < 0) which = 0;
+    if (which > 7) which = 7;
+    this.which = which;
+
     if (this.which != this.lastWhich) {
       this.port.postMessage({ which: this.which });
+      this.lastWhich = this.which;
     }
 
     let out = outputs[0] && outputs[0][0];
@@ -37,7 +39,6 @@ class MultiplexorWorklet extends AudioWorkletProcessor {
         out[i] = 0;
       }
     }
-    this.lastWhich = this.which;
     return true;
   }
 }

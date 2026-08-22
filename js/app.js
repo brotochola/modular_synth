@@ -1406,6 +1406,9 @@ class App {
   addMultiplexor() {
     this.components.push(new Multiplexor(this));
   }
+  addDemultiplexor() {
+    this.components.push(new Demultiplexor(this));
+  }
   addSequentialSwitch() {
     this.components.push(new SequentialSwitch(this));
   }
@@ -2273,6 +2276,7 @@ App.COMPONENT_CLASSES = {
   Oscilloscope,
   Merger,
   Multiplexor,
+  Demultiplexor,
   SequentialSwitch,
   SequentialDemux,
   LerpComponent,

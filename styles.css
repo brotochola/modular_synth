@@ -747,6 +747,16 @@ component.multiplexor {
   width: 220px;
 }
 
+component.Demultiplexor {
+  height: auto;
+  min-height: 200px;
+  width: 220px;
+}
+
+component.Demultiplexor icon:after {
+  content: "\1F50C";
+}
+
 component .display {
   margin-top: 0;
   margin-left: 0;
