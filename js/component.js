@@ -571,8 +571,12 @@ class Component {
     let n = this.customAudioParams.length;
     for (let p = 0; p < n; p++) {
       let current = sab.getSlot(p);
+      if (this._paramPrev[p] === undefined) {
+        this._paramPrev[p] = current;
+        continue;
+      }
       if (this._paramPrev[p] === current) continue;
-      let lastVal = this._paramPrev[p] || 0;
+      let lastVal = this._paramPrev[p];
       this._paramPrev[p] = current;
       if (this.handleCustomAudioParamChanged instanceof Function) {
         this.handleCustomAudioParamChanged({
@@ -591,6 +595,10 @@ class Component {
     let n = this.customAudioTriggers.length;
     for (let p = 0; p < n; p++) {
       let count = sab.getSlot(p);
+      if (this._trigPrev[p] === undefined) {
+        this._trigPrev[p] = count;
+        continue;
+      }
       if (this._trigPrev[p] === count) continue;
       this._trigPrev[p] = count;
       if (this.handleTriggerFromWorklet instanceof Function) {

@@ -34,15 +34,13 @@ class AudioPlayer extends Component {
   }
 
   handleCustomAudioParamChanged(e) {
-    //CUSTOM AUDIO PARAMS CAN BE WHATEVER VALUE
-
     if (e.current) this.offset = e.current;
-    if (this.offset > this.audioBuffer.duration) {
-      this.offset = this.audioBuffer.duration;
+    if (this.audioBuffer) {
+      if (this.offset > this.audioBuffer.duration) {
+        this.offset = this.audioBuffer.duration;
+      }
+      if (this.offset < 0) this.offset = 0;
     }
-    if (this.offset < 0) this.offset = 0;
-
-    //SET THE OFFSET AND TRIGGER THE AUDIO
     this.handleTriggerFromWorklet(e);
   }
 
