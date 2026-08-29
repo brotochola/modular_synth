@@ -837,6 +837,7 @@ class Component {
     if (
       this.type.toLowerCase() == "output" ||
       this.type.toLowerCase() == "imagemaker" ||
+      this.type.toLowerCase() == "canvasplotter" ||
       this.type.toLowerCase() == "shader" ||
       this.type.toLowerCase() == "numberdisplaycomponent" ||
       this.type.toLowerCase() == "visualizer" ||

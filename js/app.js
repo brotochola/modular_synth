@@ -1891,6 +1891,9 @@ class App {
   addImageMaker() {
     this.components.push(new ImageMaker(this));
   }
+  addCanvasPlotter() {
+    this.components.push(new CanvasPlotter(this));
+  }
   addShader() {
     this.components.push(new Shader(this));
   }
@@ -2626,6 +2629,7 @@ App.COMPONENT_CLASSES = {
   LargeVisualizer,
   Spectrum2Image,
   ImageMaker,
+  CanvasPlotter,
   Shader,
   WebRTCSender,
   WebRTCReceiver,
