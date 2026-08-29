@@ -8,13 +8,23 @@ class Output extends Component {
   }
 
   createInput() {
+    let row = document.createElement("div");
+    row.className = "jack-row";
+    let led = createLed();
     let button = document.createElement("button");
     button.onclick = (e) => this.onAudioParamClicked("in");
-    button.classList.add("input");
-    button.classList.add("in");
-    this.inputElements["in"] = { button };
-    button.innerText = "in";
-    this.inputsDiv.appendChild(button);
+    button.classList.add("input", "jack", "in");
+    button.title = "in";
+    button.type = "button";
+    button.setAttribute("aria-label", "in");
+    let label = document.createElement("span");
+    label.className = "jack-label";
+    label.textContent = "in";
+    row.appendChild(led);
+    row.appendChild(button);
+    row.appendChild(label);
+    this.inputElements["in"] = { button, led };
+    this.inputsDiv.appendChild(row);
   }
 
   createView() {

@@ -290,8 +290,9 @@ class Component {
         };
         this.customAudioParamsWorkletNode.parent = this;
         this.customAudioParamsWorkletNode.port.onmessage = (e) => {
+          let d = e.data || {};
           if (this.handleCustomAudioParamChanged instanceof Function)
-            this.handleCustomAudioParamChanged(e.data);
+            this.handleCustomAudioParamChanged(d);
         };
       });
   }
@@ -315,9 +316,61 @@ class Component {
       };
       this.customAudioTriggersWorkletNode.parent = this;
       this.customAudioTriggersWorkletNode.port.onmessage = (e) => {
+        let d = e.data || {};
         if (this.handleTriggerFromWorklet instanceof Function)
-          this.handleTriggerFromWorklet(e.data);
+          this.handleTriggerFromWorklet(d);
       };
+    });
+  }
+
+  /** Channel index on jackActivityNode, or -1 */
+  jackActivityChannel(audioParam) {
+    if (!audioParam || !this.jackActivityNames) return -1;
+    return this.jackActivityNames.indexOf(audioParam);
+  }
+
+  createJackActivityMonitor() {
+    if (this.jackActivityNode) return;
+    let names = this.jackActivityNames || [];
+    if (!names.length) {
+      names = Object.keys(this.inputElements || {}).filter(
+        (n) => this.inputElements[n] && this.inputElements[n].led,
+      );
+      this.jackActivityNames = names;
+    }
+    if (!names.length) return;
+
+    this.app.loadWorklet("js/audioWorklets/jackActivityWorklet.js").then(() => {
+      if (this.jackActivityNode || !this.app) return;
+      let n = (this.jackActivityNames || []).length;
+      if (!n) return;
+      this.jackActivityNode = new AudioWorkletNode(
+        this.app.actx,
+        "jack-activity-worklet",
+        {
+          numberOfInputs: n,
+          numberOfOutputs: 0,
+        },
+      );
+      this.addAudioProfileKey("jack-activity");
+      this.jackActivityNode.onprocessorerror = (e) => {
+        console.error(e);
+      };
+      this.jackActivityNode.port.onmessage = (e) => {
+        let levels = e.data && e.data.levels;
+        if (!levels) return;
+        let map = this.jackActivityNames || [];
+        for (let i = 0; i < levels.length && i < map.length; i++) {
+          let led =
+            this.inputElements[map[i]] && this.inputElements[map[i]].led;
+          if (led) setLedBipolar(led, levels[i]);
+        }
+      };
+      if (this.app && this.app.getAllConnections) {
+        for (let c of this.app.getAllConnections()) {
+          if (c.to === this && c.reset) c.reset();
+        }
+      }
     });
   }
 
@@ -361,6 +414,8 @@ class Component {
       ...(this.customAudioParams || []),
     ];
 
+    this.jackActivityNames = [];
+
     for (let inp of ordered) {
       // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
       if (inp == "in_0" && this.type == "Multiplexor") {
@@ -373,12 +428,20 @@ class Component {
       if (widgetMode === "none") continue;
 
       let audioParamRow = document.createElement("audioParamRow");
+      audioParamRow.classList.add("jack-row");
+
+      let led = createLed();
       let button = document.createElement("button");
       button.onclick = (e) => this.onAudioParamClicked(inp);
-      button.classList.add("input");
+      button.classList.add("input", "jack");
       button.classList.add(inp);
       button.title = inp;
-      button.innerText = inp;
+      button.type = "button";
+      button.setAttribute("aria-label", inp);
+
+      let label = document.createElement("span");
+      label.className = "jack-label";
+      label.textContent = inp;
 
       let textInput;
       let knob;
@@ -407,7 +470,7 @@ class Component {
           step: limits.step,
           value: currentVal,
           log: useLog,
-          label: inp,
+          label: "",
           onChange: (val) => {
             if (this.node?.parameters?.get(inp)) {
               this.node.parameters.get(inp).value = val;
@@ -421,12 +484,19 @@ class Component {
         textInput.classList.add(inp);
       }
 
-      this.inputElements[inp] = { button, textInput, knob };
+      this.inputElements[inp] = { button, textInput, knob, led };
+      if (this.jackActivityNames.indexOf(inp) < 0) {
+        this.jackActivityNames.push(inp);
+      }
 
+      audioParamRow.appendChild(led);
       audioParamRow.appendChild(button);
+      audioParamRow.appendChild(label);
       if (knob) audioParamRow.appendChild(knob.el);
       this.inputsDiv.appendChild(audioParamRow);
     }
+
+    this.createJackActivityMonitor();
   }
 
   getParamInputLimits(name) {
@@ -560,6 +630,7 @@ class Component {
       this.node,
       this.customAudioParamsWorkletNode,
       this.customAudioTriggersWorkletNode,
+      this.jackActivityNode,
       this.silentGain,
     ];
     for (let n of nodes) {
@@ -628,6 +699,14 @@ class Component {
         : this.node.connect(where.whereToConnect, numberOfOutput);
     } catch (e) {
       console.warn(e);
+    }
+
+    let actCh =
+      compo.jackActivityChannel && compo.jackActivityChannel(input);
+    if (compo.jackActivityNode && actCh >= 0) {
+      try {
+        this.node.connect(compo.jackActivityNode, numberOfOutput, actCh);
+      } catch (e) {}
     }
 
     conn.redraw();

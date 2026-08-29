@@ -182,6 +182,39 @@ function setLed(el, on) {
   el.classList.toggle("on", !!on);
 }
 
+/** Bipolar jack LED: v in [-1,1]; + green, − red, ~0 off. Colors via inline style. */
+function setLedBipolar(el, v) {
+  if (!el) return;
+  v = Number(v) || 0;
+  if (v > 1) v = 1;
+  else if (v < -1) v = -1;
+  let a = v < 0 ? -v : v;
+  if (a < 0.02) {
+    el.style.background = "";
+    el.style.borderColor = "";
+    el.style.boxShadow = "";
+    el.classList.remove("on", "pulse");
+    return;
+  }
+  let r, g, b;
+  if (v >= 0) {
+    r = Math.round(40 * a);
+    g = Math.round(180 * a + 40);
+    b = Math.round(80 * a);
+  } else {
+    r = Math.round(200 * a + 40);
+    g = Math.round(40 * a);
+    b = Math.round(40 * a);
+  }
+  let col = "rgb(" + r + "," + g + "," + b + ")";
+  let glow = Math.round(4 + 10 * a);
+  el.style.background = col;
+  el.style.borderColor = col;
+  el.style.boxShadow =
+    "0 0 " + glow + "px " + col + ", 0 0 2px rgba(255,255,255,0.4)";
+  el.classList.remove("pulse");
+}
+
 function flashLed(el, ms) {
   if (!el) return;
   el.classList.add("on", "pulse");

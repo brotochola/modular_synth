@@ -2091,6 +2091,9 @@ class App {
   addPadSampler() {
     this.components.push(new PadSampler(this));
   }
+  addRecorder() {
+    this.components.push(new Recorder(this));
+  }
   addSpectrum2Image() {
     this.components.push(new Spectrum2Image(this));
   }
@@ -2945,6 +2948,7 @@ App.COMPONENT_CLASSES = {
   RackCover,
   Drawer,
   PadSampler,
+  Recorder,
   WaveShaper,
   FrequencyAnalizer,
   Spectrogram,

@@ -748,16 +748,26 @@ component.Mixer .mixer-strip-master {
 }
 
 component.Mixer .mixer-strip button.input {
-  width: 36px;
-  min-width: 36px;
+  width: 18px;
+  min-width: 18px;
   height: 18px;
-  padding: 0 2px;
-  font-size: 9px;
-  text-align: center;
-  line-height: 1;
+  padding: 0;
 }
 
-component.Mixer .mixer-strip .mixer-audio-in {
+component.Mixer .mixer-strip .jack-row {
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+component.Mixer .mixer-strip .jack-label {
+  font-size: 9px;
+  max-width: 36px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+component.Mixer .mixer-strip .mixer-audio-in button.input {
   border-color: var(--accent);
 }
 
@@ -1074,6 +1084,67 @@ component.CanvasPlotter canvas.canvasPlotterCanvas {
   background: #000;
 }
 
+component.Recorder {
+  width: 295px;
+  min-height: 220px;
+}
+
+component.Recorder canvas.recorderCanvas {
+  display: block;
+  width: 280px;
+  height: 80px;
+  margin: 4px 0;
+  border: 1px solid gray;
+  background: #000;
+  cursor: crosshair;
+}
+
+component.Recorder .recorderControls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin: 4px 0;
+}
+
+component.Recorder .recorderControls button {
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+}
+
+component.Recorder .recorderRecBtn.active {
+  background: #c22;
+  color: #fff;
+}
+
+component.Recorder .recorderPlayBtn.active {
+  background: #2a6;
+  color: #fff;
+}
+
+component.Recorder .recorderDuration {
+  font-size: 11px;
+  opacity: 0.85;
+  margin: 2px 0 4px;
+}
+
+component.Recorder .moduleToggles {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 4px 0;
+  font-size: 11px;
+}
+
+component.Recorder .moduleToggles label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
 component.CanvasPlotter .plotterToggles,
 component.Mulberry32 .moduleToggles {
   display: flex;
@@ -1383,6 +1454,59 @@ component button.input:hover {
 component button.input.connected {
   border-color: var(--accent);
   box-shadow: inset 3px 0 0 var(--accent);
+}
+
+component audioParamRow.jack-row,
+component .jack-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+component button.input.jack {
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at 50% 50%, #0a0c0b 38%, #1a2220 42%, #2a3330 55%, #1a2220 70%);
+  border: 2px solid #3a4540;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(255, 255, 255, 0.06);
+  color: transparent;
+  font-size: 0;
+  text-indent: -9999px;
+}
+
+component button.input.jack:hover {
+  border-color: var(--accent);
+  background:
+    radial-gradient(circle at 50% 50%, #0a0c0b 38%, #1a2220 42%, #2a3330 55%, #1a2220 70%);
+  color: transparent;
+}
+
+component button.input.jack.connected {
+  border-color: var(--accent);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.8),
+    0 0 0 1px var(--accent),
+    0 0 8px rgba(0, 200, 120, 0.35);
+}
+
+component .jack-label {
+  font-size: 10px;
+  letter-spacing: 0.3px;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  user-select: none;
 }
 
 component input[type="number"],

@@ -45,15 +45,29 @@ class Mixer extends Component {
     });
   }
 
-  /** Build one jack button and register it in inputElements */
+  /** Build jack row (LED + hole + label) and register in inputElements */
   makeJack(name, label) {
+    let wrap = document.createElement("div");
+    wrap.className = "jack-row";
+    let led = createLed();
     let button = document.createElement("button");
     button.onclick = (e) => this.onAudioParamClicked(name);
-    button.classList.add("input", name);
+    button.classList.add("input", "jack", name);
     button.title = name;
-    button.innerText = label || name;
-    this.inputElements[name] = { button, textInput: null, knob: null };
-    return button;
+    button.type = "button";
+    button.setAttribute("aria-label", label || name);
+    let labelEl = document.createElement("span");
+    labelEl.className = "jack-label";
+    labelEl.textContent = label || name;
+    wrap.appendChild(led);
+    wrap.appendChild(button);
+    wrap.appendChild(labelEl);
+    this.inputElements[name] = { button, led, textInput: null, knob: null };
+    if (!this.jackActivityNames) this.jackActivityNames = [];
+    if (this.jackActivityNames.indexOf(name) < 0) {
+      this.jackActivityNames.push(name);
+    }
+    return wrap;
   }
 
   makeGainReadout(name) {
@@ -152,6 +166,7 @@ class Mixer extends Component {
 
     (this.main || this.body || this.container).appendChild(this.faders);
     this.syncFadersFromParams();
+    this.createJackActivityMonitor();
   }
 
   onFaderInput(name, val) {

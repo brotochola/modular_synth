@@ -28,7 +28,25 @@ class Connection {
     } catch (e) {
       // Already disconnected (e.g. full node.disconnect earlier) — ignore.
     }
+
+    let actCh =
+      this.to.jackActivityChannel &&
+      this.to.jackActivityChannel(this.audioParam);
+    if (this.to.jackActivityNode && actCh >= 0) {
+      try {
+        this.from.node.disconnect(
+          this.to.jackActivityNode,
+          this.numberOfOutput,
+          actCh,
+        );
+      } catch (e) {}
+    }
+
     this.to.inputElements[this.audioParam].button.classList.remove("connected");
+    let led =
+      this.to.inputElements[this.audioParam] &&
+      this.to.inputElements[this.audioParam].led;
+    if (led) setLedBipolar(led, 0);
     this.from.connections = this.from.connections.filter(
       (k) => k.id != this.id
     );
@@ -74,6 +92,19 @@ class Connection {
       // console.warn(e);
     }
 
+    let actCh =
+      this.to.jackActivityChannel &&
+      this.to.jackActivityChannel(this.audioParam);
+    if (this.to.jackActivityNode && actCh >= 0) {
+      try {
+        this.from.node.disconnect(
+          this.to.jackActivityNode,
+          this.numberOfOutput,
+          actCh,
+        );
+      } catch (e) {}
+    }
+
     try {
       where.whichInput
         ? this.from.node.connect(
@@ -85,6 +116,16 @@ class Connection {
     } catch (e) {
       // debugger;
       // console.warn(e);
+    }
+
+    if (this.to.jackActivityNode && actCh >= 0) {
+      try {
+        this.from.node.connect(
+          this.to.jackActivityNode,
+          this.numberOfOutput,
+          actCh,
+        );
+      } catch (e) {}
     }
   }
 
