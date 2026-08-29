@@ -12,7 +12,8 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
     this.syncToBeat = false;
     this.prevClockSample = 0;
     this.clockSkew = 0;
-    this.retrigger = [0, 0, 0, 0, 0, 0, 0, 0];
+    this.pulseLength = Math.max(1, Math.floor(sampleRate * 0.01));
+    this.pulseRemaining = [0, 0, 0, 0, 0, 0, 0, 0];
     this.port.onmessage = (e) => {
       let d = e.data || {};
       if (d.clockSkew != null) this.clockSkew = d.clockSkew;
@@ -31,16 +32,16 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
 
   postPlayhead() {
     if (this.currentNote === this.lastPostedNote) return;
-    if (this.lastPostedNote >= 0) this.armRetrigger(this.currentNote);
+    this.armPulses(this.currentNote);
     this.lastPostedNote = this.currentNote;
     this.port.postMessage({ currentNote: this.currentNote });
   }
 
-  armRetrigger(step) {
+  armPulses(step) {
     let seq = this.sequence;
     if (!seq || !seq[step]) return;
     for (let lane = 0; lane < 8; lane++) {
-      this.retrigger[lane] = seq[step][lane] ? 1 : 0;
+      if (seq[step][lane]) this.pulseRemaining[lane] = this.pulseLength;
     }
   }
 
@@ -88,16 +89,14 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
   }
 
   writeStep(outputs, i) {
-    let seq = this.sequence;
-    let step = seq && seq[this.currentNote];
     for (let lane = 0; lane < 8; lane++) {
       let ch = outputs[lane] && outputs[lane][0];
       if (!ch || i >= ch.length) continue;
-      if (this.retrigger[lane]) {
-        ch[i] = 0;
-        this.retrigger[lane] = 0;
+      if (this.pulseRemaining[lane] > 0) {
+        ch[i] = 1;
+        this.pulseRemaining[lane]--;
       } else {
-        ch[i] = step && step[lane] ? 1 : 0;
+        ch[i] = 0;
       }
     }
   }

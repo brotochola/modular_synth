@@ -3,7 +3,7 @@ class PolySequencer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "Polyphonic gate sequencer. 8 lanes × 16 steps. Click toggles a cell. One gate output per lane. Rising clock advances; no clock uses BPM 16ths. Sync checkbox forces project BPM phase and ignores clock. Consecutive hits retrigger (one-sample drop).";
+      "Polyphonic trigger sequencer. 8 lanes × 16 steps. Click toggles a cell. One trigger output per lane (~10ms pulse on each on-step, including consecutive). Rising clock advances; no clock / sync uses BPM 16ths. Sync checkbox forces project BPM phase and ignores clock.";
     this.valuesToSave = ["sequence", "syncToBeat"];
     this.syncToBeat =
       serializedData && serializedData.syncToBeat !== undefined
@@ -145,6 +145,15 @@ class PolySequencer extends Component {
     root
       .querySelectorAll("button[time='" + step + "']")
       .forEach((b) => b.classList.add("seqColumnPlaying"));
+    let col = this.sequence && this.sequence[step];
+    if (col) {
+      this.ensureOutputLeds();
+      for (let lane = 0; lane < this.numberOfLanes; lane++) {
+        if (!col[lane]) continue;
+        let led = this.outputLedElements && this.outputLedElements[lane];
+        if (led) flashLedTrig(led, 100);
+      }
+    }
   }
 
   handleClickOnSeqButton(e) {

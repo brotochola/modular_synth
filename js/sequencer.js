@@ -4,7 +4,7 @@ class Sequencer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "Step sequencer. 16 steps × 13 semitones grid. A rising trigger advances the playhead. Outputs: relative note (semitone offset), a trigger when the step is on, and frequency in Hz. Sync checkbox forces project BPM phase and ignores clock. Draw notes on the grid; sequence saves with the patch.";
+      "Step sequencer. 16 steps × 13 semitones grid. Rising clock advances the playhead; no clock / sync uses project BPM 16ths. Outputs: relative note, gate (held while step on), Hz, and trigger (~10ms pulse on each on-step, including consecutive). Sync checkbox forces project BPM phase and ignores clock. Draw notes on the grid; sequence saves with the patch.";
     this.valuesToSave = ["sequence", "syncToBeat"];
     this.syncToBeat =
       serializedData && serializedData.syncToBeat !== undefined
@@ -15,8 +15,8 @@ class Sequencer extends Component {
     this.numberOfSteps = 16;
     this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
-    this.outputLabels = ["relative note", "trigger", "Hz"];
-    this.outputKinds = { 0: "cv", 1: "trig", 2: "cv" };
+    this.outputLabels = ["relative note", "gate", "Hz", "trigger"];
+    this.outputKinds = { 0: "cv", 1: "gate", 2: "cv", 3: "trig" };
     this.createSyncToggle();
     this.createNode();
     this.createbuttons();
@@ -88,6 +88,12 @@ class Sequencer extends Component {
     root
       .querySelectorAll("button[time='" + step + "']")
       .forEach((b) => b.classList.add("seqColumnPlaying"));
+    let col = this.sequence && this.sequence[step];
+    if (col && col.some((b) => !!b)) {
+      this.ensureOutputLeds();
+      let led = this.outputLedElements && this.outputLedElements[3];
+      if (led) flashLedTrig(led, 100);
+    }
   }
 
   putLabels() {
@@ -181,7 +187,7 @@ class Sequencer extends Component {
     this.app.loadWorklet("js/audioWorklets/sequencerWorklet.js").then(() => {
       this.node = new AudioWorkletNode(this.app.actx, "sequencer-worklet", {
         numberOfInputs: 1,
-        numberOfOutputs: 3,
+        numberOfOutputs: 4,
       });
 
       this.node.onprocessorerror = (e) => {

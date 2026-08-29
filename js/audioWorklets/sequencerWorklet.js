@@ -20,10 +20,13 @@ class SequencerWorklet extends AudioWorkletProcessor {
     this.durationOfLoop = 0;
     this.currentNote = 0;
     this.lastPostedNote = -1;
+    this.lastStepForTrig = -1;
     this.externalClock = false;
     this.syncToBeat = false;
     this.prevClockSample = 0;
     this.clockSkew = 0;
+    this.pulseRemaining = 0;
+    this.pulseLength = Math.max(1, Math.floor(sampleRate * 0.01));
     this.port.onmessage = (e) => {
       let d = e.data || {};
       if (d.clockSkew != null) this.clockSkew = d.clockSkew;
@@ -46,12 +49,19 @@ class SequencerWorklet extends AudioWorkletProcessor {
     this.port.postMessage({ currentNote: this.currentNote });
   }
 
+  armTrigIfNeeded(seq) {
+    if (this.currentNote === this.lastStepForTrig) return;
+    this.lastStepForTrig = this.currentNote;
+    if (seq[this.currentNote]) this.pulseRemaining = this.pulseLength;
+  }
+
   process(inputs, outputs, parameters) {
     let seq = this.sequence;
     if (!seq || !this.durationOfLoop) return true;
     let outputChannel = outputs[0] && outputs[0][0];
-    let triggerOutputChannel = outputs[1] && outputs[1][0];
+    let gateChannel = outputs[1] && outputs[1][0];
     let hzChannel = outputs[2] && outputs[2][0];
+    let trigChannel = outputs[3] && outputs[3][0];
     if (!outputChannel) return true;
     let n = outputChannel.length;
     let clockChannel = inputs[0] && inputs[0][0];
@@ -80,6 +90,8 @@ class SequencerWorklet extends AudioWorkletProcessor {
       this.postPlayhead();
     }
 
+    this.armTrigIfNeeded(seq);
+
     let pitch = seq[this.currentNote] || 0;
     let gate = pitch != 0 ? 1 : 0;
     let baseArr = parameters.baseHz;
@@ -90,11 +102,14 @@ class SequencerWorklet extends AudioWorkletProcessor {
       if (hzChannel) {
         hzChannel[i] = pitch * (aRate ? baseArr[i] : base0);
       }
-    }
-    if (triggerOutputChannel) {
-      let tn = triggerOutputChannel.length;
-      for (let i = 0; i < tn; ++i) {
-        triggerOutputChannel[i] = gate;
+      if (gateChannel) gateChannel[i] = gate;
+      if (trigChannel) {
+        if (this.pulseRemaining > 0) {
+          trigChannel[i] = 1;
+          this.pulseRemaining--;
+        } else {
+          trigChannel[i] = 0;
+        }
       }
     }
     return true;
