@@ -1298,7 +1298,7 @@ class App {
     let warn =
       audioPct >= 70 || this._audioLate || uiLoad >= 80 || fps < 30;
     this.sysStatusEl.textContent =
-      "a " + audioPct + "% · ui " + uiLoad + "% · " + n + "n";
+      "b " + audioPct + "% · ui " + uiLoad + "% · " + n + "n";
     this.sysStatusEl.classList.toggle("warn", warn);
     this.sysStatusEl.classList.toggle("dim", state !== "running");
     this.updatePerfPanel({ state, fps, uiLoad, audioPct, n, warn });
@@ -1433,22 +1433,38 @@ class App {
       sum.warn != null
         ? sum.warn
         : audioPct >= 70 || this._audioLate || uiLoad >= 80 || fps < 30;
+    let cpu = this._audioCpu;
     let q =
-      this._audioCpu && this._audioCpu.quantumMs
-        ? this._audioCpu.quantumMs.toFixed(2)
+      cpu && cpu.quantumMs != null ? Number(cpu.quantumMs).toFixed(2) : "—";
+    let avgQ =
+      cpu && cpu.avgMsPerQuantum != null
+        ? Number(cpu.avgMsPerQuantum).toFixed(2)
         : "—";
-    let hires = !this._audioCpu || this._audioCpu.hires !== false;
+    let hires = !cpu || cpu.hires !== false;
 
     if (this.perfSummaryEl) {
-      let late = this._audioLate ? ' · <span class="warn">late</span>' : "";
+      let lateHtml = "";
+      if (this._audioLate || (cpu && cpu.lateCount > 0)) {
+        let lateMax =
+          cpu && cpu.lateMaxMs != null ? Number(cpu.lateMaxMs).toFixed(2) : "?";
+        let lateN = cpu && cpu.lateCount != null ? cpu.lateCount : 1;
+        lateHtml =
+          '<div class="perfHint warn">late max ' +
+          lateMax +
+          " ms (" +
+          lateN +
+          "×)</div>";
+      }
       let coarse = !hires
         ? '<div class="perfHint warn">timer coarse (~1ms) — max puede saltar a 1.00</div>'
         : "";
+      let latHtml = this.perfLatencyHtml();
+      let playHtml = this.perfPlaybackStatsHtml();
       this.perfSummaryEl.innerHTML =
         "audio <b>" +
         state +
         "</b><br>" +
-        "worklets <b" +
+        "budget <b" +
         (audioPct >= 70 ? ' class="warn"' : "") +
         ">" +
         audioPct +
@@ -1459,13 +1475,17 @@ class App {
         "%</b> · " +
         fps +
         " fps<br>" +
-        "quantum " +
+        "avg " +
+        avgQ +
+        " ms / quantum " +
         q +
         " ms · " +
         n +
         " modules" +
-        late +
-        '<div class="perfHint">ms = CPU por process() · %q = avg / quantum</div>' +
+        latHtml +
+        playHtml +
+        lateHtml +
+        '<div class="perfHint">budget = worklets vs wall · nativos no medidos · %q = avg / quantum</div>' +
         coarse;
       this.perfSummaryEl.classList.toggle("warn", !!warn);
     }
@@ -1503,6 +1523,41 @@ class App {
         "%</span></div>";
     }
     this.perfListEl.innerHTML = html;
+  }
+
+  perfLatencyHtml() {
+    let ctx = this.actx;
+    if (!ctx) return "";
+    let parts = [];
+    if (typeof ctx.baseLatency === "number" && !isNaN(ctx.baseLatency)) {
+      parts.push("base " + (ctx.baseLatency * 1000).toFixed(1) + " ms");
+    }
+    if (typeof ctx.outputLatency === "number" && !isNaN(ctx.outputLatency)) {
+      parts.push("out " + (ctx.outputLatency * 1000).toFixed(1) + " ms");
+    }
+    if (!parts.length) return "";
+    return "<br>latency " + parts.join(" · ");
+  }
+
+  perfPlaybackStatsHtml() {
+    let ctx = this.actx;
+    if (!ctx) return "";
+    let stats = ctx.playbackStats || ctx.playoutStats;
+    if (!stats) return "";
+    let bits = [];
+    if (typeof stats.underrunCount === "number") {
+      bits.push("underruns " + stats.underrunCount);
+    } else if (typeof stats.underrunEvents === "number") {
+      bits.push("underruns " + stats.underrunEvents);
+    }
+    if (typeof stats.underrunDuration === "number") {
+      bits.push("underrun " + (stats.underrunDuration * 1000).toFixed(1) + " ms");
+    }
+    if (typeof stats.averageLatency === "number") {
+      bits.push("avgLat " + (stats.averageLatency * 1000).toFixed(1) + " ms");
+    }
+    if (!bits.length) return "";
+    return "<br>" + bits.join(" · ");
   }
 
   closeFooterDrops(except) {
@@ -1554,6 +1609,8 @@ class App {
     if (!data) return;
     this._audioCpu = data;
     this._audioLate = !!data.late;
+    this._audioLateCount = data.lateCount || 0;
+    this._audioLateMaxMs = data.lateMaxMs || 0;
     let windowMs = data.windowMs > 0 ? data.windowMs : 250;
     let inst = Math.min(100, (data.totalMs / windowMs) * 100);
     this._audioPct += (inst - this._audioPct) * 0.25;
