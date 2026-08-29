@@ -205,20 +205,41 @@ class Component {
     return this.outputElements;
   }
   setOutputActive(i, on) {
-    let el = this.getOutputElements()[i];
-    if (!el) return;
-    if (on) el.classList.add("active");
-    else el.classList.remove("active");
+    i = parseInt(i, 10) || 0;
+    if (this.hideOutputActivityLeds) {
+      let el = this.getOutputElements()[i];
+      if (!el) return;
+      el.classList.toggle("active", !!on);
+      return;
+    }
+    this.ensureOutputLeds();
+    let led = this.outputLedElements && this.outputLedElements[i];
+    if (!led) return;
+    if (!on) {
+      led.style.background = "";
+      led.style.borderColor = "";
+      led.style.boxShadow = "";
+    }
+    setLed(led, on);
   }
-  flashOutput(i, ms = 120) {
-    let el = this.getOutputElements()[i];
-    if (!el) return;
-    if (!this._flashOutputTimers) this._flashOutputTimers = {};
-    el.classList.add("active");
-    clearTimeout(this._flashOutputTimers[i]);
-    this._flashOutputTimers[i] = setTimeout(() => {
-      el.classList.remove("active");
-    }, ms);
+
+  flashOutput(i, ms) {
+    i = parseInt(i, 10) || 0;
+    ms = ms != null ? ms : AppConfig.LED_FLASH_MS;
+    if (this.hideOutputActivityLeds) {
+      let el = this.getOutputElements()[i];
+      if (!el) return;
+      if (!this._flashOutputTimers) this._flashOutputTimers = {};
+      el.classList.add("active");
+      clearTimeout(this._flashOutputTimers[i]);
+      this._flashOutputTimers[i] = setTimeout(() => {
+        el.classList.remove("active");
+      }, ms);
+      return;
+    }
+    this.ensureOutputLeds();
+    let led = this.outputLedElements && this.outputLedElements[i];
+    if (led) flashLedTrig(led, ms);
   }
   createView() {
     if (!this.app) return;
@@ -337,17 +358,8 @@ class Component {
     return this.jackActivityNames.indexOf(name);
   }
 
-  /** Old ADSR cables used "trigger"; param is now "gate". */
+  /** Normalize jack / AudioParam name (override in subclasses if needed). */
   resolveJackName(name) {
-    if (
-      name == "trigger" &&
-      this.node &&
-      this.node.parameters &&
-      this.node.parameters.get("gate") &&
-      !this.node.parameters.get("trigger")
-    ) {
-      return "gate";
-    }
     return name;
   }
 
@@ -398,7 +410,8 @@ class Component {
     if (kind == "trig") {
       if (!this._jackLedPrev) this._jackLedPrev = {};
       let prev = this._jackLedPrev[name] || 0;
-      if (prev < 0.5 && level >= 0.5) flashLedTrig(led, 100);
+      if (AppConfig.isRising(prev, level))
+        flashLedTrig(led, AppConfig.LED_FLASH_MS);
       this._jackLedPrev[name] = level;
     } else {
       setLedBipolar(led, level);
@@ -414,7 +427,8 @@ class Component {
     if (kind == "trig") {
       if (!this._outLedPrev) this._outLedPrev = {};
       let prev = this._outLedPrev[i] || 0;
-      if (prev < 0.5 && level >= 0.5) flashLedTrig(led, 100);
+      if (AppConfig.isRising(prev, level))
+        flashLedTrig(led, AppConfig.LED_FLASH_MS);
       this._outLedPrev[i] = level;
     } else {
       setLedBipolar(led, level);
@@ -1101,9 +1115,6 @@ class Component {
       this.container.classList.add("active");
       this.active = true;
     }
-
-    window.tc = this;
-    // console.log(this);
   }
   createDisplay() {
     this.displayWrap = document.createElement("div");

@@ -45,10 +45,10 @@ class SequentialDemuxWorklet extends AudioWorkletProcessor {
       let ck = clockCh ? clockCh[i] : 0;
       let rs = resetCh ? resetCh[i] : 0;
       let sig = signalCh ? signalCh[i] : 0;
-      if (prevR < 0.5 && rs >= 0.5) {
+      if (AppConfig.isRising(prevR, rs)) {
         step = 0;
         changed = true;
-      } else if (prevC < 0.5 && ck >= 0.5) {
+      } else if (AppConfig.isRising(prevC, ck)) {
         step = (step + 1) % steps;
         changed = true;
       }

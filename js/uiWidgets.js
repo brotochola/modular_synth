@@ -221,7 +221,7 @@ function flashLed(el, ms) {
   clearTimeout(el._flashTimer);
   el._flashTimer = setTimeout(() => {
     el.classList.remove("on", "pulse");
-  }, ms || 100);
+  }, ms != null ? ms : AppConfig.LED_FLASH_MS);
 }
 
 /** Strong green flash for trig jacks (rising edge). Clears inline bipolar styles. */
@@ -237,5 +237,5 @@ function flashLedTrig(el, ms) {
     el.style.background = "";
     el.style.borderColor = "";
     el.style.boxShadow = "";
-  }, ms || 100);
+  }, ms != null ? ms : AppConfig.LED_FLASH_MS);
 }

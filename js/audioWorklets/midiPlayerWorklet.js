@@ -25,7 +25,7 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     this.noteHz = [0];
     this.activeNote = [-1];
     this.gateSamplesLeft = [0];
-    this.gateLen = Math.max(1, Math.floor(sampleRate * 0.002));
+    this.gateLen = AppConfig.trigPulseSamples(sampleRate);
     this.prevTrig = 0;
     this.prevStop = 0;
     this.port.onmessage = (e) => this.onMessage(e.data || {});

@@ -835,7 +835,35 @@ component.envelopegenerator icon:after {
 component.Midi {
   height: auto;
   min-height: 120px;
-  width: 160px;
+  width: 180px;
+}
+
+component.Midi .ui-display {
+  width: 100%;
+  margin: 4px 0 2px;
+}
+
+component.Midi .display {
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+component.Midi outputs {
+  gap: 3px;
+  margin-top: 4px;
+}
+
+component.Midi .outputJackRow {
+  min-height: 18px;
+}
+
+component.Midi .jack-label {
+  min-width: 52px;
+  font-size: 10px;
 }
 component.NumberDisplayComponent {
   height: auto;
@@ -1633,6 +1661,10 @@ component .outputJackRow {
   align-items: center;
   gap: 6px;
   justify-content: flex-end;
+}
+
+component .outputJackRow[hidden] {
+  display: none !important;
 }
 
 component .outputJackRow .jack-label {

@@ -38,7 +38,7 @@ class Kick808 extends Component {
       if (this.node && this.node.parameters) {
         this.node.parameters.get("trigger").value = 0;
       }
-    }, 20);
+    }, AppConfig.KICK_BANG_MS);
   }
 
   createNode() {

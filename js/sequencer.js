@@ -1,10 +1,15 @@
 class Sequencer extends Component {
   static name = "Sequencer";
-  static oneSemitone = 1.059463;
+  static get oneSemitone() {
+    return AppConfig.ONE_SEMITONE;
+  }
   constructor(app, serializedData) {
     super(app, serializedData);
+    let pulseMs = Math.round(AppConfig.TRIG_PULSE_SEC * 1000);
     this.infoText =
-      "Step sequencer. 16 steps × 13 semitones grid. Rising clock advances the playhead; no clock / sync uses project BPM 16ths. Outputs: relative note, gate (held while step on), Hz, and trigger (~10ms pulse on each on-step, including consecutive). Sync checkbox forces project BPM phase and ignores clock. Draw notes on the grid; sequence saves with the patch.";
+      "Step sequencer. 16 steps × 13 semitones grid. Rising clock advances the playhead; no clock / sync uses project BPM 16ths. Outputs: relative note, gate (held while step on), Hz, and trigger (~" +
+      pulseMs +
+      "ms pulse on each on-step, including consecutive). Sync checkbox forces project BPM phase and ignores clock. Draw notes on the grid; sequence saves with the patch.";
     this.valuesToSave = ["sequence", "syncToBeat"];
     this.syncToBeat =
       serializedData && serializedData.syncToBeat !== undefined
@@ -12,7 +17,7 @@ class Sequencer extends Component {
         : false;
 
     this.numberOfSemitones = 13;
-    this.numberOfSteps = 16;
+    this.numberOfSteps = AppConfig.SEQ_STEPS;
     this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
     this.outputLabels = ["relative note", "gate", "Hz", "trigger"];
@@ -89,11 +94,7 @@ class Sequencer extends Component {
       .querySelectorAll("button[time='" + step + "']")
       .forEach((b) => b.classList.add("seqColumnPlaying"));
     let col = this.sequence && this.sequence[step];
-    if (col && col.some((b) => !!b)) {
-      this.ensureOutputLeds();
-      let led = this.outputLedElements && this.outputLedElements[3];
-      if (led) flashLedTrig(led, 100);
-    }
+    if (col && col.some((b) => !!b)) this.flashOutput(3);
   }
 
   putLabels() {

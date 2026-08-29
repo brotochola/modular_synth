@@ -31,23 +31,6 @@ class EnvelopeGenerator extends Component {
           release: 0.8,
         },
       });
-      this.applyGateCompat();
     });
-  }
-
-  /** Old patches saved audioParams.trigger — copy once onto gate. */
-  applyGateCompat() {
-    let ap = (this.serializedData || {}).audioParams;
-    if (!ap || !this.node || !this.node.parameters) return;
-    let gate = this.node.parameters.get("gate");
-    if (!gate) return;
-    if (ap.gate == null && ap.trigger != null) {
-      gate.value = ap.trigger;
-    }
-  }
-
-  loadFromSerializedData(cb) {
-    super.loadFromSerializedData(cb);
-    this.applyGateCompat();
   }
 }

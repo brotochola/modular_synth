@@ -7,7 +7,7 @@ class BpmOutWorklet extends AudioWorkletProcessor {
     this.count = 0;
     this.lastCount = -1;
     this.pulseRemaining = 0;
-    this.pulseLength = Math.max(1, Math.floor(sampleRate * 0.002));
+    this.pulseLength = AppConfig.trigPulseSamples(sampleRate);
     this.clockSkew = 0;
     this.port.onmessage = (e) => {
       let d = e.data || {};

@@ -74,7 +74,7 @@ class BPMOutputComponent extends Component {
 
   updateDisplay() {
     if (this.display) this.display.innerHTML = this.val;
-    flashLed(this.displayLed, 80);
+    flashLed(this.displayLed, AppConfig.LED_FLASH_BPM_MS);
   }
 
   loadFromSerializedData(cb) {

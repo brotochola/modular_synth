@@ -101,18 +101,16 @@ class JoystickComponent extends Component {
       this.outputElements.length &&
       this.outputElements[0] instanceof HTMLElement
     ) {
+      this.ensureOutputLeds();
       for (let i = 0; i < nButtons + nAxes; i++) {
         if (i >= nButtons) {
           let idx = i - nButtons;
-          if (this.axes[idx] != this.prevAxes[idx]) {
-            this.outputElements[i].classList.add("active");
-          } else {
-            this.outputElements[i].classList.remove("active");
-          }
-        } else if (this.buttons[i]) {
-          this.outputElements[i].classList.add("active");
+          let led =
+            this.outputLedElements && this.outputLedElements[i];
+          if (led) setLedBipolar(led, this.axes[idx] || 0);
+          else if (this.axes[idx] != this.prevAxes[idx]) this.flashOutput(i);
         } else {
-          this.outputElements[i].classList.remove("active");
+          this.setOutputActive(i, !!this.buttons[i]);
         }
       }
     }

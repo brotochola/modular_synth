@@ -1,13 +1,19 @@
 class App {
-  static HISTORY_CAP = 40;
-  static CABLE_DEFAULTS = {
-    gravity: 4000,
-    stiffness: 0,
-    damping: 0.88,
-    slack: 0.5,
-    beadRadius: 1.25,
-    cableAlpha: 0.5,
-  };
+  static get HISTORY_CAP() {
+    return (globalThis.AppConfig && AppConfig.HISTORY_CAP) || 40;
+  }
+  static get CABLE_DEFAULTS() {
+    return (
+      (globalThis.AppConfig && AppConfig.CABLE) || {
+        gravity: 4000,
+        stiffness: 0,
+        damping: 0.88,
+        slack: 0.5,
+        beadRadius: 1.25,
+        cableAlpha: 0.5,
+      }
+    );
+  }
   // static name → AudioProfile attach keys (main worklet). custom-params/trigger vía Component.
   static PERF_PROFILE_BY_TITLE = {
     "Math Processor": ["custom-proc"],
@@ -90,7 +96,9 @@ class App {
     this.actx.suspend();
     this.actx.addEventListener("statechange", () => this.updateSysStatus());
 
-    this.bpm = 100;
+    this.bpm = (globalThis.AppConfig && AppConfig.DEFAULT_BPM) || 100;
+    this._configModuleUrl = "js/config.js";
+    this._profilerModuleUrl = "js/audioWorklets/_audioProfile.js?v=4";
     this.cables = Object.assign({}, App.CABLE_DEFAULTS);
     this.scale = 1;
     this.lastScale = 1;
@@ -130,7 +138,6 @@ class App {
     this._audioLate = false;
     this._audioProfileNode = null;
     this._audioProfileMute = null;
-    this._profilerModuleUrl = "js/audioWorklets/_audioProfile.js?v=4";
     this._cableMouse = { x: 0, y: 0 };
     this._cableMouseClient = { x: 0, y: 0 };
     this.createMainContainer(elem);
@@ -1978,14 +1985,25 @@ class App {
   }
 
   loadWorklet(url) {
+    let configUrl = this._configModuleUrl || "js/config.js";
     let profilerUrl = this._profilerModuleUrl;
-    if (!this._workletModules[profilerUrl]) {
-      this._workletModules[profilerUrl] =
-        this.actx.audioWorklet.addModule(profilerUrl);
+    if (!this._workletModules[configUrl]) {
+      this._workletModules[configUrl] =
+        this.actx.audioWorklet.addModule(configUrl);
     }
-    let ready = this._workletModules[profilerUrl];
-    if (url === profilerUrl) return ready;
-    return ready.then(() => {
+    let chain = this._workletModules[configUrl];
+    if (url === configUrl) return chain;
+
+    chain = chain.then(() => {
+      if (!this._workletModules[profilerUrl]) {
+        this._workletModules[profilerUrl] =
+          this.actx.audioWorklet.addModule(profilerUrl);
+      }
+      return this._workletModules[profilerUrl];
+    });
+    if (url === profilerUrl) return chain;
+
+    return chain.then(() => {
       if (!this._workletModules[url]) {
         this._workletModules[url] = this.actx.audioWorklet.addModule(url);
       }
@@ -1994,7 +2012,7 @@ class App {
   }
 
   getNextBeat() {
-    let bpm = this.bpm || 120;
+    let bpm = this.bpm || ((globalThis.AppConfig && AppConfig.FALLBACK_BPM) || 120);
     let barSec = (60 / bpm) * 4;
     if (this.beatOriginMs != null && this.playing) {
       let transportSec = (this.adminNowMs() - this.beatOriginMs) / 1000;

@@ -26,7 +26,7 @@ class SequencerWorklet extends AudioWorkletProcessor {
     this.prevClockSample = 0;
     this.clockSkew = 0;
     this.pulseRemaining = 0;
-    this.pulseLength = Math.max(1, Math.floor(sampleRate * 0.01));
+    this.pulseLength = AppConfig.trigPulseSamples(sampleRate);
     this.port.onmessage = (e) => {
       let d = e.data || {};
       if (d.clockSkew != null) this.clockSkew = d.clockSkew;
@@ -37,8 +37,9 @@ class SequencerWorklet extends AudioWorkletProcessor {
       }
       if (d.bpm != null) {
         this.bpm = d.bpm;
-        this.durationOfOneNote = (60000 / this.bpm) * 0.25;
-        this.durationOfLoop = this.durationOfOneNote * 16;
+        this.durationOfOneNote =
+          (60000 / this.bpm) * AppConfig.SEQ_STEP_QUARTER;
+        this.durationOfLoop = this.durationOfOneNote * AppConfig.SEQ_STEPS;
       }
     };
   }
@@ -69,12 +70,12 @@ class SequencerWorklet extends AudioWorkletProcessor {
     if (clockChannel && !this.syncToBeat) {
       for (let i = 0; i < clockChannel.length; ++i) {
         let sample = clockChannel[i];
-        if (sample > this.prevClockSample + 0.01) {
+        if (sample > this.prevClockSample + AppConfig.CLOCK_EDGE_DELTA) {
           if (!this.externalClock) {
             this.externalClock = true;
             this.currentNote = 0;
           } else {
-            this.currentNote = (this.currentNote + 1) % 16;
+            this.currentNote = (this.currentNote + 1) % AppConfig.SEQ_STEPS;
           }
           this.postPlayhead();
         }

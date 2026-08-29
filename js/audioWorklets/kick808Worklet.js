@@ -63,8 +63,8 @@ class Kick808Worklet extends AudioWorkletProcessor {
     let trig0 = trigs[0];
     let twoPi = 6.283185307179586;
     let ampCoeff = Math.exp(-Math.log(1000) / (decay * sampleRate));
-    let pitchCoeff = Math.exp(-1 / (sampleRate * 0.05));
-    let clickCoeff = Math.exp(-1 / (sampleRate * 0.002));
+    let pitchCoeff = Math.exp(-1 / (sampleRate * AppConfig.KICK_PITCH_ENV_SEC));
+    let clickCoeff = Math.exp(-1 / (sampleRate * AppConfig.KICK_CLICK_ENV_SEC));
     let prev = this.prevTrig;
     let phase = this.phase;
     let ampEnv = this.ampEnv;
@@ -73,7 +73,7 @@ class Kick808Worklet extends AudioWorkletProcessor {
     let invSr = 1 / sampleRate;
     for (let i = 0; i < n; i++) {
       let trig = aTrig ? trigs[i] : trig0;
-      if (prev < 0.5 && trig >= 0.5) {
+      if (AppConfig.isRising(prev, trig)) {
         phase = 0;
         ampEnv = 1;
         pitchEnv = 1;

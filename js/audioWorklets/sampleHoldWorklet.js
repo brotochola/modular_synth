@@ -18,7 +18,7 @@ class SampleHoldWorklet extends AudioWorkletProcessor {
     let held = this.held;
     for (let i = 0; i < n; i++) {
       let ck = hasClock ? clock[i] : 0;
-      if (prev < 0.5 && ck >= 0.5) {
+      if (AppConfig.isRising(prev, ck)) {
         held = hasSignal ? signal[i] : Math.random() * 2 - 1;
       }
       output[i] = held;

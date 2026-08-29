@@ -22,7 +22,7 @@ class JackActivityWorklet extends AudioWorkletProcessor {
       this.peaks[p] = peak;
     }
     this.counter++;
-    if (this.counter < 12) return true;
+    if (this.counter < AppConfig.JACK_ACTIVITY_REPORT_EVERY) return true;
     this.counter = 0;
     let levels = this.peaks;
     this.peaks = new Float32Array(n);
