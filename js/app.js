@@ -45,6 +45,7 @@ class App {
     "Number Display": ["number-display"],
     Shader: ["shader-uniforms"],
     "Canvas Plotter": ["canvas-plotter"],
+    Recorder: ["recorder"],
   };
   // analog patch-cable set: saturated, similar lightness, readable on dark rack
   static CABLE_COLORS = [
@@ -129,7 +130,7 @@ class App {
     this._audioLate = false;
     this._audioProfileNode = null;
     this._audioProfileMute = null;
-    this._profilerModuleUrl = "js/audioWorklets/_audioProfile.js?v=3";
+    this._profilerModuleUrl = "js/audioWorklets/_audioProfile.js?v=4";
     this._cableMouse = { x: 0, y: 0 };
     this._cableMouseClient = { x: 0, y: 0 };
     this.createMainContainer(elem);

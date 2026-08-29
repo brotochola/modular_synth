@@ -1223,6 +1223,59 @@ component.PolySequencer {
   overflow: hidden;
 }
 
+component.Sequencer .seqSyncToggle,
+component.PolySequencer .seqSyncToggle {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 5px;
+  height: 18px;
+  border: 1px solid var(--panel-edge);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.55);
+  box-shadow: inset 0 0 6px rgba(93, 255, 194, 0.08);
+}
+
+component.Sequencer .seqSyncToggle.on,
+component.PolySequencer .seqSyncToggle.on {
+  border-color: var(--accent);
+  box-shadow:
+    inset 0 0 6px var(--accent-dim),
+    0 0 6px var(--accent-dim);
+}
+
+component.Sequencer .seqSyncToggle label,
+component.PolySequencer .seqSyncToggle label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.55;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+component.Sequencer .seqSyncToggle.on label,
+component.PolySequencer .seqSyncToggle.on label {
+  opacity: 1;
+}
+
+component.Sequencer .seqSyncToggle input,
+component.PolySequencer .seqSyncToggle input {
+  width: 11px;
+  height: 11px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
 component.PolySequencer {
   width: 340px;
   min-height: 180px;

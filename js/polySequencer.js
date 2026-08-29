@@ -3,8 +3,12 @@ class PolySequencer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "Polyphonic gate sequencer. 8 lanes × 16 steps. Click toggles a cell. One gate output per lane. Rising clock advances; no clock uses BPM 16ths. Consecutive hits retrigger (one-sample drop).";
-    this.valuesToSave = ["sequence"];
+      "Polyphonic gate sequencer. 8 lanes × 16 steps. Click toggles a cell. One gate output per lane. Rising clock advances; no clock uses BPM 16ths. Sync checkbox forces project BPM phase and ignores clock. Consecutive hits retrigger (one-sample drop).";
+    this.valuesToSave = ["sequence", "syncToBeat"];
+    this.syncToBeat =
+      serializedData && serializedData.syncToBeat !== undefined
+        ? !!serializedData.syncToBeat
+        : false;
     this.numberOfLanes = 8;
     this.numberOfSteps = 16;
     this.playheadStep = 0;
@@ -20,8 +24,31 @@ class PolySequencer extends Component {
       6: "trig",
       7: "trig",
     };
+    this.createSyncToggle();
     this.createNode();
     this.createbuttons();
+  }
+
+  createSyncToggle() {
+    this.toggleWrap = document.createElement("div");
+    this.toggleWrap.classList.add("moduleToggles", "seqSyncToggle");
+    this.syncLabel = document.createElement("label");
+    this.syncLabel.title = "Lock playhead to project BPM (ignore clock jack)";
+    this.syncCheck = document.createElement("input");
+    this.syncCheck.type = "checkbox";
+    this.syncCheck.checked = !!this.syncToBeat;
+    this.syncCheck.onchange = () => {
+      this.syncToBeat = this.syncCheck.checked;
+      this.toggleWrap.classList.toggle("on", this.syncToBeat);
+      if (this.node) this.node.port.postMessage({ syncToBeat: this.syncToBeat });
+      this.quickSave();
+    };
+    this.toggleWrap.classList.toggle("on", !!this.syncToBeat);
+    this.syncLabel.appendChild(this.syncCheck);
+    this.syncLabel.appendChild(document.createTextNode("sync"));
+    this.toggleWrap.appendChild(this.syncLabel);
+    if (this.headerLeft) this.headerLeft.appendChild(this.toggleWrap);
+    else (this.main || this.container).appendChild(this.toggleWrap);
   }
 
   initSequence() {
@@ -179,6 +206,7 @@ class PolySequencer extends Component {
       seq: seq,
       bpm: this.app.bpm,
       clockSkew: this.clockSkew || this.app.clockSkew || 0,
+      syncToBeat: !!this.syncToBeat,
     });
   }
 

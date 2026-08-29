@@ -51,6 +51,8 @@ const AudioProfile = {
     let now = nowMs != null ? nowMs : profileNow();
     if (!this._windowStart) this._windowStart = now;
     let windowMs = Math.max(1, now - this._windowStart);
+    let quantumMs = (128 / sampleRate) * 1000;
+    let quanta = Math.max(1, windowMs / quantumMs);
     let by = Object.create(null);
     for (let name in this._by) {
       let s = this._by[name];
@@ -62,9 +64,10 @@ const AudioProfile = {
     }
     let out = {
       windowMs,
-      quantumMs: (128 / sampleRate) * 1000,
+      quantumMs,
       totalMs: this._totalMs,
       maxMs: this._maxMs,
+      avgMsPerQuantum: this._totalMs / quanta,
       by,
     };
     this._by = Object.create(null);
@@ -83,6 +86,8 @@ class AudioProfileReporter extends AudioWorkletProcessor {
     this._lastPost = currentTime;
     this._lastCb = currentTime;
     this._late = false;
+    this._lateCount = 0;
+    this._lateMaxMs = 0;
     this._inited = false;
   }
 
@@ -90,7 +95,12 @@ class AudioProfileReporter extends AudioWorkletProcessor {
     let expected = 128 / sampleRate;
     let dt = currentTime - this._lastCb;
     this._lastCb = currentTime;
-    if (this._inited && dt > expected * 1.5 && dt < 0.1) this._late = true;
+    if (this._inited && dt > expected * 1.5 && dt < 0.1) {
+      this._late = true;
+      this._lateCount++;
+      let excessMs = (dt - expected) * 1000;
+      if (excessMs > this._lateMaxMs) this._lateMaxMs = excessMs;
+    }
     this._inited = true;
 
     if (currentTime - this._lastPost < 0.25) return true;
@@ -102,11 +112,16 @@ class AudioProfileReporter extends AudioWorkletProcessor {
       totalMs: snap.totalMs,
       maxMs: snap.maxMs,
       windowMs: snap.windowMs,
+      avgMsPerQuantum: snap.avgMsPerQuantum,
       late: this._late,
+      lateCount: this._lateCount,
+      lateMaxMs: this._lateMaxMs,
       hires: !!(globalThis["performance"] && globalThis["performance"].now),
       by: snap.by,
     });
     this._late = false;
+    this._lateCount = 0;
+    this._lateMaxMs = 0;
     return true;
   }
 }

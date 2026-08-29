@@ -4,8 +4,12 @@ class Sequencer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "Step sequencer. 16 steps × 13 semitones grid. A rising trigger advances the playhead. Outputs: relative note (semitone offset), a trigger when the step is on, and frequency in Hz. Draw notes on the grid; sequence saves with the patch.";
-    this.valuesToSave = ["sequence"];
+      "Step sequencer. 16 steps × 13 semitones grid. A rising trigger advances the playhead. Outputs: relative note (semitone offset), a trigger when the step is on, and frequency in Hz. Sync checkbox forces project BPM phase and ignores clock. Draw notes on the grid; sequence saves with the patch.";
+    this.valuesToSave = ["sequence", "syncToBeat"];
+    this.syncToBeat =
+      serializedData && serializedData.syncToBeat !== undefined
+        ? !!serializedData.syncToBeat
+        : false;
 
     this.numberOfSemitones = 13;
     this.numberOfSteps = 16;
@@ -13,8 +17,31 @@ class Sequencer extends Component {
     if (!this.sequence) this.initSequence();
     this.outputLabels = ["relative note", "trigger", "Hz"];
     this.outputKinds = { 0: "cv", 1: "trig", 2: "cv" };
+    this.createSyncToggle();
     this.createNode();
     this.createbuttons();
+  }
+
+  createSyncToggle() {
+    this.toggleWrap = document.createElement("div");
+    this.toggleWrap.classList.add("moduleToggles", "seqSyncToggle");
+    this.syncLabel = document.createElement("label");
+    this.syncLabel.title = "Lock playhead to project BPM (ignore clock jack)";
+    this.syncCheck = document.createElement("input");
+    this.syncCheck.type = "checkbox";
+    this.syncCheck.checked = !!this.syncToBeat;
+    this.syncCheck.onchange = () => {
+      this.syncToBeat = this.syncCheck.checked;
+      this.toggleWrap.classList.toggle("on", this.syncToBeat);
+      if (this.node) this.node.port.postMessage({ syncToBeat: this.syncToBeat });
+      this.quickSave();
+    };
+    this.toggleWrap.classList.toggle("on", !!this.syncToBeat);
+    this.syncLabel.appendChild(this.syncCheck);
+    this.syncLabel.appendChild(document.createTextNode("sync"));
+    this.toggleWrap.appendChild(this.syncLabel);
+    if (this.headerLeft) this.headerLeft.appendChild(this.toggleWrap);
+    else (this.main || this.container).appendChild(this.toggleWrap);
   }
   initSequence() {
     this.sequence = [];
@@ -130,6 +157,7 @@ class Sequencer extends Component {
       seq: this.convertedArray,
       bpm: this.app.bpm,
       clockSkew: this.clockSkew || this.app.clockSkew || 0,
+      syncToBeat: !!this.syncToBeat,
     });
   }
 

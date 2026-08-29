@@ -9,6 +9,7 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
     this.currentNote = 0;
     this.lastPostedNote = -1;
     this.externalClock = false;
+    this.syncToBeat = false;
     this.prevClockSample = 0;
     this.clockSkew = 0;
     this.retrigger = [0, 0, 0, 0, 0, 0, 0, 0];
@@ -16,6 +17,10 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
       let d = e.data || {};
       if (d.clockSkew != null) this.clockSkew = d.clockSkew;
       if (d.seq != null) this.sequence = d.seq;
+      if (d.syncToBeat != null) {
+        this.syncToBeat = !!d.syncToBeat;
+        if (this.syncToBeat) this.externalClock = false;
+      }
       if (d.bpm != null) {
         this.bpm = d.bpm;
         this.durationOfOneNote = (60000 / this.bpm) * 0.25;
@@ -49,7 +54,7 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
       if (ch && ch.length > n) n = ch.length;
     }
 
-    if (clockChannel) {
+    if (clockChannel && !this.syncToBeat) {
       for (let i = 0; i < clockChannel.length; ++i) {
         let sample = clockChannel[i];
         if (sample > this.prevClockSample + 0.01) {
@@ -67,7 +72,7 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
       return true;
     }
 
-    if (!this.externalClock) {
+    if (this.syncToBeat || !this.externalClock) {
       let tMs = (currentTime + (this.clockSkew || 0)) * 1000;
       let phase =
         ((tMs % this.durationOfLoop) + this.durationOfLoop) %
