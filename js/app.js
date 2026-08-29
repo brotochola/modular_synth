@@ -1149,7 +1149,10 @@ class App {
     this._cableCanvasW = 0;
     this._cableCanvasH = 0;
     try {
-      if (typeof Worker === "undefined" || !this.canvas.transferControlToOffscreen) {
+      if (
+        typeof Worker === "undefined" ||
+        !this.canvas.transferControlToOffscreen
+      ) {
         throw new Error("OffscreenCanvas unavailable");
       }
       let offscreen = this.canvas.transferControlToOffscreen();
@@ -1206,7 +1209,10 @@ class App {
   }
   setCableParams(params) {
     if (this._cableWorker) {
-      this.postCableWorker({ type: "params", params: Object.assign({}, params) });
+      this.postCableWorker({
+        type: "params",
+        params: Object.assign({}, params),
+      });
     } else if (this.cableWorld) {
       this.cableWorld.setParams(params);
     }
