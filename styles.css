@@ -729,6 +729,18 @@ component.SequentialDemux icon:after {
 component.Kick808 icon:after {
   content: "\1F941";
 }
+component.Snare808 icon:after {
+  content: "\1F3B5";
+}
+component.Clap808 icon:after {
+  content: "\1F44F";
+}
+component.HiHat808 icon:after {
+  content: "\1F4A8";
+}
+component.Cowbell808 icon:after {
+  content: "\1F514";
+}
 component.ScanlineSynth icon:after {
   content: "\1F4FA";
 }

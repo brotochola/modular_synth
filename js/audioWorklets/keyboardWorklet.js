@@ -3,7 +3,7 @@ class KeyboardWorklet extends AudioWorkletProcessor {
     super();
     AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "keyboard");
-    this.status = new Float32Array(16);
+    this.status = new Float32Array(32);
   }
 
   process(inputs, outputs) {

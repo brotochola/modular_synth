@@ -1,0 +1,3125 @@
+{
+  "bpm": 88,
+  "outputX": "1680px",
+  "outputY": "720px",
+  "connections": [],
+  "cables": {
+    "gravity": 4000,
+    "stiffness": 0,
+    "damping": 0.88,
+    "slack": 0.5,
+    "beadRadius": 1.25,
+    "cableAlpha": 0.5
+  },
+  "components": [
+    {
+      "id": "txt_title",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "20px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "text": "LETRAS XY — fonema de cada letra (formantes, sin samples)\nVocales bien abiertas: a e i o u. s f j = ruido; p t k = golpe; m n = nasal.\nPlay, tocá el teclado. Plotter: F1 × F2.",
+      "valuesToSave": [
+        "text"
+      ]
+    },
+    {
+      "id": "kb",
+      "constructor": "KeyboardComponent",
+      "type": "KeyboardComponent",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "160px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c001"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c002"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c003"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c004"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c005"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c006"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c007"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c008"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_1",
+          "numberOfOutput": 1,
+          "id": "c009"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_1",
+          "numberOfOutput": 1,
+          "id": "c010"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_1",
+          "numberOfOutput": 1,
+          "id": "c011"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_1",
+          "numberOfOutput": 1,
+          "id": "c012"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_1",
+          "numberOfOutput": 1,
+          "id": "c013"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_1",
+          "numberOfOutput": 1,
+          "id": "c014"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_1",
+          "numberOfOutput": 1,
+          "id": "c015"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_1",
+          "numberOfOutput": 1,
+          "id": "c016"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_2",
+          "numberOfOutput": 2,
+          "id": "c017"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_2",
+          "numberOfOutput": 2,
+          "id": "c018"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_2",
+          "numberOfOutput": 2,
+          "id": "c019"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_2",
+          "numberOfOutput": 2,
+          "id": "c020"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_2",
+          "numberOfOutput": 2,
+          "id": "c021"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_2",
+          "numberOfOutput": 2,
+          "id": "c022"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_2",
+          "numberOfOutput": 2,
+          "id": "c023"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_2",
+          "numberOfOutput": 2,
+          "id": "c024"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_3",
+          "numberOfOutput": 3,
+          "id": "c025"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_3",
+          "numberOfOutput": 3,
+          "id": "c026"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_3",
+          "numberOfOutput": 3,
+          "id": "c027"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_3",
+          "numberOfOutput": 3,
+          "id": "c028"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_3",
+          "numberOfOutput": 3,
+          "id": "c029"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_3",
+          "numberOfOutput": 3,
+          "id": "c030"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_3",
+          "numberOfOutput": 3,
+          "id": "c031"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_3",
+          "numberOfOutput": 3,
+          "id": "c032"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_4",
+          "numberOfOutput": 4,
+          "id": "c033"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_4",
+          "numberOfOutput": 4,
+          "id": "c034"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_4",
+          "numberOfOutput": 4,
+          "id": "c035"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_4",
+          "numberOfOutput": 4,
+          "id": "c036"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_4",
+          "numberOfOutput": 4,
+          "id": "c037"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_4",
+          "numberOfOutput": 4,
+          "id": "c038"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_4",
+          "numberOfOutput": 4,
+          "id": "c039"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_4",
+          "numberOfOutput": 4,
+          "id": "c040"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_5",
+          "numberOfOutput": 5,
+          "id": "c041"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_5",
+          "numberOfOutput": 5,
+          "id": "c042"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_5",
+          "numberOfOutput": 5,
+          "id": "c043"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_5",
+          "numberOfOutput": 5,
+          "id": "c044"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_5",
+          "numberOfOutput": 5,
+          "id": "c045"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_5",
+          "numberOfOutput": 5,
+          "id": "c046"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_5",
+          "numberOfOutput": 5,
+          "id": "c047"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_5",
+          "numberOfOutput": 5,
+          "id": "c048"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_6",
+          "numberOfOutput": 6,
+          "id": "c049"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_6",
+          "numberOfOutput": 6,
+          "id": "c050"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_6",
+          "numberOfOutput": 6,
+          "id": "c051"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_6",
+          "numberOfOutput": 6,
+          "id": "c052"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_6",
+          "numberOfOutput": 6,
+          "id": "c053"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_6",
+          "numberOfOutput": 6,
+          "id": "c054"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_6",
+          "numberOfOutput": 6,
+          "id": "c055"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_6",
+          "numberOfOutput": 6,
+          "id": "c056"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_7",
+          "numberOfOutput": 7,
+          "id": "c057"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_7",
+          "numberOfOutput": 7,
+          "id": "c058"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_7",
+          "numberOfOutput": 7,
+          "id": "c059"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_7",
+          "numberOfOutput": 7,
+          "id": "c060"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_7",
+          "numberOfOutput": 7,
+          "id": "c061"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_7",
+          "numberOfOutput": 7,
+          "id": "c062"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_7",
+          "numberOfOutput": 7,
+          "id": "c063"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_7",
+          "numberOfOutput": 7,
+          "id": "c064"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_8",
+          "numberOfOutput": 8,
+          "id": "c065"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_8",
+          "numberOfOutput": 8,
+          "id": "c066"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_8",
+          "numberOfOutput": 8,
+          "id": "c067"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_8",
+          "numberOfOutput": 8,
+          "id": "c068"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_8",
+          "numberOfOutput": 8,
+          "id": "c069"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_8",
+          "numberOfOutput": 8,
+          "id": "c070"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_8",
+          "numberOfOutput": 8,
+          "id": "c071"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_8",
+          "numberOfOutput": 8,
+          "id": "c072"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_9",
+          "numberOfOutput": 9,
+          "id": "c073"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_9",
+          "numberOfOutput": 9,
+          "id": "c074"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_9",
+          "numberOfOutput": 9,
+          "id": "c075"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_9",
+          "numberOfOutput": 9,
+          "id": "c076"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_9",
+          "numberOfOutput": 9,
+          "id": "c077"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_9",
+          "numberOfOutput": 9,
+          "id": "c078"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_9",
+          "numberOfOutput": 9,
+          "id": "c079"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_9",
+          "numberOfOutput": 9,
+          "id": "c080"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_10",
+          "numberOfOutput": 10,
+          "id": "c081"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_10",
+          "numberOfOutput": 10,
+          "id": "c082"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_10",
+          "numberOfOutput": 10,
+          "id": "c083"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_10",
+          "numberOfOutput": 10,
+          "id": "c084"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_10",
+          "numberOfOutput": 10,
+          "id": "c085"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_10",
+          "numberOfOutput": 10,
+          "id": "c086"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_10",
+          "numberOfOutput": 10,
+          "id": "c087"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_10",
+          "numberOfOutput": 10,
+          "id": "c088"
+        },
+        {
+          "from": "kb",
+          "to": "wa",
+          "audioParam": "in_11",
+          "numberOfOutput": 11,
+          "id": "c089"
+        },
+        {
+          "from": "kb",
+          "to": "f1a",
+          "audioParam": "in_11",
+          "numberOfOutput": 11,
+          "id": "c090"
+        },
+        {
+          "from": "kb",
+          "to": "f2a",
+          "audioParam": "in_11",
+          "numberOfOutput": 11,
+          "id": "c091"
+        },
+        {
+          "from": "kb",
+          "to": "f3a",
+          "audioParam": "in_11",
+          "numberOfOutput": 11,
+          "id": "c092"
+        },
+        {
+          "from": "kb",
+          "to": "va",
+          "audioParam": "in_11",
+          "numberOfOutput": 11,
+          "id": "c093"
+        },
+        {
+          "from": "kb",
+          "to": "ba",
+          "audioParam": "in_11",
+          "numberOfOutput": 11,
+          "id": "c094"
+        },
+        {
+          "from": "kb",
+          "to": "na",
+          "audioParam": "in_11",
+          "numberOfOutput": 11,
+          "id": "c095"
+        },
+        {
+          "from": "kb",
+          "to": "pa",
+          "audioParam": "in_11",
+          "numberOfOutput": 11,
+          "id": "c096"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_0",
+          "numberOfOutput": 12,
+          "id": "c097"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_0",
+          "numberOfOutput": 12,
+          "id": "c098"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_0",
+          "numberOfOutput": 12,
+          "id": "c099"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_0",
+          "numberOfOutput": 12,
+          "id": "c100"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_0",
+          "numberOfOutput": 12,
+          "id": "c101"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_0",
+          "numberOfOutput": 12,
+          "id": "c102"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_0",
+          "numberOfOutput": 12,
+          "id": "c103"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_0",
+          "numberOfOutput": 12,
+          "id": "c104"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_1",
+          "numberOfOutput": 13,
+          "id": "c105"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_1",
+          "numberOfOutput": 13,
+          "id": "c106"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_1",
+          "numberOfOutput": 13,
+          "id": "c107"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_1",
+          "numberOfOutput": 13,
+          "id": "c108"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_1",
+          "numberOfOutput": 13,
+          "id": "c109"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_1",
+          "numberOfOutput": 13,
+          "id": "c110"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_1",
+          "numberOfOutput": 13,
+          "id": "c111"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_1",
+          "numberOfOutput": 13,
+          "id": "c112"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_2",
+          "numberOfOutput": 14,
+          "id": "c113"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_2",
+          "numberOfOutput": 14,
+          "id": "c114"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_2",
+          "numberOfOutput": 14,
+          "id": "c115"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_2",
+          "numberOfOutput": 14,
+          "id": "c116"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_2",
+          "numberOfOutput": 14,
+          "id": "c117"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_2",
+          "numberOfOutput": 14,
+          "id": "c118"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_2",
+          "numberOfOutput": 14,
+          "id": "c119"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_2",
+          "numberOfOutput": 14,
+          "id": "c120"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_3",
+          "numberOfOutput": 15,
+          "id": "c121"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_3",
+          "numberOfOutput": 15,
+          "id": "c122"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_3",
+          "numberOfOutput": 15,
+          "id": "c123"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_3",
+          "numberOfOutput": 15,
+          "id": "c124"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_3",
+          "numberOfOutput": 15,
+          "id": "c125"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_3",
+          "numberOfOutput": 15,
+          "id": "c126"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_3",
+          "numberOfOutput": 15,
+          "id": "c127"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_3",
+          "numberOfOutput": 15,
+          "id": "c128"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_4",
+          "numberOfOutput": 16,
+          "id": "c129"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_4",
+          "numberOfOutput": 16,
+          "id": "c130"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_4",
+          "numberOfOutput": 16,
+          "id": "c131"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_4",
+          "numberOfOutput": 16,
+          "id": "c132"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_4",
+          "numberOfOutput": 16,
+          "id": "c133"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_4",
+          "numberOfOutput": 16,
+          "id": "c134"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_4",
+          "numberOfOutput": 16,
+          "id": "c135"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_4",
+          "numberOfOutput": 16,
+          "id": "c136"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_5",
+          "numberOfOutput": 17,
+          "id": "c137"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_5",
+          "numberOfOutput": 17,
+          "id": "c138"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_5",
+          "numberOfOutput": 17,
+          "id": "c139"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_5",
+          "numberOfOutput": 17,
+          "id": "c140"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_5",
+          "numberOfOutput": 17,
+          "id": "c141"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_5",
+          "numberOfOutput": 17,
+          "id": "c142"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_5",
+          "numberOfOutput": 17,
+          "id": "c143"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_5",
+          "numberOfOutput": 17,
+          "id": "c144"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_6",
+          "numberOfOutput": 18,
+          "id": "c145"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_6",
+          "numberOfOutput": 18,
+          "id": "c146"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_6",
+          "numberOfOutput": 18,
+          "id": "c147"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_6",
+          "numberOfOutput": 18,
+          "id": "c148"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_6",
+          "numberOfOutput": 18,
+          "id": "c149"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_6",
+          "numberOfOutput": 18,
+          "id": "c150"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_6",
+          "numberOfOutput": 18,
+          "id": "c151"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_6",
+          "numberOfOutput": 18,
+          "id": "c152"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_7",
+          "numberOfOutput": 19,
+          "id": "c153"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_7",
+          "numberOfOutput": 19,
+          "id": "c154"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_7",
+          "numberOfOutput": 19,
+          "id": "c155"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_7",
+          "numberOfOutput": 19,
+          "id": "c156"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_7",
+          "numberOfOutput": 19,
+          "id": "c157"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_7",
+          "numberOfOutput": 19,
+          "id": "c158"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_7",
+          "numberOfOutput": 19,
+          "id": "c159"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_7",
+          "numberOfOutput": 19,
+          "id": "c160"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_8",
+          "numberOfOutput": 20,
+          "id": "c161"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_8",
+          "numberOfOutput": 20,
+          "id": "c162"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_8",
+          "numberOfOutput": 20,
+          "id": "c163"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_8",
+          "numberOfOutput": 20,
+          "id": "c164"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_8",
+          "numberOfOutput": 20,
+          "id": "c165"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_8",
+          "numberOfOutput": 20,
+          "id": "c166"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_8",
+          "numberOfOutput": 20,
+          "id": "c167"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_8",
+          "numberOfOutput": 20,
+          "id": "c168"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_9",
+          "numberOfOutput": 21,
+          "id": "c169"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_9",
+          "numberOfOutput": 21,
+          "id": "c170"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_9",
+          "numberOfOutput": 21,
+          "id": "c171"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_9",
+          "numberOfOutput": 21,
+          "id": "c172"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_9",
+          "numberOfOutput": 21,
+          "id": "c173"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_9",
+          "numberOfOutput": 21,
+          "id": "c174"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_9",
+          "numberOfOutput": 21,
+          "id": "c175"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_9",
+          "numberOfOutput": 21,
+          "id": "c176"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_10",
+          "numberOfOutput": 22,
+          "id": "c177"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_10",
+          "numberOfOutput": 22,
+          "id": "c178"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_10",
+          "numberOfOutput": 22,
+          "id": "c179"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_10",
+          "numberOfOutput": 22,
+          "id": "c180"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_10",
+          "numberOfOutput": 22,
+          "id": "c181"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_10",
+          "numberOfOutput": 22,
+          "id": "c182"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_10",
+          "numberOfOutput": 22,
+          "id": "c183"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_10",
+          "numberOfOutput": 22,
+          "id": "c184"
+        },
+        {
+          "from": "kb",
+          "to": "wb",
+          "audioParam": "in_11",
+          "numberOfOutput": 23,
+          "id": "c185"
+        },
+        {
+          "from": "kb",
+          "to": "f1b",
+          "audioParam": "in_11",
+          "numberOfOutput": 23,
+          "id": "c186"
+        },
+        {
+          "from": "kb",
+          "to": "f2b",
+          "audioParam": "in_11",
+          "numberOfOutput": 23,
+          "id": "c187"
+        },
+        {
+          "from": "kb",
+          "to": "f3b",
+          "audioParam": "in_11",
+          "numberOfOutput": 23,
+          "id": "c188"
+        },
+        {
+          "from": "kb",
+          "to": "vb",
+          "audioParam": "in_11",
+          "numberOfOutput": 23,
+          "id": "c189"
+        },
+        {
+          "from": "kb",
+          "to": "bb",
+          "audioParam": "in_11",
+          "numberOfOutput": 23,
+          "id": "c190"
+        },
+        {
+          "from": "kb",
+          "to": "nb",
+          "audioParam": "in_11",
+          "numberOfOutput": 23,
+          "id": "c191"
+        },
+        {
+          "from": "kb",
+          "to": "pb",
+          "audioParam": "in_11",
+          "numberOfOutput": 23,
+          "id": "c192"
+        },
+        {
+          "from": "kb",
+          "to": "wc",
+          "audioParam": "in_0",
+          "numberOfOutput": 24,
+          "id": "c193"
+        },
+        {
+          "from": "kb",
+          "to": "f1c",
+          "audioParam": "in_0",
+          "numberOfOutput": 24,
+          "id": "c194"
+        },
+        {
+          "from": "kb",
+          "to": "f2c",
+          "audioParam": "in_0",
+          "numberOfOutput": 24,
+          "id": "c195"
+        },
+        {
+          "from": "kb",
+          "to": "f3c",
+          "audioParam": "in_0",
+          "numberOfOutput": 24,
+          "id": "c196"
+        },
+        {
+          "from": "kb",
+          "to": "vc",
+          "audioParam": "in_0",
+          "numberOfOutput": 24,
+          "id": "c197"
+        },
+        {
+          "from": "kb",
+          "to": "bc",
+          "audioParam": "in_0",
+          "numberOfOutput": 24,
+          "id": "c198"
+        },
+        {
+          "from": "kb",
+          "to": "nc",
+          "audioParam": "in_0",
+          "numberOfOutput": 24,
+          "id": "c199"
+        },
+        {
+          "from": "kb",
+          "to": "pc",
+          "audioParam": "in_0",
+          "numberOfOutput": 24,
+          "id": "c200"
+        },
+        {
+          "from": "kb",
+          "to": "wc",
+          "audioParam": "in_1",
+          "numberOfOutput": 25,
+          "id": "c201"
+        },
+        {
+          "from": "kb",
+          "to": "f1c",
+          "audioParam": "in_1",
+          "numberOfOutput": 25,
+          "id": "c202"
+        },
+        {
+          "from": "kb",
+          "to": "f2c",
+          "audioParam": "in_1",
+          "numberOfOutput": 25,
+          "id": "c203"
+        },
+        {
+          "from": "kb",
+          "to": "f3c",
+          "audioParam": "in_1",
+          "numberOfOutput": 25,
+          "id": "c204"
+        },
+        {
+          "from": "kb",
+          "to": "vc",
+          "audioParam": "in_1",
+          "numberOfOutput": 25,
+          "id": "c205"
+        },
+        {
+          "from": "kb",
+          "to": "bc",
+          "audioParam": "in_1",
+          "numberOfOutput": 25,
+          "id": "c206"
+        },
+        {
+          "from": "kb",
+          "to": "nc",
+          "audioParam": "in_1",
+          "numberOfOutput": 25,
+          "id": "c207"
+        },
+        {
+          "from": "kb",
+          "to": "pc",
+          "audioParam": "in_1",
+          "numberOfOutput": 25,
+          "id": "c208"
+        },
+        {
+          "from": "kb",
+          "to": "trill",
+          "audioParam": "in_0",
+          "numberOfOutput": 3,
+          "id": "c209"
+        }
+      ]
+    },
+    {
+      "id": "wa",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "160px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f1a",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "340px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*220+x2*210+x3*390+x4*370+x5*360+x6*240+x7*210+x8*220+x9*420+x10*390+x11*920+x12*400",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f2a",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "520px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*460+x2*410+x3*2250+x4*1180+x5*2150+x6*2550+x7*430+x8*2700+x9*640+x10*2050+x11*1100+x12*2200",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f3a",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "700px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*2100+x2*2000+x3*2900+x4*2520+x5*3100+x6*3300+x7*2050+x8*3450+x9*2300+x10*2600+x11*2450+x12*3900",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "va",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "880px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*0.35+x2*1+x3*1+x4*0.88+x5*0.16+x6*0.82+x7*1+x8*1+x9*1+x10*0.18+x11*1+x12*0",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "ba",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "1060px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*0.95+x2*0.22+x3*0+x4*0.28+x5*1+x6*0.28+x7*0+x8*0+x9*0+x10*1+x11*0+x12*0.06",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "na",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "1240px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*1300+x2*550+x3*2000+x4*1050+x5*4500+x6*2600+x7*2000+x8*2000+x9*2000+x10*1550+x11*2000+x12*6800",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "pa",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "360px",
+      "y": "1420px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*104+x2*100+x3*136+x4*124+x5*132+x6*150+x7*100+x8*156+x9*110+x10*130+x11*116+x12*136",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "wb",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "160px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1+x2+x3+x4+x5+x6+x7+x8+x9+x10+x11+x12",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f1b",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "340px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*300+x2*400+x3*430+x4*900+x5*460+x6*900+x7*360+x8*400+x9*390+x10*400+x11*270+x12*270",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f2b",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "520px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*1780+x2*1300+x3*980+x4*1120+x5*720+x6*1080+x7*920+x8*2200+x9*2000+x10*2200+x11*680+x12*680",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f3b",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "700px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*2550+x2*2400+x3*1950+x4*2450+x5*1800+x6*2400+x7*2900+x8*3800+x9*3300+x10*3600+x11*1750+x12*1750",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "vb",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "880px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*1+x2*0+x3*0.06+x4*0.32+x5*0.04+x6*0.28+x7*1+x8*0+x9*0.04+x10*0+x11*1+x12*1",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "bb",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "1060px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*0.55+x2*0.08+x3*0.22+x4*0.35+x5*0.18+x6*1+x7*0.06+x8*0.08+x9*0.75+x10*0.12+x11*0.6+x12*0.6",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "nb",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "1240px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*850+x2*1250+x3*760+x4*2400+x5*680+x6*1750+x7*1400+x8*6400+x9*5200+x10*6000+x11*480+x12*480",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "pb",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "580px",
+      "y": "1420px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*122+x2*128+x3*114+x4*116+x5*108+x6*116+x7*126+x8*136+x9*128+x10*134+x11*118+x12*118",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "wc",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "160px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1+x2",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f1c",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "340px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*230+x2*200",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f2c",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "520px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*1620+x2*780",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f3c",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "700px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*2050+x2*1450",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "vc",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "880px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*1+x2*1",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "bc",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "1060px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*0.18+x2*0.18",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "nc",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "1240px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*340+x2*250",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "pc",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "800px",
+      "y": "1420px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "formula": "y=x1*108+x2*102",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "wsum",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "160px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "wc",
+          "to": "wsum",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c219"
+        },
+        {
+          "from": "wb",
+          "to": "wsum",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c218"
+        },
+        {
+          "from": "wa",
+          "to": "wsum",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c217"
+        },
+        {
+          "from": "wsum",
+          "to": "f1",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c210"
+        },
+        {
+          "from": "wsum",
+          "to": "f2",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c211"
+        },
+        {
+          "from": "wsum",
+          "to": "f3",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c212"
+        },
+        {
+          "from": "wsum",
+          "to": "voice",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c213"
+        },
+        {
+          "from": "wsum",
+          "to": "burst",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c214"
+        },
+        {
+          "from": "wsum",
+          "to": "nf",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c215"
+        },
+        {
+          "from": "wsum",
+          "to": "f0",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c216"
+        }
+      ],
+      "formula": "y=x1+x2+x3+0.001",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f1",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "340px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "f1c",
+          "to": "f1",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c223"
+        },
+        {
+          "from": "f1b",
+          "to": "f1",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c222"
+        },
+        {
+          "from": "f1a",
+          "to": "f1",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c221"
+        },
+        {
+          "from": "f1",
+          "to": "lerp_f1",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c220"
+        }
+      ],
+      "formula": "y=(x1+x2+x3+0.39)/x4",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f2",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "520px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "f2c",
+          "to": "f2",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c227"
+        },
+        {
+          "from": "f2b",
+          "to": "f2",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c226"
+        },
+        {
+          "from": "f2a",
+          "to": "f2",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c225"
+        },
+        {
+          "from": "f2",
+          "to": "lerp_f2",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c224"
+        }
+      ],
+      "formula": "y=(x1+x2+x3+2.25)/x4",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f3",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "700px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "f3c",
+          "to": "f3",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c231"
+        },
+        {
+          "from": "f3b",
+          "to": "f3",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c230"
+        },
+        {
+          "from": "f3a",
+          "to": "f3",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c229"
+        },
+        {
+          "from": "f3",
+          "to": "lerp_f3",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c228"
+        }
+      ],
+      "formula": "y=(x1+x2+x3+2.6)/x4",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "voice",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "880px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "vc",
+          "to": "voice",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c235"
+        },
+        {
+          "from": "vb",
+          "to": "voice",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c234"
+        },
+        {
+          "from": "va",
+          "to": "voice",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c233"
+        },
+        {
+          "from": "voice",
+          "to": "lerp_voice",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c232"
+        }
+      ],
+      "formula": "y=Math.max(0,Math.min(1,(x1+x2+x3+0.001)/x4))",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "burst",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "1060px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "bc",
+          "to": "burst",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c239"
+        },
+        {
+          "from": "bb",
+          "to": "burst",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c238"
+        },
+        {
+          "from": "ba",
+          "to": "burst",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c237"
+        },
+        {
+          "from": "burst",
+          "to": "lerp_burst",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c236"
+        }
+      ],
+      "formula": "y=Math.max(0,Math.min(1,(x1+x2+x3)/x4))",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "nf",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "1240px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "nc",
+          "to": "nf",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c243"
+        },
+        {
+          "from": "nb",
+          "to": "nf",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c242"
+        },
+        {
+          "from": "na",
+          "to": "nf",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c241"
+        },
+        {
+          "from": "nf",
+          "to": "lerp_nf",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c240"
+        }
+      ],
+      "formula": "y=(x1+x2+x3+2)/x4",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "f0",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "1420px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "pc",
+          "to": "f0",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c247"
+        },
+        {
+          "from": "pb",
+          "to": "f0",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c246"
+        },
+        {
+          "from": "pa",
+          "to": "f0",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c245"
+        },
+        {
+          "from": "f0",
+          "to": "lerp_f0",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c244"
+        }
+      ],
+      "formula": "y=(x1+x2+x3+0.125)/x4",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "gate",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1020px",
+      "y": "1580px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "wc",
+          "to": "gate",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c252"
+        },
+        {
+          "from": "wb",
+          "to": "gate",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c251"
+        },
+        {
+          "from": "wa",
+          "to": "gate",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c250"
+        },
+        {
+          "from": "gate",
+          "to": "env_syll",
+          "audioParam": "gate",
+          "numberOfOutput": 0,
+          "id": "c248"
+        },
+        {
+          "from": "gate",
+          "to": "env_burst",
+          "audioParam": "gate",
+          "numberOfOutput": 0,
+          "id": "c249"
+        }
+      ],
+      "formula": "y=x1+x2+x3",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "trill",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "240px",
+      "y": "1420px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "trill",
+          "to": "osc_vib",
+          "audioParam": "frequency",
+          "numberOfOutput": 0,
+          "id": "c253"
+        }
+      ],
+      "formula": "y=x1*32",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "osc_vib",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "1600px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 5.5
+      },
+      "node": {
+        "type": "sine"
+      },
+      "connections": [
+        {
+          "from": "osc_vib",
+          "to": "amp_vib",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c254"
+        }
+      ]
+    },
+    {
+      "id": "amp_vib",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "240px",
+      "y": "1600px",
+      "audioParams": {
+        "gain": 4
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_vib",
+          "to": "osc_glot",
+          "audioParam": "frequency",
+          "numberOfOutput": 0,
+          "id": "c255"
+        }
+      ]
+    },
+    {
+      "id": "noise_jit",
+      "constructor": "NoiseGenWithWorklet",
+      "type": "NoiseGenWithWorklet",
+      "createdBy": "user",
+      "x": "40px",
+      "y": "1780px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "noise_jit",
+          "to": "filt_jit",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c256"
+        }
+      ]
+    },
+    {
+      "id": "filt_jit",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "240px",
+      "y": "1780px",
+      "audioParams": {
+        "Q": 0.5,
+        "detune": 0,
+        "frequency": 35,
+        "gain": 0
+      },
+      "node": {
+        "type": "lowpass"
+      },
+      "connections": [
+        {
+          "from": "filt_jit",
+          "to": "amp_jit",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c257"
+        }
+      ]
+    },
+    {
+      "id": "amp_jit",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "440px",
+      "y": "1780px",
+      "audioParams": {
+        "gain": 1.6
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_jit",
+          "to": "osc_glot",
+          "audioParam": "frequency",
+          "numberOfOutput": 0,
+          "id": "c258"
+        }
+      ]
+    },
+    {
+      "id": "osc_glot",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "440px",
+      "y": "1600px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sawtooth"
+      },
+      "connections": [
+        {
+          "from": "osc_glot",
+          "to": "filt_tilt",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c259"
+        }
+      ]
+    },
+    {
+      "id": "filt_tilt",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "640px",
+      "y": "1600px",
+      "audioParams": {
+        "Q": 0.6,
+        "detune": 0,
+        "frequency": 3400,
+        "gain": 0
+      },
+      "node": {
+        "type": "lowpass"
+      },
+      "connections": [
+        {
+          "from": "filt_tilt",
+          "to": "crush_glot",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c260"
+        }
+      ]
+    },
+    {
+      "id": "crush_glot",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "840px",
+      "y": "1600px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "crush_glot",
+          "to": "mix_src",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c261"
+        }
+      ],
+      "formula": "y=Math.tanh(x1*1.6)",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "noise_asp",
+      "constructor": "NoiseGenWithWorklet",
+      "type": "NoiseGenWithWorklet",
+      "createdBy": "user",
+      "x": "840px",
+      "y": "1780px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "noise_asp",
+          "to": "filt_asp",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c262"
+        }
+      ]
+    },
+    {
+      "id": "filt_asp",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "1780px",
+      "audioParams": {
+        "Q": 0.9,
+        "detune": 0,
+        "frequency": 2000,
+        "gain": 0
+      },
+      "node": {
+        "type": "bandpass"
+      },
+      "connections": [
+        {
+          "from": "filt_asp",
+          "to": "mix_nse",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c263"
+        }
+      ]
+    },
+    {
+      "id": "lerp_voice",
+      "constructor": "LerpComponent",
+      "type": "LerpComponent",
+      "createdBy": "user",
+      "x": "1240px",
+      "y": "880px",
+      "audioParams": {
+        "time": 0.02
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "lerp_voice",
+          "to": "mix_src",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c264"
+        },
+        {
+          "from": "lerp_voice",
+          "to": "mix_nse",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c265"
+        }
+      ]
+    },
+    {
+      "id": "lerp_burst",
+      "constructor": "LerpComponent",
+      "type": "LerpComponent",
+      "createdBy": "user",
+      "x": "1240px",
+      "y": "1060px",
+      "audioParams": {
+        "time": 0.02
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "lerp_burst",
+          "to": "mix_nse",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c266"
+        }
+      ]
+    },
+    {
+      "id": "lerp_nf",
+      "constructor": "LerpComponent",
+      "type": "LerpComponent",
+      "createdBy": "user",
+      "x": "1240px",
+      "y": "1240px",
+      "audioParams": {
+        "time": 0.03
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "lerp_nf",
+          "to": "filt_asp",
+          "audioParam": "frequency",
+          "numberOfOutput": 0,
+          "id": "c267"
+        }
+      ]
+    },
+    {
+      "id": "env_burst",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "1240px",
+      "y": "1420px",
+      "audioParams": {
+        "attack": 0.004,
+        "attackcurve": 0.7,
+        "decay": 0.09,
+        "release": 0.06,
+        "sustain": 0,
+        "gate": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_burst",
+          "to": "mix_nse",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c268"
+        }
+      ]
+    },
+    {
+      "id": "mix_src",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1460px",
+      "y": "1600px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "mix_src",
+          "to": "filt_f1",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c269"
+        },
+        {
+          "from": "mix_src",
+          "to": "filt_f2",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c270"
+        },
+        {
+          "from": "mix_src",
+          "to": "filt_f3",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c271"
+        }
+      ],
+      "formula": "y=x1*x2",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "mix_nse",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "1460px",
+      "y": "1780px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "mix_nse",
+          "to": "mix_form",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c272"
+        }
+      ],
+      "formula": "y=Math.tanh(x1*((1-x2)*1.4+x3*x4*1.3))",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "lerp_f0",
+      "constructor": "LerpComponent",
+      "type": "LerpComponent",
+      "createdBy": "user",
+      "x": "1240px",
+      "y": "1600px",
+      "audioParams": {
+        "time": 0.03
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "lerp_f0",
+          "to": "osc_glot",
+          "audioParam": "frequency",
+          "numberOfOutput": 0,
+          "id": "c273"
+        }
+      ]
+    },
+    {
+      "id": "lerp_f1",
+      "constructor": "LerpComponent",
+      "type": "LerpComponent",
+      "createdBy": "user",
+      "x": "1240px",
+      "y": "340px",
+      "audioParams": {
+        "time": 0.022
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "lerp_f1",
+          "to": "filt_f1",
+          "audioParam": "frequency",
+          "numberOfOutput": 0,
+          "id": "c274"
+        },
+        {
+          "from": "lerp_f1",
+          "to": "plot_x",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c275"
+        }
+      ]
+    },
+    {
+      "id": "lerp_f2",
+      "constructor": "LerpComponent",
+      "type": "LerpComponent",
+      "createdBy": "user",
+      "x": "1240px",
+      "y": "520px",
+      "audioParams": {
+        "time": 0.022
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "lerp_f2",
+          "to": "filt_f2",
+          "audioParam": "frequency",
+          "numberOfOutput": 0,
+          "id": "c276"
+        },
+        {
+          "from": "lerp_f2",
+          "to": "plot_y",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c277"
+        }
+      ]
+    },
+    {
+      "id": "lerp_f3",
+      "constructor": "LerpComponent",
+      "type": "LerpComponent",
+      "createdBy": "user",
+      "x": "1240px",
+      "y": "700px",
+      "audioParams": {
+        "time": 0.022
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "lerp_f3",
+          "to": "filt_f3",
+          "audioParam": "frequency",
+          "numberOfOutput": 0,
+          "id": "c278"
+        }
+      ]
+    },
+    {
+      "id": "filt_f1",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "1460px",
+      "y": "340px",
+      "audioParams": {
+        "Q": 16,
+        "detune": 0,
+        "frequency": 400,
+        "gain": 0
+      },
+      "node": {
+        "type": "bandpass"
+      },
+      "connections": [
+        {
+          "from": "filt_f1",
+          "to": "mix_form",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c279"
+        }
+      ]
+    },
+    {
+      "id": "filt_f2",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "1460px",
+      "y": "520px",
+      "audioParams": {
+        "Q": 18,
+        "detune": 0,
+        "frequency": 2200,
+        "gain": 0
+      },
+      "node": {
+        "type": "bandpass"
+      },
+      "connections": [
+        {
+          "from": "filt_f2",
+          "to": "mix_form",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c280"
+        }
+      ]
+    },
+    {
+      "id": "filt_f3",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "1460px",
+      "y": "700px",
+      "audioParams": {
+        "Q": 8,
+        "detune": 0,
+        "frequency": 2900,
+        "gain": 0
+      },
+      "node": {
+        "type": "bandpass"
+      },
+      "connections": [
+        {
+          "from": "filt_f3",
+          "to": "mix_form",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c281"
+        }
+      ]
+    },
+    {
+      "id": "mix_form",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1680px",
+      "y": "520px",
+      "audioParams": {
+        "g0": 1.1,
+        "g1": 0.85,
+        "g2": 0.28,
+        "g3": 0.95,
+        "master": 0.55
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "mix_form",
+          "to": "amp_vca",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c282"
+        }
+      ]
+    },
+    {
+      "id": "env_syll",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "1680px",
+      "y": "340px",
+      "audioParams": {
+        "attack": 0.018,
+        "attackcurve": 0.4,
+        "decay": 0.07,
+        "release": 0.12,
+        "sustain": 0.84,
+        "gate": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "env_syll",
+          "to": "amp_vca",
+          "audioParam": "gain",
+          "numberOfOutput": 0,
+          "id": "c283"
+        },
+        {
+          "from": "env_syll",
+          "to": "plotter",
+          "audioParam": "in_2",
+          "numberOfOutput": 0,
+          "id": "c284"
+        },
+        {
+          "from": "env_syll",
+          "to": "plotter",
+          "audioParam": "in_3",
+          "numberOfOutput": 0,
+          "id": "c285"
+        },
+        {
+          "from": "env_syll",
+          "to": "plotter",
+          "audioParam": "in_4",
+          "numberOfOutput": 0,
+          "id": "c286"
+        }
+      ]
+    },
+    {
+      "id": "amp_vca",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1880px",
+      "y": "520px",
+      "audioParams": {
+        "gain": 0
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "amp_vca",
+          "to": "hp_lip",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c287"
+        }
+      ]
+    },
+    {
+      "id": "hp_lip",
+      "constructor": "Filter",
+      "type": "Filter",
+      "createdBy": "user",
+      "x": "2080px",
+      "y": "520px",
+      "audioParams": {
+        "Q": 0.7,
+        "detune": 0,
+        "frequency": 70,
+        "gain": 0
+      },
+      "node": {
+        "type": "highpass"
+      },
+      "connections": [
+        {
+          "from": "hp_lip",
+          "to": "spec",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c288"
+        }
+      ]
+    },
+    {
+      "id": "spec",
+      "constructor": "Spectrogram",
+      "type": "Spectrogram",
+      "createdBy": "user",
+      "x": "2280px",
+      "y": "400px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "spec",
+          "to": "comp_out",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c289"
+        }
+      ]
+    },
+    {
+      "id": "comp_out",
+      "constructor": "Compressor",
+      "type": "Compressor",
+      "createdBy": "user",
+      "x": "2280px",
+      "y": "560px",
+      "audioParams": {
+        "attack": 0.003,
+        "knee": 10,
+        "ratio": 4,
+        "release": 0.1,
+        "threshold": -20
+      },
+      "node": {},
+      "connections": [
+        {
+          "from": "comp_out",
+          "to": "output",
+          "audioParam": "in",
+          "numberOfOutput": 0,
+          "id": "c290"
+        }
+      ]
+    },
+    {
+      "id": "plot_x",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "700px",
+      "y": "20px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "plot_x",
+          "to": "plotter",
+          "audioParam": "in_0",
+          "numberOfOutput": 0,
+          "id": "c291"
+        }
+      ],
+      "formula": "y=(x1-180)/800",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "plot_y",
+      "constructor": "CustomProcessorComponent",
+      "type": "CustomProcessorComponent",
+      "createdBy": "user",
+      "x": "900px",
+      "y": "20px",
+      "audioParams": {},
+      "node": {},
+      "connections": [
+        {
+          "from": "plot_y",
+          "to": "plotter",
+          "audioParam": "in_1",
+          "numberOfOutput": 0,
+          "id": "c292"
+        }
+      ],
+      "formula": "y=(x1-400)/2400",
+      "valuesToSave": [
+        "formula"
+      ]
+    },
+    {
+      "id": "plotter",
+      "constructor": "CanvasPlotter",
+      "type": "CanvasPlotter",
+      "createdBy": "user",
+      "x": "1100px",
+      "y": "20px",
+      "audioParams": {
+        "clear": 10,
+        "range": 1,
+        "time": 0.05
+      },
+      "node": {},
+      "connections": [],
+      "bipolar": false,
+      "lastOnly": true,
+      "valuesToSave": [
+        "bipolar",
+        "lastOnly"
+      ]
+    }
+  ]
+}

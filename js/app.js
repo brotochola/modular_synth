@@ -24,6 +24,10 @@ class App {
     Noise: ["white-noise"],
     Mulberry32: ["mulberry32"],
     "808 Kick": ["kick808"],
+    "808 Snare": ["snare808"],
+    "808 Clap": ["clap808"],
+    "808 HiHat": ["hihat808"],
+    "808 Cowbell": ["cowbell808"],
     Scanline: ["scanline"],
     "Image Maker": ["image-maker"],
     "Image Player": ["image-player"],
@@ -2402,6 +2406,18 @@ class App {
   addKick808() {
     this.components.push(new Kick808(this));
   }
+  addSnare808() {
+    this.components.push(new Snare808(this));
+  }
+  addClap808() {
+    this.components.push(new Clap808(this));
+  }
+  addHiHat808() {
+    this.components.push(new HiHat808(this));
+  }
+  addCowbell808() {
+    this.components.push(new Cowbell808(this));
+  }
 
   addNumberDisplay() {
     this.components.push(new NumberDisplayComponent(this));
@@ -3081,6 +3097,10 @@ App.COMPONENT_CLASSES = {
   SampleHold,
   ScanlineSynth,
   Kick808,
+  Snare808,
+  Clap808,
+  HiHat808,
+  Cowbell808,
   EnvelopeGenerator,
   ConstantValueNode,
   Mouse,
@@ -3127,6 +3147,10 @@ App.COMPONENT_CLASSES = {
 App.COMPONENT_TONE = {
   Oscillator: "source",
   Kick808: "source",
+  Snare808: "source",
+  Clap808: "source",
+  HiHat808: "source",
+  Cowbell808: "source",
   ScanlineSynth: "source",
   NoiseGenWithWorklet: "source",
   Mulberry32: "source",

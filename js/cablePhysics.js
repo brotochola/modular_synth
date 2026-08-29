@@ -1,5 +1,5 @@
 class CableWorld {
-  static MAX_CABLES = 96;
+  static MAX_CABLES = 512;
   static MAX_BEADS = 36;
   static MIN_BEADS = 6;
 

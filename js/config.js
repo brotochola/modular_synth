@@ -33,6 +33,17 @@
     KICK_PITCH_ENV_SEC: 0.05,
     KICK_CLICK_ENV_SEC: 0.002,
 
+    // --- 808 Perc (snare / clap / hat / cowbell) ---
+    SNARE_RATIO: 330 / 185,
+    CLAP_PULSE0_SEC: 0,
+    CLAP_PULSE1_SEC: 0.01,
+    CLAP_PULSE2_SEC: 0.021,
+    CLAP_PULSE3_SEC: 0.031,
+    CLAP_BURST_SEC: 0.005,
+    HAT_CLOSED_SEC: 0.07,
+    HAT_FREQS: [205.3, 304.4, 369.6, 522.7, 540, 800],
+    COWBELL_RATIO: 800 / 540,
+
     // --- Audio profiler ---
     /** Wrap every process() with timing. Off in prod; reporter still tracks xruns. */
     AUDIO_PROFILE_WRAP: false,
