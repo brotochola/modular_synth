@@ -11,6 +11,31 @@
   --radius: 6px;
   --gap: 4px;
   --led-color: var(--accent);
+
+  --tone-source: #e8c547;
+  --tone-source-dim: rgba(232, 197, 71, 0.35);
+  --tone-source-edge: #5a4a1e;
+  --tone-media: #e89a6a;
+  --tone-media-dim: rgba(232, 154, 106, 0.35);
+  --tone-media-edge: #5a3a28;
+  --tone-filter: #e86b8a;
+  --tone-filter-dim: rgba(232, 107, 138, 0.35);
+  --tone-filter-edge: #5a2838;
+  --tone-process: #b89af0;
+  --tone-process-dim: rgba(184, 154, 240, 0.35);
+  --tone-process-edge: #3a2a5a;
+  --tone-mod: #7dffb3;
+  --tone-mod-dim: rgba(125, 255, 179, 0.35);
+  --tone-mod-edge: #2a4a38;
+  --tone-time: #5eb8e8;
+  --tone-time-dim: rgba(94, 184, 232, 0.35);
+  --tone-time-edge: #1e3a4a;
+  --tone-control: #7a9fff;
+  --tone-control-dim: rgba(122, 159, 255, 0.35);
+  --tone-control-edge: #283a5a;
+  --tone-visual: #c9a0e8;
+  --tone-visual-dim: rgba(201, 160, 232, 0.35);
+  --tone-visual-edge: #3a2a4a;
 }
 
 * {
@@ -384,6 +409,111 @@ app .mainContainer {
   color: var(--accent);
 }
 
+.buttons button.tone-source {
+  border-color: var(--tone-source-edge);
+}
+.buttons button.tone-source:hover,
+.buttons button.tone-source:active {
+  border-color: var(--tone-source);
+  color: var(--tone-source);
+}
+.buttons button.tone-source:active {
+  background: var(--tone-source-dim);
+}
+
+.buttons button.tone-media {
+  border-color: var(--tone-media-edge);
+}
+.buttons button.tone-media:hover,
+.buttons button.tone-media:active {
+  border-color: var(--tone-media);
+  color: var(--tone-media);
+}
+.buttons button.tone-media:active {
+  background: var(--tone-media-dim);
+}
+
+.buttons button.tone-filter {
+  border-color: var(--tone-filter-edge);
+}
+.buttons button.tone-filter:hover,
+.buttons button.tone-filter:active {
+  border-color: var(--tone-filter);
+  color: var(--tone-filter);
+}
+.buttons button.tone-filter:active {
+  background: var(--tone-filter-dim);
+}
+
+.buttons button.tone-process {
+  border-color: var(--tone-process-edge);
+}
+.buttons button.tone-process:hover,
+.buttons button.tone-process:active {
+  border-color: var(--tone-process);
+  color: var(--tone-process);
+}
+.buttons button.tone-process:active {
+  background: var(--tone-process-dim);
+}
+
+.buttons button.tone-mod {
+  border-color: var(--tone-mod-edge);
+}
+.buttons button.tone-mod:hover,
+.buttons button.tone-mod:active {
+  border-color: var(--tone-mod);
+  color: var(--tone-mod);
+}
+.buttons button.tone-mod:active {
+  background: var(--tone-mod-dim);
+}
+
+.buttons button.tone-time {
+  border-color: var(--tone-time-edge);
+}
+.buttons button.tone-time:hover,
+.buttons button.tone-time:active {
+  border-color: var(--tone-time);
+  color: var(--tone-time);
+}
+.buttons button.tone-time:active {
+  background: var(--tone-time-dim);
+}
+
+.buttons button.tone-control {
+  border-color: var(--tone-control-edge);
+}
+.buttons button.tone-control:hover,
+.buttons button.tone-control:active {
+  border-color: var(--tone-control);
+  color: var(--tone-control);
+}
+.buttons button.tone-control:active {
+  background: var(--tone-control-dim);
+}
+
+.buttons button.tone-visual {
+  border-color: var(--tone-visual-edge);
+}
+.buttons button.tone-visual:hover,
+.buttons button.tone-visual:active {
+  border-color: var(--tone-visual);
+  color: var(--tone-visual);
+}
+.buttons button.tone-visual:active {
+  background: var(--tone-visual-dim);
+}
+
+.buttons button.tone-meta {
+  border-color: var(--panel-edge);
+}
+.buttons button.tone-meta:hover,
+.buttons button.tone-meta:active {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .buttons hr {
   height: 4px;
   line-height: 4px;
@@ -403,7 +533,7 @@ component {
   background-position-y: var(--posY);
   box-shadow:
     0 8px 28px rgba(0, 0, 0, 0.45),
-    0 0 0 1px rgba(93, 255, 194, 0.08);
+    0 0 0 1px var(--accent-dim);
   position: absolute;
   border-radius: var(--radius);
   border: 1px solid var(--panel-edge);
@@ -415,6 +545,55 @@ component {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+component.tone-source {
+  --accent: var(--tone-source);
+  --accent-dim: var(--tone-source-dim);
+  --panel-edge: var(--tone-source-edge);
+  --led-color: var(--tone-source);
+}
+component.tone-media {
+  --accent: var(--tone-media);
+  --accent-dim: var(--tone-media-dim);
+  --panel-edge: var(--tone-media-edge);
+  --led-color: var(--tone-media);
+}
+component.tone-filter {
+  --accent: var(--tone-filter);
+  --accent-dim: var(--tone-filter-dim);
+  --panel-edge: var(--tone-filter-edge);
+  --led-color: var(--tone-filter);
+}
+component.tone-process {
+  --accent: var(--tone-process);
+  --accent-dim: var(--tone-process-dim);
+  --panel-edge: var(--tone-process-edge);
+  --led-color: var(--tone-process);
+}
+component.tone-mod {
+  --accent: var(--tone-mod);
+  --accent-dim: var(--tone-mod-dim);
+  --panel-edge: var(--tone-mod-edge);
+  --led-color: var(--tone-mod);
+}
+component.tone-time {
+  --accent: var(--tone-time);
+  --accent-dim: var(--tone-time-dim);
+  --panel-edge: var(--tone-time-edge);
+  --led-color: var(--tone-time);
+}
+component.tone-control {
+  --accent: var(--tone-control);
+  --accent-dim: var(--tone-control-dim);
+  --panel-edge: var(--tone-control-edge);
+  --led-color: var(--tone-control);
+}
+component.tone-visual {
+  --accent: var(--tone-visual);
+  --accent-dim: var(--tone-visual-dim);
+  --panel-edge: var(--tone-visual-edge);
+  --led-color: var(--tone-visual);
 }
 
 component.active {
@@ -2086,6 +2265,21 @@ span.categoryOfComponent {
   justify-content: flex-start;
   padding: 4px 6px;
   border-left: 2px solid var(--accent-dim);
+}
+span.categoryOfComponent:nth-child(1) {
+  border-left-color: var(--tone-source-dim);
+}
+span.categoryOfComponent:nth-child(2) {
+  border-left-color: var(--tone-process-dim);
+}
+span.categoryOfComponent:nth-child(3) {
+  border-left-color: var(--tone-control-dim);
+}
+span.categoryOfComponent:nth-child(4) {
+  border-left-color: var(--tone-time-dim);
+}
+span.categoryOfComponent:nth-child(5) {
+  border-left-color: var(--tone-visual-dim);
 }
 
 .openButtons {

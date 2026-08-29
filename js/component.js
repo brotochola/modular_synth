@@ -981,6 +981,8 @@ class Component {
     this.app.container.appendChild(this.container);
 
     this.container.classList.add(this.type);
+    let tone = (App.COMPONENT_TONE && App.COMPONENT_TONE[this.type]) || "meta";
+    this.container.classList.add("tone-" + tone);
 
     // Header bar
     this.header = document.createElement("div");
