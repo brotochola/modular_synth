@@ -12,7 +12,7 @@ class Recorder extends Component {
       "• toggleRec: rising edge flips record latch\n" +
       "• play / clear: triggers (also buttons)\n" +
       "• Length: 4 / 8 / 16 beats at project BPM. Resize copies audio; shrink truncates, grow pads silence.\n" +
-      "• playbackRate + currentTime (seek). Click waveform to seek.\n" +
+      "• playbackRate + currentTime (seek play + record). Click waveform to seek. Record writes from that position.\n" +
       "• loop / thru checkboxes.";
     this.namedAudioInputs = ["audio", "gate"];
     this.uiParamWidgets = { in_0: "none", in_1: "none" };
@@ -32,6 +32,7 @@ class Recorder extends Component {
         : true;
     this.peaks = new Float32Array(Recorder.PEAK_COLS * 2);
     this.playHeadNorm = 0;
+    this.writeHeadNorm = 0;
     this.recording = false;
     this.playing = false;
     this.durationSec = 0;
@@ -204,6 +205,7 @@ class Recorder extends Component {
     if (x < 0) x = 0;
     if (x > 1) x = 1;
     this.playHeadNorm = x;
+    this.writeHeadNorm = x;
     this.postToWorklet({ seekNorm: x });
     let p =
       this.node && this.node.parameters && this.node.parameters.get("currentTime");
@@ -218,8 +220,9 @@ class Recorder extends Component {
       if (data.durationSec != null) this.durationSec = data.durationSec;
       this.drawWaveform();
     }
-    if (data.playHeadNorm != null) {
-      this.playHeadNorm = data.playHeadNorm;
+    if (data.playHeadNorm != null || data.writeHeadNorm != null) {
+      if (data.playHeadNorm != null) this.playHeadNorm = data.playHeadNorm;
+      if (data.writeHeadNorm != null) this.writeHeadNorm = data.writeHeadNorm;
       this.recording = !!data.recording;
       this.playing = !!data.playing;
       this.updateButtons();
@@ -266,13 +269,30 @@ class Recorder extends Component {
     this.ctx.moveTo(0, mid);
     this.ctx.lineTo(w, mid);
     this.ctx.stroke();
-    let px = this.playHeadNorm * w;
-    this.ctx.strokeStyle = this.recording ? "#f44" : "#fff";
     this.ctx.lineWidth = 1.5;
-    this.ctx.beginPath();
-    this.ctx.moveTo(px, 0);
-    this.ctx.lineTo(px, h);
-    this.ctx.stroke();
+    if (this.playing) {
+      let px = this.playHeadNorm * w;
+      this.ctx.strokeStyle = "#fff";
+      this.ctx.beginPath();
+      this.ctx.moveTo(px, 0);
+      this.ctx.lineTo(px, h);
+      this.ctx.stroke();
+    }
+    if (this.recording) {
+      let wx = this.writeHeadNorm * w;
+      this.ctx.strokeStyle = "#f44";
+      this.ctx.beginPath();
+      this.ctx.moveTo(wx, 0);
+      this.ctx.lineTo(wx, h);
+      this.ctx.stroke();
+    } else if (!this.playing) {
+      let px = this.playHeadNorm * w;
+      this.ctx.strokeStyle = "#fff";
+      this.ctx.beginPath();
+      this.ctx.moveTo(px, 0);
+      this.ctx.lineTo(px, h);
+      this.ctx.stroke();
+    }
   }
 
   putLabels() {

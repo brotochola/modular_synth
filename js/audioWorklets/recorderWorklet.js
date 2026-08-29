@@ -54,23 +54,25 @@ class RecorderWorklet extends AudioWorkletProcessor {
     }
     if (d.clear) {
       this.buffer.fill(0);
-      this.writeHead = 0;
-      this.playHead = 0;
+      this.seekToSample(0);
       this.sendPeaks();
       this.sendStatus(true);
     }
     if (d.loop !== undefined) this.loop = !!d.loop;
     if (d.thru !== undefined) this.thru = !!d.thru;
     if (d.seekNorm != null) {
-      let n = this.buffer.length;
-      this.playHead = Math.max(0, Math.min(n - 1, d.seekNorm * n));
+      this.seekToSample(d.seekNorm * this.buffer.length);
     }
     if (d.seekSec != null) {
-      this.playHead = Math.max(
-        0,
-        Math.min(this.buffer.length - 1, d.seekSec * sampleRate),
-      );
+      this.seekToSample(d.seekSec * sampleRate);
     }
+  }
+
+  seekToSample(pos) {
+    let n = this.buffer.length;
+    let p = Math.max(0, Math.min(n > 0 ? n - 1 : 0, pos));
+    this.playHead = p;
+    this.writeHead = Math.floor(p);
   }
 
   bufferLengthSamples() {
@@ -121,9 +123,10 @@ class RecorderWorklet extends AudioWorkletProcessor {
   }
 
   sendStatus(force) {
+    let n = this.buffer.length;
     this.port.postMessage({
-      playHeadNorm:
-        this.buffer.length > 0 ? this.playHead / this.buffer.length : 0,
+      playHeadNorm: n > 0 ? this.playHead / n : 0,
+      writeHeadNorm: n > 0 ? this.writeHead / n : 0,
       recording: !!(this.wasRecording || this.toggleLatched),
       playing: !!this.playing,
       toggleLatched: !!this.toggleLatched,
@@ -153,16 +156,14 @@ class RecorderWorklet extends AudioWorkletProcessor {
     let ct = times[0] || 0;
     if (ct !== this.lastCurrentTime) {
       this.lastCurrentTime = ct;
-      this.playHead = Math.max(
-        0,
-        Math.min(this.buffer.length - 1, ct * sampleRate),
-      );
+      this.seekToSample(ct * sampleRate);
     }
 
     let n = output.length;
     let buf = this.buffer;
     let bufLen = buf.length;
     let recordingAny = false;
+    let recSynced = false;
 
     for (let i = 0; i < n; i++) {
       let gate = gateIn ? gateIn[i] || 0 : 0;
@@ -173,6 +174,11 @@ class RecorderWorklet extends AudioWorkletProcessor {
       let input = audioIn ? audioIn[i] || 0 : 0;
 
       if (recording && bufLen > 0) {
+        if (!this.wasRecording && !recSynced) {
+          this.writeHead = Math.floor(this.playHead) % bufLen;
+          if (this.writeHead < 0) this.writeHead = 0;
+          recSynced = true;
+        }
         buf[this.writeHead] = input;
         this.writeHead++;
         if (this.writeHead >= bufLen) this.writeHead = 0;
@@ -214,6 +220,7 @@ class RecorderWorklet extends AudioWorkletProcessor {
       if (recordingAny) this.sendPeaks();
       this.port.postMessage({
         playHeadNorm: bufLen > 0 ? this.playHead / bufLen : 0,
+        writeHeadNorm: bufLen > 0 ? this.writeHead / bufLen : 0,
         recording: recordingAny,
         playing: !!this.playing,
         toggleLatched: !!this.toggleLatched,
