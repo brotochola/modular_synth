@@ -983,7 +983,8 @@ component.CanvasPlotter canvas.canvasPlotterCanvas {
   background: #000;
 }
 
-component.CanvasPlotter .plotterToggles {
+component.CanvasPlotter .plotterToggles,
+component.Mulberry32 .moduleToggles {
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -991,7 +992,8 @@ component.CanvasPlotter .plotterToggles {
   font-size: 11px;
 }
 
-component.CanvasPlotter .plotterToggles label {
+component.CanvasPlotter .plotterToggles label,
+component.Mulberry32 .moduleToggles label {
   display: flex;
   align-items: center;
   gap: 4px;

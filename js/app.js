@@ -1884,6 +1884,9 @@ class App {
   addNoise() {
     this.components.push(new NoiseGenWithWorklet(this));
   }
+  addMulberry32() {
+    this.components.push(new Mulberry32(this));
+  }
   addMouse() {
     this.components.push(new Mouse(this));
   }
@@ -2586,6 +2589,7 @@ App.COMPONENT_CLASSES = {
   Reverb,
   Distortion,
   NoiseGenWithWorklet,
+  Mulberry32,
   CustomProcessorComponent,
   Mixer,
   Sequencer,
