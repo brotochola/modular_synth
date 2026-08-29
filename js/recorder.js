@@ -149,7 +149,7 @@ class Recorder extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/recorderWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "recorder-worklet", {
+      this.node = this.makeWorklet("recorder-worklet", {
         numberOfInputs: 2,
         numberOfOutputs: 1,
         parameterData: { playbackRate: 1, currentTime: 0 },
@@ -157,7 +157,6 @@ class Recorder extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
-      this.node.port.onmessage = (e) => this.onWorkletMessage(e.data);
       this.postToWorklet({ loop: this.loop, thru: this.thru });
       this.sendBpmBeats();
     });
@@ -220,21 +219,28 @@ class Recorder extends Component {
     this.drawWaveform();
   }
 
-  onWorkletMessage(data) {
-    if (!data) return;
-    if (data.peaks) {
-      this.peaks = data.peaks;
-      if (data.durationSec != null) this.durationSec = data.durationSec;
-      this.drawWaveform();
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab) return;
+    let bits = sab.getRec();
+    this.playHeadNorm = sab.getSlot(0);
+    this.writeHeadNorm = sab.getSlot(1);
+    this.recording = !!(bits & AppConfig.SAB_REC_RECORDING);
+    this.playing = !!(bits & AppConfig.SAB_REC_PLAYING);
+    let dur = sab.getSlot(5);
+    if (dur > 0) this.durationSec = dur;
+    let note = sab.getNote();
+    if (note !== this._peakNote) {
+      this._peakNote = note;
+      let cols = Recorder.PEAK_COLS;
+      let n = cols * 2;
+      if (!this.peaks || this.peaks.length !== n) this.peaks = new Float32Array(n);
+      let base = AppConfig.SAB_RING_BASE;
+      for (let i = 0; i < n; i++) this.peaks[i] = sab.f32[base + i];
     }
-    if (data.playHeadNorm != null || data.writeHeadNorm != null) {
-      if (data.playHeadNorm != null) this.playHeadNorm = data.playHeadNorm;
-      if (data.writeHeadNorm != null) this.writeHeadNorm = data.writeHeadNorm;
-      this.recording = !!data.recording;
-      this.playing = !!data.playing;
-      this.updateButtons();
-      this.drawWaveform();
-    }
+    this.updateButtons();
+    this.drawWaveform();
   }
 
   updateButtons() {

@@ -18,8 +18,9 @@ class RecorderWorklet extends AudioWorkletProcessor {
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "recorder");
     this.bpm = 120;
     this.beats = 8;
@@ -34,6 +35,7 @@ class RecorderWorklet extends AudioWorkletProcessor {
     this.lastCurrentTime = 0;
     this.statusCounter = 0;
     this.peakCols = 128;
+    this.peakScratch = new Float32Array(256);
     this.resizeBuffer();
     this.port.onmessage = (e) => this.onMessage(e.data || {});
   }
@@ -95,7 +97,8 @@ class RecorderWorklet extends AudioWorkletProcessor {
     let buf = this.buffer;
     let n = buf.length;
     let cols = this.peakCols;
-    let peaks = new Float32Array(cols * 2);
+    let peaks = this.peakScratch;
+    peaks.fill(0);
     if (n < 1) return peaks;
     for (let c = 0; c < cols; c++) {
       let start = Math.floor((c / cols) * n);
@@ -116,31 +119,37 @@ class RecorderWorklet extends AudioWorkletProcessor {
 
   sendPeaks() {
     let peaks = this.buildPeaks();
-    this.port.postMessage(
-      { peaks, durationSec: this.buffer.length / sampleRate },
-      [peaks.buffer],
-    );
+    let sab = this.sab;
+    if (!sab) return;
+    let base = AppConfig.SAB_RING_BASE;
+    for (let i = 0; i < peaks.length; i++) sab.f32[base + i] = peaks[i];
+    sab.setSlot(5, this.buffer.length / sampleRate);
+    sab.setNote(sab.getNote() + 1);
   }
 
   sendStatus(force) {
+    let sab = this.sab;
+    if (!sab) return;
     let n = this.buffer.length;
-    this.port.postMessage({
-      playHeadNorm: n > 0 ? this.playHead / n : 0,
-      writeHeadNorm: n > 0 ? this.writeHead / n : 0,
-      recording: !!(this.wasRecording || this.toggleLatched),
-      playing: !!this.playing,
-      toggleLatched: !!this.toggleLatched,
-      force: !!force,
-    });
+    sab.setSlot(0, n > 0 ? this.playHead / n : 0);
+    sab.setSlot(1, n > 0 ? this.writeHead / n : 0);
+    let bits = 0;
+    if (this.wasRecording || this.toggleLatched) bits |= AppConfig.SAB_REC_RECORDING;
+    if (this.playing) bits |= AppConfig.SAB_REC_PLAYING;
+    if (this.toggleLatched) bits |= AppConfig.SAB_REC_LATCH;
+    sab.setRec(bits);
+    if (force) sab.publish();
   }
 
   readSample(pos) {
     let buf = this.buffer;
     let n = buf.length;
     if (n < 2) return buf[0] || 0;
-    let i0 = Math.floor(pos) % n;
+    let i0 = Math.floor(pos);
+    if (i0 >= n) i0 -= n;
     if (i0 < 0) i0 += n;
-    let i1 = (i0 + 1) % n;
+    let i1 = i0 + 1;
+    if (i1 >= n) i1 = 0;
     let frac = pos - Math.floor(pos);
     return buf[i0] + (buf[i1] - buf[i0]) * frac;
   }
@@ -175,7 +184,8 @@ class RecorderWorklet extends AudioWorkletProcessor {
 
       if (recording && bufLen > 0) {
         if (!this.wasRecording && !recSynced) {
-          this.writeHead = Math.floor(this.playHead) % bufLen;
+          this.writeHead = Math.floor(this.playHead);
+          if (this.writeHead >= bufLen) this.writeHead -= bufLen;
           if (this.writeHead < 0) this.writeHead = 0;
           recSynced = true;
         }
@@ -191,14 +201,14 @@ class RecorderWorklet extends AudioWorkletProcessor {
         this.playHead += rate;
         if (this.playHead >= bufLen) {
           if (this.loop) {
-            this.playHead = this.playHead % bufLen;
+            while (this.playHead >= bufLen) this.playHead -= bufLen;
           } else {
             this.playHead = bufLen - 1;
             this.playing = false;
           }
         } else if (this.playHead < 0) {
           if (this.loop) {
-            this.playHead = ((this.playHead % bufLen) + bufLen) % bufLen;
+            while (this.playHead < 0) this.playHead += bufLen;
           } else {
             this.playHead = 0;
             this.playing = false;
@@ -218,15 +228,13 @@ class RecorderWorklet extends AudioWorkletProcessor {
     if (this.statusCounter >= 12) {
       this.statusCounter = 0;
       if (recordingAny) this.sendPeaks();
-      this.port.postMessage({
-        playHeadNorm: bufLen > 0 ? this.playHead / bufLen : 0,
-        writeHeadNorm: bufLen > 0 ? this.writeHead / bufLen : 0,
-        recording: recordingAny,
-        playing: !!this.playing,
-        toggleLatched: !!this.toggleLatched,
-      });
+      this.sendStatus(false);
     }
 
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
+      this.sab.publish();
+    }
     return true;
   }
 }

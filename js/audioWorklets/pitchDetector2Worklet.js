@@ -1,6 +1,7 @@
 class PitchDetector2Worklet extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "pitch-worklet-2");
     console.log(this.context, context, BiquadFilterNode)
     this.FFTJS = (function (t) {
@@ -409,7 +410,9 @@ class PitchDetector2Worklet extends AudioWorkletProcessor {
     this.fftSize = 128*16;
     this.f = new this.FFTJS(this.fftSize);
     this.out = this.f.createComplexArray();
-    this.audioBuffer = [];
+    this.audioBuffer = new Float32Array(this.fftSize);
+    this.audioWrite = 0;
+    this.highestValue = 0;
     this.highestValue=0
   }
 
@@ -441,35 +444,51 @@ class PitchDetector2Worklet extends AudioWorkletProcessor {
   }
 
   getFreqFromFFT() {
-    let highestValue = this.getHighestItemFromArrObj(
-      this.arrayToObject(this.out)
-    );
-    return (highestValue * sampleRate) / (this.fftSize*2);
+    let out = this.out;
+    let best = 0;
+    let bestI = 0;
+    let n = out.length;
+    for (let i = 2; i < n; i += 2) {
+      let re = out[i];
+      let im = out[i + 1];
+      let mag = re * re + im * im;
+      if (mag > best) {
+        best = mag;
+        bestI = i / 2;
+      }
+    }
+    if (bestI > 1 && bestI + 1 < n / 2) {
+      let prev = out[(bestI - 1) * 2];
+      let mid = out[bestI * 2];
+      let next = out[(bestI + 1) * 2];
+      let denom = 2 * (2 * mid - next - prev);
+      if (denom) bestI = bestI + (next - prev) / denom;
+    }
+    return (bestI * sampleRate) / (this.fftSize * 2);
   }
 
   process(inputs, outputs) {
-    let output = ((outputs || [])[0] || [])[0] || [];
-    let input = ((inputs || [])[0] || [])[0] || [];
-    try {
-      if (input[0] == 0 && input[1] == 0 && input[2] == 0) {
-        //no input
-      } else {
-        this.audioBuffer = [...this.audioBuffer, ...input];
-        
-        if (this.audioBuffer.length >= this.fftSize) {
-          
-          this.f.realTransform(this.out, this.audioBuffer);
+    let output = outputs[0] && outputs[0][0];
+    let input = inputs[0] && inputs[0][0];
+    if (!output) return true;
+    if (input && input.length) {
+      let buf = this.audioBuffer;
+      let size = this.fftSize;
+      let w = this.audioWrite;
+      for (let i = 0; i < input.length; i++) {
+        buf[w++] = input[i];
+        if (w >= size) {
+          this.f.realTransform(this.out, buf);
           this.highestValue = this.getFreqFromFFT();
-          this.audioBuffer=[]
-        }
-
-        for (let i = 0; i < output.length; ++i) {
-          output[i] = this.highestValue;
+          w = 0;
         }
       }
-    } catch (e) {
-      this.port.postMessage({ error: e });
-      console.warn(e);
+      this.audioWrite = w;
+    }
+    output.fill(this.highestValue);
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, null);
+      this.sab.publish();
     }
     return true;
   }

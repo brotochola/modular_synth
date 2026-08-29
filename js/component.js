@@ -26,6 +26,9 @@ class Component {
     // this.app.actx.resume();
     this.active = false;
   }
+  makeWorklet(name, opts) {
+    return this.app.makeWorklet(name, opts, this);
+  }
   createDeleteButton() {
     if (!this.isThisComponentMine()) return;
     this.deleteButton = document.createElement("button");
@@ -303,25 +306,20 @@ class Component {
     this.app
       .loadWorklet("js/audioWorklets/customAudioParamsWorklet.js")
       .then(() => {
-        this.customAudioParamsWorkletNode = new AudioWorkletNode(
-          this.app.actx,
+        this.customAudioParamsWorkletNode = this.app.makeWorklet(
           "custom-params-worklet",
           {
             numberOfInputs: this.customAudioParams.length,
             numberOfOutputs: 0,
           },
         );
+        this.paramsSab = this.customAudioParamsWorkletNode._sabBlock;
         this.addAudioProfileKey("custom-params");
 
         this.customAudioParamsWorkletNode.onprocessorerror = (e) => {
           console.error(e);
         };
         this.customAudioParamsWorkletNode.parent = this;
-        this.customAudioParamsWorkletNode.port.onmessage = (e) => {
-          let d = e.data || {};
-          if (this.handleCustomAudioParamChanged instanceof Function)
-            this.handleCustomAudioParamChanged(d);
-        };
       });
   }
 
@@ -329,25 +327,20 @@ class Component {
     if (!Array.isArray(this.customAudioTriggers)) return;
 
     this.app.loadWorklet("js/audioWorklets/triggerWorklet.js").then(() => {
-      this.customAudioTriggersWorkletNode = new AudioWorkletNode(
-        this.app.actx,
+      this.customAudioTriggersWorkletNode = this.app.makeWorklet(
         "trigger-worklet",
         {
           numberOfInputs: this.customAudioTriggers.length,
           numberOfOutputs: 0,
         },
       );
+      this.trigSab = this.customAudioTriggersWorkletNode._sabBlock;
       this.addAudioProfileKey("trigger");
 
       this.customAudioTriggersWorkletNode.onprocessorerror = (e) => {
         console.error(e);
       };
       this.customAudioTriggersWorkletNode.parent = this;
-      this.customAudioTriggersWorkletNode.port.onmessage = (e) => {
-        let d = e.data || {};
-        if (this.handleTriggerFromWorklet instanceof Function)
-          this.handleTriggerFromWorklet(d);
-      };
     });
   }
 
@@ -513,15 +506,107 @@ class Component {
 
   flushMirrorAcc() {
     if (!this._mirrorAcc) return;
-    for (let key of Object.keys(this._mirrorAcc)) {
+    for (let key in this._mirrorAcc) {
       let { from, oi, level } = this._mirrorAcc[key];
       from.setOutputLed(oi, level, from.getOutputKind(oi));
+      delete this._mirrorAcc[key];
     }
-    this._mirrorAcc = Object.create(null);
+  }
+
+  tickJackLedsFromSab() {
+    let names = this.jackActivityNames;
+    if (!names || !names.length) return;
+    if (!this._mirrorAcc) this._mirrorAcc = Object.create(null);
+    if (this.jackActivityNode && this.jackActivityNode._sabBlock) {
+      let sab = this.jackActivityNode._sabBlock;
+      let seq = sab.seq();
+      if (seq === this._jackSabSeq) return;
+      this._jackSabSeq = seq;
+      for (let i = 0; i < names.length; i++) {
+        let level = sab.getSlot(i);
+        this.applyInputLed(names[i], level);
+        this.mirrorLevelsToSources(names[i], level);
+      }
+      this.flushMirrorAcc();
+      return;
+    }
+    if (!this._selfPeaks || !this.sabBlock) return;
+    let sab = this.sabBlock;
+    let seq = sab.seq();
+    if (seq === this._jackSabSeq) return;
+    this._jackSabSeq = seq;
+    let nIn = this.node ? this.node.numberOfInputs : 0;
+    let paramKeys = this._peakParamKeys;
+    if (!paramKeys) {
+      paramKeys = [];
+      if (this.node && this.node.parameters) {
+        this.node.parameters.forEach((_p, name) => paramKeys.push(name));
+      }
+      this._peakParamKeys = paramKeys;
+    }
+    for (let i = 0; i < names.length; i++) {
+      let name = names[i];
+      let idx;
+      if (String(name).indexOf("in_") === 0) {
+        idx = AppConfig.SAB_SLOT_PEAK0 + (parseInt(name.slice(3), 10) || 0);
+      } else {
+        let pi = paramKeys.indexOf(name);
+        if (pi < 0) continue;
+        idx = AppConfig.SAB_SLOT_PEAK0 + nIn + pi;
+      }
+      let level = sab.getSlot(idx);
+      this.applyInputLed(name, level);
+      this.mirrorLevelsToSources(name, level);
+    }
+    this.flushMirrorAcc();
+  }
+
+  onSabTick() {
+    this.drainParamSab();
+    this.drainTrigSab();
+  }
+
+  drainParamSab() {
+    let sab = this.paramsSab;
+    if (!sab || !this.customAudioParams) return;
+    if (!this._paramPrev) this._paramPrev = [];
+    let n = this.customAudioParams.length;
+    for (let p = 0; p < n; p++) {
+      let current = sab.getSlot(p);
+      if (this._paramPrev[p] === current) continue;
+      let lastVal = this._paramPrev[p] || 0;
+      this._paramPrev[p] = current;
+      if (this.handleCustomAudioParamChanged instanceof Function) {
+        this.handleCustomAudioParamChanged({
+          channelTriggered: p,
+          lastVal,
+          current,
+        });
+      }
+    }
+  }
+
+  drainTrigSab() {
+    let sab = this.trigSab;
+    if (!sab || !this.customAudioTriggers) return;
+    if (!this._trigPrev) this._trigPrev = [];
+    let n = this.customAudioTriggers.length;
+    for (let p = 0; p < n; p++) {
+      let count = sab.getSlot(p);
+      if (this._trigPrev[p] === count) continue;
+      this._trigPrev[p] = count;
+      if (this.handleTriggerFromWorklet instanceof Function) {
+        this.handleTriggerFromWorklet({
+          channelTriggered: p,
+          lastVal: 0,
+          current: 1,
+        });
+      }
+    }
   }
 
   createJackActivityMonitor() {
-    if (this.jackActivityNode) return;
+    if (this.jackActivityNode || this._selfPeaks) return;
     let names = this.jackActivityNames || [];
     if (!names.length) {
       names = Object.keys(this.inputElements || {}).filter(
@@ -531,32 +616,22 @@ class Component {
     }
     if (!names.length) return;
 
+    if (this.node instanceof AudioWorkletNode) {
+      this._selfPeaks = true;
+      return;
+    }
+
     this.app.loadWorklet("js/audioWorklets/jackActivityWorklet.js").then(() => {
-      if (this.jackActivityNode || !this.app) return;
+      if (this.jackActivityNode || !this.app || this._selfPeaks) return;
       let n = (this.jackActivityNames || []).length;
       if (!n) return;
-      this.jackActivityNode = new AudioWorkletNode(
-        this.app.actx,
-        "jack-activity-worklet",
-        {
-          numberOfInputs: n,
-          numberOfOutputs: 0,
-        },
-      );
+      this.jackActivityNode = this.app.makeWorklet("jack-activity-worklet", {
+        numberOfInputs: n,
+        numberOfOutputs: 0,
+      });
       this.addAudioProfileKey("jack-activity");
       this.jackActivityNode.onprocessorerror = (e) => {
         console.error(e);
-      };
-      this.jackActivityNode.port.onmessage = (e) => {
-        let levels = e.data && e.data.levels;
-        if (!levels) return;
-        let map = this.jackActivityNames || [];
-        this._mirrorAcc = Object.create(null);
-        for (let i = 0; i < levels.length && i < map.length; i++) {
-          this.applyInputLed(map[i], levels[i]);
-          this.mirrorLevelsToSources(map[i], levels[i]);
-        }
-        this.flushMirrorAcc();
       };
       if (this.app && this.app.getAllConnections) {
         for (let c of this.app.getAllConnections()) {
@@ -584,9 +659,9 @@ class Component {
     for (let i = 0; i < this.node.numberOfInputs; i++) {
       this.audioParams.push("in_" + i);
     }
-    //AUDIO WORKLETS WITH PARAMETERS BEHAVE THIS WAY:
     for (let key of Object.keys(this.node)) {
-      if (key != "parent") this.audioParams.push(key);
+      if (key == "parent" || key.charAt(0) == "_") continue;
+      if (this.node[key] instanceof AudioParam) this.audioParams.push(key);
     }
     if (this.node.parameters) {
       //IT'S AN AUDIO WORKLET NODE
@@ -609,7 +684,7 @@ class Component {
     this.jackActivityNames = [];
 
     for (let inp of ordered) {
-      // if ((inp == "gain" || inp == "detune") && this.type != "Amp")   continue;
+      if (String(inp).charAt(0) == "_") continue;
       if (inp == "in_0" && this.type == "Multiplexor") {
         //INPUT 0 DOESNT WORK, I USE 0 TO INDICATE THE MULTIPLEXOR HAS TO REMEMBER ITS LAST STATE
         continue;
@@ -760,8 +835,7 @@ class Component {
     }
   }
   resetAudioParams() {
-    //FORCES THE CUSTOM AUDIO PARAMS WORKLET TO TRIGGER THE VALUE AGAIN
-    this.customAudioParamsWorkletNode.port.postMessage({ reset: true });
+    if (this.paramsSab) this.paramsSab.setNote(1);
   }
   createInfoButton() {
     if (!this.infoText) return;
@@ -1269,3 +1343,4 @@ class Component {
     return this.ready && this.areMycustomTriggersAndParamsWorkletsReady();
   }
 }
+     

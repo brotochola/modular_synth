@@ -33,7 +33,7 @@ class PadSampler extends Component {
   createNode() {
     this.app.loadWorklet("js/audioWorklets/padSamplerWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "pad-sampler", {
+        this.node = this.makeWorklet("pad-sampler", {
           numberOfInputs: 8,
           numberOfOutputs: 1,
         });

@@ -11,8 +11,9 @@ class LerpProcessor extends AudioWorkletProcessor {
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "lerp");
     this.lastValue = 0;
   }
@@ -26,15 +27,20 @@ class LerpProcessor extends AudioWorkletProcessor {
     let t = parameters.time[0];
     if (t == 0 || isNaN(t)) t = 0.5;
     else if (t < 0.0001) t = 0.0001;
+    let coeff = 0.0001 / t;
     if (input) {
       for (let i = 0; i < n; i++) {
-        last = last + ((input[i] - last) * 0.0001) / t;
+        last = last + (input[i] - last) * coeff;
         output[i] = last;
       }
     } else {
-      for (let i = 0; i < n; i++) output[i] = last;
+      output.fill(last);
     }
     this.lastValue = last;
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
+      this.sab.publish();
+    }
     return true;
   }
 }

@@ -1,6 +1,7 @@
 class SequentialDemuxWorklet extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "sequential-demux");
     this.step = 0;
     this.steps = 4;
@@ -23,7 +24,7 @@ class SequentialDemuxWorklet extends AudioWorkletProcessor {
   postStep() {
     if (this.step === this.lastPosted) return;
     this.lastPosted = this.step;
-    this.port.postMessage({ step: this.step });
+    if (this.sab) this.sab.setNote(this.step);
   }
 
   process(inputs, outputs) {
@@ -66,6 +67,10 @@ class SequentialDemuxWorklet extends AudioWorkletProcessor {
     this.prevReset = prevR;
     this.step = step;
     if (changed) this.postStep();
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, null);
+      this.sab.publish();
+    }
     return true;
   }
 }

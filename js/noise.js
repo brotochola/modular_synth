@@ -10,7 +10,7 @@ class Noise extends Component {
     // this.osc.frequency.value = 0;
 
     // this.app.actx.audioWorklet.addModule("js/noiseWorklet.js").then(() => {
-    //   this.node = new AudioWorkletNode(this.app.actx, "random-worklet", {
+    //   this.node = this.makeWorklet("random-worklet", {
     //     numberOfInputs: 0,
     //     numberOfOutputs: 1,
     //   });

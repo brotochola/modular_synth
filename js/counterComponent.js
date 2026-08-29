@@ -22,8 +22,9 @@ class CounterComponent extends Component {
   }
 
   updateValueInNode() {
-    // debugger
-    this.node.port.postMessage({ val: this.val });
+    if (!this.sabBlock) return;
+    this.sabBlock.setSlot(0, this.val);
+    this.sabBlock.publish();
   }
   updateDisplay() {
     this.display.innerHTML = this.val;
@@ -31,7 +32,7 @@ class CounterComponent extends Component {
   createNode() {
     this.app.loadWorklet("js/audioWorklets/counterWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "counter-worklet", {
+        this.node = this.makeWorklet("counter-worklet", {
           numberOfInputs: 0,
           numberOfOutputs: 1,
         });

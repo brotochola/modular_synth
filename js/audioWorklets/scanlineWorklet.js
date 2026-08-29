@@ -18,8 +18,9 @@ class ScanlineWorklet extends AudioWorkletProcessor {
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "scanline");
     this.width = 0;
     this.height = 0;
@@ -70,8 +71,8 @@ class ScanlineWorklet extends AudioWorkletProcessor {
     let w = this.width;
     let h = this.height;
     let phase = this.phase;
-    if (!this.luma || w < 2 || h < 2) {
-      for (let i = 0; i < n; i++) output[i] = 0;
+      if (!this.luma || w < 2 || h < 2) {
+      output.fill(0);
       return true;
     }
     let invSr = 1 / sampleRate;
@@ -88,6 +89,10 @@ class ScanlineWorklet extends AudioWorkletProcessor {
       output[i] = this.sampleAt(x, y) * 2 - 1;
     }
     this.phase = phase;
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
+      this.sab.publish();
+    }
     return true;
   }
 }

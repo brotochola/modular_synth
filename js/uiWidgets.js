@@ -182,60 +182,49 @@ function setLed(el, on) {
   el.classList.toggle("on", !!on);
 }
 
-/** Bipolar jack LED: v in [-1,1]; + green, − red, ~0 off. Colors via inline style. */
 function setLedBipolar(el, v) {
   if (!el) return;
   v = Number(v) || 0;
   if (v > 1) v = 1;
   else if (v < -1) v = -1;
+  if (el._ledV != null && Math.abs(el._ledV - v) < 0.03) return;
+  el._ledV = v;
   let a = v < 0 ? -v : v;
   if (a < 0.02) {
-    el.style.background = "";
-    el.style.borderColor = "";
-    el.style.boxShadow = "";
-    el.classList.remove("on", "pulse");
+    el.style.removeProperty("--led-a");
+    el.classList.remove("on", "pos", "neg", "trig");
     return;
   }
-  let r, g, b;
-  if (v >= 0) {
-    r = Math.round(40 * a);
-    g = Math.round(180 * a + 40);
-    b = Math.round(80 * a);
-  } else {
-    r = Math.round(200 * a + 40);
-    g = Math.round(40 * a);
-    b = Math.round(40 * a);
-  }
-  let col = "rgb(" + r + "," + g + "," + b + ")";
-  let glow = Math.round(4 + 10 * a);
-  el.style.background = col;
-  el.style.borderColor = col;
-  el.style.boxShadow =
-    "0 0 " + glow + "px " + col + ", 0 0 2px rgba(255,255,255,0.4)";
-  el.classList.remove("pulse");
+  el.style.setProperty("--led-a", String(a));
+  el.classList.toggle("pos", v >= 0);
+  el.classList.toggle("neg", v < 0);
+  el.classList.add("on");
+  el.classList.remove("trig");
 }
+
+let _ledFlashList = [];
 
 function flashLed(el, ms) {
   if (!el) return;
   el.classList.add("on", "pulse");
-  clearTimeout(el._flashTimer);
-  el._flashTimer = setTimeout(() => {
-    el.classList.remove("on", "pulse");
-  }, ms != null ? ms : AppConfig.LED_FLASH_MS);
+  el._flashUntil = performance.now() + (ms != null ? ms : AppConfig.LED_FLASH_MS);
+  _ledFlashList.push(el);
 }
 
-/** Strong green flash for trig jacks (rising edge). Clears inline bipolar styles. */
 function flashLedTrig(el, ms) {
   if (!el) return;
-  el.style.background = "rgb(40,220,80)";
-  el.style.borderColor = "rgb(40,220,80)";
-  el.style.boxShadow =
-    "0 0 14px rgb(40,220,80), 0 0 3px #fff";
-  el.classList.remove("pulse");
-  clearTimeout(el._flashTrigTimer);
-  el._flashTrigTimer = setTimeout(() => {
-    el.style.background = "";
-    el.style.borderColor = "";
-    el.style.boxShadow = "";
-  }, ms != null ? ms : AppConfig.LED_FLASH_MS);
+  el.classList.add("trig", "on");
+  el.classList.remove("pos", "neg");
+  el._flashUntil = performance.now() + (ms != null ? ms : AppConfig.LED_FLASH_MS);
+  _ledFlashList.push(el);
+}
+
+function tickLedFlashes(now) {
+  now = now || performance.now();
+  for (let i = _ledFlashList.length - 1; i >= 0; i--) {
+    let el = _ledFlashList[i];
+    if (now < el._flashUntil) continue;
+    el.classList.remove("on", "pulse", "trig");
+    _ledFlashList.splice(i, 1);
+  }
 }

@@ -11,8 +11,9 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "midi-player");
     this.events = [];
     this.eventIndex = 0;
@@ -78,11 +79,11 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     this.eventIndex = 0;
     this.tick = 0;
     this.tickFrac = 0;
-    if (notify) this.port.postMessage({ ended: true });
+    if (notify && this.sab) this.sab.setEnded(true);
   }
 
   noteToHz(note) {
-    return (440 / 32) * Math.pow(2, (note - 9) / 12);
+    return AppConfig.midiToHz(note);
   }
 
   applyEvent(ev) {
@@ -101,70 +102,71 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
   }
 
   process(inputs, outputs, parameters) {
-    try {
-      let playCh = ((inputs || [])[0] || [])[0];
-      let stopCh = ((inputs || [])[1] || [])[0];
-      let out0 = ((outputs || [])[0] || [])[0];
-      if (!out0) return true;
+    let playCh = inputs[0] && inputs[0][0];
+    let stopCh = inputs[1] && inputs[1][0];
+    let out0 = outputs[0] && outputs[0][0];
+    if (!out0) return true;
+    let n = out0.length;
+    let rate = parameters.rate[0];
+    if (!(rate > 0) || isNaN(rate)) rate = 1;
+    let ticksPerSample =
+      ((((this.bpm || 120) / 60) * (this.ppqn || 480)) / sampleRate) * rate;
+    let vc = this.voiceCount;
+    let noteOuts = this._noteOuts || (this._noteOuts = []);
+    let trigOuts = this._trigOuts || (this._trigOuts = []);
+    for (let v = 0; v < vc; v++) {
+      noteOuts[v] = outputs[v * 2] && outputs[v * 2][0];
+      trigOuts[v] = outputs[v * 2 + 1] && outputs[v * 2 + 1][0];
+    }
 
-      let n = out0.length;
-      let rate = parameters.rate[0];
-      if (!(rate > 0) || isNaN(rate)) rate = 1;
-      let ticksPerSample =
-        ((((this.bpm || 120) / 60) * (this.ppqn || 480)) / sampleRate) * rate;
+    for (let i = 0; i < n; i++) {
+      let stopIn = stopCh ? stopCh[i] : 0;
+      if (stopIn > 0 && this.prevStop <= 0) this.stopPlayback(true);
+      this.prevStop = stopIn;
+      let trigIn = playCh ? playCh[i] : 0;
+      if (trigIn > 0 && this.prevTrig <= 0 && !this.playing) this.startPlayback();
+      this.prevTrig = trigIn;
 
-      for (let i = 0; i < n; i++) {
-        let stopIn = stopCh ? stopCh[i] || 0 : 0;
-        if (stopIn > 0 && this.prevStop <= 0) {
-          this.stopPlayback(true);
+      if (this.playing) {
+        this.tickFrac += ticksPerSample;
+        while (this.tickFrac >= 1) {
+          this.tickFrac -= 1;
+          this.tick += 1;
         }
-        this.prevStop = stopIn;
-
-        let trigIn = playCh ? playCh[i] || 0 : 0;
-        if (trigIn > 0 && this.prevTrig <= 0 && !this.playing) {
-          this.startPlayback();
+        while (
+          this.eventIndex < this.events.length &&
+          this.events[this.eventIndex].tick <= this.tick
+        ) {
+          this.applyEvent(this.events[this.eventIndex]);
+          this.eventIndex++;
         }
-        this.prevTrig = trigIn;
-
-        if (this.playing) {
-          this.tickFrac += ticksPerSample;
-          while (this.tickFrac >= 1) {
-            this.tickFrac -= 1;
-            this.tick += 1;
+        if (this.eventIndex >= this.events.length) {
+          this.playing = false;
+          for (let v = 0; v < vc; v++) {
+            this.noteHz[v] = 0;
+            this.activeNote[v] = -1;
           }
-          while (
-            this.eventIndex < this.events.length &&
-            this.events[this.eventIndex].tick <= this.tick
-          ) {
-            this.applyEvent(this.events[this.eventIndex]);
-            this.eventIndex++;
-          }
-          if (this.eventIndex >= this.events.length) {
-            this.playing = false;
-            for (let v = 0; v < this.voiceCount; v++) {
-              this.noteHz[v] = 0;
-              this.activeNote[v] = -1;
-            }
-            this.port.postMessage({ ended: true });
-          }
+          if (this.sab) this.sab.setEnded(true);
         }
+      }
 
-        for (let v = 0; v < this.voiceCount; v++) {
-          let noteOut = ((outputs[v * 2] || [])[0] || []);
-          let trigOut = ((outputs[v * 2 + 1] || [])[0] || []);
-          if (noteOut.length) noteOut[i] = this.noteHz[v] || 0;
-          if (trigOut.length) {
-            if (this.gateSamplesLeft[v] > 0) {
-              trigOut[i] = 1;
-              this.gateSamplesLeft[v]--;
-            } else {
-              trigOut[i] = 0;
-            }
+      for (let v = 0; v < vc; v++) {
+        let noteOut = noteOuts[v];
+        let trigOut = trigOuts[v];
+        if (noteOut) noteOut[i] = this.noteHz[v] || 0;
+        if (trigOut) {
+          if (this.gateSamplesLeft[v] > 0) {
+            trigOut[i] = 1;
+            this.gateSamplesLeft[v]--;
+          } else {
+            trigOut[i] = 0;
           }
         }
       }
-    } catch (e) {
-      this.port.postMessage(String(e));
+    }
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
+      this.sab.publish();
     }
     return true;
   }

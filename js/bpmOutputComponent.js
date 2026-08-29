@@ -59,17 +59,28 @@ class BPMOutputComponent extends Component {
 
   applyClockSkew(skew) {
     this.clockSkew = skew || 0;
-    if (!(this.node || {}).port) return;
-    this.node.port.postMessage({ clockSkew: this.clockSkew });
+    this.sendToWorklet();
   }
 
   sendToWorklet() {
-    if (!(this.node || {}).port) return;
-    this.node.port.postMessage({
-      bpm: this.app.bpm,
-      rate: this.rate,
-      clockSkew: this.clockSkew || this.app.clockSkew || 0,
-    });
+    let sab = this.sabBlock;
+    if (!sab) return;
+    sab.setBpm(this.app.bpm || 120);
+    sab.setRate(this.rate || 1);
+    sab.setSlot(0, this.clockSkew || this.app.clockSkew || 0);
+    sab.publish();
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab) return;
+    let n = sab.getNote();
+    if (n !== this._lastSabNote) {
+      this._lastSabNote = n;
+      this.val = n;
+      this.updateDisplay();
+    }
   }
 
   updateDisplay() {
@@ -85,7 +96,7 @@ class BPMOutputComponent extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/bpmOutputWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "bpm-worklet", {
+      this.node = this.makeWorklet("bpm-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: 1,
       });
@@ -93,13 +104,6 @@ class BPMOutputComponent extends Component {
 
       this.node.onprocessorerror = (e) => {
         console.error(e);
-      };
-
-      this.node.port.onmessage = (e) => {
-        if (e.data.count != null) {
-          this.val = e.data.count;
-          this.updateDisplay();
-        }
       };
     });
   }

@@ -64,20 +64,21 @@ class WebcamPlayer extends Component {
   }
 
   sendImgDataToWorklet() {
-    if (!this.node || !this.imageData) return;
-    let buf = new Uint8Array(this.imageData.data);
-    this.node.port.postMessage(buf, [buf.buffer]);
+    let bulk = this.sabBulk;
+    if (!bulk || !this.imageData) return;
+    let which = bulk.which() ^ 1;
+    bulk.u8.set(this.imageData.data, bulk.bufOffset(which));
+    bulk.publish(which);
   }
   createNode() {
     this.app.loadWorklet("js/audioWorklets/webcamPlayerWorklet.js")
       .then(() => {
         this.createdAt = this.app.actx.currentTime;
-        this.node = new AudioWorkletNode(
-          this.app.actx,
-          "webcam-player-worklet",
+        this.node = this.makeWorklet("webcam-player-worklet",
           {
             numberOfInputs: 0,
             numberOfOutputs: 3,
+            bulkBytes: 215 * 121 * 4,
           }
         );
 

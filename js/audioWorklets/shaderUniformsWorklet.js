@@ -8,22 +8,21 @@ class ShaderUniformsWorklet extends AudioWorkletProcessor {
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "shader-uniforms");
-    this.tick = 0;
   }
 
   process(inputs, outputs, parameters) {
-    this.tick++;
-    if (this.tick % 8 === 0) {
-      const pick = (p) => p[p.length - 1];
-      this.port.postMessage({
-        x1: pick(parameters.x1),
-        x2: pick(parameters.x2),
-        x3: pick(parameters.x3),
-        x4: pick(parameters.x4),
-      });
+    let sab = this.sab;
+    if (sab) {
+      sab.setSlot(0, parameters.x1[parameters.x1.length - 1]);
+      sab.setSlot(1, parameters.x2[parameters.x2.length - 1]);
+      sab.setSlot(2, parameters.x3[parameters.x3.length - 1]);
+      sab.setSlot(3, parameters.x4[parameters.x4.length - 1]);
+      AppConfig.sabWriteGraphPeaks(sab, inputs, parameters);
+      sab.publish();
     }
     return true;
   }

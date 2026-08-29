@@ -19,7 +19,7 @@ class CustomProcessorComponent extends Component {
   }
   createNode() {
     this.app.loadWorklet("js/audioWorklets/customProcessor.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "custom-proc", {
+      this.node = this.makeWorklet("custom-proc", {
         numberOfInputs: 12,
         numberOfOutputs: 1,
       });
@@ -29,9 +29,6 @@ class CustomProcessorComponent extends Component {
       };
 
       this.updateNodeWithFormula();
-      this.node.port.onmessage = (e) => {
-        console.warn(this.id + " !!!! :", e.data);
-      };
     });
   }
   updateNodeWithFormula() {

@@ -39,9 +39,7 @@ class SequentialDemux extends Component {
     this.app
       .loadWorklet("js/audioWorklets/sequentialDemuxWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(
-          this.app.actx,
-          "sequential-demux-worklet",
+        this.node = this.makeWorklet("sequential-demux-worklet",
           {
             numberOfInputs: 3,
             numberOfOutputs: 4,
@@ -49,11 +47,6 @@ class SequentialDemux extends Component {
         );
         this.node.onprocessorerror = (e) => {
           console.error(e);
-        };
-        this.node.port.onmessage = (e) => {
-          if (typeof e.data.step === "number" && this.display) {
-            this.display.innerHTML = e.data.step + 1;
-          }
         };
         this.sendSteps();
         if (this.display) this.display.innerHTML = "1";
@@ -80,5 +73,14 @@ class SequentialDemux extends Component {
   updateUI() {
     if (this.stepsSelect) this.stepsSelect.value = this.steps;
     this.sendSteps();
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    if (!this.sabBlock || !this.display) return;
+    let s = this.sabBlock.getNote() + 1;
+    if (s === this._shownStep) return;
+    this._shownStep = s;
+    this.display.innerHTML = s;
   }
 }

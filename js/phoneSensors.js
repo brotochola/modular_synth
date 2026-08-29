@@ -135,18 +135,16 @@ class PhoneSensors extends Component {
   }
 
   sendToWorklet() {
-    if (!this.node) return;
-    this.node.port.postMessage({
-      values: [
-        this.tiltX,
-        this.tiltY,
-        this.heading,
-        this.accelX,
-        this.accelY,
-        this.accelZ,
-        this.shake,
-      ],
-    });
+    if (!this.sabBlock) return;
+    let sab = this.sabBlock;
+    sab.setSlot(0, this.tiltX);
+    sab.setSlot(1, this.tiltY);
+    sab.setSlot(2, this.heading);
+    sab.setSlot(3, this.accelX);
+    sab.setSlot(4, this.accelY);
+    sab.setSlot(5, this.accelZ);
+    sab.setSlot(6, this.shake);
+    sab.publish();
   }
 
   updateDisplay() {
@@ -161,7 +159,7 @@ class PhoneSensors extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/phoneSensorsWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "phone-sensors-worklet", {
+      this.node = this.makeWorklet("phone-sensors-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: 7,
       });

@@ -236,7 +236,7 @@ class Shader extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/shaderUniformsWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "shader-uniforms-worklet", {
+      this.node = this.makeWorklet("shader-uniforms-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: 1,
         parameterData: { x1: 0, x2: 0, x3: 0, x4: 0 },
@@ -244,18 +244,22 @@ class Shader extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
-      this.node.port.onmessage = (e) => {
-        this.uniforms.x1 = e.data.x1;
-        this.uniforms.x2 = e.data.x2;
-        this.uniforms.x3 = e.data.x3;
-        this.uniforms.x4 = e.data.x4;
-      };
       // ponytail: 0-output worklet is not pulled. Silent tap keeps process() running.
       this.silentGain = this.app.actx.createGain();
       this.silentGain.gain.value = 0;
       this.node.connect(this.silentGain);
       this.silentGain.connect(this.app.actx.destination);
     });
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab) return;
+    this.uniforms.x1 = sab.getSlot(0);
+    this.uniforms.x2 = sab.getSlot(1);
+    this.uniforms.x3 = sab.getSlot(2);
+    this.uniforms.x4 = sab.getSlot(3);
   }
 
   uploadCamTexture() {

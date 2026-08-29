@@ -78,20 +78,21 @@ class ImagePlayerWorkletVersion extends Component {
   }
 
   sendImgDataToWorklet() {
-    if (!this.node || !this.imageData) return;
-    let buf = new Uint8Array(this.imageData.data);
-    this.node.port.postMessage(buf, [buf.buffer]);
+    let bulk = this.sabBulk;
+    if (!bulk || !this.imageData) return;
+    let which = bulk.which() ^ 1;
+    bulk.u8.set(this.imageData.data, bulk.bufOffset(which));
+    bulk.publish(which);
   }
   createNode() {
     this.app.loadWorklet("js/audioWorklets/imagePlayerAudioWorklet.js")
       .then(() => {
         this.createdAt = this.app.actx.currentTime;
-        this.node = new AudioWorkletNode(
-          this.app.actx,
-          "image-player-worklet",
+        this.node = this.makeWorklet("image-player-worklet",
           {
             numberOfInputs: 0,
             numberOfOutputs: 4,
+            bulkBytes: 215 * 121 * 4,
           }
         );
 

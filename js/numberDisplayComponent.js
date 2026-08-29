@@ -12,19 +12,24 @@ class NumberDisplayComponent extends Component {
   createNode() {
     this.app.loadWorklet("js/audioWorklets/numberDisplay.js")
       .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "number-display", {
+        this.node = this.makeWorklet("number-display", {
           numberOfInputs: 1,
           numberOfOutputs: 0,
         });
-        this.node.port.onmessage = (e) => this.handleMsgFromWorklet(e);
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        
       });
   }
-  handleMsgFromWorklet(e) {
-    this.display.textContent = e.data.number.toFixed(3);
+
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab || !this.display) return;
+    let n = sab.getSlot(0);
+    if (Math.abs(n - this._shown) < 0.0005) return;
+    this._shown = n;
+    this.display.textContent = n.toFixed(3);
   }
 
 

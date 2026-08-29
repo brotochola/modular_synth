@@ -1,20 +1,22 @@
 class NumberDisplay extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "number-display");
     this.lastPosted = NaN;
-    this.lastPostTime = 0;
   }
 
   process(inputs) {
     let input = inputs[0] && inputs[0][0];
     if (!input || input.length === 0) return true;
     let number = input[input.length - 1] || 0;
-    if (Math.abs(number - this.lastPosted) < 0.0005) return true;
-    if (currentTime - this.lastPostTime < 1 / 15) return true;
-    this.lastPosted = number;
-    this.lastPostTime = currentTime;
-    this.port.postMessage({ number });
+    let sab = this.sab;
+    if (sab && Math.abs(number - this.lastPosted) >= 0.0005) {
+      this.lastPosted = number;
+      sab.setSlot(0, number);
+      sab.publish();
+    }
+    if (sab) AppConfig.sabWriteGraphPeaks(sab, inputs, null);
     return true;
   }
 }

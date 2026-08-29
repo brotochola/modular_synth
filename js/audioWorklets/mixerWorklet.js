@@ -9,20 +9,20 @@ class MixerWorklet extends AudioWorkletProcessor {
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "mixer");
     this.lastPostTime = 0;
-    this.lastPosted = null;
   }
 
   process(inputs, outputs, parameters) {
     const out = outputs[0] && outputs[0][0];
     if (!out) return true;
-    const c0 = (inputs[0] && inputs[0][0]) || null;
-    const c1 = (inputs[1] && inputs[1][0]) || null;
-    const c2 = (inputs[2] && inputs[2][0]) || null;
-    const c3 = (inputs[3] && inputs[3][0]) || null;
+    const c0 = inputs[0] && inputs[0][0];
+    const c1 = inputs[1] && inputs[1][0];
+    const c2 = inputs[2] && inputs[2][0];
+    const c3 = inputs[3] && inputs[3][0];
     const g0 = parameters.g0;
     const g1 = parameters.g1;
     const g2 = parameters.g2;
@@ -34,43 +34,40 @@ class MixerWorklet extends AudioWorkletProcessor {
     const g3k = g3.length === 1;
     const mk = master.length === 1;
     const n = out.length;
-    for (let i = 0; i < n; i++) {
-      const x0 = c0 ? c0[i] || 0 : 0;
-      const x1 = c1 ? c1[i] || 0 : 0;
-      const x2 = c2 ? c2[i] || 0 : 0;
-      const x3 = c3 ? c3[i] || 0 : 0;
-      out[i] =
-        (x0 * (g0k ? g0[0] : g0[i]) +
-          x1 * (g1k ? g1[0] : g1[i]) +
-          x2 * (g2k ? g2[0] : g2[i]) +
-          x3 * (g3k ? g3[0] : g3[i])) *
-        (mk ? master[0] : master[i]);
-    }
-
-    // Live UI: post effective gains (~20 Hz). .value on main thread misses CV sum.
-    if (currentTime - this.lastPostTime >= 1 / 20) {
-      this.lastPostTime = currentTime;
-      const last = (p) => p[p.length - 1];
-      const gains = {
-        g0: last(g0),
-        g1: last(g1),
-        g2: last(g2),
-        g3: last(g3),
-        master: last(master),
-      };
-      const prev = this.lastPosted;
-      if (
-        !prev ||
-        Math.abs(gains.g0 - prev.g0) > 0.001 ||
-        Math.abs(gains.g1 - prev.g1) > 0.001 ||
-        Math.abs(gains.g2 - prev.g2) > 0.001 ||
-        Math.abs(gains.g3 - prev.g3) > 0.001 ||
-        Math.abs(gains.master - prev.master) > 0.001
-      ) {
-        this.lastPosted = gains;
-        this.port.postMessage({ gains });
+    const v0 = g0k ? g0[0] : 0;
+    const v1 = g1k ? g1[0] : 0;
+    const v2 = g2k ? g2[0] : 0;
+    const v3 = g3k ? g3[0] : 0;
+    const vm = mk ? master[0] : 0;
+    if (c0 && c1 && c2 && c3 && g0k && g1k && g2k && g3k && mk) {
+      for (let i = 0; i < n; i++) {
+        out[i] = (c0[i] * v0 + c1[i] * v1 + c2[i] * v2 + c3[i] * v3) * vm;
+      }
+    } else {
+      for (let i = 0; i < n; i++) {
+        let x0 = c0 ? c0[i] : 0;
+        let x1 = c1 ? c1[i] : 0;
+        let x2 = c2 ? c2[i] : 0;
+        let x3 = c3 ? c3[i] : 0;
+        out[i] =
+          (x0 * (g0k ? v0 : g0[i]) +
+            x1 * (g1k ? v1 : g1[i]) +
+            x2 * (g2k ? v2 : g2[i]) +
+            x3 * (g3k ? v3 : g3[i])) *
+          (mk ? vm : master[i]);
       }
     }
+
+    if (this.sab && currentTime - this.lastPostTime >= 1 / 20) {
+      this.lastPostTime = currentTime;
+      this.sab.setSlot(0, g0[g0.length - 1]);
+      this.sab.setSlot(1, g1[g1.length - 1]);
+      this.sab.setSlot(2, g2[g2.length - 1]);
+      this.sab.setSlot(3, g3[g3.length - 1]);
+      this.sab.setSlot(4, master[master.length - 1]);
+      this.sab.publish();
+    }
+    if (this.sab) AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
     return true;
   }
 }

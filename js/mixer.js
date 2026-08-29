@@ -19,7 +19,6 @@ class Mixer extends Component {
       in_3: "none",
     };
     this.createNode();
-    this.waitUntilImReady(() => this.createChannelStrips());
   }
 
   getParamInputLimits(name) {
@@ -31,7 +30,7 @@ class Mixer extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/mixerWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "mixer-worklet", {
+      this.node = this.makeWorklet("mixer-worklet", {
         numberOfInputs: 4,
         numberOfOutputs: 1,
         parameterData: { g0: 1, g1: 1, g2: 1, g3: 1, master: 1 },
@@ -39,10 +38,12 @@ class Mixer extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
-      this.node.port.onmessage = (e) => {
-        if (e.data && e.data.gains) this.applyLiveGains(e.data.gains);
-      };
     });
+  }
+
+  createInputButtons() {
+    super.createInputButtons();
+    this.createChannelStrips();
   }
 
   /** Build jack row (LED + hole + label) and register in inputElements */
@@ -167,6 +168,19 @@ class Mixer extends Component {
     (this.main || this.body || this.container).appendChild(this.faders);
     this.syncFadersFromParams();
     this.createJackActivityMonitor();
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab || !this.sliders) return;
+    this.applyLiveGains({
+      g0: sab.getSlot(0),
+      g1: sab.getSlot(1),
+      g2: sab.getSlot(2),
+      g3: sab.getSlot(3),
+      master: sab.getSlot(4),
+    });
   }
 
   onFaderInput(name, val) {

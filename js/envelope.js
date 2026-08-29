@@ -19,7 +19,7 @@ class EnvelopeGenerator extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/adsrWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "adsr-worklet", {
+      this.node = this.makeWorklet("adsr-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: 1,
         channelCount: 1,

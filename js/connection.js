@@ -7,7 +7,10 @@ class Connection {
     this.audioParam = audioParam;
     this.numberOfOutput = numberOfOutput;
     this.id = makeid(8);
-    if (app) app.markCablesDirty();
+    if (app) {
+      app.markCablesDirty();
+      if (app.invalidateConnections) app.invalidateConnections();
+    }
   }
   remove() {
     let jackName =
@@ -62,6 +65,7 @@ class Connection {
     if (this.app) {
       if (this.app.cableWorld) this.app.cableWorld.freeByConnectionId(this.id);
       this.app.markCablesDirty();
+      if (this.app.invalidateConnections) this.app.invalidateConnections();
     }
   }
 

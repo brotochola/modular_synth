@@ -1,32 +1,15 @@
 class CanvasPlotterWorklet extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
-      {
-        name: "clear",
-        defaultValue: 0,
-        minValue: 0,
-        maxValue: 100,
-        automationRate: "k-rate",
-      },
-      {
-        name: "time",
-        defaultValue: 0,
-        minValue: 0,
-        maxValue: 10,
-        automationRate: "k-rate",
-      },
-      {
-        name: "range",
-        defaultValue: 1,
-        minValue: 1,
-        maxValue: 1000,
-        automationRate: "k-rate",
-      },
+      { name: "clear", defaultValue: 0, minValue: 0, maxValue: 100, automationRate: "k-rate" },
+      { name: "time", defaultValue: 0, minValue: 0, maxValue: 10, automationRate: "k-rate" },
+      { name: "range", defaultValue: 1, minValue: 1, maxValue: 1000, automationRate: "k-rate" },
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "canvas-plotter");
     this.lastProcessTime = 0;
     this.sx = 0;
@@ -35,6 +18,7 @@ class CanvasPlotterWorklet extends AudioWorkletProcessor {
     this.sg = 0;
     this.sb = 0;
     this.inited = false;
+    this.ringWrite = 0;
   }
 
   lastSample(input) {
@@ -76,14 +60,31 @@ class CanvasPlotterWorklet extends AudioWorkletProcessor {
     let clear = parameters.clear[0];
     if (isNaN(clear)) clear = 0;
 
-    let buf = new Float32Array(6);
-    buf[0] = this.sx;
-    buf[1] = this.sy;
-    buf[2] = this.sr;
-    buf[3] = this.sg;
-    buf[4] = this.sb;
-    buf[5] = clear;
-    this.port.postMessage(buf, [buf.buffer]);
+    let sab = this.sab;
+    if (sab) {
+      sab.setSlot(0, this.sx);
+      sab.setSlot(1, this.sy);
+      sab.setSlot(2, this.sr);
+      sab.setSlot(3, this.sg);
+      sab.setSlot(4, this.sb);
+      sab.setSlot(5, clear);
+      let dense = sab.getSlot(6) > 0.5;
+      if (dense) {
+        let cap = AppConfig.SAB_RING_CAP;
+        let stride = AppConfig.SAB_RING_STRIDE;
+        let w = Atomics.load(sab.i32, AppConfig.SAB_I_BULK_WRITE);
+        let base = AppConfig.SAB_RING_BASE + (w % cap) * stride;
+        sab.f32[base] = this.sx;
+        sab.f32[base + 1] = this.sy;
+        sab.f32[base + 2] = this.sr;
+        sab.f32[base + 3] = this.sg;
+        sab.f32[base + 4] = this.sb;
+        sab.f32[base + 5] = clear;
+        Atomics.store(sab.i32, AppConfig.SAB_I_BULK_WRITE, w + 1);
+      }
+      AppConfig.sabWriteGraphPeaks(sab, inputs, parameters);
+      sab.publish();
+    }
     return true;
   }
 }

@@ -1,48 +1,52 @@
 class imageMakerAudioWorklet extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "image-maker");
     this.width = 215;
     this.height = 121;
     this.totalPixels = this.width * this.height;
     this.write = 0;
-    this.allocFrame();
-  }
-
-  allocFrame() {
-    this.frame = new Uint8ClampedArray(this.totalPixels * 4);
+    this.which = 0;
   }
 
   mapFrom0To255(val) {
-    return Math.floor((val + 1) * 0.5 * 256);
+    return ((val + 1) * 0.5 * 256) | 0;
   }
 
   process(inputs) {
+    let bulk = this.bulk;
+    if (!bulk) return true;
     let n = 128;
+    let chs = [null, null, null, null];
     for (let ch = 0; ch < 4; ch++) {
-      let channel = (inputs[ch] && inputs[ch][0]) || [];
-      if (channel.length > n) n = channel.length;
+      chs[ch] = (inputs[ch] && inputs[ch][0]) || null;
+      if (chs[ch] && chs[ch].length > n) n = chs[ch].length;
     }
-
+    let off = bulk.bufOffset(this.which);
+    let u8 = bulk.u8;
     for (let c = 0; c < n; c++) {
-      let base = this.write * 4;
+      let base = off + this.write * 4;
       for (let ch = 0; ch < 4; ch++) {
-        let channel = (inputs[ch] && inputs[ch][0]) || [];
-        if (channel.length) {
-          this.frame[base + ch] = this.mapFrom0To255(channel[c]);
+        let channel = chs[ch];
+        if (channel) {
+          u8[base + ch] = this.mapFrom0To255(channel[c]);
         } else {
-          this.frame[base + ch] = ch == 3 ? 255 : 0;
+          u8[base + ch] = ch == 3 ? 255 : 0;
         }
       }
       this.write++;
       if (this.write >= this.totalPixels) {
-        // ponytail: one post per completed frame. Upgrade = SharedArrayBuffer ring if COOP/COEP.
-        this.port.postMessage(this.frame, [this.frame.buffer]);
-        this.allocFrame();
+        bulk.publish(this.which);
+        this.which ^= 1;
         this.write = 0;
+        off = bulk.bufOffset(this.which);
       }
     }
-
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, null);
+      this.sab.publish();
+    }
     return true;
   }
 }

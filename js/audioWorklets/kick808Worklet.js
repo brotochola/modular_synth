@@ -39,14 +39,24 @@ class Kick808Worklet extends AudioWorkletProcessor {
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "kick808");
     this.prevTrig = 0;
     this.phase = 0;
     this.ampEnv = 0;
     this.pitchEnv = 0;
     this.clickEnv = 0;
+    this.noise = 1;
+    this.lastDecay = -1;
+    this.ampCoeff = 0;
+    this.sineLut = new Float32Array(2048);
+    for (let i = 0; i < 2048; i++) {
+      this.sineLut[i] = Math.sin((i / 2048) * 6.283185307179586);
+    }
+    this.pitchCoeff = Math.exp(-1 / (sampleRate * AppConfig.KICK_PITCH_ENV_SEC));
+    this.clickCoeff = Math.exp(-1 / (sampleRate * AppConfig.KICK_CLICK_ENV_SEC));
   }
 
   process(inputs, outputs, parameters) {
@@ -58,22 +68,29 @@ class Kick808Worklet extends AudioWorkletProcessor {
     let punch = parameters.punch[0];
     let decay = parameters.decay[0];
     if (decay < 0.05) decay = 0.05;
+    if (decay !== this.lastDecay) {
+      this.lastDecay = decay;
+      this.ampCoeff = Math.exp(-Math.log(1000) / (decay * sampleRate));
+    }
     let clickAmt = parameters.click[0];
     let aTrig = trigs.length > 1;
     let trig0 = trigs[0];
-    let twoPi = 6.283185307179586;
-    let ampCoeff = Math.exp(-Math.log(1000) / (decay * sampleRate));
-    let pitchCoeff = Math.exp(-1 / (sampleRate * AppConfig.KICK_PITCH_ENV_SEC));
-    let clickCoeff = Math.exp(-1 / (sampleRate * AppConfig.KICK_CLICK_ENV_SEC));
+    let lut = this.sineLut;
+    let lutMask = 2047;
     let prev = this.prevTrig;
     let phase = this.phase;
     let ampEnv = this.ampEnv;
     let pitchEnv = this.pitchEnv;
     let clickEnv = this.clickEnv;
+    let noise = this.noise;
     let invSr = 1 / sampleRate;
+    let ampCoeff = this.ampCoeff;
+    let pitchCoeff = this.pitchCoeff;
+    let clickCoeff = this.clickCoeff;
+    let thr = AppConfig.TRIG_THRESHOLD;
     for (let i = 0; i < n; i++) {
       let trig = aTrig ? trigs[i] : trig0;
-      if (AppConfig.isRising(prev, trig)) {
+      if (prev < thr && trig >= thr) {
         phase = 0;
         ampEnv = 1;
         pitchEnv = 1;
@@ -81,11 +98,19 @@ class Kick808Worklet extends AudioWorkletProcessor {
       }
       let freq = pitch + punch * pitchEnv;
       phase += freq * invSr;
-      phase -= Math.floor(phase);
-      let sine = Math.sin(phase * twoPi) * ampEnv;
-      let click = (Math.random() * 2 - 1) * clickEnv * clickAmt;
+      phase -= phase | 0;
+      let idx = phase * 2048;
+      let i0 = idx | 0;
+      let f = idx - i0;
+      let s0 = lut[i0 & lutMask];
+      let s1 = lut[(i0 + 1) & lutMask];
+      let sine = (s0 + (s1 - s0) * f) * ampEnv;
+      noise = (Math.imul(noise, 1664525) + 1013904223) | 0;
+      let click = (noise / 2147483648) * clickEnv * clickAmt;
       let out = sine + click;
-      out = Math.tanh(out);
+      if (out > 1) out = 1;
+      else if (out < -1) out = -1;
+      else out = out / (1 + (out < 0 ? -out : out));
       output[i] = out;
       ampEnv *= ampCoeff;
       pitchEnv *= pitchCoeff;
@@ -97,6 +122,11 @@ class Kick808Worklet extends AudioWorkletProcessor {
     this.ampEnv = ampEnv;
     this.pitchEnv = pitchEnv;
     this.clickEnv = clickEnv;
+    this.noise = noise;
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
+      this.sab.publish();
+    }
     return true;
   }
 }

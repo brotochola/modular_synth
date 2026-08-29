@@ -123,15 +123,17 @@ class Midi extends Component {
 
   restoreSavedControlChanges() {
     let saved = (this.serializedData || {}).controlChangesToBeSaved;
-    if (!saved || !this.node) return;
+    if (!saved || !this.sabBlock) return;
     for (let k of Object.keys(saved)) {
-      this.node.port.postMessage({
-        type: "controlChange",
-        velocity: saved[k],
-        numOfOutput: k,
-      });
+      this.pushMidi(AppConfig.SAB_EVT_CC, 0, Math.round(saved[k] * 127), Number(k) || 0);
     }
     this.serializedData.controlChangesToBeSaved = null;
+  }
+
+  pushMidi(type, a, b, c) {
+    if (!this.sabBlock) return;
+    this.sabBlock.pushEvent(AppConfig.packEvent(type, a, b, c));
+    this.sabBlock.publish();
   }
 
   gotMIDImessage(messageData) {
@@ -160,11 +162,12 @@ class Midi extends Component {
     this.addToVisibleOutputs(key);
     let numOfOutput = (this.visibleOutputs[key] || {}).numOfOutput;
     if (numOfOutput == null) return;
-    this.node.port.postMessage({
-      type: "controlChange",
-      velocity,
+    this.pushMidi(
+      AppConfig.SAB_EVT_CC,
+      0,
+      Math.round(velocity * 127),
       numOfOutput,
-    });
+    );
     this.flashOutput(numOfOutput);
   }
 
@@ -173,44 +176,53 @@ class Midi extends Component {
     this.addToVisibleOutputs(key);
     let numOfOutput = (this.visibleOutputs[key] || {}).numOfOutput;
     if (numOfOutput == null) return;
-    this.node.port.postMessage({
-      type: "pad",
+    this.pushMidi(
+      AppConfig.SAB_EVT_PAD,
       note,
-      velocity,
+      velocity > 0 ? Math.round(velocity * 127) : 0,
       numOfOutput,
-    });
+    );
     this.flashOutput(numOfOutput);
   }
 
   onModWheel(velocity) {
-    if (this.node) this.node.port.postMessage({ type: "modWheel", velocity });
+    if (!this.sabBlock) return;
+    this.sabBlock.setSlot(8, velocity);
+    this.sabBlock.publish();
   }
 
   onPitchBend(velocity) {
-    if (this.node) this.node.port.postMessage({ type: "pitchBend", velocity });
+    if (!this.sabBlock) return;
+    this.sabBlock.setSlot(9, velocity);
+    this.sabBlock.publish();
   }
 
   onNote(note, velocity) {
-    if (!this.node) return;
-    this.node.port.postMessage({ type: "note", note, velocity });
+    if (!this.sabBlock) return;
+    let vel = velocity > 0 ? Math.round(velocity * 127) : 0;
+    this.pushMidi(AppConfig.SAB_EVT_NOTE, note, vel, 0);
     if (velocity) this.notesOn[note] = velocity;
     else delete this.notesOn[note];
-    this.node.port.postMessage({ type: "notesOn", notesOn: this.notesOn });
     if (velocity) this.flashOutput(4);
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab) return;
+    let ccIdx = sab.getNote();
+    let v = sab.getSlot(16 + (ccIdx & 15));
+    if (!this.controlChangesToBeSaved) this.controlChangesToBeSaved = {};
+    if (ccIdx >= 7) this.controlChangesToBeSaved[ccIdx] = v;
   }
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/midiWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "midi-worklet", {
+      this.node = this.makeWorklet("midi-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: Midi.MAX_OUTS,
       });
       this.node.onprocessorerror = (e) => console.error(e);
-      this.node.port.onmessage = (e) => {
-        if (e.data && e.data.type == "controlChangesToBeSaved") {
-          this.controlChangesToBeSaved = e.data.controlChanges;
-        }
-      };
       this.waitUntilImReady(() => {
         this.syncOutputsUI();
         this.restoreSavedControlChanges();

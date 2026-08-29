@@ -197,11 +197,27 @@ class PolyphonicKeyboard extends Component {
   }
 
   sendKey(type, midiNote) {
-    if (this.node) this.node.port.postMessage({ type, midiNote });
+    if (!this.sabBlock) return;
+    if (type == "releaseAll") {
+      this.sabBlock.pushEvent(
+        AppConfig.packEvent(AppConfig.SAB_EVT_KEY, 255, 0, 0),
+      );
+      this.sabBlock.publish();
+      return;
+    }
+    this.sabBlock.pushEvent(
+      AppConfig.packEvent(
+        AppConfig.SAB_EVT_NOTE,
+        midiNote,
+        type == "down" ? 1 : 0,
+        0,
+      ),
+    );
+    this.sabBlock.publish();
   }
 
   releaseAllKeys() {
-    if (this.node) this.node.port.postMessage({ type: "releaseAll" });
+    this.sendKey("releaseAll");
     for (let midi of [...this.pressedMidi]) {
       this.setPianoPressed(midi, false);
     }
@@ -237,13 +253,20 @@ class PolyphonicKeyboard extends Component {
     this.refreshSeatSelect();
   }
 
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab) return;
+    for (let i = 0; i < 8; i++) {
+      this.setOutputActive(i, (sab.getSlot(i) || 0) > 0);
+    }
+  }
+
   createNode() {
     this.app
       .loadWorklet("js/audioWorklets/polyphonicKeyboardWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(
-          this.app.actx,
-          "polyphonic-keyboard-worklet",
+        this.node = this.makeWorklet("polyphonic-keyboard-worklet",
           {
             numberOfInputs: 0,
             numberOfOutputs: 8,
@@ -252,15 +275,6 @@ class PolyphonicKeyboard extends Component {
 
         this.node.onprocessorerror = (e) => {
           console.error(e);
-        };
-
-        this.node.port.onmessage = (e) => {
-          if (e.data && e.data.type == "freqs") {
-            let freqs = e.data.freqs || [];
-            for (let i = 0; i < 8; i++) {
-              this.setOutputActive(i, (freqs[i] || 0) > 0);
-            }
-          }
         };
       });
   }

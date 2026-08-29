@@ -153,19 +153,36 @@ class Sequencer extends Component {
 
   applyClockSkew(skew) {
     this.clockSkew = skew || 0;
-    if (!(this.node || {}).port) return;
-    this.node.port.postMessage({ clockSkew: this.clockSkew });
+    this.writeSabControl();
   }
 
   sendToWorklet() {
     if (!this.node) return console.warn("seq node not ready");
     this.convertArrayOfArraysIntoSmpleArray();
-    this.node.port.postMessage({
-      seq: this.convertedArray,
-      bpm: this.app.bpm,
-      clockSkew: this.clockSkew || this.app.clockSkew || 0,
-      syncToBeat: !!this.syncToBeat,
-    });
+    this.writeSabControl();
+    this.node.port.postMessage({ seq: this.convertedArray });
+  }
+
+  writeSabControl() {
+    let sab = this.sabBlock;
+    if (!sab) return;
+    let arr = this.convertedArray || [];
+    for (let i = 0; i < AppConfig.SEQ_STEPS; i++) sab.setSlot(i, arr[i] || 0);
+    sab.setBpm(this.app.bpm || 120);
+    sab.setSlot(16, this.clockSkew || this.app.clockSkew || 0);
+    sab.setSlot(17, this.syncToBeat ? 1 : 0);
+    sab.publish();
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab) return;
+    let n = sab.getNote();
+    if (n !== this._lastSabNote) {
+      this._lastSabNote = n;
+      if (typeof this.updatePlayhead === "function") this.updatePlayhead(n);
+    }
   }
 
   convertArrayOfArraysIntoSmpleArray() {
@@ -186,19 +203,13 @@ class Sequencer extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/sequencerWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "sequencer-worklet", {
+      this.node = this.makeWorklet("sequencer-worklet", {
         numberOfInputs: 1,
         numberOfOutputs: 4,
       });
 
       this.node.onprocessorerror = (e) => {
         console.error(e);
-      };
-
-      this.node.port.onmessage = (e) => {
-        if (typeof e.data.currentNote === "number") {
-          this.updatePlayhead(e.data.currentNote);
-        }
       };
 
       this.sendToWorklet();

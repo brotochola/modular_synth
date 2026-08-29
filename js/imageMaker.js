@@ -54,24 +54,31 @@ class ImageMaker extends Component {
     this.app.loadWorklet("js/audioWorklets/imageMakerAudioWorklet.js")
       .then(() => {
         this.createdAt = this.app.actx.currentTime;
-        this.node = new AudioWorkletNode(this.app.actx, "image-maker-worklet", {
+        this.node = this.makeWorklet("image-maker-worklet", {
           numberOfInputs: 4,
           numberOfOutputs: 0,
+          bulkBytes: this.width * this.height * 4,
         });
 
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-
-        this.node.port.onmessage = (e) => this.handleDataFromWorklet(e);
       });
   }
-  handleDataFromWorklet(e) {
-    let data = e.data;
-    if (!(data instanceof Uint8ClampedArray)) {
-      data = new Uint8ClampedArray(data.buffer || data);
+  onSabTick() {
+    super.onSabTick();
+    let bulk = this.sabBulk;
+    if (!bulk) return;
+    let seq = bulk.seq();
+    if (seq === this._bulkSeq) return;
+    this._bulkSeq = seq;
+    let n = this.totalPixels * 4;
+    if (!this._pixels) {
+      this._pixels = new Uint8ClampedArray(n);
+      this.imgData = new ImageData(this._pixels, this.width, this.height);
     }
-    this.imgData = new ImageData(data, this.width, this.height);
+    let off = bulk.bufOffset(bulk.which());
+    this._pixels.set(bulk.u8.subarray(off, off + n));
     this.deltaTime = this.app.actx.currentTime - this.lastImageProcessed;
     this.lastImageProcessed = this.app.actx.currentTime;
     this.fadeImages();

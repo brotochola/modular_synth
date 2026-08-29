@@ -198,8 +198,7 @@ class PolySequencer extends Component {
 
   applyClockSkew(skew) {
     this.clockSkew = skew || 0;
-    if (!(this.node || {}).port) return;
-    this.node.port.postMessage({ clockSkew: this.clockSkew });
+    this.writeSabControl();
   }
 
   sendToWorklet() {
@@ -211,21 +210,35 @@ class PolySequencer extends Component {
         seq[j][i] = this.sequence[j] && this.sequence[j][i] ? 1 : 0;
       }
     }
-    this.node.port.postMessage({
-      seq: seq,
-      bpm: this.app.bpm,
-      clockSkew: this.clockSkew || this.app.clockSkew || 0,
-      syncToBeat: !!this.syncToBeat,
-    });
+    this.node.port.postMessage({ seq: seq });
+    this.writeSabControl();
+  }
+
+  writeSabControl() {
+    let sab = this.sabBlock;
+    if (!sab) return;
+    sab.setBpm(this.app.bpm || 120);
+    sab.setSlot(0, this.clockSkew || this.app.clockSkew || 0);
+    sab.setSlot(1, this.syncToBeat ? 1 : 0);
+    sab.publish();
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab) return;
+    let n = sab.getNote();
+    if (n !== this._lastSabNote) {
+      this._lastSabNote = n;
+      if (typeof this.updatePlayhead === "function") this.updatePlayhead(n);
+    }
   }
 
   createNode() {
     this.app
       .loadWorklet("js/audioWorklets/polySequencerWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(
-          this.app.actx,
-          "poly-sequencer-worklet",
+        this.node = this.makeWorklet("poly-sequencer-worklet",
           {
             numberOfInputs: 1,
             numberOfOutputs: 8,
@@ -234,12 +247,6 @@ class PolySequencer extends Component {
 
         this.node.onprocessorerror = (e) => {
           console.error(e);
-        };
-
-        this.node.port.onmessage = (e) => {
-          if (typeof e.data.currentNote === "number") {
-            this.updatePlayhead(e.data.currentNote);
-          }
         };
 
         this.sendToWorklet();

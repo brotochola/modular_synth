@@ -1,26 +1,28 @@
 class WhiteNoiseProcessor extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "white-noise");
+    this.noise = 1;
   }
-
-  // When constructor() undefined, the default constructor will be implicitly
-  // used.
 
   process(inputs, outputs, parameters) {
     let output = outputs[0];
-    try {
-      for (let channel = 0; channel < output.length; ++channel) {
-        // let inputChannel = input[channel];
-        let outputChannel = output[channel];
-        for (let i = 0; i < outputChannel.length; ++i) {
-          outputChannel[i] = Math.random()*2-1;
-        }
+    if (!output) return true;
+    let noise = this.noise;
+    for (let channel = 0; channel < output.length; ++channel) {
+      let outputChannel = output[channel];
+      if (!outputChannel) continue;
+      for (let i = 0; i < outputChannel.length; ++i) {
+        noise = (Math.imul(noise, 1664525) + 1013904223) | 0;
+        outputChannel[i] = noise / 2147483648;
       }
-    } catch (e) {
-      this.port.postMessage(e);
     }
-
+    this.noise = noise;
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
+      this.sab.publish();
+    }
     return true;
   }
 }

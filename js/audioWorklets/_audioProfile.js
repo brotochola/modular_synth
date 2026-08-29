@@ -1,10 +1,12 @@
-// Shared audio-thread profiler. Loaded before other worklets via App.loadWorklet.
-// AudioWorkletGlobalScope may lack performance (Firefox / older engines).
+// Shared audio-thread profiler. Loaded after config + _sab.
+let _nowFn = null;
 function profileNow() {
-  // Bracket access — bare `performance` throws ReferenceError in some worklet scopes.
-  let p = globalThis["performance"];
-  if (p && typeof p.now === "function") return p.now();
-  return Date.now();
+  if (!_nowFn) {
+    let p = globalThis["performance"];
+    if (p && typeof p.now === "function") _nowFn = p.now.bind(p);
+    else _nowFn = Date.now;
+  }
+  return _nowFn();
 }
 
 const AudioProfile = {
@@ -15,6 +17,7 @@ const AudioProfile = {
   _windowStart: 0,
 
   attach(processor, name) {
+    if (globalThis.AppConfig && !AppConfig.AUDIO_PROFILE_WRAP) return;
     if (!processor || typeof name !== "string" || !name) return;
     if (this._attached.has(processor)) return;
     let orig = processor.process;
@@ -46,29 +49,18 @@ const AudioProfile = {
     if (ms > s.max) s.max = ms;
   },
 
-  // nowMs: prefer audio-clock ms from reporter (always available).
   snapshot(nowMs) {
     let now = nowMs != null ? nowMs : profileNow();
     if (!this._windowStart) this._windowStart = now;
     let windowMs = Math.max(1, now - this._windowStart);
     let quantumMs = (128 / sampleRate) * 1000;
     let quanta = Math.max(1, windowMs / quantumMs);
-    let by = Object.create(null);
-    for (let name in this._by) {
-      let s = this._by[name];
-      by[name] = {
-        avg: s.n ? s.sum / s.n : 0,
-        max: s.max,
-        n: s.n,
-      };
-    }
     let out = {
       windowMs,
       quantumMs,
       totalMs: this._totalMs,
       maxMs: this._maxMs,
       avgMsPerQuantum: this._totalMs / quanta,
-      by,
     };
     this._by = Object.create(null);
     this._totalMs = 0;
@@ -81,8 +73,9 @@ const AudioProfile = {
 globalThis.AudioProfile = AudioProfile;
 
 class AudioProfileReporter extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     this._lastPost = currentTime;
     this._lastCb = currentTime;
     this._late = false;
@@ -105,20 +98,19 @@ class AudioProfileReporter extends AudioWorkletProcessor {
 
     if (currentTime - this._lastPost < 0.25) return true;
     this._lastPost = currentTime;
-    // Window from audio clock — no performance dependency.
     let snap = AudioProfile.snapshot(currentTime * 1000);
-    this.port.postMessage({
-      quantumMs: snap.quantumMs,
-      totalMs: snap.totalMs,
-      maxMs: snap.maxMs,
-      windowMs: snap.windowMs,
-      avgMsPerQuantum: snap.avgMsPerQuantum,
-      late: this._late,
-      lateCount: this._lateCount,
-      lateMaxMs: this._lateMaxMs,
-      hires: !!(globalThis["performance"] && globalThis["performance"].now),
-      by: snap.by,
-    });
+    let sab = this.sab;
+    if (sab) {
+      sab.setSlot(0, snap.quantumMs);
+      sab.setSlot(1, snap.totalMs);
+      sab.setSlot(2, snap.maxMs);
+      sab.setSlot(3, snap.windowMs);
+      sab.setSlot(4, snap.avgMsPerQuantum);
+      sab.setSlot(5, this._late ? 1 : 0);
+      sab.setSlot(6, this._lateCount);
+      sab.setSlot(7, this._lateMaxMs);
+      sab.publish();
+    }
     this._late = false;
     this._lateCount = 0;
     this._lateMaxMs = 0;
@@ -127,22 +119,3 @@ class AudioProfileReporter extends AudioWorkletProcessor {
 }
 
 registerProcessor("audio-profile-reporter", AudioProfileReporter);
-
-// ponytail: profiler self-check. Upgrade = AudioWorklet integration test.
-(function audioProfileSelfCheck() {
-  let fake = {
-    process() {
-      return true;
-    },
-  };
-  AudioProfile.attach(fake, "_selfcheck");
-  let wrapped = fake.process;
-  AudioProfile.attach(fake, "_selfcheck");
-  if (fake.process !== wrapped) {
-    console.error("AudioProfile.attach double-wrap self-check failed");
-  }
-  let q = (128 / sampleRate) * 1000;
-  if (!(q > 0.5 && q < 20)) {
-    console.error("AudioProfile quantumMs self-check failed", q);
-  }
-})();

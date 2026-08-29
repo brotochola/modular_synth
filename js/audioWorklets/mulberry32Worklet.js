@@ -13,17 +13,13 @@ class Mulberry32Worklet extends AudioWorkletProcessor {
 
   constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "mulberry32");
     this.bipolar = !!(
       options &&
       options.processorOptions &&
       options.processorOptions.bipolar
     );
-    this.port.onmessage = (e) => {
-      if (e.data && e.data.bipolar !== undefined) {
-        this.bipolar = !!e.data.bipolar;
-      }
-    };
   }
 
   /** One mulberry32 step from seed — pure hash, no lingering state. */
@@ -43,12 +39,17 @@ class Mulberry32Worklet extends AudioWorkletProcessor {
     if (seeds.length === 1) {
       let u = this.hash(seeds[0]);
       let v = bipolar ? u * 2 - 1 : u;
-      for (let i = 0; i < n; i++) output[i] = v;
+      output.fill(v);
     } else {
       for (let i = 0; i < n; i++) {
         let u = this.hash(seeds[i]);
         output[i] = bipolar ? u * 2 - 1 : u;
       }
+    }
+    if (this.sab) {
+      this.bipolar = this.sab.getSlot(0) > 0.5;
+      AppConfig.sabWriteGraphPeaks(this.sab, _inputs, parameters);
+      this.sab.publish();
     }
     return true;
   }

@@ -43,7 +43,7 @@
         {
           "from": "bpm_ss",
           "to": "env_ss",
-          "audioParam": "trigger",
+          "audioParam": "gate",
           "numberOfOutput": 0,
           "id": "c_bpm_env"
         }
@@ -181,7 +181,7 @@
         "decay": 0.18,
         "sustain": 0,
         "release": 0.12,
-        "trigger": 0
+        "gate": 0
       },
       "node": {},
       "connections": [

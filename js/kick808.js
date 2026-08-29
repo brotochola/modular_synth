@@ -43,7 +43,7 @@ class Kick808 extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/kick808Worklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "kick808-worklet", {
+      this.node = this.makeWorklet("kick808-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: 1,
         parameterData: {

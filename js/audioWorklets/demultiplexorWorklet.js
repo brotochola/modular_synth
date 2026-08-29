@@ -10,8 +10,9 @@ class DemultiplexorWorklet extends AudioWorkletProcessor {
     ];
   }
 
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "demultiplexor");
     this.which = 0;
     this.lastWhich = -1;
@@ -25,8 +26,8 @@ class DemultiplexorWorklet extends AudioWorkletProcessor {
     this.which = which;
 
     if (this.which != this.lastWhich) {
-      this.port.postMessage({ which: this.which });
       this.lastWhich = this.which;
+      if (this.sab) this.sab.setNote(this.which);
     }
 
     let signal = inputs[0] && inputs[0][0];
@@ -41,14 +42,17 @@ class DemultiplexorWorklet extends AudioWorkletProcessor {
       if (!ch) continue;
       let len = ch.length;
       if (o === which) {
-        if (signal) {
+        if (signal && signal.length === ch.length) ch.set(signal);
+        else if (signal) {
           for (let i = 0; i < len; i++) ch[i] = signal[i] || 0;
-        } else {
-          for (let i = 0; i < len; i++) ch[i] = 0;
-        }
+        } else ch.fill(0);
       } else {
-        for (let i = 0; i < len; i++) ch[i] = 0;
+        ch.fill(0);
       }
+    }
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
+      this.sab.publish();
     }
     return true;
   }

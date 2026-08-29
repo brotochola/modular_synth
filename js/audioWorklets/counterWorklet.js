@@ -1,21 +1,20 @@
 class CounterWorklet extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "counter");
     this.val = 0;
-    this.port.onmessage = (e) => {
-      this.val = e.data.val;
-    };
   }
 
   process(inputs, outputs) {
-    let output = outputs[0];
-    if (!output) return true;
-    let outputChannel = output[0];
+    let sab = this.sab;
+    if (sab) this.val = sab.getSlot(0);
+    let outputChannel = outputs[0] && outputs[0][0];
     if (!outputChannel) return true;
-    let val = this.val;
-    for (let i = 0; i < outputChannel.length; ++i) {
-      outputChannel[i] = val;
+    outputChannel.fill(this.val);
+    if (sab) {
+      AppConfig.sabWriteGraphPeaks(sab, inputs, null);
+      sab.publish();
     }
     return true;
   }

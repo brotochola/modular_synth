@@ -233,7 +233,7 @@ class ScanlineSynth extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/scanlineWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "scanline-worklet", {
+      this.node = this.makeWorklet("scanline-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: 1,
         parameterData: { frequency: 110, row: 0.5 },

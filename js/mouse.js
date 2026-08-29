@@ -17,7 +17,7 @@ class Mouse extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/mouseWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "mouse-worklet", {
+      this.node = this.makeWorklet("mouse-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: 2,
       });
@@ -40,8 +40,11 @@ class Mouse extends Component {
   }
 
   sendPos() {
-    if (this.node) this.node.port.postMessage({ x: this.x, y: this.y });
-    // Unipolar 0..1 CV: setLedBipolar maps + to black→green
+    if (this.sabBlock) {
+      this.sabBlock.setSlot(0, this.x);
+      this.sabBlock.setSlot(1, this.y);
+      this.sabBlock.publish();
+    }
     this.setOutputLed(0, this.x, "cv");
     this.setOutputLed(1, this.y, "cv");
   }

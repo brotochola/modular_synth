@@ -72,6 +72,10 @@ class CanvasPlotter extends Component {
     this.lastOnlyCheck.checked = !!this.lastOnly;
     this.lastOnlyCheck.onchange = () => {
       this.lastOnly = this.lastOnlyCheck.checked;
+      if (this.sabBlock) {
+        this.sabBlock.setSlot(6, this.lastOnly ? 0 : 1);
+        this.sabBlock.publish();
+      }
       this.quickSave();
     };
     this.lastOnlyLabel.appendChild(this.lastOnlyCheck);
@@ -86,9 +90,7 @@ class CanvasPlotter extends Component {
     this.app
       .loadWorklet("js/audioWorklets/canvasPlotterWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(
-          this.app.actx,
-          "canvas-plotter-worklet",
+        this.node = this.makeWorklet("canvas-plotter-worklet",
           {
             numberOfInputs: 5,
             numberOfOutputs: 0,
@@ -98,7 +100,6 @@ class CanvasPlotter extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        this.node.port.onmessage = (e) => this.onWorkletMessage(e.data);
         this.startLoop();
       });
   }
@@ -165,6 +166,46 @@ class CanvasPlotter extends Component {
     this.pending[i + 3] = data[3];
     this.pending[i + 4] = data[4];
     this.pendingCount++;
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    let sab = this.sabBlock;
+    if (!sab) return;
+    if (this.lastOnly) {
+      this.pendingClear = sab.getSlot(5);
+      this.ensurePendingCapacity(1);
+      this.pending[0] = sab.getSlot(0);
+      this.pending[1] = sab.getSlot(1);
+      this.pending[2] = sab.getSlot(2);
+      this.pending[3] = sab.getSlot(3);
+      this.pending[4] = sab.getSlot(4);
+      this.pendingCount = 1;
+      return;
+    }
+    let w = Atomics.load(sab.i32, AppConfig.SAB_I_BULK_WRITE);
+    let r = this._sabRingRead || 0;
+    let cap = AppConfig.SAB_RING_CAP;
+    let stride = AppConfig.SAB_RING_STRIDE;
+    let n = w - r;
+    if (n > cap) {
+      r = w - cap;
+    }
+    if (n <= 0) return;
+    this.ensurePendingCapacity(this.pendingCount + n);
+    while (r < w) {
+      let base = AppConfig.SAB_RING_BASE + (r % cap) * stride;
+      this.pendingClear = sab.f32[base + 5];
+      let i = this.pendingCount * CanvasPlotter.STRIDE;
+      this.pending[i] = sab.f32[base];
+      this.pending[i + 1] = sab.f32[base + 1];
+      this.pending[i + 2] = sab.f32[base + 2];
+      this.pending[i + 3] = sab.f32[base + 3];
+      this.pending[i + 4] = sab.f32[base + 4];
+      this.pendingCount++;
+      r++;
+    }
+    this._sabRingRead = w;
   }
 
   startLoop() {

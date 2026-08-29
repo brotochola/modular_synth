@@ -4,10 +4,8 @@ class Distortion extends Component {
     super(app, serializedData);
     this.infoText =
       "Waveshaping distortion. Soft-clips the input; higher amount means more harmonics and grit. Set amount with the number box or automate the amount input.";
-    this.amount = 0;
-
+    this.uiParamWidgets = { amount: "none" };
     this.createNode();
-    this.customAudioParams = ["amount"];
     this.amountFromInput = 10;
     this.waitUntilImReady(() => this.createInputAmount());
   }
@@ -15,43 +13,30 @@ class Distortion extends Component {
     this.amountInput = document.createElement("input");
     this.amountInput.type = "number";
     this.amountInput.oninput = () => {
-      this.amountFromInput = this.amountInput.value;
-      this.makeDistortionCurve();
+      this.amountFromInput = Number(this.amountInput.value) || 0;
+      this.applyAmount();
     };
     this.amountInput.value = this.amountFromInput;
-    this.container
-      .querySelector("audioparamrow:nth-child(2)")
-      .appendChild(this.amountInput);
-    this.makeDistortionCurve();
+    let row = this.container.querySelector("audioparamrow:nth-child(2)");
+    if (row) row.appendChild(this.amountInput);
+    this.applyAmount();
   }
 
-  handleCustomAudioParamChanged(e) {
-    if (e.current < 0) return;
-    if (e.current != undefined && e.current != null) this.amount = e.current;
-    this.makeDistortionCurve();
-  }
-
-  makeDistortionCurve() {
-    this.totalAmount = Number(this.amount) + Number(this.amountFromInput || 0);
-    this.node.port.postMessage({distortion:this.totalAmount})
+  applyAmount() {
+    let p = this.node && this.node.parameters && this.node.parameters.get("amount");
+    if (p) p.value = Number(this.amountFromInput) || 0;
   }
 
   createNode() {
-    this.app.loadWorklet("js/audioWorklets/distortionWorklet.js")
-      .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "distortion-worklet", {
-          numberOfInputs: 1,
-          numberOfOutputs: 1,
-        });
-
-        this.node.onprocessorerror = (e) => {
-          console.error(e);
-        };
-
-        // this.updateNodeWithFormula();
-        this.node.port.onmessage = (e) => {
-          console.warn(this.id + " !!!! :", e.data);
-        };
+    this.app.loadWorklet("js/audioWorklets/distortionWorklet.js").then(() => {
+      this.node = this.makeWorklet("distortion-worklet", {
+        numberOfInputs: 1,
+        numberOfOutputs: 1,
+        parameterData: { amount: 10 },
       });
+      this.node.onprocessorerror = (e) => {
+        console.error(e);
+      };
+    });
   }
 }

@@ -1363,7 +1363,7 @@
         {
           "from": "seq_gate",
           "to": "env_syll",
-          "audioParam": "trigger",
+          "audioParam": "gate",
           "numberOfOutput": 1,
           "id": "c32"
         }
@@ -2291,7 +2291,7 @@
         "decay": 0.08,
         "release": 0.16,
         "sustain": 0.78,
-        "trigger": 0
+        "gate": 0
       },
       "node": {},
       "connections": [
@@ -2617,7 +2617,7 @@
     {
       "from": "seq_gate",
       "to": "env_syll",
-      "audioParam": "trigger",
+      "audioParam": "gate",
       "numberOfOutput": 1,
       "id": "c32"
     },

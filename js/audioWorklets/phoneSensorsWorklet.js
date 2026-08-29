@@ -1,21 +1,25 @@
 class PhoneSensorsWorklet extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "phone-sensors");
-    this.values = [0, 0, 0, 0, 0, 0, 0];
-    this.port.onmessage = (e) => {
-      let v = e.data && e.data.values;
-      if (v && v.length) this.values = v;
-    };
+    this.values = new Float32Array(8);
   }
 
   process(inputs, outputs) {
+    let sab = this.sab;
+    if (sab) {
+      for (let i = 0; i < this.values.length; i++) this.values[i] = sab.getSlot(i);
+    }
     let vals = this.values;
     for (let o = 0; o < outputs.length; o++) {
       let ch = outputs[o] && outputs[o][0];
       if (!ch) continue;
-      let val = vals[o] || 0;
-      for (let i = 0; i < ch.length; i++) ch[i] = val;
+      ch.fill(vals[o] || 0);
+    }
+    if (sab) {
+      AppConfig.sabWriteGraphPeaks(sab, inputs, null);
+      sab.publish();
     }
     return true;
   }

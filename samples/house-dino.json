@@ -13,7 +13,9 @@
       "y": "40px",
       "audioParams": {},
       "node": {},
-      "valuesToSave": ["text"],
+      "valuesToSave": [
+        "text"
+      ],
       "text": "KICK  negras",
       "connections": []
     },
@@ -24,39 +26,267 @@
       "createdBy": "user",
       "x": "40px",
       "y": "130px",
-      "audioParams": { "baseHz": 440 },
+      "audioParams": {
+        "baseHz": 440
+      },
       "node": {},
-      "valuesToSave": ["sequence"],
+      "valuesToSave": [
+        "sequence"
+      ],
       "sequence": {
-        "0": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        "1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "4": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        "5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "6": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "7": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "8": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        "9": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "10": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "11": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "12": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        "13": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "14": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "15": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        "0": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "15": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
       },
       "connections": [
         {
           "from": "seq_kick",
           "to": "env_kick",
-          "audioParam": "trigger",
+          "audioParam": "gate",
           "numberOfOutput": "1",
           "id": "ck1"
         },
         {
           "from": "seq_kick",
           "to": "env_kick_pitch",
-          "audioParam": "trigger",
+          "audioParam": "gate",
           "numberOfOutput": "1",
           "id": "ck2"
         }
@@ -75,7 +305,7 @@
         "decay": 0.18,
         "release": 0.14,
         "sustain": 0,
-        "trigger": 0
+        "gate": 0
       },
       "node": {},
       "connections": [
@@ -101,7 +331,7 @@
         "decay": 0.055,
         "release": 0.04,
         "sustain": 0,
-        "trigger": 0
+        "gate": 0
       },
       "node": {},
       "connections": [
@@ -128,8 +358,13 @@
       "createdBy": "user",
       "x": "600px",
       "y": "130px",
-      "audioParams": { "detune": 0, "frequency": 50 },
-      "node": { "type": "sine" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 50
+      },
+      "node": {
+        "type": "sine"
+      },
       "connections": [
         {
           "from": "osc_kick",
@@ -147,7 +382,9 @@
       "createdBy": "user",
       "x": "600px",
       "y": "280px",
-      "audioParams": { "gain": 180 },
+      "audioParams": {
+        "gain": 180
+      },
       "node": {},
       "connections": [
         {
@@ -166,7 +403,9 @@
       "createdBy": "user",
       "x": "820px",
       "y": "130px",
-      "audioParams": { "gain": 0 },
+      "audioParams": {
+        "gain": 0
+      },
       "node": {},
       "connections": [
         {
@@ -204,7 +443,9 @@
       "createdBy": "user",
       "x": "1040px",
       "y": "280px",
-      "audioParams": { "gain": 0 },
+      "audioParams": {
+        "gain": 0
+      },
       "node": {},
       "connections": [
         {
@@ -225,7 +466,9 @@
       "y": "440px",
       "audioParams": {},
       "node": {},
-      "valuesToSave": ["text"],
+      "valuesToSave": [
+        "text"
+      ],
       "text": "HAT  offbeat 8ths",
       "connections": []
     },
@@ -236,32 +479,260 @@
       "createdBy": "user",
       "x": "40px",
       "y": "530px",
-      "audioParams": { "baseHz": 440 },
+      "audioParams": {
+        "baseHz": 440
+      },
       "node": {},
-      "valuesToSave": ["sequence"],
+      "valuesToSave": [
+        "sequence"
+      ],
       "sequence": {
-        "0": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "2": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        "3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "6": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        "7": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "8": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "9": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "10": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        "11": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "12": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "13": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "14": [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
-        "15": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        "0": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "15": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
       },
       "connections": [
         {
           "from": "seq_hat",
           "to": "env_hat",
-          "audioParam": "trigger",
+          "audioParam": "gate",
           "numberOfOutput": "1",
           "id": "ch1"
         }
@@ -280,7 +751,7 @@
         "decay": 0.04,
         "release": 0.025,
         "sustain": 0,
-        "trigger": 0
+        "gate": 0
       },
       "node": {},
       "connections": [
@@ -319,8 +790,15 @@
       "createdBy": "user",
       "x": "820px",
       "y": "530px",
-      "audioParams": { "Q": 0.8, "detune": 0, "frequency": 8000, "gain": 0 },
-      "node": { "type": "highpass" },
+      "audioParams": {
+        "Q": 0.8,
+        "detune": 0,
+        "frequency": 8000,
+        "gain": 0
+      },
+      "node": {
+        "type": "highpass"
+      },
       "connections": [
         {
           "from": "filt_hat_hp",
@@ -338,8 +816,15 @@
       "createdBy": "user",
       "x": "1040px",
       "y": "530px",
-      "audioParams": { "Q": 3.5, "detune": 0, "frequency": 10000, "gain": 0 },
-      "node": { "type": "bandpass" },
+      "audioParams": {
+        "Q": 3.5,
+        "detune": 0,
+        "frequency": 10000,
+        "gain": 0
+      },
+      "node": {
+        "type": "bandpass"
+      },
       "connections": [
         {
           "from": "filt_hat_bp",
@@ -357,7 +842,9 @@
       "createdBy": "user",
       "x": "1260px",
       "y": "530px",
-      "audioParams": { "gain": 0 },
+      "audioParams": {
+        "gain": 0
+      },
       "node": {},
       "connections": [
         {
@@ -378,7 +865,9 @@
       "y": "850px",
       "audioParams": {},
       "node": {},
-      "valuesToSave": ["text"],
+      "valuesToSave": [
+        "text"
+      ],
       "text": "DINO  FM roar agresivo",
       "connections": []
     },
@@ -389,8 +878,13 @@
       "createdBy": "user",
       "x": "40px",
       "y": "960px",
-      "audioParams": { "detune": 0, "frequency": 23 },
-      "node": { "type": "sawtooth" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 23
+      },
+      "node": {
+        "type": "sawtooth"
+      },
       "connections": [
         {
           "from": "osc_mod",
@@ -408,7 +902,9 @@
       "createdBy": "user",
       "x": "240px",
       "y": "960px",
-      "audioParams": { "gain": 210 },
+      "audioParams": {
+        "gain": 210
+      },
       "node": {},
       "connections": [
         {
@@ -427,8 +923,13 @@
       "createdBy": "user",
       "x": "440px",
       "y": "960px",
-      "audioParams": { "detune": 0, "frequency": 34 },
-      "node": { "type": "triangle" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 34
+      },
+      "node": {
+        "type": "triangle"
+      },
       "connections": [
         {
           "from": "osc_car",
@@ -446,8 +947,15 @@
       "createdBy": "user",
       "x": "640px",
       "y": "960px",
-      "audioParams": { "Q": 4, "detune": 0, "frequency": 1100, "gain": 0 },
-      "node": { "type": "lowpass" },
+      "audioParams": {
+        "Q": 4,
+        "detune": 0,
+        "frequency": 1100,
+        "gain": 0
+      },
+      "node": {
+        "type": "lowpass"
+      },
       "connections": [
         {
           "from": "filt_dino",
@@ -467,7 +975,9 @@
       "y": "960px",
       "audioParams": {},
       "node": {},
-      "valuesToSave": ["formula"],
+      "valuesToSave": [
+        "formula"
+      ],
       "formula": "y=Math.tanh(x1*7)",
       "connections": [
         {
@@ -486,7 +996,9 @@
       "createdBy": "user",
       "x": "1040px",
       "y": "960px",
-      "audioParams": { "gain": 0.72 },
+      "audioParams": {
+        "gain": 0.72
+      },
       "node": {},
       "connections": [
         {
@@ -505,8 +1017,13 @@
       "createdBy": "user",
       "x": "40px",
       "y": "1140px",
-      "audioParams": { "detune": 0, "frequency": 0.28 },
-      "node": { "type": "sine" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0.28
+      },
+      "node": {
+        "type": "sine"
+      },
       "connections": [
         {
           "from": "osc_lfo",
@@ -531,7 +1048,9 @@
       "createdBy": "user",
       "x": "240px",
       "y": "1140px",
-      "audioParams": { "gain": 95 },
+      "audioParams": {
+        "gain": 95
+      },
       "node": {},
       "connections": [
         {
@@ -550,7 +1069,9 @@
       "createdBy": "user",
       "x": "840px",
       "y": "1140px",
-      "audioParams": { "gain": 700 },
+      "audioParams": {
+        "gain": 700
+      },
       "node": {},
       "connections": [
         {
@@ -569,8 +1090,13 @@
       "createdBy": "user",
       "x": "440px",
       "y": "1140px",
-      "audioParams": { "detune": 0, "frequency": 0.11 },
-      "node": { "type": "sine" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0.11
+      },
+      "node": {
+        "type": "sine"
+      },
       "connections": [
         {
           "from": "osc_wander",
@@ -588,7 +1114,9 @@
       "createdBy": "user",
       "x": "640px",
       "y": "1140px",
-      "audioParams": { "gain": 18 },
+      "audioParams": {
+        "gain": 18
+      },
       "node": {},
       "connections": [
         {
@@ -607,8 +1135,13 @@
       "createdBy": "user",
       "x": "40px",
       "y": "1320px",
-      "audioParams": { "detune": 0, "frequency": 71 },
-      "node": { "type": "square" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 71
+      },
+      "node": {
+        "type": "square"
+      },
       "connections": [
         {
           "from": "osc_s_mod",
@@ -626,7 +1159,9 @@
       "createdBy": "user",
       "x": "240px",
       "y": "1320px",
-      "audioParams": { "gain": 340 },
+      "audioParams": {
+        "gain": 340
+      },
       "node": {},
       "connections": [
         {
@@ -645,8 +1180,13 @@
       "createdBy": "user",
       "x": "440px",
       "y": "1320px",
-      "audioParams": { "detune": 0, "frequency": 230 },
-      "node": { "type": "triangle" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 230
+      },
+      "node": {
+        "type": "triangle"
+      },
       "connections": [
         {
           "from": "osc_s_car",
@@ -664,7 +1204,9 @@
       "createdBy": "user",
       "x": "640px",
       "y": "1320px",
-      "audioParams": { "gain": 0.55 },
+      "audioParams": {
+        "gain": 0.55
+      },
       "node": {},
       "connections": [
         {
@@ -685,7 +1227,9 @@
       "y": "1500px",
       "audioParams": {},
       "node": {},
-      "valuesToSave": ["text"],
+      "valuesToSave": [
+        "text"
+      ],
       "text": "BASS  seq sucio",
       "connections": []
     },
@@ -696,32 +1240,260 @@
       "createdBy": "user",
       "x": "40px",
       "y": "1560px",
-      "audioParams": { "baseHz": 55 },
+      "audioParams": {
+        "baseHz": 55
+      },
       "node": {},
-      "valuesToSave": ["sequence"],
+      "valuesToSave": [
+        "sequence"
+      ],
       "sequence": {
-        "0": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "3": [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "4": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "6": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        "7": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "8": [1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "9": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "10": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-        "11": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "12": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0],
-        "13": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        "14": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-        "15": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        "0": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "11": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "15": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
       },
       "connections": [
         {
           "from": "seq_bass",
           "to": "env_bass",
-          "audioParam": "trigger",
+          "audioParam": "gate",
           "numberOfOutput": "1",
           "id": "cb8"
         },
@@ -747,7 +1519,7 @@
         "decay": 0.1,
         "release": 0.22,
         "sustain": 0.45,
-        "trigger": 0
+        "gate": 0
       },
       "node": {},
       "connections": [
@@ -767,8 +1539,13 @@
       "createdBy": "user",
       "x": "380px",
       "y": "1600px",
-      "audioParams": { "detune": 0, "frequency": 0 },
-      "node": { "type": "sawtooth" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "sawtooth"
+      },
       "connections": [
         {
           "from": "osc_bass",
@@ -786,8 +1563,15 @@
       "createdBy": "user",
       "x": "580px",
       "y": "1600px",
-      "audioParams": { "Q": 7, "detune": 0, "frequency": 620, "gain": 0 },
-      "node": { "type": "lowpass" },
+      "audioParams": {
+        "Q": 7,
+        "detune": 0,
+        "frequency": 620,
+        "gain": 0
+      },
+      "node": {
+        "type": "lowpass"
+      },
       "connections": [
         {
           "from": "filt_bass",
@@ -807,7 +1591,9 @@
       "y": "1600px",
       "audioParams": {},
       "node": {},
-      "valuesToSave": ["formula"],
+      "valuesToSave": [
+        "formula"
+      ],
       "formula": "y=Math.tanh(x1*(8+10*x2))",
       "connections": [
         {
@@ -826,7 +1612,9 @@
       "createdBy": "user",
       "x": "1040px",
       "y": "1600px",
-      "audioParams": { "gain": 0 },
+      "audioParams": {
+        "gain": 0
+      },
       "node": {},
       "connections": [
         {
@@ -845,8 +1633,13 @@
       "createdBy": "user",
       "x": "380px",
       "y": "1780px",
-      "audioParams": { "detune": 0, "frequency": 0.047 },
-      "node": { "type": "sine" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0.047
+      },
+      "node": {
+        "type": "sine"
+      },
       "connections": [
         {
           "from": "osc_evol_cut",
@@ -864,7 +1657,9 @@
       "createdBy": "user",
       "x": "580px",
       "y": "1780px",
-      "audioParams": { "gain": 520 },
+      "audioParams": {
+        "gain": 520
+      },
       "node": {},
       "connections": [
         {
@@ -883,8 +1678,13 @@
       "createdBy": "user",
       "x": "800px",
       "y": "1780px",
-      "audioParams": { "detune": 0, "frequency": 0.073 },
-      "node": { "type": "triangle" },
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0.073
+      },
+      "node": {
+        "type": "triangle"
+      },
       "connections": [
         {
           "from": "osc_evol_drv",
@@ -904,7 +1704,9 @@
       "y": "960px",
       "audioParams": {},
       "node": {},
-      "valuesToSave": ["formula"],
+      "valuesToSave": [
+        "formula"
+      ],
       "formula": "y=x1*1.2+x2*0.12+x3*0.26+x4*0.4",
       "connections": [
         {

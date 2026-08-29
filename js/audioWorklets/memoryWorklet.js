@@ -1,37 +1,31 @@
 class MemoryWorklet extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "memory");
     this.val = 0;
-    this.port.onmessage = (e) => {
-      //   this.port.postMessage("UPDATED data from joystick " + this.dataFromJoystick);
-    };
-
   }
 
-
   process(inputs, outputs) {
-    // this.port.postMessage({savedValue:this.val})
-
-    try {
-      let output = outputs[0];
-      let input = inputs[0];
-
-      for (let channel = 0; channel < output.length; ++channel) {
-        let outputChannel = (output || [])[channel] || [];
-        let inputChannel = (input || [])[channel] || [];
-
-        for (let i = 0; i < outputChannel.length; ++i) {
-            
-          this.val = inputChannel[i] != 0 ? inputChannel[i] : this.val;
-          if (isNaN(this.val)) this.val = 0;
-          outputChannel[i] = this.val;
-        }
+    let outputChannel = outputs[0] && outputs[0][0];
+    let inputChannel = inputs[0] && inputs[0][0];
+    if (!outputChannel) return true;
+    let n = outputChannel.length;
+    let val = this.val;
+    if (inputChannel) {
+      for (let i = 0; i < n; ++i) {
+        let x = inputChannel[i];
+        if (x !== 0) val = x;
+        outputChannel[i] = val;
       }
-
-      // this.port.postMessage({ data: "hola", counter });
-    } catch (e) {
-      this.port.postMessage(e);
+    } else {
+      outputChannel.fill(val);
+    }
+    this.val = val;
+    if (this.sab) {
+      this.sab.setSlot(0, val);
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, null);
+      this.sab.publish();
     }
     return true;
   }

@@ -1,32 +1,24 @@
 class JackActivityWorklet extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "jack-activity");
     this.counter = 0;
-    this.peaks = null;
   }
 
   process(inputs) {
+    let sab = this.sab;
     let n = inputs.length;
-    if (!this.peaks || this.peaks.length !== n) {
-      this.peaks = new Float32Array(n);
-    }
+    if (n > 32) n = 32;
     for (let p = 0; p < n; p++) {
-      let ch = inputs[p] && inputs[p][0];
-      if (!ch || !ch.length) continue;
-      let peak = this.peaks[p];
-      for (let i = 0; i < ch.length; i++) {
-        let v = ch[i];
-        if (Math.abs(v) > Math.abs(peak)) peak = v;
-      }
-      this.peaks[p] = peak;
+      let peak = AppConfig.peakAbs(inputs[p] && inputs[p][0]);
+      if (sab) sab.setSlot(p, peak);
     }
     this.counter++;
-    if (this.counter < AppConfig.JACK_ACTIVITY_REPORT_EVERY) return true;
-    this.counter = 0;
-    let levels = this.peaks;
-    this.peaks = new Float32Array(n);
-    this.port.postMessage({ levels }, [levels.buffer]);
+    if (this.counter >= AppConfig.JACK_ACTIVITY_REPORT_EVERY) {
+      this.counter = 0;
+      if (sab) sab.publish();
+    }
     return true;
   }
 }

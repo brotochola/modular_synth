@@ -12,7 +12,7 @@ class MemoryComponent extends Component {
   createNode() {
     this.app.loadWorklet("js/audioWorklets/memoryWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(this.app.actx, "memory-worklet", {
+        this.node = this.makeWorklet("memory-worklet", {
           numberOfInputs: 1,
           numberOfOutputs: 1,
         });
@@ -20,16 +20,15 @@ class MemoryComponent extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-
-        this.node.port.onmessage = (e) => {
-          if (e.data.savedValue) {
-            this.savedValue = e.data.savedValue;
-            if (this.display.innerHTML != this.savedValue){
-              this.display.innerHTML = this.savedValue;
-            }
-          }
-          // console.log("#memory worklet", e.data);
-        };
       });
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    if (!this.sabBlock || !this.display) return;
+    let v = this.sabBlock.getSlot(0);
+    if (v === this.savedValue) return;
+    this.savedValue = v;
+    this.display.innerHTML = v;
   }
 }

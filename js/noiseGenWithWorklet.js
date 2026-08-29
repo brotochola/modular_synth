@@ -7,9 +7,7 @@ class NoiseGenWithWorklet extends Component {
 
     this.app.loadWorklet("js/audioWorklets/whiteNoiseWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(
-          this.app.actx,
-          "white-noise-processor",
+        this.node = this.makeWorklet("white-noise-processor",
           {
             numberOfInputs: 0,
             numberOfOutputs: 1,
@@ -19,10 +17,6 @@ class NoiseGenWithWorklet extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-
-        this.node.port.onmessage = (e) => console.log("##noise compo", e.data);
-
-        // this.createInputButtons();
       });
   }
 }

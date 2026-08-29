@@ -192,18 +192,12 @@ class MidiFilePlayer extends Component {
           this.node.disconnect();
         } catch (e) {}
       }
-      this.node = new AudioWorkletNode(this.app.actx, "midi-player-worklet", {
+      this.node = this.makeWorklet("midi-player-worklet", {
         numberOfInputs: 2,
         numberOfOutputs: outs,
         parameterData: { rate },
       });
       this.node.onprocessorerror = (e) => console.error(e);
-      this.node.port.onmessage = (e) => {
-        if (e.data && e.data.ended) {
-          this.playing = false;
-          this.updateButton();
-        }
-      };
       if (this.arrayBuffer) this.postLoadToWorklet();
     });
   }
@@ -247,18 +241,12 @@ class MidiFilePlayer extends Component {
             this.node.disconnect();
           } catch (e) {}
         }
-        this.node = new AudioWorkletNode(this.app.actx, "midi-player-worklet", {
+        this.node = this.makeWorklet("midi-player-worklet", {
           numberOfInputs: 2,
           numberOfOutputs: needOuts,
           parameterData: { rate },
         });
         this.node.onprocessorerror = (e) => console.error(e);
-        this.node.port.onmessage = (e) => {
-          if (e.data && e.data.ended) {
-            this.playing = false;
-            this.updateButton();
-          }
-        };
         finish();
         this.app.resetAllConnections();
       });
@@ -286,6 +274,16 @@ class MidiFilePlayer extends Component {
     if (!this.arrayBuffer) return;
     if (this.playing) this.stop();
     else this.play();
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    if (!this.sabBlock) return;
+    if (this.sabBlock.getEnded()) {
+      this.sabBlock.setEnded(false);
+      this.playing = false;
+      this.updateButton();
+    }
   }
 
   updateBPM() {

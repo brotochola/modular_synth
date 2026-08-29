@@ -17,7 +17,7 @@ class Demultiplexor extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/demultiplexorWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "demultiplexor-worklet", {
+      this.node = this.makeWorklet("demultiplexor-worklet", {
         numberOfInputs: 1,
         numberOfOutputs: 8,
         parameterData: { which: 0 },
@@ -27,13 +27,17 @@ class Demultiplexor extends Component {
         console.error(e);
       };
 
-      this.node.port.onmessage = (e) => {
-        if (e.data.which != null && this.display) {
-          this.display.innerHTML = e.data.which;
-        }
-      };
       if (this.display) this.display.innerHTML = "0";
     });
+  }
+
+  onSabTick() {
+    super.onSabTick();
+    if (!this.sabBlock || !this.display) return;
+    let w = this.sabBlock.getNote();
+    if (w === this._shownWhich) return;
+    this._shownWhich = w;
+    this.display.innerHTML = w;
   }
 
   putLabels() {

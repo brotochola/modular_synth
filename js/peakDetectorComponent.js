@@ -9,15 +9,16 @@ class PeakDetectorComponent extends Component {
   }
 
   handleTriggerFromWorklet(e) {
-    this.node.port.postMessage("reset");
+    if (this.sabBlock) {
+      this.sabBlock.setNote(1);
+      this.sabBlock.publish();
+    }
   }
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/peakDetectorWorklet.js")
       .then(() => {
-        this.node = new AudioWorkletNode(
-          this.app.actx,
-          "peak-detector-worklet",
+        this.node = this.makeWorklet("peak-detector-worklet",
           {
             numberOfInputs: 1,
             numberOfOutputs: 1,
@@ -27,11 +28,6 @@ class PeakDetectorComponent extends Component {
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
-        this.node.port.onmessage = (e) => {
-          console.log("#msg in peak detector", e.data);
-        };
-
-        // setTimeout(() => this.putLabels(), 200);
       });
   }
   //   putLabels() {

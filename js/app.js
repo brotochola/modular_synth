@@ -98,7 +98,8 @@ class App {
 
     this.bpm = (globalThis.AppConfig && AppConfig.DEFAULT_BPM) || 100;
     this._configModuleUrl = "js/config.js";
-    this._profilerModuleUrl = "js/audioWorklets/_audioProfile.js?v=4";
+    this._sabModuleUrl = "js/audioWorklets/_sab.js";
+    this._profilerModuleUrl = "js/audioWorklets/_audioProfile.js?v=5";
     this.cables = Object.assign({}, App.CABLE_DEFAULTS);
     this.scale = 1;
     this.lastScale = 1;
@@ -127,6 +128,8 @@ class App {
     this._timeSyncTimer = null;
     this._beatPublishTimer = null;
     this._cablesDirty = true;
+    this._connDirty = true;
+    this._connCache = null;
     this._endpointDirtyIds = new Set();
     this._rackRect = null;
     this._rackScale = 1;
@@ -206,6 +209,7 @@ class App {
     );
 
     this.wheelZoom();
+    this.assertCrossOriginIsolated();
 
     this.buttonsContainer = document.querySelector(".buttons");
     this.bindCablePanel();
@@ -1281,6 +1285,8 @@ class App {
       this._cableLastTs = ts;
       let t0 = performance.now();
       this.runCableFrame(dt);
+      this.tickSabUi();
+      if (typeof tickLedFlashes === "function") tickLedFlashes();
       let frameMs = performance.now() - t0;
       let fpsInst = dt > 0 ? 1 / dt : 60;
       this._sysFrameMs += (frameMs - this._sysFrameMs) * 0.15;
@@ -1593,18 +1599,15 @@ class App {
     this.loadWorklet(url)
       .then(() => {
         if (this._audioProfileNode || !this.actx) return;
-        this._audioProfileNode = new AudioWorkletNode(
-          this.actx,
-          "audio-profile-reporter",
-          { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1] },
-        );
+        this._audioProfileNode = this.makeWorklet("audio-profile-reporter", {
+          numberOfInputs: 0,
+          numberOfOutputs: 1,
+          outputChannelCount: [1],
+        });
         this._audioProfileMute = this.actx.createGain();
         this._audioProfileMute.gain.value = 0;
         this._audioProfileNode.connect(this._audioProfileMute);
         this._audioProfileMute.connect(this.actx.destination);
-        this._audioProfileNode.port.onmessage = (e) => {
-          this.onAudioProfileStats(e.data);
-        };
         this._audioProfileNode.onprocessorerror = (e) => {
           console.error(e);
         };
@@ -1666,6 +1669,72 @@ class App {
   markCablesDirty() {
     this._cablesDirty = true;
     this.wakeCables();
+  }
+  assertCrossOriginIsolated() {
+    if (typeof Sab !== "undefined" && Sab.isolated()) return;
+    if (this.sysStatusEl) {
+      this.sysStatusEl.textContent = "serve with npm start (COOP/COEP)";
+      this.sysStatusEl.classList.add("warn");
+    }
+    console.error(
+      "SharedArrayBuffer unavailable. Run npm start and open http://localhost:8000/ — not XAMPP.",
+    );
+  }
+  makeWorklet(name, opts, owner) {
+    if (typeof Sab === "undefined" || !Sab.isolated()) {
+      this.assertCrossOriginIsolated();
+      throw new Error("SharedArrayBuffer required");
+    }
+    opts = opts || {};
+    let extra = {};
+    if (opts.bulkBytes) {
+      extra.bulk = Sab.createBulk(opts.bulkBytes);
+      delete opts.bulkBytes;
+    }
+    opts = Sab.inject(opts, extra);
+    let block = opts._sabBlock;
+    let bulk = opts._sabBulk;
+    delete opts._sabBlock;
+    delete opts._sabBulk;
+    let node = new AudioWorkletNode(this.actx, name, opts);
+    node._sabBlock = block;
+    node._sabBulk = bulk;
+    if (owner) {
+      owner.sabBlock = block;
+      owner.sabBulk = bulk;
+    }
+    return node;
+  }
+  tickSabUi() {
+    this.tickAudioProfileSab();
+    let comps = this.components || [];
+    for (let i = 0; i < comps.length; i++) {
+      let c = comps[i];
+      if (c.tickJackLedsFromSab) c.tickJackLedsFromSab();
+      if (c.onSabTick) c.onSabTick();
+    }
+  }
+  tickAudioProfileSab() {
+    let block = this._audioProfileNode && this._audioProfileNode._sabBlock;
+    if (!block) return;
+    let seq = block.seq();
+    if (seq === this._audioProfileSeq) return;
+    this._audioProfileSeq = seq;
+    let late = block.getSlot(5) > 0.5;
+    let lateCount = block.getSlot(6);
+    let lateMax = block.getSlot(7);
+    let totalMs = block.getSlot(1);
+    let windowMs = block.getSlot(3) || 250;
+    this._audioLate = late;
+    this._audioLateCount = lateCount;
+    this._audioLateMaxMs = lateMax;
+    let inst;
+    if (totalMs > 0) {
+      inst = Math.min(100, (totalMs / windowMs) * 100);
+    } else {
+      inst = late ? Math.min(100, 40 + lateCount * 5) : 0;
+    }
+    this._audioPct += (inst - this._audioPct) * 0.25;
   }
   markEndpointsDirty(componentId) {
     if (componentId == null) return;
@@ -1986,6 +2055,7 @@ class App {
 
   loadWorklet(url) {
     let configUrl = this._configModuleUrl || "js/config.js";
+    let sabUrl = this._sabModuleUrl || "js/audioWorklets/_sab.js";
     let profilerUrl = this._profilerModuleUrl;
     if (!this._workletModules[configUrl]) {
       this._workletModules[configUrl] =
@@ -1993,6 +2063,14 @@ class App {
     }
     let chain = this._workletModules[configUrl];
     if (url === configUrl) return chain;
+
+    chain = chain.then(() => {
+      if (!this._workletModules[sabUrl]) {
+        this._workletModules[sabUrl] = this.actx.audioWorklet.addModule(sabUrl);
+      }
+      return this._workletModules[sabUrl];
+    });
+    if (url === sabUrl) return chain;
 
     chain = chain.then(() => {
       if (!this._workletModules[profilerUrl]) {
@@ -2330,14 +2408,22 @@ class App {
   }
 
   getAllConnections() {
+    if (!this._connDirty && this._connCache) return this._connCache;
     let ret = [];
-    this.components.map((k) =>
-      k.connections.map((c) => {
-        ret.push(c);
-      }),
-    );
-
+    let comps = this.components || [];
+    for (let i = 0; i < comps.length; i++) {
+      let list = comps[i].connections;
+      if (!list) continue;
+      for (let j = 0; j < list.length; j++) ret.push(list[j]);
+    }
+    this._connCache = ret;
+    this._connDirty = false;
     return ret;
+  }
+
+  invalidateConnections() {
+    this._connDirty = true;
+    this._connCache = null;
   }
 
   resetAllConnections() {

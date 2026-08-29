@@ -23,7 +23,10 @@ class Mulberry32 extends Component {
     this.bipolarCheck.checked = !!this.bipolar;
     this.bipolarCheck.onchange = () => {
       this.bipolar = this.bipolarCheck.checked;
-      if (this.node) this.node.port.postMessage({ bipolar: this.bipolar });
+      if (this.sabBlock) {
+        this.sabBlock.setSlot(0, this.bipolar ? 1 : 0);
+        this.sabBlock.publish();
+      }
       this.quickSave();
     };
     this.bipolarLabel.appendChild(this.bipolarCheck);
@@ -34,7 +37,7 @@ class Mulberry32 extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/mulberry32Worklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "mulberry32-worklet", {
+      this.node = this.makeWorklet("mulberry32-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: 1,
         parameterData: { seed: 0 },
@@ -43,6 +46,10 @@ class Mulberry32 extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
+      if (this.sabBlock) {
+        this.sabBlock.setSlot(0, this.bipolar ? 1 : 0);
+        this.sabBlock.publish();
+      }
     });
   }
 

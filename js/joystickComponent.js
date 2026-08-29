@@ -115,8 +115,11 @@ class JoystickComponent extends Component {
       }
     }
 
-    if (this.node) {
-      this.node.port.postMessage({ axes: this.axes, buttons: this.buttons });
+    if (this.sabBlock) {
+      let sab = this.sabBlock;
+      for (let i = 0; i < nButtons; i++) sab.setSlot(i, this.buttons[i]);
+      for (let i = 0; i < nAxes; i++) sab.setSlot(nButtons + i, this.axes[i]);
+      sab.publish();
     }
 
     if (this.prevAxes && this.axes) this.prevAxes.set(this.axes);
@@ -130,7 +133,7 @@ class JoystickComponent extends Component {
     this.gamepadLayout = { nButtons, nAxes };
     this.app.loadWorklet("js/audioWorklets/joystickworklet.js").then(() => {
       this.numberOfOutputs = total;
-      this.node = new AudioWorkletNode(this.app.actx, "joystick-worklet", {
+      this.node = this.makeWorklet("joystick-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: this.numberOfOutputs,
       });

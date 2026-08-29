@@ -10,7 +10,7 @@ class SampleHold extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/sampleHoldWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "sample-hold-worklet", {
+      this.node = this.makeWorklet("sample-hold-worklet", {
         numberOfInputs: 2,
         numberOfOutputs: 1,
       });

@@ -1,9 +1,11 @@
 class SampleHoldWorklet extends AudioWorkletProcessor {
-  constructor() {
+  constructor(options) {
     super();
+    AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "sample-hold");
     this.held = 0;
     this.prevClock = 0;
+    this.noise = 1;
   }
 
   process(inputs, outputs) {
@@ -16,16 +18,27 @@ class SampleHoldWorklet extends AudioWorkletProcessor {
     let hasClock = !!(clock && clock.length);
     let prev = this.prevClock;
     let held = this.held;
+    let noise = this.noise;
+    let thr = AppConfig.TRIG_THRESHOLD;
     for (let i = 0; i < n; i++) {
       let ck = hasClock ? clock[i] : 0;
-      if (AppConfig.isRising(prev, ck)) {
-        held = hasSignal ? signal[i] : Math.random() * 2 - 1;
+      if (prev < thr && ck >= thr) {
+        if (hasSignal) held = signal[i];
+        else {
+          noise = (Math.imul(noise, 1664525) + 1013904223) | 0;
+          held = noise / 2147483648;
+        }
       }
       output[i] = held;
       prev = ck;
     }
     this.prevClock = prev;
     this.held = held;
+    this.noise = noise;
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, null);
+      this.sab.publish();
+    }
     return true;
   }
 }

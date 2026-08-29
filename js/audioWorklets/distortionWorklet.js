@@ -1,29 +1,72 @@
 class DistortionWorklet extends AudioWorkletProcessor {
-  constructor() {
-    super();
-    if (globalThis.AudioProfile) AudioProfile.attach(this, "distortion");
-    this.amount=0
-    this.port.onmessage = (e) => {
-      if (e.data.distortion) {
-        this.amount = e.data.distortion;
-      }
-    };
+  static get parameterDescriptors() {
+    return [
+      {
+        name: "amount",
+        defaultValue: 10,
+        minValue: 0,
+        maxValue: 100,
+        automationRate: "a-rate",
+      },
+    ];
   }
 
-  process(inputs, outputs) {
-    try {
-      let output = outputs[0];
-      let input1 = inputs[0];
+  constructor(options) {
+    super();
+    AppConfig.bindProcessorSab(this, options);
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "distortion");
+    this.lut = new Float32Array(4096);
+    this.lutAmt = -1;
+  }
 
-      let outputChannel = (output || [])[0] || [];
-      let inputChannel1 = (input1 || [])[0] || [];
+  rebuildLut(amt) {
+    let lut = this.lut;
+    let n = lut.length;
+    let last = n - 1;
+    for (let i = 0; i < n; i++) {
+      let x = (i / last) * 2 - 1;
+      lut[i] = (1 / (1 + Math.exp(amt * x)) - 0.5) * 2;
+    }
+    this.lutAmt = amt;
+  }
 
-      for (let i = 0; i < outputChannel.length; ++i) {
-        outputChannel[i] =
-          (1 / (1 + Math.E ** (this.amount * inputChannel1[i])) - 0.5) * 2;
+  process(inputs, outputs, parameters) {
+    let out = outputs[0] && outputs[0][0];
+    let inp = inputs[0] && inputs[0][0];
+    if (!out) return true;
+    let n = out.length;
+    let amts = parameters.amount;
+    let amt0 = amts[0];
+    let aRate = amts.length > 1;
+    if (!aRate) {
+      if (amt0 !== this.lutAmt) this.rebuildLut(amt0);
+      let lut = this.lut;
+      let last = lut.length - 1;
+      if (inp) {
+        for (let i = 0; i < n; i++) {
+          let x = inp[i];
+          if (x < -1) x = -1;
+          else if (x > 1) x = 1;
+          let idx = ((x + 1) * 0.5) * last;
+          let i0 = idx | 0;
+          let f = idx - i0;
+          let a = lut[i0];
+          let b = lut[i0 < last ? i0 + 1 : last];
+          out[i] = a + (b - a) * f;
+        }
+      } else {
+        out.fill(0);
       }
-    } catch (e) {
-      this.port.postMessage(e);
+    } else if (inp) {
+      for (let i = 0; i < n; i++) {
+        out[i] = (1 / (1 + Math.exp(amts[i] * inp[i])) - 0.5) * 2;
+      }
+    } else {
+      out.fill(0);
+    }
+    if (this.sab) {
+      AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
+      this.sab.publish();
     }
     return true;
   }

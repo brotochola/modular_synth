@@ -76,7 +76,10 @@ class KeyboardComponent extends Component {
   }
 
   sendKey(type, which) {
-    if (this.node) this.node.port.postMessage({ type, which });
+    if (this.sabBlock) {
+      this.sabBlock.setSlot(which, type == "down" ? 1 : 0);
+      this.sabBlock.publish();
+    }
     this.setOutputActive(which, type == "down");
   }
 
@@ -108,7 +111,7 @@ class KeyboardComponent extends Component {
 
   createNode() {
     this.app.loadWorklet("js/audioWorklets/keyboardWorklet.js").then(() => {
-      this.node = new AudioWorkletNode(this.app.actx, "keyboard-worklet", {
+      this.node = this.makeWorklet("keyboard-worklet", {
         numberOfInputs: 0,
         numberOfOutputs: this.outputLabels.length,
       });
@@ -116,9 +119,6 @@ class KeyboardComponent extends Component {
       this.node.onprocessorerror = (e) => {
         console.error(e);
       };
-
-      this.node.port.onmessage = (e) =>
-        console.log("#keyboard worklet", e.data);
     });
   }
 
