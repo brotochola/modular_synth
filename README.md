@@ -2,7 +2,7 @@
 
 Browser modular synthesizer. Oscillators, filters, envelopes, sequencers — plus modules that do not exist in hardware: mouse as CV, images as wavetables, webcam pixels as audio, a per-sample math formula.
 
-Live: [https://brotochola.github.io/modular_synth](https://brotochola.github.io/modular_synth)
+Live:[https://modular-web-synth-rosy.vercel.app/](https://modular-web-synth-rosy.vercel.app/)
 
 Click **▶** before anything will sound. The audio engine starts paused (browser autoplay rules).
 
