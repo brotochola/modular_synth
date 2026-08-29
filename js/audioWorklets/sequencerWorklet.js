@@ -16,9 +16,10 @@ class SequencerWorklet extends AudioWorkletProcessor {
     AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "sequencer");
     this.sequence = new Float32Array(AppConfig.SEQ_STEPS);
-    this.bpm = 120;
+    this.bpm = 0;
     this.durationOfOneNote = 0;
     this.durationOfLoop = 0;
+    this.applyBpm(AppConfig.FALLBACK_BPM);
     this.currentNote = 0;
     this.lastPostedNote = -1;
     this.lastStepForTrig = -1;
@@ -38,21 +39,24 @@ class SequencerWorklet extends AudioWorkletProcessor {
     };
   }
 
+  applyBpm(bpm) {
+    if (!(bpm > 0)) return;
+    if (bpm === this.bpm && this.durationOfLoop) return;
+    this.bpm = bpm;
+    this.durationOfOneNote = (60000 / bpm) * AppConfig.SEQ_STEP_QUARTER;
+    this.durationOfLoop = this.durationOfOneNote * AppConfig.SEQ_STEPS;
+  }
+
   readControl() {
     let sab = this.sab;
     if (!sab) return;
-    let bpm = sab.getBpm();
-    if (bpm > 0 && bpm !== this.bpm) {
-      this.bpm = bpm;
-      this.durationOfOneNote = (60000 / this.bpm) * AppConfig.SEQ_STEP_QUARTER;
-      this.durationOfLoop = this.durationOfOneNote * AppConfig.SEQ_STEPS;
-    }
+    this.applyBpm(sab.getBpm());
     this.clockSkew = sab.getSlot(16);
     this.syncToBeat = sab.getSlot(17) > 0.5;
     if (this.syncToBeat) this.externalClock = false;
+    if (sab.getSlot(18) < 0.5) return;
     for (let i = 0; i < AppConfig.SEQ_STEPS; i++) {
-      let v = sab.getSlot(i);
-      if (v === v) this.sequence[i] = v;
+      this.sequence[i] = sab.getSlot(i);
     }
   }
 
@@ -70,20 +74,24 @@ class SequencerWorklet extends AudioWorkletProcessor {
 
   process(inputs, outputs, parameters) {
     this.readControl();
-    let seq = this.sequence;
     if (!this.durationOfLoop) return true;
+    let seq = this.sequence;
     let outputChannel = outputs[0] && outputs[0][0];
     let gateChannel = outputs[1] && outputs[1][0];
     let hzChannel = outputs[2] && outputs[2][0];
     let trigChannel = outputs[3] && outputs[3][0];
-    if (!outputChannel) return true;
-    let n = outputChannel.length;
+    let n =
+      (outputChannel && outputChannel.length) ||
+      (gateChannel && gateChannel.length) ||
+      (hzChannel && hzChannel.length) ||
+      (trigChannel && trigChannel.length) ||
+      128;
     let clockChannel = inputs[0] && inputs[0][0];
 
-    if (clockChannel && !this.syncToBeat) {
+    if (clockChannel && clockChannel.length && !this.syncToBeat) {
       for (let i = 0; i < clockChannel.length; ++i) {
         let sample = clockChannel[i];
-        if (sample > this.prevClockSample + AppConfig.CLOCK_EDGE_DELTA) {
+        if (AppConfig.isRising(this.prevClockSample, sample)) {
           if (!this.externalClock) {
             this.externalClock = true;
             this.currentNote = 0;
@@ -112,13 +120,13 @@ class SequencerWorklet extends AudioWorkletProcessor {
     let base0 = baseArr[0];
     let aRate = baseArr.length > 1;
     if (this.pulseRemaining <= 0 && !aRate) {
-      outputChannel.fill(pitch);
+      if (outputChannel) outputChannel.fill(pitch);
       if (hzChannel) hzChannel.fill(pitch * base0);
       if (gateChannel) gateChannel.fill(gate);
       if (trigChannel) trigChannel.fill(0);
     } else {
       for (let i = 0; i < n; ++i) {
-        outputChannel[i] = pitch;
+        if (outputChannel) outputChannel[i] = pitch;
         if (hzChannel) hzChannel[i] = pitch * (aRate ? baseArr[i] : base0);
         if (gateChannel) gateChannel[i] = gate;
         if (trigChannel) {

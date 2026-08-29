@@ -19,14 +19,7 @@ class TriggerWorklet extends AudioWorkletProcessor {
       let prev = lastVal;
       for (let i = 0; i < inputChannel.length; i++) {
         let current = inputChannel[i];
-        if (
-          !fired &&
-          ((current > 0 && prev <= 0) ||
-            (current < 0 && prev >= 0) ||
-            (current == 0 && prev != 0))
-        ) {
-          fired = true;
-        }
+        if (!fired && AppConfig.isRising(prev, current)) fired = true;
         prev = current;
       }
       if (fired) {

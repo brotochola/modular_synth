@@ -43,7 +43,7 @@ class PolySequencer extends Component {
     this.syncCheck.onchange = () => {
       this.syncToBeat = this.syncCheck.checked;
       this.toggleWrap.classList.toggle("on", this.syncToBeat);
-      if (this.node) this.node.port.postMessage({ syncToBeat: this.syncToBeat });
+      this.writeSabControl();
       this.quickSave();
     };
     this.toggleWrap.classList.toggle("on", !!this.syncToBeat);
@@ -242,8 +242,13 @@ class PolySequencer extends Component {
           {
             numberOfInputs: 1,
             numberOfOutputs: 8,
+            outputChannelCount: [1, 1, 1, 1, 1, 1, 1, 1],
           },
         );
+        this.silentGain = this.app.actx.createGain();
+        this.silentGain.gain.value = 0;
+        this.node.connect(this.silentGain);
+        this.silentGain.connect(this.app.actx.destination);
 
         this.node.onprocessorerror = (e) => {
           console.error(e);
