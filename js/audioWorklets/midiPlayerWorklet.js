@@ -13,6 +13,7 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "midi-player");
     this.events = [];
     this.eventIndex = 0;
     this.tick = 0;

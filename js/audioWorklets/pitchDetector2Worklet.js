@@ -1,6 +1,7 @@
 class PitchDetector2Worklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "pitch-worklet-2");
     console.log(this.context, context, BiquadFilterNode)
     this.FFTJS = (function (t) {
       function r(e) {

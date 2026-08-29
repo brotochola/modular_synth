@@ -10,6 +10,7 @@ class ShaderUniformsWorklet extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "shader-uniforms");
     this.tick = 0;
   }
 

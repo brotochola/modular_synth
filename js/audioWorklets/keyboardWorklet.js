@@ -1,6 +1,7 @@
 class KeyboardWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "keyboard");
     this.status = [];
     this.port.onmessage = (e) => {
       if (e.data.type == "down") {

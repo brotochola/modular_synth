@@ -1,6 +1,7 @@
 class CustomProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "custom-proc");
     this.port.onmessage = (e) => {
       this.formula = e.data;
       this.handleFormulaUpdate(e.data);

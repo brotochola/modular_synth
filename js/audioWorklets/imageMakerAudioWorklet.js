@@ -1,6 +1,7 @@
 class imageMakerAudioWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "image-maker");
     this.width = 215;
     this.height = 121;
     this.totalPixels = this.width * this.height;

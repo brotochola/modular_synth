@@ -1,6 +1,7 @@
 class YinProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "yin");
     this.sampleRate = sampleRate;
     this.threshold = 0.1; // Threshold for YIN algorithm
     this.buffer = [];

@@ -1,4 +1,9 @@
 class WhiteNoiseProcessor extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "white-noise");
+  }
+
   // When constructor() undefined, the default constructor will be implicitly
   // used.
 

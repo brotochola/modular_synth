@@ -11,6 +11,7 @@ class MultiplexorWorklet extends AudioWorkletProcessor {
   }
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "multiplexor");
     this.which = 0;
     this.lastWhich = -1;
   }

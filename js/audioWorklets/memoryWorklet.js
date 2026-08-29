@@ -1,6 +1,7 @@
 class MemoryWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "memory");
     this.val = 0;
     this.port.onmessage = (e) => {
       //   this.port.postMessage("UPDATED data from joystick " + this.dataFromJoystick);

@@ -177,28 +177,40 @@ app .mainContainer {
 
 .historyPanel {
   position: fixed;
-  bottom: 0;
+  top: calc(44px + env(safe-area-inset-top, 0px));
   right: 8px;
-  transform: translateY(110%);
   width: 280px;
   z-index: 2;
   pointer-events: none;
-  transition: transform 250ms ease-out;
-  padding-bottom: env(safe-area-inset-bottom, 0px);
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 200ms ease-out,
+    opacity 200ms ease-out,
+    visibility 200ms;
 }
 .historyPanel.visible {
   transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
   pointer-events: all;
 }
-.cablePanel {
+.cablePanel,
+.perfPanel {
   position: fixed;
-  bottom: 0;
+  top: calc(44px + env(safe-area-inset-top, 0px));
   right: 8px;
-  transform: translateY(110%);
-  width: 260px;
+  width: 280px;
   z-index: 2;
   pointer-events: none;
-  transition: transform 250ms ease-out;
+  transform: translateY(-10px);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 200ms ease-out,
+    opacity 200ms ease-out,
+    visibility 200ms;
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -207,12 +219,16 @@ app .mainContainer {
   border-radius: var(--radius);
   backdrop-filter: blur(10px);
   padding: 10px;
-  padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px));
   color: var(--ink);
   font-size: 12px;
+  max-height: min(60vh, 420px);
+  box-sizing: border-box;
 }
-.cablePanel.visible {
+.cablePanel.visible,
+.perfPanel.visible {
   transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
   pointer-events: all;
 }
 .cablePanel label {
@@ -230,6 +246,81 @@ app .mainContainer {
   width: 100%;
   accent-color: var(--accent);
   height: 6px;
+}
+.perfHead {
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0.9;
+}
+.perfSummary {
+  line-height: 1.45;
+  opacity: 0.95;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--panel-edge);
+}
+.perfSummary .warn {
+  color: var(--danger);
+}
+.perfList {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 0;
+}
+.perfHint {
+  margin-top: 6px;
+  font-size: 10px;
+  opacity: 0.65;
+  line-height: 1.35;
+}
+.perfHint.warn {
+  color: var(--danger);
+  opacity: 0.95;
+}
+.perfRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) 52px 52px 44px;
+  gap: 6px;
+  align-items: baseline;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(10, 42, 10, 0.8);
+  font-variant-numeric: tabular-nums;
+}
+.perfRowHead {
+  opacity: 0.55;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  border-bottom-color: var(--panel-edge);
+}
+.perfRow:last-child {
+  border-bottom: none;
+}
+.perfRow .name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.perfRow .ms {
+  color: var(--accent);
+  opacity: 0.95;
+  text-align: right;
+}
+.perfRow .n {
+  opacity: 0.75;
+  font-size: 11px;
+  text-align: right;
+}
+.perfRow .dim {
+  opacity: 0.45;
+  color: var(--ink);
+}
+.perfEmpty {
+  opacity: 0.55;
+  padding: 8px 0;
 }
 .historyList {
   overflow-y: auto;
@@ -1627,7 +1718,8 @@ footer connectedUsers {
   letter-spacing: 0.3px;
 }
 
-footer .sysStatus {
+footer .sysStatus,
+footer button.openPerf {
   font-size: 11px;
   line-height: 22px;
   margin-right: 8px;
@@ -1637,14 +1729,31 @@ footer .sysStatus {
   opacity: 0.9;
 }
 
-footer .sysStatus.dim {
+footer .sysStatus.dim,
+footer button.openPerf.dim {
   opacity: 0.45;
   color: var(--ink);
 }
 
-footer .sysStatus.warn {
+footer .sysStatus.warn,
+footer button.openPerf.warn {
   color: var(--danger);
   opacity: 1;
+}
+
+footer button.openPerf {
+  background: transparent;
+  border: 1px solid transparent;
+  box-shadow: none;
+  height: auto;
+  min-height: 26px;
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+footer button.openPerf:hover {
+  border-color: var(--panel-edge);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 footer button,

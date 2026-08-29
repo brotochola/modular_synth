@@ -1,6 +1,7 @@
 class JoystickWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "joystick");
     this.dataFromJoystick = {};
     this.port.onmessage = (e) => {
       this.dataFromJoystick = e.data;

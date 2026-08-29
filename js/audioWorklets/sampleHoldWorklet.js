@@ -1,6 +1,7 @@
 class SampleHoldWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "sample-hold");
     this.held = 0;
     this.prevClock = 0;
   }

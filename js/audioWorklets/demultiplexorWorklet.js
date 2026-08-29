@@ -12,6 +12,7 @@ class DemultiplexorWorklet extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "demultiplexor");
     this.which = 0;
     this.lastWhich = -1;
   }

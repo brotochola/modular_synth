@@ -30,6 +30,7 @@ function rearrangeArrays(inputArray, outputArray) {
 class PolyphonicKeyboardWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "polyphonic-keyboard");
     this.notesOn = {};
     this.arrayOfFreqs = [];
     this.maxVoices = 8;

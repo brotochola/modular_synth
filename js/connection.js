@@ -26,8 +26,7 @@ class Connection {
           )
         : this.from.node.disconnect(where.whereToConnect, this.numberOfOutput);
     } catch (e) {
-      // debugger;
-      console.log(e);
+      // Already disconnected (e.g. full node.disconnect earlier) — ignore.
     }
     this.to.inputElements[this.audioParam].button.classList.remove("connected");
     this.from.connections = this.from.connections.filter(

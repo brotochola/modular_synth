@@ -11,6 +11,7 @@ class Component {
     this.retryCounter = 0;
     this.connections = [];
     this.running = false;
+    this.audioProfileKeys = [];
     this.id = serializedData?.id
       ? serializedData.id
       : this.type.toLowerCase().substring(0, 7) + "_" + makeid(8);
@@ -282,6 +283,7 @@ class Component {
             numberOfOutputs: 0,
           },
         );
+        this.addAudioProfileKey("custom-params");
 
         this.customAudioParamsWorkletNode.onprocessorerror = (e) => {
           console.error(e);
@@ -306,6 +308,7 @@ class Component {
           numberOfOutputs: 0,
         },
       );
+      this.addAudioProfileKey("trigger");
 
       this.customAudioTriggersWorkletNode.onprocessorerror = (e) => {
         console.error(e);
@@ -552,10 +555,32 @@ class Component {
     );
   }
 
+  disposeAudio() {
+    let nodes = [
+      this.node,
+      this.customAudioParamsWorkletNode,
+      this.customAudioTriggersWorkletNode,
+      this.silentGain,
+    ];
+    for (let n of nodes) {
+      if (!n || typeof n.disconnect !== "function") continue;
+      try {
+        n.disconnect();
+      } catch (e) {}
+    }
+  }
+
+  addAudioProfileKey(key) {
+    if (!key) return;
+    if (!this.audioProfileKeys) this.audioProfileKeys = [];
+    if (this.audioProfileKeys.indexOf(key) < 0) this.audioProfileKeys.push(key);
+  }
+
   remove() {
     if (this.unsubscribeToFireStore instanceof Function)
       this.unsubscribeToFireStore();
     this.app.removeAllConnections(this);
+    this.disposeAudio();
     this.container.parentElement.removeChild(this.container);
 
     this.app.components = this.app.components.filter((c) => c != this);

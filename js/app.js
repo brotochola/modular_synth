@@ -8,6 +8,44 @@ class App {
     beadRadius: 1.25,
     cableAlpha: 0.5,
   };
+  // static name → AudioProfile attach keys (main worklet). custom-params/trigger vía Component.
+  static PERF_PROFILE_BY_TITLE = {
+    "Math Processor": ["custom-proc"],
+    ADSR: ["adsr"],
+    Sequencer: ["sequencer"],
+    "Poly Seq": ["poly-sequencer"],
+    Mixer: ["mixer"],
+    Noise: ["white-noise"],
+    Mulberry32: ["mulberry32"],
+    "808 Kick": ["kick808"],
+    Scanline: ["scanline"],
+    "Image Maker": ["image-maker"],
+    "Image Player": ["image-player"],
+    Webcam: ["webcam-player"],
+    Distortion: ["distortion"],
+    MIDI: ["midi"],
+    "MIDI Player": ["midi-player"],
+    BPM: ["bpm"],
+    Mouse: ["mouse"],
+    Keyboard: ["keyboard"],
+    "Polyphonic Keyboard": ["polyphonic-keyboard"],
+    Gamepad: ["joystick"],
+    Phone: ["phone-sensors"],
+    "Pitch Detector": ["yin"],
+    "Peak Detector": ["peak-detector"],
+    "Sample & Hold": ["sample-hold"],
+    lerp: ["lerp"],
+    Counter: ["counter"],
+    Memory: ["memory"],
+    Multiplexor: ["multiplexor"],
+    Demultiplexor: ["demultiplexor"],
+    "Seq Switch": ["sequential-switch"],
+    "Seq Demux": ["sequential-demux"],
+    "Pad Sampler": ["pad-sampler"],
+    "Number Display": ["number-display"],
+    Shader: ["shader-uniforms"],
+    "Canvas Plotter": ["canvas-plotter"],
+  };
   // analog patch-cable set: saturated, similar lightness, readable on dark rack
   static CABLE_COLORS = [
     "#ef5350",
@@ -86,6 +124,12 @@ class App {
     this._sysFps = 60;
     this._sysFrameMs = 16;
     this._sysHudAt = 0;
+    this._audioCpu = null;
+    this._audioPct = 0;
+    this._audioLate = false;
+    this._audioProfileNode = null;
+    this._audioProfileMute = null;
+    this._profilerModuleUrl = "js/audioWorklets/_audioProfile.js?v=3";
     this._cableMouse = { x: 0, y: 0 };
     this._cableMouseClient = { x: 0, y: 0 };
     this.createMainContainer(elem);
@@ -147,6 +191,7 @@ class App {
           this.buttonsContainer.classList.toggle("visible");
           if (this.historyPanel) this.historyPanel.classList.remove("visible");
           if (this.cablePanel) this.cablePanel.classList.remove("visible");
+          if (this.perfPanel) this.perfPanel.classList.remove("visible");
         }
       },
       false,
@@ -156,6 +201,9 @@ class App {
 
     this.buttonsContainer = document.querySelector(".buttons");
     this.bindCablePanel();
+    this.perfPanel = document.querySelector(".perfPanel");
+    this.perfSummaryEl = document.querySelector(".perfSummary");
+    this.perfListEl = document.querySelector(".perfList");
 
     this.listOfConnectedUsersElement = document.querySelector("connectedUsers");
 
@@ -361,6 +409,7 @@ class App {
       if (this.admin && !fromRemote && this.beatOriginMs == null) {
         this.beatOriginMs = this.computeBeatOriginMs();
       }
+      this.ensureAudioProfile();
       let resumeResult = this.actx.resume();
       if (resumeResult && resumeResult.then) {
         resumeResult.catch(() => {
@@ -1239,15 +1288,275 @@ class App {
     if (!this.sysStatusEl) return;
     let state = (this.actx && this.actx.state) || "closed";
     let fps = Math.round(this._sysFps || 0);
-    let load = Math.min(
+    let uiLoad = Math.min(
       100,
       Math.round(((this._sysFrameMs || 0) / 16.67) * 100),
     );
+    let audioPct = Math.min(100, Math.round(this._audioPct || 0));
     let n = (this.components && this.components.length) || 0;
+    let warn =
+      audioPct >= 70 || this._audioLate || uiLoad >= 80 || fps < 30;
     this.sysStatusEl.textContent =
-      "audio " + state + " · " + fps + " fps · " + load + "% · " + n + "n";
-    this.sysStatusEl.classList.toggle("warn", load >= 80 || fps < 30);
+      "a " + audioPct + "% · ui " + uiLoad + "% · " + n + "n";
+    this.sysStatusEl.classList.toggle("warn", warn);
     this.sysStatusEl.classList.toggle("dim", state !== "running");
+    this.updatePerfPanel({ state, fps, uiLoad, audioPct, n, warn });
+  }
+
+  audioCpuRows() {
+    return this.buildPerfRows();
+  }
+
+  perfDisplayNames() {
+    let comps = this.components || [];
+    let counts = new Map();
+    let indexes = new Map();
+    for (let c of comps) {
+      let base = (c && c.constructor && c.constructor.name) || "Module";
+      counts.set(base, (counts.get(base) || 0) + 1);
+    }
+    let names = new Map();
+    for (let c of comps) {
+      let base = (c && c.constructor && c.constructor.name) || "Module";
+      let total = counts.get(base) || 1;
+      if (total <= 1) {
+        names.set(c, base);
+        continue;
+      }
+      let i = (indexes.get(base) || 0) + 1;
+      indexes.set(base, i);
+      names.set(c, base + " " + i);
+    }
+    return names;
+  }
+
+  perfKeysFor(comp) {
+    let keys = [];
+    let push = (k) => {
+      if (k && keys.indexOf(k) < 0) keys.push(k);
+    };
+    let title = (comp && comp.constructor && comp.constructor.name) || "";
+    let mapped = App.PERF_PROFILE_BY_TITLE[title];
+    if (mapped) for (let k of mapped) push(k);
+    if (comp && Array.isArray(comp.audioProfileKeys)) {
+      for (let k of comp.audioProfileKeys) push(k);
+    }
+    return keys;
+  }
+
+  mergeProfileStats(keys, by) {
+    if (!by || !keys.length) return null;
+    let sum = 0;
+    let max = 0;
+    let n = 0;
+    let hit = false;
+    for (let k of keys) {
+      let s = by[k];
+      if (!s) continue;
+      hit = true;
+      let nn = s.n || 0;
+      sum += (s.avg || 0) * nn;
+      n += nn;
+      if ((s.max || 0) > max) max = s.max || 0;
+    }
+    if (!hit) return { avg: 0, max: 0, n: 0, native: false };
+    return {
+      avg: n ? sum / n : 0,
+      max,
+      n,
+      native: false,
+    };
+  }
+
+  buildPerfRows() {
+    let names = this.perfDisplayNames();
+    let by = (this._audioCpu && this._audioCpu.by) || null;
+    let quantumMs =
+      (this._audioCpu && this._audioCpu.quantumMs) ||
+      (128 / ((this.actx && this.actx.sampleRate) || 48000)) * 1000;
+    let rows = [];
+    for (let c of this.components || []) {
+      let keys = this.perfKeysFor(c);
+      let stats = this.mergeProfileStats(keys, by);
+      if (!keys.length) {
+        rows.push({
+          label: names.get(c) || "Module",
+          native: true,
+          avg: 0,
+          max: 0,
+          n: 0,
+          pctQ: 0,
+        });
+        continue;
+      }
+      let avg = stats ? stats.avg : 0;
+      let max = stats ? stats.max : 0;
+      let n = stats ? stats.n : 0;
+      rows.push({
+        label: names.get(c) || "Module",
+        native: false,
+        avg,
+        max,
+        n,
+        pctQ: quantumMs > 0 ? (avg / quantumMs) * 100 : 0,
+      });
+    }
+    rows.sort((a, b) =>
+      String(a.label).localeCompare(String(b.label), undefined, {
+        numeric: true,
+        sensitivity: "base",
+      }),
+    );
+    return rows;
+  }
+
+  updatePerfPanel(sum) {
+    if (!this.perfPanel) return;
+    sum = sum || {};
+    let state = sum.state != null ? sum.state : (this.actx && this.actx.state) || "closed";
+    let fps =
+      sum.fps != null ? sum.fps : Math.round(this._sysFps || 0);
+    let uiLoad =
+      sum.uiLoad != null
+        ? sum.uiLoad
+        : Math.min(100, Math.round(((this._sysFrameMs || 0) / 16.67) * 100));
+    let audioPct =
+      sum.audioPct != null
+        ? sum.audioPct
+        : Math.min(100, Math.round(this._audioPct || 0));
+    let n =
+      sum.n != null
+        ? sum.n
+        : (this.components && this.components.length) || 0;
+    let warn =
+      sum.warn != null
+        ? sum.warn
+        : audioPct >= 70 || this._audioLate || uiLoad >= 80 || fps < 30;
+    let q =
+      this._audioCpu && this._audioCpu.quantumMs
+        ? this._audioCpu.quantumMs.toFixed(2)
+        : "—";
+    let hires = !this._audioCpu || this._audioCpu.hires !== false;
+
+    if (this.perfSummaryEl) {
+      let late = this._audioLate ? ' · <span class="warn">late</span>' : "";
+      let coarse = !hires
+        ? '<div class="perfHint warn">timer coarse (~1ms) — max puede saltar a 1.00</div>'
+        : "";
+      this.perfSummaryEl.innerHTML =
+        "audio <b>" +
+        state +
+        "</b><br>" +
+        "worklets <b" +
+        (audioPct >= 70 ? ' class="warn"' : "") +
+        ">" +
+        audioPct +
+        "%</b> · ui <b" +
+        (uiLoad >= 80 ? ' class="warn"' : "") +
+        ">" +
+        uiLoad +
+        "%</b> · " +
+        fps +
+        " fps<br>" +
+        "quantum " +
+        q +
+        " ms · " +
+        n +
+        " modules" +
+        late +
+        '<div class="perfHint">ms = CPU por process() · %q = avg / quantum</div>' +
+        coarse;
+      this.perfSummaryEl.classList.toggle("warn", !!warn);
+    }
+
+    if (!this.perfListEl) return;
+    let rows = this.buildPerfRows();
+    if (!rows.length) {
+      this.perfListEl.innerHTML =
+        '<div class="perfEmpty">No modules on patch.</div>';
+      return;
+    }
+    let html =
+      '<div class="perfRow perfRowHead"><span class="name">module</span><span class="ms">max</span><span class="ms">avg</span><span class="n">%q</span></div>';
+    for (let r of rows) {
+      if (r.native) {
+        html +=
+          '<div class="perfRow"><span class="name" title="' +
+          r.label +
+          '">' +
+          r.label +
+          '</span><span class="ms dim">native</span><span class="ms dim">—</span><span class="n dim">—</span></div>';
+        continue;
+      }
+      html +=
+        '<div class="perfRow"><span class="name" title="' +
+        r.label +
+        '">' +
+        r.label +
+        '</span><span class="ms">' +
+        r.max.toFixed(2) +
+        '</span><span class="ms">' +
+        r.avg.toFixed(2) +
+        '</span><span class="n">' +
+        r.pctQ.toFixed(1) +
+        "%</span></div>";
+    }
+    this.perfListEl.innerHTML = html;
+  }
+
+  closeFooterDrops(except) {
+    except = except || "";
+    if (except !== "buttons" && this.buttonsContainer)
+      this.buttonsContainer.classList.remove("visible");
+    if (except !== "history" && this.historyPanel)
+      this.historyPanel.classList.remove("visible");
+    if (except !== "cables" && this.cablePanel)
+      this.cablePanel.classList.remove("visible");
+    if (except !== "perf" && this.perfPanel)
+      this.perfPanel.classList.remove("visible");
+  }
+
+  openPerf() {
+    if (!this.perfPanel) return;
+    let opening = !this.perfPanel.classList.contains("visible");
+    this.closeFooterDrops(opening ? "perf" : "");
+    this.perfPanel.classList.toggle("visible", opening);
+    if (opening) this.updatePerfPanel();
+  }
+
+  ensureAudioProfile() {
+    if (this._audioProfileNode) return;
+    let url = this._profilerModuleUrl;
+    this.loadWorklet(url)
+      .then(() => {
+        if (this._audioProfileNode || !this.actx) return;
+        this._audioProfileNode = new AudioWorkletNode(
+          this.actx,
+          "audio-profile-reporter",
+          { numberOfInputs: 0, numberOfOutputs: 1, outputChannelCount: [1] },
+        );
+        this._audioProfileMute = this.actx.createGain();
+        this._audioProfileMute.gain.value = 0;
+        this._audioProfileNode.connect(this._audioProfileMute);
+        this._audioProfileMute.connect(this.actx.destination);
+        this._audioProfileNode.port.onmessage = (e) => {
+          this.onAudioProfileStats(e.data);
+        };
+        this._audioProfileNode.onprocessorerror = (e) => {
+          console.error(e);
+        };
+      })
+      .catch((e) => console.error(e));
+  }
+
+  onAudioProfileStats(data) {
+    if (!data) return;
+    this._audioCpu = data;
+    this._audioLate = !!data.late;
+    let windowMs = data.windowMs > 0 ? data.windowMs : 250;
+    let inst = Math.min(100, (data.totalMs / windowMs) * 100);
+    this._audioPct += (inst - this._audioPct) * 0.25;
+    this.updateSysStatus();
   }
   sizeCableCanvas() {
     let w = this.appEl.clientWidth || 1;
@@ -1611,10 +1920,19 @@ class App {
   }
 
   loadWorklet(url) {
-    if (!this._workletModules[url]) {
-      this._workletModules[url] = this.actx.audioWorklet.addModule(url);
+    let profilerUrl = this._profilerModuleUrl;
+    if (!this._workletModules[profilerUrl]) {
+      this._workletModules[profilerUrl] =
+        this.actx.audioWorklet.addModule(profilerUrl);
     }
-    return this._workletModules[url];
+    let ready = this._workletModules[profilerUrl];
+    if (url === profilerUrl) return ready;
+    return ready.then(() => {
+      if (!this._workletModules[url]) {
+        this._workletModules[url] = this.actx.audioWorklet.addModule(url);
+      }
+      return this._workletModules[url];
+    });
   }
 
   getNextBeat() {
@@ -1651,15 +1969,13 @@ class App {
       if (e.button != 0) return;
       if (
         e.target.closest(
-          "component, footer, .buttons, .historyPanel, .messageBox",
+          "component, footer, .buttons, .historyPanel, .cablePanel, .perfPanel, .messageBox",
         )
       )
         return;
       this.makeAllComponentsInactive();
       this.clearCableGhost();
-      if (this.buttonsContainer)
-        this.buttonsContainer.classList.remove("visible");
-      if (this.cablePanel) this.cablePanel.classList.remove("visible");
+      this.closeFooterDrops();
       this._panning = true;
       this._panStartX = e.clientX;
       this._panStartY = e.clientY;
@@ -2273,6 +2589,7 @@ class App {
     }
     // Guest under admin: click is autoplay gesture only.
     if (this.playing) {
+      this.ensureAudioProfile();
       let resumeResult = this.actx.resume();
       if (resumeResult && resumeResult.then) {
         resumeResult.catch(() => {
@@ -2287,30 +2604,25 @@ class App {
   }
 
   openButtons() {
-    this.buttonsContainer.classList.toggle("visible");
-    if (this.historyPanel) this.historyPanel.classList.remove("visible");
-    if (this.cablePanel) this.cablePanel.classList.remove("visible");
+    if (!this.buttonsContainer) return;
+    let opening = !this.buttonsContainer.classList.contains("visible");
+    this.closeFooterDrops(opening ? "buttons" : "");
+    this.buttonsContainer.classList.toggle("visible", opening);
   }
 
   openHistory() {
     if (!this.historyPanel) return;
-    this.historyPanel.classList.toggle("visible");
-    if (this.historyPanel.classList.contains("visible")) {
-      if (this.buttonsContainer)
-        this.buttonsContainer.classList.remove("visible");
-      if (this.cablePanel) this.cablePanel.classList.remove("visible");
-      this.renderHistoryPanel();
-    }
+    let opening = !this.historyPanel.classList.contains("visible");
+    this.closeFooterDrops(opening ? "history" : "");
+    this.historyPanel.classList.toggle("visible", opening);
+    if (opening) this.renderHistoryPanel();
   }
 
   openCables() {
     if (!this.cablePanel) return;
-    this.cablePanel.classList.toggle("visible");
-    if (this.cablePanel.classList.contains("visible")) {
-      if (this.buttonsContainer)
-        this.buttonsContainer.classList.remove("visible");
-      if (this.historyPanel) this.historyPanel.classList.remove("visible");
-    }
+    let opening = !this.cablePanel.classList.contains("visible");
+    this.closeFooterDrops(opening ? "cables" : "");
+    this.cablePanel.classList.toggle("visible", opening);
   }
 
   applyCableParams(cables) {

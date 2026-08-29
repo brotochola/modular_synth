@@ -1,6 +1,7 @@
 class customAudioParamsWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "custom-params");
     this.prevValues = [];
     this.reset = false;
     this.port.onmessage = (e) => {

@@ -13,6 +13,7 @@ class SequencerWorklet extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "sequencer");
     this.sequence = null;
     this.bpm = 120;
     this.durationOfOneNote = 0;

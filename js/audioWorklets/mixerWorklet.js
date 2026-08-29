@@ -11,6 +11,7 @@ class MixerWorklet extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "mixer");
     this.lastPostTime = 0;
     this.lastPosted = null;
   }

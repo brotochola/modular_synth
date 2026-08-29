@@ -1,6 +1,7 @@
 class DistortionWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "distortion");
     this.amount=0
     this.port.onmessage = (e) => {
       if (e.data.distortion) {

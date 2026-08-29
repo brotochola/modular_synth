@@ -13,6 +13,7 @@ class Mulberry32Worklet extends AudioWorkletProcessor {
 
   constructor(options) {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "mulberry32");
     this.bipolar = !!(
       options &&
       options.processorOptions &&

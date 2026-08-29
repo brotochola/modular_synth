@@ -1,6 +1,7 @@
 class SequentialSwitchWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "sequential-switch");
     this.step = 0;
     this.steps = 4;
     this.prevClock = 0;

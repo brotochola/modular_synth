@@ -41,6 +41,7 @@ class Kick808Worklet extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "kick808");
     this.prevTrig = 0;
     this.phase = 0;
     this.ampEnv = 0;

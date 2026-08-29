@@ -20,6 +20,7 @@ class ScanlineWorklet extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "scanline");
     this.width = 0;
     this.height = 0;
     this.luma = null;

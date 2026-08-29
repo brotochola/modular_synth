@@ -1,6 +1,7 @@
 class MouseWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "mouse");
     this.x = 0;
     this.y = 0;
     this.port.onmessage = (e) => {

@@ -1,6 +1,7 @@
 class PeakDetectorWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "peak-detector");
     this.outputVal = 0;
     this.port.onmessage = (e) => {
       if (e.data == "reset") {        

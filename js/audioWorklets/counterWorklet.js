@@ -1,6 +1,7 @@
 class CounterWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "counter");
     this.val = 0;
     this.port.onmessage = (e) => {
       this.val = e.data.val;

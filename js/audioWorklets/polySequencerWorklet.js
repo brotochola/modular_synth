@@ -1,6 +1,7 @@
 class PolySequencerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "poly-sequencer");
     this.sequence = null;
     this.bpm = 120;
     this.durationOfOneNote = 0;

@@ -39,6 +39,7 @@ function rearrangeArrays(inputArray, outputArray) {
 class MidiWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "midi");
     this.arrayOfFreqs = [];
     this.note = 0;
     this.freq = 0;

@@ -13,6 +13,7 @@ class LerpProcessor extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "lerp");
     this.lastValue = 0;
   }
 

@@ -1,6 +1,7 @@
 class PadSamplerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "pad-sampler");
     this.audioBuffer = new Float32Array(0);
     this.port.onmessage = (e) => {
       let src = e.data && e.data.audioBuffer;

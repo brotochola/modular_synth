@@ -124,7 +124,7 @@
     <footer>
         <button onclick="app.openButtons()" class="openButtons">+ Modules</button>
         <connectedUsers></connectedUsers>
-        <span class="sysStatus" title="Audio + UI load"></span>
+        <button type="button" onclick="app.openPerf()" class="openPerf sysStatus" title="Open performance">audio …</button>
 
 
         <!-- <button onclick="app.save()">💾 save</button> -->
@@ -286,6 +286,11 @@
         <label>Alpha <span data-val="cableAlpha">0.5</span>
             <input type="range" name="cableAlpha" min="0" max="1" step="0.01" value="0.5">
         </label>
+    </div>
+    <div class="perfPanel">
+        <div class="perfHead">Performance</div>
+        <div class="perfSummary"></div>
+        <div class="perfList"></div>
     </div>
     <app></app>
     <script>

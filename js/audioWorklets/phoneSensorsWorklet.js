@@ -1,6 +1,7 @@
 class PhoneSensorsWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "phone-sensors");
     this.values = [0, 0, 0, 0, 0, 0, 0];
     this.port.onmessage = (e) => {
       let v = e.data && e.data.values;

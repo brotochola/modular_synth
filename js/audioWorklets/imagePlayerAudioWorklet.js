@@ -1,6 +1,7 @@
 class ImagePlayerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "image-player");
     this.pixelCount = 0;
     this.pixels = null;
     this.pixelLen = 0;

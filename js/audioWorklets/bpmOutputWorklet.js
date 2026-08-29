@@ -1,6 +1,7 @@
 class BpmOutWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "bpm");
     this.bpm = 120;
     this.rate = 1;
     this.count = 0;

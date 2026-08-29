@@ -1,6 +1,7 @@
 class AdsrProcessor extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "adsr");
     this._lasttrig = 0;
     this._trig = 0;
     this._phase = 0;

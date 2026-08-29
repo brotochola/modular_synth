@@ -1,6 +1,7 @@
 class SequentialDemuxWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "sequential-demux");
     this.step = 0;
     this.steps = 4;
     this.prevClock = 0;

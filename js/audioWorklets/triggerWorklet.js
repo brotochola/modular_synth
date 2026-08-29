@@ -1,6 +1,7 @@
 class TriggerWorklet extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "trigger");
     this.prevValues = [];
   }
 

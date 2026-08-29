@@ -27,6 +27,7 @@ class CanvasPlotterWorklet extends AudioWorkletProcessor {
 
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "canvas-plotter");
     this.lastProcessTime = 0;
     this.sx = 0;
     this.sy = 0;

@@ -1,6 +1,7 @@
 class NumberDisplay extends AudioWorkletProcessor {
   constructor() {
     super();
+    if (globalThis.AudioProfile) AudioProfile.attach(this, "number-display");
     this.lastPosted = NaN;
     this.lastPostTime = 0;
   }
