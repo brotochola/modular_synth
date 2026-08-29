@@ -34,6 +34,7 @@ class KeyboardComponent extends Component {
     ];
     this.letters = this.outputLabels;
     this.valuesToSave = ["sourceUserID"];
+    this.hideOutputActivityLeds = true;
     this.putEvents();
     this.createSeatSelect();
     this.createNode();

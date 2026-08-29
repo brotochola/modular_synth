@@ -3,15 +3,18 @@ class EnvelopeGenerator extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "ADSR envelope. While trigger (gate) stays high it runs attack then decay to sustain; when trigger falls it releases. Patch trigger from keys, MIDI, sequencers or BPM. Shape with attack, decay, sustain, release and attackcurve; output modulates amp, filter, etc.";
+      "ADSR envelope. While gate stays high it runs attack then decay to sustain; when gate falls it releases. Patch gate from keys, MIDI, sequencers or BPM. Shape with attack, decay, sustain, release and attackcurve; output modulates amp, filter, etc.";
+    this.jackKinds = { gate: "gate" };
     this.createNode();
   }
 
   noteOn() {
-    this.node.parameters.get("trigger").value = 1;
+    let p = this.node && this.node.parameters && this.node.parameters.get("gate");
+    if (p) p.value = 1;
   }
   noteOff() {
-    this.node.parameters.get("trigger").value = 0;
+    let p = this.node && this.node.parameters && this.node.parameters.get("gate");
+    if (p) p.value = 0;
   }
 
   createNode() {
@@ -28,6 +31,23 @@ class EnvelopeGenerator extends Component {
           release: 0.8,
         },
       });
+      this.applyGateCompat();
     });
+  }
+
+  /** Old patches saved audioParams.trigger — copy once onto gate. */
+  applyGateCompat() {
+    let ap = (this.serializedData || {}).audioParams;
+    if (!ap || !this.node || !this.node.parameters) return;
+    let gate = this.node.parameters.get("gate");
+    if (!gate) return;
+    if (ap.gate == null && ap.trigger != null) {
+      gate.value = ap.trigger;
+    }
+  }
+
+  loadFromSerializedData(cb) {
+    super.loadFromSerializedData(cb);
+    this.applyGateCompat();
   }
 }

@@ -178,11 +178,18 @@ class Component {
   }
   putLabels() {
     if (!(this.outputLabels || []).length) return;
-    let arr = Array.from(this.container.querySelectorAll(".outputButton"));
+    let rows = Array.from(this.container.querySelectorAll(".outputJackRow"));
+    let buttons = Array.from(this.container.querySelectorAll(".outputButton"));
     for (let i = 0; i < this.outputLabels.length; i++) {
-      let elem = arr[i];
-
-      elem.style.setProperty("--label", "'" + this.outputLabels[i] + "'");
+      let text = this.outputLabels[i];
+      let lab =
+        rows[i] && rows[i].querySelector(".jack-label");
+      if (lab) lab.textContent = text;
+      let elem = buttons[i];
+      if (elem) {
+        elem.title = text;
+        elem.style.setProperty("--label", "'" + text + "'");
+      }
     }
   }
   getOutputElements() {
@@ -326,7 +333,177 @@ class Component {
   /** Channel index on jackActivityNode, or -1 */
   jackActivityChannel(audioParam) {
     if (!audioParam || !this.jackActivityNames) return -1;
-    return this.jackActivityNames.indexOf(audioParam);
+    let name = this.resolveJackName(audioParam);
+    return this.jackActivityNames.indexOf(name);
+  }
+
+  /** Old ADSR cables used "trigger"; param is now "gate". */
+  resolveJackName(name) {
+    if (
+      name == "trigger" &&
+      this.node &&
+      this.node.parameters &&
+      this.node.parameters.get("gate") &&
+      !this.node.parameters.get("trigger")
+    ) {
+      return "gate";
+    }
+    return name;
+  }
+
+  getJackKind(name) {
+    name = this.resolveJackName(name);
+    if (this.jackKinds && this.jackKinds[name]) return this.jackKinds[name];
+    if ((this.customAudioTriggers || []).includes(name)) return "trig";
+    if (name == "gate") return "gate";
+    if (
+      name == "trigger" ||
+      name == "clock" ||
+      name == "reset" ||
+      name == "stop"
+    ) {
+      return "trig";
+    }
+    if (String(name).startsWith("in_")) return "audio";
+    if ((this.namedAudioInputs || []).includes(name)) return "audio";
+    return "cv";
+  }
+
+  getOutputKind(i) {
+    i = parseInt(i, 10) || 0;
+    if (this.outputKinds && this.outputKinds[i] != null) {
+      return this.outputKinds[i];
+    }
+    if (this.outputKinds && this.outputKinds[String(i)] != null) {
+      return this.outputKinds[String(i)];
+    }
+    let label = ((this.outputLabels || [])[i] || "").toLowerCase();
+    if (
+      label == "trigger" ||
+      label.indexOf("trig") >= 0 ||
+      label == "clock" ||
+      label == "reset"
+    ) {
+      return "trig";
+    }
+    if (label == "gate") return "gate";
+    return "cv";
+  }
+
+  applyInputLed(name, level) {
+    let led =
+      this.inputElements[name] && this.inputElements[name].led;
+    if (!led) return;
+    let kind = this.getJackKind(name);
+    if (kind == "trig") {
+      if (!this._jackLedPrev) this._jackLedPrev = {};
+      let prev = this._jackLedPrev[name] || 0;
+      if (prev < 0.5 && level >= 0.5) flashLedTrig(led, 100);
+      this._jackLedPrev[name] = level;
+    } else {
+      setLedBipolar(led, level);
+    }
+  }
+
+  setOutputLed(i, level, kind) {
+    i = parseInt(i, 10) || 0;
+    if (!this.outputLedElements) this.ensureOutputLeds();
+    let led = this.outputLedElements && this.outputLedElements[i];
+    if (!led) return;
+    kind = kind || this.getOutputKind(i);
+    if (kind == "trig") {
+      if (!this._outLedPrev) this._outLedPrev = {};
+      let prev = this._outLedPrev[i] || 0;
+      if (prev < 0.5 && level >= 0.5) flashLedTrig(led, 100);
+      this._outLedPrev[i] = level;
+    } else {
+      setLedBipolar(led, level);
+    }
+  }
+
+  clearOutputLedIfIdle(outIndex) {
+    outIndex = parseInt(outIndex, 10) || 0;
+    let still = (this.connections || []).some(
+      (c) => parseInt(c.numberOfOutput, 10) == outIndex,
+    );
+    this.syncOutputConnected(outIndex);
+    if (still) return;
+    if (!this.outputLedElements) return;
+    let led = this.outputLedElements[outIndex];
+    if (led) setLedBipolar(led, 0);
+    if (this._outLedPrev) this._outLedPrev[outIndex] = 0;
+  }
+
+  syncOutputConnected(outIndex) {
+    outIndex = parseInt(outIndex, 10) || 0;
+    let outs = this.getOutputElements();
+    let btn = outs[outIndex];
+    if (!btn) return;
+    let has = (this.connections || []).some(
+      (c) => parseInt(c.numberOfOutput, 10) == outIndex,
+    );
+    btn.classList.toggle("connected", has);
+  }
+
+  ensureOutputLeds() {
+    if (this.hideOutputActivityLeds) return;
+    if (!this.outputLedElements) this.outputLedElements = [];
+    let outs = this.getOutputElements();
+    for (let i = 0; i < outs.length; i++) {
+      if (this.outputLedElements[i]) continue;
+      let btn = outs[i];
+      if (!btn || !btn.parentElement) continue;
+      let wrap = btn.parentElement;
+      if (!wrap.classList || !wrap.classList.contains("outputJackRow")) {
+        wrap = document.createElement("div");
+        wrap.className = "outputJackRow";
+        btn.parentElement.insertBefore(wrap, btn);
+        wrap.appendChild(btn);
+      }
+      let lab = wrap.querySelector(".jack-label");
+      if (!lab) {
+        lab = document.createElement("span");
+        lab.className = "jack-label";
+        wrap.insertBefore(lab, wrap.firstChild);
+      }
+      let led = wrap.querySelector(".ui-led");
+      if (!led && !this.hideOutputActivityLeds) {
+        led = createLed();
+        wrap.insertBefore(led, btn);
+      }
+      if (led) this.outputLedElements[i] = led;
+    }
+  }
+
+  mirrorLevelsToSources(jackName, level) {
+    if (!this.app || !this.app.getAllConnections) return;
+    jackName = this.resolveJackName(jackName);
+    // key: fromId|outIdx -> best level by |v|
+    if (!this._mirrorAcc) this._mirrorAcc = Object.create(null);
+    for (let conn of this.app.getAllConnections()) {
+      if (conn.to !== this) continue;
+      let destJack =
+        (this.resolveJackName && this.resolveJackName(conn.audioParam)) ||
+        conn.audioParam;
+      if (destJack !== jackName) continue;
+      let from = conn.from;
+      if (!from || !from.setOutputLed) continue;
+      let oi = parseInt(conn.numberOfOutput, 10) || 0;
+      let key = from.id + "|" + oi;
+      let prev = this._mirrorAcc[key];
+      if (!prev || Math.abs(level) >= Math.abs(prev.level)) {
+        this._mirrorAcc[key] = { from, oi, level };
+      }
+    }
+  }
+
+  flushMirrorAcc() {
+    if (!this._mirrorAcc) return;
+    for (let key of Object.keys(this._mirrorAcc)) {
+      let { from, oi, level } = this._mirrorAcc[key];
+      from.setOutputLed(oi, level, from.getOutputKind(oi));
+    }
+    this._mirrorAcc = Object.create(null);
   }
 
   createJackActivityMonitor() {
@@ -360,11 +537,12 @@ class Component {
         let levels = e.data && e.data.levels;
         if (!levels) return;
         let map = this.jackActivityNames || [];
+        this._mirrorAcc = Object.create(null);
         for (let i = 0; i < levels.length && i < map.length; i++) {
-          let led =
-            this.inputElements[map[i]] && this.inputElements[map[i]].led;
-          if (led) setLedBipolar(led, levels[i]);
+          this.applyInputLed(map[i], levels[i]);
+          this.mirrorLevelsToSources(map[i], levels[i]);
         }
+        this.flushMirrorAcc();
       };
       if (this.app && this.app.getAllConnections) {
         for (let c of this.app.getAllConnections()) {
@@ -489,8 +667,8 @@ class Component {
         this.jackActivityNames.push(inp);
       }
 
-      audioParamRow.appendChild(led);
       audioParamRow.appendChild(button);
+      audioParamRow.appendChild(led);
       audioParamRow.appendChild(label);
       if (knob) audioParamRow.appendChild(knob.el);
       this.inputsDiv.appendChild(audioParamRow);
@@ -680,8 +858,10 @@ class Component {
     }
 
     let conn = new Connection(this, compo, input, numberOfOutput, this.app);
+    let jackName =
+      (compo.resolveJackName && compo.resolveJackName(input)) || input;
     try {
-      compo.inputElements[input].button.classList.add("connected");
+      compo.inputElements[jackName].button.classList.add("connected");
     } catch (e) {
       console.log(e);
     }
@@ -702,13 +882,14 @@ class Component {
     }
 
     let actCh =
-      compo.jackActivityChannel && compo.jackActivityChannel(input);
+      compo.jackActivityChannel && compo.jackActivityChannel(jackName);
     if (compo.jackActivityNode && actCh >= 0) {
       try {
         this.node.connect(compo.jackActivityNode, numberOfOutput, actCh);
       } catch (e) {}
     }
 
+    this.syncOutputConnected(numberOfOutput);
     conn.redraw();
   }
 
@@ -951,16 +1132,29 @@ class Component {
     }
     this.outputs = document.createElement("outputs");
     (this.body || this.container).appendChild(this.outputs);
+    this.outputLedElements = [];
 
     for (let i = 0; i < (this.node || {}).numberOfOutputs; i++) {
+      let row = document.createElement("div");
+      row.className = "outputJackRow";
+      let label = document.createElement("span");
+      label.className = "jack-label";
+      label.textContent = (this.outputLabels && this.outputLabels[i]) || "";
       let outputButton = document.createElement("input");
       outputButton.type = "checkbox";
-      outputButton.classList.add("outputButton");
+      outputButton.classList.add("outputButton", "jack");
       outputButton.setAttribute("numberOfOutput", i);
       outputButton.onclick = (e) => {
         this.onOutputClicked(e, outputButton);
       };
-      this.outputs.appendChild(outputButton);
+      row.appendChild(label);
+      if (!this.hideOutputActivityLeds) {
+        let led = createLed();
+        row.appendChild(led);
+        this.outputLedElements[i] = led;
+      }
+      row.appendChild(outputButton);
+      this.outputs.appendChild(row);
     }
     this.outputElements = null;
   }

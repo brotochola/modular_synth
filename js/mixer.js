@@ -59,8 +59,8 @@ class Mixer extends Component {
     let labelEl = document.createElement("span");
     labelEl.className = "jack-label";
     labelEl.textContent = label || name;
-    wrap.appendChild(led);
     wrap.appendChild(button);
+    wrap.appendChild(led);
     wrap.appendChild(labelEl);
     this.inputElements[name] = { button, led, textInput: null, knob: null };
     if (!this.jackActivityNames) this.jackActivityNames = [];

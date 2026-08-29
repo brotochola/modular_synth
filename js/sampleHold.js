@@ -4,6 +4,7 @@ class SampleHold extends Component {
     super(app, serializedData);
     this.infoText =
       "Sample and hold. Rising edge on clock (in_1) grabs the current signal (in_0) and holds it. No signal patched: samples internal white noise. Stepped random CV, analog-computer classic.";
+    this.jackKinds = { in_0: "audio", in_1: "trig" };
     this.createNode();
   }
 
@@ -21,15 +22,16 @@ class SampleHold extends Component {
 
   putLabels() {
     super.putLabels();
-    let sig = this.container.querySelector("button.in_0");
-    if (sig) {
-      sig.innerText = "signal";
-      sig.title = "signal";
-    }
-    let clk = this.container.querySelector("button.in_1");
-    if (clk) {
-      clk.innerText = "clock";
-      clk.title = "clock";
-    }
+    let setJackLabel = (cls, text) => {
+      let btn = this.container.querySelector("button." + cls);
+      if (!btn) return;
+      let lab = btn.parentElement && btn.parentElement.querySelector(".jack-label");
+      if (lab) {
+        lab.textContent = text;
+        btn.title = text;
+      }
+    };
+    setJackLabel("in_0", "signal");
+    setJackLabel("in_1", "clock");
   }
 }

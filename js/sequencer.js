@@ -12,6 +12,7 @@ class Sequencer extends Component {
     this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
     this.outputLabels = ["relative note", "trigger", "Hz"];
+    this.outputKinds = { 0: "cv", 1: "trig", 2: "cv" };
     this.createNode();
     this.createbuttons();
   }
@@ -65,10 +66,12 @@ class Sequencer extends Component {
   putLabels() {
     super.putLabels();
     let clockBtn = this.container.querySelector("button.in_0");
-    if (clockBtn) {
-      clockBtn.innerText = "clock";
-      clockBtn.title = "clock";
-    }
+    if (!clockBtn) return;
+    let lab =
+      clockBtn.parentElement &&
+      clockBtn.parentElement.querySelector(".jack-label");
+    if (lab) lab.textContent = "clock";
+    clockBtn.title = "clock";
   }
 
   handleClickOnSeqButton(e) {

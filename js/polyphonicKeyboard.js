@@ -51,6 +51,7 @@ class PolyphonicKeyboard extends Component {
       "freq7",
       "freq8",
     ];
+    this.hideOutputActivityLeds = true;
     this.pressedMidi = new Set();
     this.pianoKeyEls = {};
     this.valuesToSave = ["sourceUserID"];

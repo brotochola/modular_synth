@@ -10,6 +10,16 @@ class PolySequencer extends Component {
     this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
     this.outputLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
+    this.outputKinds = {
+      0: "trig",
+      1: "trig",
+      2: "trig",
+      3: "trig",
+      4: "trig",
+      5: "trig",
+      6: "trig",
+      7: "trig",
+    };
     this.createNode();
     this.createbuttons();
   }
@@ -57,19 +67,45 @@ class PolySequencer extends Component {
 
   createOutputButton() {
     this.outputs = this.buttonsContainer;
+    this.outputLedElements = [];
     let n = (this.node || {}).numberOfOutputs || this.numberOfLanes;
     for (let i = 0; i < n; i++) {
+      let row = document.createElement("div");
+      row.className = "outputJackRow polySeqOut";
+      let label = document.createElement("span");
+      label.className = "jack-label";
+      label.textContent = String(i + 1);
+      let led = createLed();
       let outputButton = document.createElement("input");
       outputButton.type = "checkbox";
-      outputButton.classList.add("outputButton");
+      outputButton.classList.add("outputButton", "jack");
       outputButton.setAttribute("numberOfOutput", i);
       outputButton.onclick = (e) => {
         this.onOutputClicked(e, outputButton);
       };
-      let row = (this.laneRows && this.laneRows[i]) || this.buttonsContainer;
+      row.appendChild(label);
+      row.appendChild(led);
       row.appendChild(outputButton);
+      let lane = (this.laneRows && this.laneRows[i]) || this.buttonsContainer;
+      lane.appendChild(row);
+      this.outputLedElements[i] = led;
     }
     this.outputElements = null;
+  }
+
+  putLabels() {
+    super.putLabels();
+    let setJackLabel = (cls, text) => {
+      let btn = this.container.querySelector("button." + cls);
+      if (!btn) return;
+      let lab =
+        btn.parentElement && btn.parentElement.querySelector(".jack-label");
+      if (lab) {
+        lab.textContent = text;
+        btn.title = text;
+      }
+    };
+    setJackLabel("in_0", "clock");
   }
 
   updatePlayhead(step) {
@@ -82,15 +118,6 @@ class PolySequencer extends Component {
     root
       .querySelectorAll("button[time='" + step + "']")
       .forEach((b) => b.classList.add("seqColumnPlaying"));
-  }
-
-  putLabels() {
-    super.putLabels();
-    let clockBtn = this.container.querySelector("button.in_0");
-    if (clockBtn) {
-      clockBtn.innerText = "clock";
-      clockBtn.title = "clock";
-    }
   }
 
   handleClickOnSeqButton(e) {

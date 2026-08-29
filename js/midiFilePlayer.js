@@ -8,8 +8,10 @@ class MidiFilePlayer extends Component {
     this.voices = [{ id: "ch1", label: "ch1" }];
     this.namedAudioInputs = ["trigger", "stop"];
     this.uiParamWidgets = { in_0: "none", in_1: "none" };
+    this.jackKinds = { trigger: "trig", stop: "trig" };
     this.valuesToSave = ["audioEncoding", "base64", "filename", "voiceLabels"];
     this.outputLabels = ["ch1 note", "ch1 trig"];
+    this.outputKinds = { 0: "cv", 1: "trig" };
 
     this.createInputFile();
     this.createPlayButton();
@@ -127,23 +129,39 @@ class MidiFilePlayer extends Component {
     }
     this.outputs = document.createElement("outputs");
     (this.body || this.container).appendChild(this.outputs);
+    this.outputLedElements = [];
     let n = (this.node || {}).numberOfOutputs || 0;
     for (let i = 0; i < n; i++) {
+      let row = document.createElement("div");
+      row.className = "outputJackRow";
+      let label = document.createElement("span");
+      label.className = "jack-label";
+      let led = createLed();
       let outputButton = document.createElement("input");
       outputButton.type = "checkbox";
-      outputButton.classList.add("outputButton");
+      outputButton.classList.add("outputButton", "jack");
       outputButton.setAttribute("numberOfOutput", i);
       outputButton.onclick = (e) => this.onOutputClicked(e, outputButton);
-      this.outputs.appendChild(outputButton);
+      row.appendChild(label);
+      row.appendChild(led);
+      row.appendChild(outputButton);
+      this.outputs.appendChild(row);
+      this.outputLedElements[i] = led;
     }
     this.outputElements = null;
     this.outputLabels = [];
+    this.outputKinds = {};
     for (let v of this.voices || []) {
       this.outputLabels.push(v.label + " note");
       this.outputLabels.push(v.label + " trig");
     }
     if (!this.outputLabels.length) {
       this.outputLabels = ["note", "trigger"];
+    }
+    for (let i = 0; i < this.outputLabels.length; i++) {
+      let lab = String(this.outputLabels[i]).toLowerCase();
+      this.outputKinds[i] =
+        lab.indexOf("trig") >= 0 || lab == "trigger" ? "trig" : "cv";
     }
     this.voiceLabels = (this.voices || []).map((v) => v.label);
     this.putLabels();

@@ -81,6 +81,9 @@ function makeid(length) {
 function figureOutWhereToConnect(compoSource, compoTarget, input) {
   let whereToConnect;
   let whichInput;
+  if (compoTarget && typeof compoTarget.resolveJackName === "function") {
+    input = compoTarget.resolveJackName(input);
+  }
   if (compoTarget.type.toLowerCase() == "output") {
     whereToConnect = compoSource.app.actx.destination;
   } else {

@@ -4,6 +4,7 @@ class Kick808 extends Component {
     super(app, serializedData);
     this.infoText =
       "Analog 808 kick. Rising edge on trigger fires a sine with pitch punch and a short click. Patch a sequencer or BPM clock in, or tap Kick. Knobs: pitch (body Hz), punch (start sweep), decay, click.";
+    this.jackKinds = { trigger: "trig" };
     this.createNode();
   }
 

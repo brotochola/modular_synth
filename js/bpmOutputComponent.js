@@ -23,6 +23,7 @@ class BPMOutputComponent extends Component {
     }
     this.val = 0;
     this.outputLabels = ["trigger"];
+    this.outputKinds = { 0: "trig" };
     this.createNode();
     this.createDisplay();
     this.createRateSelect();

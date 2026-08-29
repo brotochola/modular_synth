@@ -17,6 +17,13 @@ class Recorder extends Component {
     this.namedAudioInputs = ["audio", "gate"];
     this.uiParamWidgets = { in_0: "none", in_1: "none" };
     this.customAudioTriggers = ["toggleRec", "play", "clear"];
+    this.jackKinds = {
+      audio: "audio",
+      gate: "gate",
+      toggleRec: "trig",
+      play: "trig",
+      clear: "trig",
+    };
     this.valuesToSave = ["beats", "loop", "thru"];
     this.beats =
       serializedData && Recorder.BEATS.includes(Number(serializedData.beats))

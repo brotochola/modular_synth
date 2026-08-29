@@ -5,6 +5,7 @@ class Mouse extends Component {
     this.infoText =
       "Mouse position as CV. Outputs normalized X and Y. Seat select picks which collaborator's cursor drives the module in multiplayer.";
     this.outputLabels = ["X", "Y"];
+    this.outputKinds = { 0: "cv", 1: "cv" };
     this.x = 0;
     this.y = 0;
     this.valuesToSave = ["sourceUserID"];
@@ -40,8 +41,9 @@ class Mouse extends Component {
 
   sendPos() {
     if (this.node) this.node.port.postMessage({ x: this.x, y: this.y });
-    this.flashOutput(0);
-    this.flashOutput(1);
+    // Unipolar 0..1 CV: setLedBipolar maps + to black→green
+    this.setOutputLed(0, this.x, "cv");
+    this.setOutputLed(1, this.y, "cv");
   }
 
   onRemoteInput(msg) {

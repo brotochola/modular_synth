@@ -20,8 +20,8 @@ class Output extends Component {
     let label = document.createElement("span");
     label.className = "jack-label";
     label.textContent = "in";
-    row.appendChild(led);
     row.appendChild(button);
+    row.appendChild(led);
     row.appendChild(label);
     this.inputElements["in"] = { button, led };
     this.inputsDiv.appendChild(row);

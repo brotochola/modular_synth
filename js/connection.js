@@ -10,6 +10,9 @@ class Connection {
     if (app) app.markCablesDirty();
   }
   remove() {
+    let jackName =
+      (this.to.resolveJackName && this.to.resolveJackName(this.audioParam)) ||
+      this.audioParam;
     let where = figureOutWhereToConnect(
       this.from,
       this.to,
@@ -30,8 +33,7 @@ class Connection {
     }
 
     let actCh =
-      this.to.jackActivityChannel &&
-      this.to.jackActivityChannel(this.audioParam);
+      this.to.jackActivityChannel && this.to.jackActivityChannel(jackName);
     if (this.to.jackActivityNode && actCh >= 0) {
       try {
         this.from.node.disconnect(
@@ -42,14 +44,21 @@ class Connection {
       } catch (e) {}
     }
 
-    this.to.inputElements[this.audioParam].button.classList.remove("connected");
-    let led =
-      this.to.inputElements[this.audioParam] &&
-      this.to.inputElements[this.audioParam].led;
-    if (led) setLedBipolar(led, 0);
+    let inpEl = this.to.inputElements[jackName] || this.to.inputElements[this.audioParam];
+    if (inpEl && inpEl.button) inpEl.button.classList.remove("connected");
+    if (inpEl && inpEl.led) setLedBipolar(inpEl.led, 0);
+
     this.from.connections = this.from.connections.filter(
       (k) => k.id != this.id
     );
+
+    // Clear source output LED if no remaining cables from that out
+    if (this.from.clearOutputLedIfIdle) {
+      this.from.clearOutputLedIfIdle(this.numberOfOutput);
+    } else if (this.from.syncOutputConnected) {
+      this.from.syncOutputConnected(this.numberOfOutput);
+    }
+
     if (this.app) {
       if (this.app.cableWorld) this.app.cableWorld.freeByConnectionId(this.id);
       this.app.markCablesDirty();
@@ -94,7 +103,10 @@ class Connection {
 
     let actCh =
       this.to.jackActivityChannel &&
-      this.to.jackActivityChannel(this.audioParam);
+      this.to.jackActivityChannel(
+        (this.to.resolveJackName && this.to.resolveJackName(this.audioParam)) ||
+          this.audioParam,
+      );
     if (this.to.jackActivityNode && actCh >= 0) {
       try {
         this.from.node.disconnect(

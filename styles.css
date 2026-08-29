@@ -641,13 +641,7 @@ component.midifileplayer {
 }
 
 component.midifileplayer input.outputButton:after {
-  width: 112px;
-  left: -116px;
-  font-size: 10px;
-  line-height: 12px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  display: none;
 }
 component.CustomProcessorComponent icon:after {
   content: "🧮";
@@ -970,19 +964,34 @@ component.KeyboardComponent outputs {
   z-index: 2;
 }
 
+component.KeyboardComponent .outputJackRow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0;
+}
+
+component.KeyboardComponent .outputJackRow .jack-label,
+component.KeyboardComponent .outputJackRow .ui-led {
+  display: none;
+}
+
 component.KeyboardComponent input.outputButton {
   position: relative;
   overflow: visible;
 }
 
-component.KeyboardComponent input.outputButton:after {
-  content: var(--label);
-  position: absolute;
-  top: -12px;
-  left: 50% !important;
-  transform: translateX(-50%);
-  text-align: center;
-  line-height: 9px;
+component.PolyphonicKeyboard outputs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: flex-end;
+  margin-top: auto;
+}
+
+component.PolyphonicKeyboard .outputJackRow .ui-led {
+  display: none;
 }
 
 component input.outputButton.active {
@@ -1215,7 +1224,7 @@ component.PolySequencer {
 }
 
 component.PolySequencer {
-  width: 300px;
+  width: 340px;
   min-height: 180px;
   overflow: visible;
 }
@@ -1299,10 +1308,20 @@ component.PolySequencer div.buttonsContainer {
 
 component.PolySequencer .seqLane {
   display: grid;
-  grid-template-columns: repeat(16, 15px) 16px;
+  grid-template-columns: repeat(16, 15px) auto;
   gap: 1px;
   align-items: center;
   width: max-content;
+}
+
+component.PolySequencer .seqLane .outputJackRow.polySeqOut {
+  margin-left: 4px;
+  gap: 4px;
+}
+
+component.PolySequencer .seqLane .polySeqOut .jack-label {
+  max-width: 14px;
+  font-size: 9px;
 }
 
 component.PolySequencer .seqLane .outputButton {
@@ -1315,15 +1334,22 @@ component.PolySequencer .seqLane .outputButton:after {
 }
 
 component input.outputButton:after {
+  display: none;
+}
+
+/* Keyboard: letter labels above jack (grid is dense; span labels hidden) */
+component.KeyboardComponent input.outputButton:after {
+  display: block;
   content: var(--label);
   position: absolute;
-  width: 100px;
-  font-size: 11px;
-  left: -105px;
-  text-align: right;
-  line-height: 11px;
+  top: -12px;
+  left: 50% !important;
+  transform: translateX(-50%);
+  text-align: center;
+  line-height: 9px;
+  width: auto;
+  font-size: 10px;
   pointer-events: none;
-  touch-action: none;
   text-shadow: -1px 0px 3px black;
 }
 
@@ -1369,39 +1395,78 @@ outputs {
   z-index: 5;
 }
 
-component .outputButton {
+component .outputJackRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-end;
+}
+
+component .outputJackRow .jack-label {
+  flex: 0 1 auto;
+  text-align: right;
+  max-width: 90px;
+  white-space: nowrap;
+}
+
+component .outputButton,
+component input.outputButton.jack {
   position: relative;
   overflow: visible;
   right: 0;
   bottom: 0;
   appearance: none;
   -webkit-appearance: none;
-  background: radial-gradient(circle at 40% 35%, #1a2420 0%, var(--jack) 70%);
-  box-shadow:
-    inset 0 0 0 1px #000,
-    inset 0 2px 4px rgba(0, 0, 0, 0.8);
-  width: 13px;
-  height: 13px;
+  width: 18px;
+  min-width: 18px;
+  height: 18px;
   margin: 1px 0;
+  padding: 0;
   cursor: pointer;
   border-radius: 50%;
-  border: 1px solid var(--panel-edge);
+  background:
+    radial-gradient(circle at 50% 50%, #0a0c0b 38%, #1a2220 42%, #2a3330 55%, #1a2220 70%);
+  border: 2px solid #3a4540;
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.8),
+    0 1px 0 rgba(255, 255, 255, 0.06);
   outline: none;
 }
 
-component .outputButton:hover {
+component .outputButton:hover,
+component input.outputButton.jack:hover {
   border-color: var(--accent);
   box-shadow:
-    inset 0 0 0 1px #000,
+    inset 0 1px 3px rgba(0, 0, 0, 0.8),
     0 0 8px var(--accent-dim);
 }
 
-component .outputButton.active {
+component .outputButton.active,
+component input.outputButton.jack.active {
   border-color: var(--accent);
   box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.8),
     0 0 0 1px var(--accent),
     0 0 10px var(--accent);
   background: radial-gradient(circle at 40% 35%, var(--accent) 0%, #0d3a2c 75%);
+}
+
+component .outputButton.connected,
+component input.outputButton.jack.connected {
+  border-color: var(--accent);
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.8),
+    0 0 0 1px var(--accent),
+    0 0 8px rgba(0, 200, 120, 0.35);
+}
+
+component .outputButton.connected.active,
+component input.outputButton.jack.connected.active {
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.8),
+    0 0 0 1px var(--accent),
+    0 0 12px var(--accent);
 }
 
 component button.playButton,
