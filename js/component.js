@@ -185,8 +185,7 @@ class Component {
     let buttons = Array.from(this.container.querySelectorAll(".outputButton"));
     for (let i = 0; i < this.outputLabels.length; i++) {
       let text = this.outputLabels[i];
-      let lab =
-        rows[i] && rows[i].querySelector(".jack-label");
+      let lab = rows[i] && rows[i].querySelector(".jack-label");
       if (lab) lab.textContent = text;
       let elem = buttons[i];
       if (elem) {
@@ -396,8 +395,7 @@ class Component {
   }
 
   applyInputLed(name, level) {
-    let led =
-      this.inputElements[name] && this.inputElements[name].led;
+    let led = this.inputElements[name] && this.inputElements[name].led;
     if (!led) return;
     let kind = this.getJackKind(name);
     if (kind == "trig") {
@@ -1343,4 +1341,3 @@ class Component {
     return this.ready && this.areMycustomTriggersAndParamsWorkletsReady();
   }
 }
-     
