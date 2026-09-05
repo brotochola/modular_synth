@@ -2391,6 +2391,9 @@ class App {
   addSequencer() {
     this.components.push(new Sequencer(this));
   }
+  addArpeggiator() {
+    this.components.push(new Arpeggiator(this));
+  }
   addPolySequencer() {
     this.components.push(new PolySequencer(this));
   }
@@ -3095,6 +3098,7 @@ App.COMPONENT_CLASSES = {
   CustomProcessorComponent,
   Mixer,
   Sequencer,
+  Arpeggiator,
   PolySequencer,
   PhoneSensors,
   SampleHold,
@@ -3180,6 +3184,7 @@ App.COMPONENT_TONE = {
   EnvelopeGenerator: "mod",
   SampleHold: "mod",
   Sequencer: "time",
+  Arpeggiator: "time",
   PolySequencer: "time",
   BPMOutputComponent: "time",
   CounterComponent: "time",
