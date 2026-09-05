@@ -742,6 +742,7 @@ class Component {
           inp === "frequency" ||
           inp === "baseHz" ||
           inp === "detune" ||
+          inp === "cutoff" ||
           (inp === "gain" && limits.max > 10);
         knob = createKnob({
           min: limits.min,
@@ -779,7 +780,7 @@ class Component {
   }
 
   getParamInputLimits(name) {
-    if (name == "frequency" || name == "detune" || name == "baseHz") {
+    if (name == "frequency" || name == "detune" || name == "baseHz" || name == "cutoff") {
       return { min: 0, max: 20000, step: 0.1 };
     }
     if (name == "Q") {

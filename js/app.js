@@ -29,11 +29,19 @@ class App {
     "808 Clap": ["clap808"],
     "808 HiHat": ["hihat808"],
     "808 Cowbell": ["cowbell808"],
+    "808 Cymbal": ["cymbal808"],
+    "808 Rim": ["rim808"],
+    "808 Clave": ["clave808"],
+    "808 Tom": ["tom808"],
     Scanline: ["scanline"],
     "Image Maker": ["image-maker"],
     "Image Player": ["image-player"],
     Webcam: ["webcam-player"],
     Distortion: ["distortion"],
+    Freeverb: ["freeverb"],
+    "Moog Ladder": ["moog-ladder"],
+    Phaser: ["phaser"],
+    Wavefolder: ["wavefolder"],
     MIDI: ["midi"],
     "MIDI Player": ["midi-player"],
     BPM: ["bpm"],
@@ -191,6 +199,7 @@ class App {
         }
         if (e.key == "Escape") {
           this.clearCableGhost();
+          this.closeFooterDrops();
           return;
         }
         if (e.key == "Delete") {
@@ -204,10 +213,14 @@ class App {
           this.updateAllLines();
         } else if (e.key == " ") {
           if (typing) return;
-          this.buttonsContainer.classList.toggle("visible");
-          if (this.historyPanel) this.historyPanel.classList.remove("visible");
-          if (this.cablePanel) this.cablePanel.classList.remove("visible");
-          if (this.perfPanel) this.perfPanel.classList.remove("visible");
+          if (this.buttonsContainer && this.buttonsContainer.contains(e.target)) return;
+          let opening = !this.buttonsContainer.classList.contains("visible");
+          this.closeFooterDrops(opening ? "buttons" : "");
+          this.buttonsContainer.classList.toggle("visible", opening);
+          if (this.paletteOverlayEl) this.paletteOverlayEl.classList.toggle("visible", opening);
+          if (opening && this.paletteSearchEl) {
+            requestAnimationFrame(() => this.paletteSearchEl.focus());
+          }
         }
       },
       false,
@@ -217,6 +230,8 @@ class App {
     this.assertCrossOriginIsolated();
 
     this.buttonsContainer = document.querySelector(".buttons");
+    this.paletteOverlayEl = document.querySelector(".paletteOverlay");
+    this.renderModulePalette();
     this.bindCablePanel();
     this.perfPanel = document.querySelector(".perfPanel");
     this.perfSummaryEl = document.querySelector(".perfSummary");
@@ -1580,8 +1595,10 @@ class App {
 
   closeFooterDrops(except) {
     except = except || "";
-    if (except !== "buttons" && this.buttonsContainer)
+    if (except !== "buttons" && this.buttonsContainer) {
       this.buttonsContainer.classList.remove("visible");
+      if (this.paletteOverlayEl) this.paletteOverlayEl.classList.remove("visible");
+    }
     if (except !== "history" && this.historyPanel)
       this.historyPanel.classList.remove("visible");
     if (except !== "cables" && this.cablePanel)
@@ -2425,6 +2442,30 @@ class App {
   addCowbell808() {
     this.components.push(new Cowbell808(this));
   }
+  addCymbal808() {
+    this.components.push(new Cymbal808(this));
+  }
+  addRim808() {
+    this.components.push(new Rim808(this));
+  }
+  addClave808() {
+    this.components.push(new Clave808(this));
+  }
+  addTom808() {
+    this.components.push(new Tom808(this));
+  }
+  addFreeverb() {
+    this.components.push(new Freeverb(this));
+  }
+  addMoogLadder() {
+    this.components.push(new MoogLadder(this));
+  }
+  addPhaser() {
+    this.components.push(new Phaser(this));
+  }
+  addWavefolder() {
+    this.components.push(new Wavefolder(this));
+  }
 
   addNumberDisplay() {
     this.components.push(new NumberDisplayComponent(this));
@@ -2799,6 +2840,188 @@ class App {
     let opening = !this.buttonsContainer.classList.contains("visible");
     this.closeFooterDrops(opening ? "buttons" : "");
     this.buttonsContainer.classList.toggle("visible", opening);
+    if (this.paletteOverlayEl) this.paletteOverlayEl.classList.toggle("visible", opening);
+    if (opening && this.paletteSearchEl) {
+      requestAnimationFrame(() => this.paletteSearchEl.focus());
+    }
+  }
+
+  renderModulePalette() {
+    let root = this.buttonsContainer;
+    if (!root) return;
+    root.classList.add("modulePalette");
+    root.innerHTML = "";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-label", "Add module");
+    this.paletteQuery = "";
+    this.paletteTone = "";
+    let head = document.createElement("div");
+    head.className = "paletteHead";
+    let title = document.createElement("span");
+    title.className = "paletteTitle";
+    title.textContent = "Add module";
+    let closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "paletteClose";
+    closeBtn.setAttribute("aria-label", "Close");
+    closeBtn.textContent = "✕";
+    closeBtn.onclick = () => this.openButtons();
+    head.appendChild(title);
+    head.appendChild(closeBtn);
+    root.appendChild(head);
+    let searchWrap = document.createElement("div");
+    searchWrap.className = "paletteSearchWrap";
+    let search = document.createElement("input");
+    search.type = "search";
+    search.className = "paletteSearch";
+    search.placeholder = "Search modules…";
+    search.setAttribute("aria-label", "Search modules");
+    search.oninput = () => {
+      this.paletteQuery = search.value;
+      this.updateModulePalette();
+    };
+    search.onkeydown = (e) => {
+      if (e.key === "ArrowDown" || e.key === "Enter") {
+        e.preventDefault();
+        let first = this.paletteGridEl && this.paletteGridEl.querySelector(".paletteCard");
+        if (first) (e.key === "Enter" ? first.click() : first.focus());
+      }
+    };
+    searchWrap.appendChild(search);
+    root.appendChild(searchWrap);
+    let chips = document.createElement("div");
+    chips.className = "paletteChips";
+    root.appendChild(chips);
+    this.paletteChipsEl = chips;
+    let grid = document.createElement("div");
+    grid.className = "paletteGrid";
+    grid.onkeydown = (e) => this.navigatePaletteGrid(e);
+    root.appendChild(grid);
+    this.paletteGridEl = grid;
+    this.paletteSearchEl = search;
+    this.renderPaletteChips();
+    this.updateModulePalette();
+  }
+
+  navigatePaletteGrid(e) {
+    let keys = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (keys.indexOf(e.key) < 0) return;
+    let grid = this.paletteGridEl;
+    let cards = Array.from(grid.querySelectorAll(".paletteCard"));
+    if (!cards.length) return;
+    e.preventDefault();
+    let idx = cards.indexOf(document.activeElement);
+    if (idx < 0) {
+      cards[0].focus();
+      return;
+    }
+    if (e.key === "ArrowRight") {
+      cards[Math.min(idx + 1, cards.length - 1)].focus();
+      return;
+    }
+    if (e.key === "ArrowLeft") {
+      cards[Math.max(idx - 1, 0)].focus();
+      return;
+    }
+    // Up/Down: find the closest card in that direction on another row.
+    let dir = e.key === "ArrowDown" ? 1 : -1;
+    let rect = cards[idx].getBoundingClientRect();
+    let best = null;
+    let bestDist = Infinity;
+    for (let i = 0; i < cards.length; i++) {
+      if (i === idx) continue;
+      let r = cards[i].getBoundingClientRect();
+      let dy = r.top - rect.top;
+      if (dir > 0 ? dy <= 2 : dy >= -2) continue;
+      let dist = Math.abs(dy) * 100 + Math.abs(r.left - rect.left);
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = cards[i];
+      }
+    }
+    if (best) best.focus();
+  }
+
+  renderPaletteChips() {
+    let chips = this.paletteChipsEl;
+    if (!chips) return;
+    chips.innerHTML = "";
+    let tones = App.PALETTE_TONES;
+    let makeChip = (tone, label) => {
+      let b = document.createElement("button");
+      b.type = "button";
+      b.className = "paletteChip" + (tone ? " tone-" + tone : "");
+      b.textContent = label;
+      b.dataset.tone = tone;
+      if (this.paletteTone === tone) b.classList.add("active");
+      b.onclick = () => {
+        this.paletteTone = tone;
+        this.renderPaletteChips();
+        this.updateModulePalette();
+      };
+      chips.appendChild(b);
+    };
+    makeChip("", "All");
+    for (let i = 0; i < tones.length; i++) {
+      let t = tones[i];
+      makeChip(t, App.toneLabel(t));
+    }
+  }
+
+  updateModulePalette() {
+    let grid = this.paletteGridEl;
+    if (!grid) return;
+    grid.innerHTML = "";
+    let q = (this.paletteQuery || "").toLowerCase().trim();
+    let tone = this.paletteTone;
+    let catalog = App.MODULE_CATALOG;
+    let grouped = !q && !tone;
+    let lastTone = null;
+    let shown = 0;
+    for (let i = 0; i < catalog.length; i++) {
+      let item = catalog[i];
+      if (tone && item.tone !== tone) continue;
+      if (q && item.title.toLowerCase().indexOf(q) < 0) continue;
+      shown++;
+      if (grouped && item.tone !== lastTone) {
+        lastTone = item.tone;
+        let header = document.createElement("div");
+        header.className = "paletteSectionHeader";
+        header.textContent = App.toneLabel(item.tone);
+        header.style.color = App.toneVar(item.tone);
+        grid.appendChild(header);
+      }
+      let card = document.createElement("button");
+      card.type = "button";
+      card.className = "paletteCard tone-" + item.tone;
+      card.title = item.title;
+      let dot = document.createElement("span");
+      dot.className = "paletteCardDot";
+      dot.setAttribute("aria-hidden", "true");
+      let text = document.createElement("span");
+      text.className = "paletteCardText";
+      let label = document.createElement("span");
+      label.className = "paletteCardLabel";
+      label.textContent = item.title;
+      let sub = document.createElement("span");
+      sub.className = "paletteCardTone";
+      sub.textContent = App.toneLabel(item.tone);
+      text.appendChild(label);
+      text.appendChild(sub);
+      card.appendChild(dot);
+      card.appendChild(text);
+      card.onclick = () => {
+        let fn = this[item.add];
+        if (typeof fn === "function") fn.call(this);
+      };
+      grid.appendChild(card);
+    }
+    if (!shown) {
+      let empty = document.createElement("div");
+      empty.className = "paletteEmpty";
+      empty.textContent = q || tone ? "No modules match." : "No modules.";
+      grid.appendChild(empty);
+    }
   }
 
   openHistory() {
@@ -3097,6 +3320,10 @@ App.COMPONENT_CLASSES = {
   Compressor,
   Reverb,
   Distortion,
+  Freeverb,
+  MoogLadder,
+  Phaser,
+  Wavefolder,
   NoiseGenWithWorklet,
   PerlinNoise,
   Mulberry32,
@@ -3113,6 +3340,10 @@ App.COMPONENT_CLASSES = {
   Clap808,
   HiHat808,
   Cowbell808,
+  Cymbal808,
+  Rim808,
+  Clave808,
+  Tom808,
   EnvelopeGenerator,
   ConstantValueNode,
   Mouse,
@@ -3163,6 +3394,10 @@ App.COMPONENT_TONE = {
   Clap808: "source",
   HiHat808: "source",
   Cowbell808: "source",
+  Cymbal808: "source",
+  Rim808: "source",
+  Clave808: "source",
+  Tom808: "source",
   ScanlineSynth: "source",
   NoiseGenWithWorklet: "source",
   PerlinNoise: "source",
@@ -3175,6 +3410,7 @@ App.COMPONENT_TONE = {
   WebcamPlayer: "media",
   ImagePlayerWorkletVersion: "media",
   Filter: "filter",
+  MoogLadder: "filter",
   Amp: "process",
   Gain: "process",
   Mixer: "process",
@@ -3182,6 +3418,9 @@ App.COMPONENT_TONE = {
   Reverb: "process",
   Compressor: "process",
   Distortion: "process",
+  Freeverb: "process",
+  Phaser: "process",
+  Wavefolder: "process",
   WaveShaper: "process",
   CustomProcessorComponent: "process",
   LerpComponent: "process",
@@ -3223,6 +3462,97 @@ App.COMPONENT_TONE = {
   Merger: "meta",
   Output: "meta",
 };
+
+App.toneLabel = function (tone) {
+  return tone ? tone.charAt(0).toUpperCase() + tone.slice(1) : "";
+};
+App.toneVar = function (tone) {
+  return "var(--" + (tone === "meta" || !tone ? "accent" : "tone-" + tone) + ")";
+};
+
+App.PALETTE_TONES = [
+  "source",
+  "media",
+  "filter",
+  "process",
+  "mod",
+  "time",
+  "control",
+  "visual",
+  "meta",
+];
+
+App.MODULE_CATALOG = [
+  { title: "Oscillator", tone: "source", add: "addOscillator" },
+  { title: "Drawer", tone: "source", add: "addDrawer" },
+  { title: "Constant", tone: "source", add: "addConstantValueNode" },
+  { title: "Noise", tone: "source", add: "addNoise" },
+  { title: "Perlin", tone: "source", add: "addPerlin" },
+  { title: "Mulberry32", tone: "source", add: "addMulberry32" },
+  { title: "808 Kick", tone: "source", add: "addKick808" },
+  { title: "808 Snare", tone: "source", add: "addSnare808" },
+  { title: "808 Clap", tone: "source", add: "addClap808" },
+  { title: "808 HiHat", tone: "source", add: "addHiHat808" },
+  { title: "808 Cowbell", tone: "source", add: "addCowbell808" },
+  { title: "808 Cymbal", tone: "source", add: "addCymbal808" },
+  { title: "808 Rim", tone: "source", add: "addRim808" },
+  { title: "808 Clave", tone: "source", add: "addClave808" },
+  { title: "808 Tom", tone: "source", add: "addTom808" },
+  { title: "Scanline", tone: "source", add: "addScanline" },
+  { title: "MIDI Player", tone: "media", add: "addMidiPlayer" },
+  { title: "Audio Player", tone: "media", add: "addAudioPlayer" },
+  { title: "Mic/Line", tone: "media", add: "addMic" },
+  { title: "Webcam", tone: "media", add: "addWebcamPlayer" },
+  { title: "Image Player", tone: "media", add: "addImagePlayer" },
+  { title: "Filter", tone: "filter", add: "addFilter" },
+  { title: "Moog Ladder", tone: "filter", add: "addMoogLadder" },
+  { title: "Math Processor", tone: "process", add: "addCustomProcessor" },
+  { title: "Mixer", tone: "process", add: "addMixer" },
+  { title: "Gain Node", tone: "process", add: "addGainNode" },
+  { title: "Compressor", tone: "process", add: "addCompressor" },
+  { title: "Delay", tone: "process", add: "addDelay" },
+  { title: "Reverb", tone: "process", add: "addReverb" },
+  { title: "Freeverb", tone: "process", add: "addFreeverb" },
+  { title: "Distortion", tone: "process", add: "addDistortion" },
+  { title: "Phaser", tone: "process", add: "addPhaser" },
+  { title: "Wavefolder", tone: "process", add: "addWavefolder" },
+  { title: "Lerp", tone: "process", add: "addLerpComponent" },
+  { title: "Pad Sampler", tone: "process", add: "addPadSampler" },
+  { title: "Recorder", tone: "process", add: "addRecorder" },
+  { title: "S&H", tone: "mod", add: "addSampleHold" },
+  { title: "ADSR", tone: "mod", add: "addEnvelope" },
+  { title: "Sequencer", tone: "time", add: "addSequencer" },
+  { title: "Arpeggiator", tone: "time", add: "addArpeggiator" },
+  { title: "Poly Seq", tone: "time", add: "addPolySequencer" },
+  { title: "BPM Output", tone: "time", add: "addBPMOutputComponenet" },
+  { title: "Memory", tone: "time", add: "addMemoryComponent" },
+  { title: "Counter", tone: "time", add: "addCounter" },
+  { title: "Multiplexor", tone: "time", add: "addMultiplexor" },
+  { title: "Demultiplexor", tone: "time", add: "addDemultiplexor" },
+  { title: "Seq Switch", tone: "time", add: "addSequentialSwitch" },
+  { title: "Seq Demux", tone: "time", add: "addSequentialDemux" },
+  { title: "Mouse", tone: "control", add: "addMouse" },
+  { title: "Keyboard", tone: "control", add: "addKeyboard" },
+  { title: "Poly Keyboard", tone: "control", add: "addPolyphonicKeyboard" },
+  { title: "Gamepad", tone: "control", add: "addJoystick" },
+  { title: "Phone", tone: "control", add: "addPhoneSensors" },
+  { title: "MIDI Input", tone: "control", add: "addMidiInput" },
+  { title: "RTC sender", tone: "control", add: "addRTCSender" },
+  { title: "RTC receiver", tone: "control", add: "addRTCReceiver" },
+  { title: "Number Display", tone: "visual", add: "addNumberDisplay" },
+  { title: "Freq Analizer", tone: "visual", add: "addFrequencyAnalizer" },
+  { title: "Spectrogram", tone: "visual", add: "addSpectrogram" },
+  { title: "Oscilloscope", tone: "visual", add: "addOscilloscope" },
+  { title: "Large Visualizer", tone: "visual", add: "addLargeVisualizer" },
+  { title: "Peak Detector", tone: "visual", add: "addPeakDetector" },
+  { title: "Pitch Detector", tone: "visual", add: "addPitchDetector" },
+  { title: "Spectrum 2 Image", tone: "visual", add: "addSpectrum2Image" },
+  { title: "Image Maker", tone: "visual", add: "addImageMaker" },
+  { title: "Canvas Plotter", tone: "visual", add: "addCanvasPlotter" },
+  { title: "Shader", tone: "visual", add: "addShader" },
+  { title: "Text", tone: "meta", add: "addText" },
+  { title: "Rack Cover", tone: "meta", add: "addRackCover" },
+];
 
 for (let key of Object.keys(App.COMPONENT_CLASSES)) {
   if (key == "Gain") continue;

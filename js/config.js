@@ -46,6 +46,16 @@
     HAT_CLOSED_SEC: 0.07,
     HAT_FREQS: [205.3, 304.4, 369.6, 522.7, 540, 800],
     COWBELL_RATIO: 800 / 540,
+    CYMBAL_BPF_LO: 800,
+    CYMBAL_BPF_HI: 5000,
+    CYMBAL_HPF: 400,
+    RIM_FREQ_LO: 455,
+    RIM_FREQ_HI: 1800,
+    CLAVE_HZ: 2500,
+    TOM_HZ: 140,
+    FREEVERB_COMB: [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617],
+    FREEVERB_ALLPASS: [556, 441, 341, 225],
+    FREEVERB_SPREAD: 23,
 
     // --- Audio profiler ---
     /** Wrap every process() with timing. Off in prod; reporter still tracks xruns. */

@@ -94,6 +94,14 @@
     <script src="js/clap808.js"></script>
     <script src="js/hihat808.js"></script>
     <script src="js/cowbell808.js"></script>
+    <script src="js/cymbal808.js"></script>
+    <script src="js/rim808.js"></script>
+    <script src="js/clave808.js"></script>
+    <script src="js/tom808.js"></script>
+    <script src="js/freeverb.js"></script>
+    <script src="js/moogLadder.js"></script>
+    <script src="js/phaser.js"></script>
+    <script src="js/wavefolder.js"></script>
 
     <script src="js/visualizer.js"></script>
     <script src="js/channelMerger.js"></script>
@@ -128,7 +136,9 @@
 
 <body>
     <footer>
-        <button onclick="app.openButtons()" class="openButtons">+ Modules</button>
+        <button onclick="app.openButtons()" class="openButtons" title="Add a module (Space)">
+            <span class="openButtonsIcon" aria-hidden="true">+</span> Add module
+        </button>
         <connectedUsers></connectedUsers>
         <button type="button" onclick="app.openPerf()" class="openPerf sysStatus" title="Open performance">audio …</button>
 
@@ -173,111 +183,8 @@
         <div class="patchName"></div>
 
     </footer>
-    <div class="buttons">
-
-        <span class="categoryOfComponent">
-            <button class="tone-source" onclick="app.addOscillator()">🚴🏿 Oscillator</button>
-            <!-- <button onclick="app.addWaveShaper()"> add wave shaper</button> -->
-            <button class="tone-source" onclick="app.addDrawer()">✏️ Drawer</button>
-
-            <button class="tone-media" onclick="app.addMidiPlayer()">🎼 MIDI Player</button>
-            <button class="tone-source" onclick="app.addConstantValueNode()">🅺 Constant</button>
-
-            <button class="tone-media" onclick="app.addAudioPlayer()">🎶 Audio Player</button>
-            <button class="tone-media" onclick="app.addMic()">🎤 Mic/Line</button>
-            <button class="tone-media" onclick="app.addWebcamPlayer()">🤳🏻 Webcam</button>
-            <button class="tone-source" onclick="app.addNoise()">👾 Noise</button>
-            <button class="tone-source" onclick="app.addPerlin()">🌫 Perlin</button>
-            <button class="tone-source" onclick="app.addMulberry32()">🎲 Mulberry32</button>
-            <button class="tone-source" onclick="app.addKick808()">🥁 808 Kick</button>
-            <button class="tone-source" onclick="app.addSnare808()">🥁 808 Snare</button>
-            <button class="tone-source" onclick="app.addClap808()">👏 808 Clap</button>
-            <button class="tone-source" onclick="app.addHiHat808()">🎩 808 HiHat</button>
-            <button class="tone-source" onclick="app.addCowbell808()">🔔 808 Cowbell</button>
-            <button class="tone-source" onclick="app.addScanline()">📺 Scanline</button>
-            <button class="tone-media" onclick="app.addImagePlayer()">🖼️ Image Player</button>
-        </span>
-        <span class="categoryOfComponent">
-            <button class="tone-filter" onclick="app.addFilter()">🤖 Filter</button>
-            <button class="tone-process" onclick="app.addCustomProcessor()">🧮 Math Processor</button>
-            <button class="tone-process" onclick="app.addMixer()">🎚️ Mixer</button>
-            <button class="tone-process" onclick="app.addGainNode()">📢 Gain Node</button>
-            <button class="tone-process" onclick="app.addCompressor()">➗ Compressor</button>
-            <button class="tone-process" onclick="app.addDelay()">⏰ Delay</button>
-            <button class="tone-process" onclick="app.addReverb()">⛪ Reverb</button>
-            <button class="tone-process" onclick="app.addDistortion()">🤘 Distortion</button>
-            <button class="tone-process" onclick="app.addLerpComponent()">Lerp</button>
-            <button class="tone-process" onclick="app.addPadSampler()">Pad Sampler</button>
-            <button class="tone-process" onclick="app.addRecorder()">⏺ Recorder</button>
-
-        </span>
-        <span class="categoryOfComponent">
-
-
-
-            <!-- <button onclick="app.addAiComponent2()">### add ai comp</button> -->
-
-
-
-            <button class="tone-control" onclick="app.addMouse()">🖱️ Mouse</button>
-            <button class="tone-control" onclick="app.addKeyboard()">⌨ Keyboard</button>
-            <button class="tone-control" onclick="app.addPolyphonicKeyboard()">🎹 Poly Keyboard</button>
-            <button class="tone-control" onclick="app.addJoystick()">🎮 Gamepad</button>
-            <button class="tone-control" onclick="app.addPhoneSensors()">📱 Phone</button>
-            <button class="tone-control" onclick="app.addMidiInput()">🎹 MIDI Input</button>
-            <button class="tone-control" onclick="app.addRTCSender()">📭 RTC sender</button>
-            <button class="tone-control" onclick="app.addRTCReceiver()">📨 RTC receiver</button>
-
-        </span>
-        <span class="categoryOfComponent">
-
-
-            <button class="tone-time" onclick="app.addSequencer()">📈 Sequencer</button>
-            <button class="tone-time" onclick="app.addArpeggiator()">🎶 Arpeggiator</button>
-            <button class="tone-time" onclick="app.addPolySequencer()">📊 Poly Seq</button>
-            <button class="tone-mod" onclick="app.addSampleHold()">S&H</button>
-            <button class="tone-mod" onclick="app.addEnvelope()">〽️ ADSR</button>
-
-            <button class="tone-time" onclick="app.addBPMOutputComponenet()">🎵 BPM Output</button>
-            <button class="tone-time" onclick="app.addMemoryComponent()">📼 Memory</button>
-            <button class="tone-time" onclick="app.addCounter()">🧮 Counter</button>
-            <button class="tone-time" onclick="app.addMultiplexor()">🔌 Multiplexor</button>
-            <button class="tone-time" onclick="app.addDemultiplexor()">🔌 Demultiplexor</button>
-            <button class="tone-time" onclick="app.addSequentialSwitch()">🔀 Seq Switch</button>
-            <button class="tone-time" onclick="app.addSequentialDemux()">🔃 Seq Demux</button>
-
-            <button class="tone-meta" onclick="app.addText()">📄 Text</button>
-
-
-
-            <button class="tone-meta" onclick="app.addRackCover()">Rack Cover</button>
-
-
-            <!-- <button onclick="app.resetAllConnections()">!! reset all connections</button> -->
-        </span>
-        <span class="categoryOfComponent">
-
-
-
-            <button class="tone-visual" onclick="app.addNumberDisplay()">#️⃣ Number Display</button>
-            <button class="tone-visual" onclick="app.addFrequencyAnalizer()">🖥️ Freq Analizer</button>
-            <button class="tone-visual" onclick="app.addSpectrogram()">🖥️ Spectrogram</button>
-
-            <button class="tone-visual" onclick="app.addOscilloscope()">📺 Oscilloscope</button>
-            <button class="tone-visual" onclick="app.addLargeVisualizer()">📺 Large Visualizer</button>
-            <button class="tone-visual" onclick="app.addPeakDetector()">⛰️ Peak Detector</button>
-            <button class="tone-visual" onclick="app.addPitchDetector()">Pitch Detector</button>
-            <button class="tone-visual" onclick="app.addSpectrum2Image()">Spectrum 2 Image</button>
-
-            <button class="tone-visual" onclick="app.addImageMaker()">📷 Image Maker</button>
-            <button class="tone-visual" onclick="app.addCanvasPlotter()">✏️ Canvas Plotter</button>
-            <button class="tone-visual" onclick="app.addShader()">Shader</button>
-            <!-- <button onclick="app.addBPMDetector()">## add bpm detector</button> -->
-
-        </span>
-
-
-    </div>
+    <div class="paletteOverlay" onclick="app.openButtons()"></div>
+    <div class="buttons modulePalette" aria-label="Module palette"></div>
     <div class="historyPanel">
         <div class="historyList"></div>
     </div>
