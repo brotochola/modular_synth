@@ -884,7 +884,7 @@ component.NumberDisplayComponent {
 component.memorycomponent {
   height: auto;
   min-height: 56px;
-  width: 221px;
+  width: 240px;
 }
 
 component.JoystickComponent {

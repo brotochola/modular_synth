@@ -54,25 +54,37 @@ class AdsrProcessor extends AudioWorkletProcessor {
     let decRatio = this._decRatio;
     let relRatio = this._relRatio;
     if (gates.length == 1) this._gate = gates[0];
+    let prev = this._lastGate;
+    let phase = this._phase;
+    let value = this._value;
+    let aRate = gates.length > 1;
+    let thr = 0.001;
     for (let i = 0; i < output.length; ++i) {
-      if (gates.length > 1) this._gate = gates[i];
-      if (this._gate >= 0.5) {
-        if (this._lastGate < 0.5) this._phase = 1;
-      } else this._phase = 0;
-      if (this._phase == 1) {
-        if ((this._value += (atkmax - this._value) * atkRatio) >= 1.0) {
-          this._value = 1.0;
-          this._phase = 0;
+      let g = aRate ? gates[i] : this._gate;
+      if (g >= thr) {
+        if (prev < thr) {
+          phase = 1;
+          value = 0;
         }
-      } else if (this._value > sus) {
-        this._value += (sus - this._value) * decRatio;
+      } else phase = 0;
+      if (phase == 1) {
+        if ((value += (atkmax - value) * atkRatio) >= 1.0) {
+          value = 1.0;
+          phase = 0;
+        }
+      } else if (value > sus) {
+        value += (sus - value) * decRatio;
       }
-      if (this._gate < 0.5) {
-        this._value += -this._value * relRatio;
+      if (g < thr) {
+        value += -value * relRatio;
       }
-      output[i] = this._value;
+      output[i] = value;
+      prev = g;
     }
-    this._lastGate = this._gate;
+    this._lastGate = prev;
+    this._gate = prev;
+    this._phase = phase;
+    this._value = value;
     if (this.sab) {
       AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
       this.sab.publish();
