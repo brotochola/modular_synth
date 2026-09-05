@@ -3,7 +3,7 @@ class AdsrProcessor extends AudioWorkletProcessor {
     super();
     AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "adsr");
-    this._lastGate = 0;
+    this._gateOn = 0;
     this._gate = 0;
     this._phase = 0;
     this._value = 0;
@@ -54,19 +54,18 @@ class AdsrProcessor extends AudioWorkletProcessor {
     let decRatio = this._decRatio;
     let relRatio = this._relRatio;
     if (gates.length == 1) this._gate = gates[0];
-    let prev = this._lastGate;
+    let on = this._gateOn;
     let phase = this._phase;
     let value = this._value;
     let aRate = gates.length > 1;
-    let thr = 0.001;
     for (let i = 0; i < output.length; ++i) {
       let g = aRate ? gates[i] : this._gate;
-      if (g >= thr) {
-        if (prev < thr) {
-          phase = 1;
-          value = 0;
-        }
-      } else phase = 0;
+      let next = AppConfig.schmitt(on, g);
+      if (next && !on) {
+        phase = 1;
+        value = 0;
+      }
+      if (!next) phase = 0;
       if (phase == 1) {
         if ((value += (atkmax - value) * atkRatio) >= 1.0) {
           value = 1.0;
@@ -75,14 +74,14 @@ class AdsrProcessor extends AudioWorkletProcessor {
       } else if (value > sus) {
         value += (sus - value) * decRatio;
       }
-      if (g < thr) {
+      if (!next) {
         value += -value * relRatio;
       }
       output[i] = value;
-      prev = g;
+      on = next;
     }
-    this._lastGate = prev;
-    this._gate = prev;
+    this._gateOn = on;
+    this._gate = on;
     this._phase = phase;
     this._value = value;
     if (this.sab) {

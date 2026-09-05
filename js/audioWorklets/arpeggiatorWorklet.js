@@ -30,7 +30,7 @@ class ArpeggiatorWorklet extends AudioWorkletProcessor {
     this.lastBpmRaw = null;
     this.externalClock = false;
     this.syncToBeat = false;
-    this.prevClockSample = 0;
+    this.clockOn = 0;
     this.clockSkew = 0;
     this.pulseRemaining = 0;
     this.pulseLength = AppConfig.trigPulseSamples(sampleRate);
@@ -147,7 +147,8 @@ class ArpeggiatorWorklet extends AudioWorkletProcessor {
     if (clockChannel && clockChannel.length && !this.syncToBeat) {
       for (let i = 0; i < clockChannel.length; ++i) {
         let sample = clockChannel[i];
-        if (AppConfig.isRising(this.prevClockSample, sample)) {
+        let on = AppConfig.schmitt(this.clockOn, sample);
+        if (on && !this.clockOn) {
           if (!this.externalClock) {
             this.externalClock = true;
             this.currentNote = 0;
@@ -156,7 +157,7 @@ class ArpeggiatorWorklet extends AudioWorkletProcessor {
           }
           this.takeStep(i, minOct, maxOct);
         }
-        this.prevClockSample = sample;
+        this.clockOn = on;
       }
     }
 

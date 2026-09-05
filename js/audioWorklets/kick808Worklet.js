@@ -43,7 +43,7 @@ class Kick808Worklet extends AudioWorkletProcessor {
     super();
     AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "kick808");
-    this.prevTrig = 0;
+    this.trigOn = 0;
     this.phase = 0;
     this.ampEnv = 0;
     this.pitchEnv = 0;
@@ -77,7 +77,7 @@ class Kick808Worklet extends AudioWorkletProcessor {
     let trig0 = trigs[0];
     let lut = this.sineLut;
     let lutMask = 2047;
-    let prev = this.prevTrig;
+    let prev = this.trigOn;
     let phase = this.phase;
     let ampEnv = this.ampEnv;
     let pitchEnv = this.pitchEnv;
@@ -87,15 +87,16 @@ class Kick808Worklet extends AudioWorkletProcessor {
     let ampCoeff = this.ampCoeff;
     let pitchCoeff = this.pitchCoeff;
     let clickCoeff = this.clickCoeff;
-    let thr = AppConfig.TRIG_THRESHOLD;
     for (let i = 0; i < n; i++) {
       let trig = aTrig ? trigs[i] : trig0;
-      if (prev < thr && trig >= thr) {
+      let on = AppConfig.schmitt(prev, trig);
+      if (on && !prev) {
         phase = 0;
         ampEnv = 1;
         pitchEnv = 1;
         clickEnv = 1;
       }
+      prev = on;
       let freq = pitch + punch * pitchEnv;
       phase += freq * invSr;
       phase -= phase | 0;
@@ -115,9 +116,8 @@ class Kick808Worklet extends AudioWorkletProcessor {
       ampEnv *= ampCoeff;
       pitchEnv *= pitchCoeff;
       clickEnv *= clickCoeff;
-      prev = trig;
     }
-    this.prevTrig = prev;
+    this.trigOn = prev;
     this.phase = phase;
     this.ampEnv = ampEnv;
     this.pitchEnv = pitchEnv;

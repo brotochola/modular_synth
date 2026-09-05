@@ -36,8 +36,8 @@ class HiHat808Worklet extends AudioWorkletProcessor {
     super();
     AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "hihat808");
-    this.prevTrig = 0;
-    this.prevOpen = 0;
+    this.trigOn = 0;
+    this.openOn = 0;
     this.playCh = 1e9;
     this.playOh = 1e9;
     this.chLut = new Float32Array(0);
@@ -113,33 +113,34 @@ class HiHat808Worklet extends AudioWorkletProcessor {
     let aOpen = opens.length > 1;
     let trig0 = trigs[0];
     let open0 = opens[0];
-    let prev = this.prevTrig;
-    let prevO = this.prevOpen;
+    let prev = this.trigOn;
+    let prevO = this.openOn;
     let playCh = this.playCh;
     let playOh = this.playOh;
     let chLut = this.chLut;
     let ohLut = this.ohLut;
     let chLen = this.chLen;
     let ohLen = this.ohLen;
-    let thr = AppConfig.TRIG_THRESHOLD;
     let n = output.length;
     for (let i = 0; i < n; i++) {
       let trig = aTrig ? trigs[i] : trig0;
       let opn = aOpen ? opens[i] : open0;
-      if (prev < thr && trig >= thr) {
+      let on = AppConfig.schmitt(prev, trig);
+      let onO = AppConfig.schmitt(prevO, opn);
+      if (on && !prev) {
         playCh = 0;
         playOh = ohLen;
       }
-      if (prevO < thr && opn >= thr) playOh = 0;
+      if (onO && !prevO) playOh = 0;
       let out = 0;
       if (playCh < chLen) out += chLut[playCh++];
       if (playOh < ohLen) out += ohLut[playOh++];
       output[i] = out;
-      prev = trig;
-      prevO = opn;
+      prev = on;
+      prevO = onO;
     }
-    this.prevTrig = prev;
-    this.prevOpen = prevO;
+    this.trigOn = prev;
+    this.openOn = prevO;
     this.playCh = playCh;
     this.playOh = playOh;
     if (this.sab) {

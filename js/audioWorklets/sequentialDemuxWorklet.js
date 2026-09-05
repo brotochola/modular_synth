@@ -5,8 +5,8 @@ class SequentialDemuxWorklet extends AudioWorkletProcessor {
     if (globalThis.AudioProfile) AudioProfile.attach(this, "sequential-demux");
     this.step = 0;
     this.steps = 4;
-    this.prevClock = 0;
-    this.prevReset = 0;
+    this.clockOn = 0;
+    this.resetOn = 0;
     this.lastPosted = -1;
     this.port.onmessage = (e) => {
       let d = e.data || {};
@@ -36,8 +36,8 @@ class SequentialDemuxWorklet extends AudioWorkletProcessor {
       let ch = outputs[o] && outputs[o][0];
       if (ch && ch.length > n) n = ch.length;
     }
-    let prevC = this.prevClock;
-    let prevR = this.prevReset;
+    let prevC = this.clockOn;
+    let prevR = this.resetOn;
     let step = this.step;
     let steps = this.steps;
     let changed = false;
@@ -46,15 +46,17 @@ class SequentialDemuxWorklet extends AudioWorkletProcessor {
       let ck = clockCh ? clockCh[i] : 0;
       let rs = resetCh ? resetCh[i] : 0;
       let sig = signalCh ? signalCh[i] : 0;
-      if (AppConfig.isRising(prevR, rs)) {
+      let onR = AppConfig.schmitt(prevR, rs);
+      let onC = AppConfig.schmitt(prevC, ck);
+      if (onR && !prevR) {
         step = 0;
         changed = true;
-      } else if (AppConfig.isRising(prevC, ck)) {
+      } else if (onC && !prevC) {
         step = (step + 1) % steps;
         changed = true;
       }
-      prevC = ck;
-      prevR = rs;
+      prevC = onC;
+      prevR = onR;
 
       for (let o = 0; o < 4; o++) {
         let ch = outputs[o] && outputs[o][0];
@@ -63,8 +65,8 @@ class SequentialDemuxWorklet extends AudioWorkletProcessor {
       }
     }
 
-    this.prevClock = prevC;
-    this.prevReset = prevR;
+    this.clockOn = prevC;
+    this.resetOn = prevR;
     this.step = step;
     if (changed) this.postStep();
     if (this.sab) {

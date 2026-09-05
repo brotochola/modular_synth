@@ -15,8 +15,11 @@
     // --- Triggers / clocks ---
     /** Standard trig / clock pulse width (seconds). ~10ms. */
     TRIG_PULSE_SEC: 0.01,
-    /** Rising-edge compare for gates/trigs (prev < thr && cur >= thr). */
-    TRIG_THRESHOLD: 0.5,
+    /** Schmitt: fire when CV crosses high; reset when it falls below low. ~1V / 0.5V on a 0–10V rail. */
+    TRIG_HIGH: 0.1,
+    TRIG_LOW: 0.05,
+    /** Alias of TRIG_HIGH for older worklets. */
+    TRIG_THRESHOLD: 0.1,
     /** Min delta for sequencer external-clock rising edge. */
     CLOCK_EDGE_DELTA: 0.01,
 
@@ -113,8 +116,17 @@
     },
 
     isRising(prev, cur) {
-      let thr = this.TRIG_THRESHOLD;
-      return prev < thr && cur >= thr;
+      return prev < this.TRIG_HIGH && cur >= this.TRIG_HIGH;
+    },
+
+    isFalling(prev, cur) {
+      return prev >= this.TRIG_LOW && cur < this.TRIG_LOW;
+    },
+
+    /** Schmitt latch. 0/1 in, 0/1 out. Rise = was 0, now 1. */
+    schmitt(on, cur) {
+      if (!on) return cur >= this.TRIG_HIGH ? 1 : 0;
+      return cur < this.TRIG_LOW ? 0 : 1;
     },
 
     packEvent(type, a, b, c) {

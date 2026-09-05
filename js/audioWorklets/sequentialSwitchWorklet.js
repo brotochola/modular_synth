@@ -5,8 +5,8 @@ class SequentialSwitchWorklet extends AudioWorkletProcessor {
     if (globalThis.AudioProfile) AudioProfile.attach(this, "sequential-switch");
     this.step = 0;
     this.steps = 4;
-    this.prevClock = 0;
-    this.prevReset = 0;
+    this.clockOn = 0;
+    this.resetOn = 0;
     this.lastPosted = -1;
     this.src = [null, null, null, null];
     this.port.onmessage = (e) => {
@@ -38,31 +38,32 @@ class SequentialSwitchWorklet extends AudioWorkletProcessor {
     this.src[1] = inputs[3] && inputs[3][0];
     this.src[2] = inputs[4] && inputs[4][0];
     this.src[3] = inputs[5] && inputs[5][0];
-    let prevC = this.prevClock;
-    let prevR = this.prevReset;
+    let prevC = this.clockOn;
+    let prevR = this.resetOn;
     let step = this.step;
     let steps = this.steps;
     let changed = false;
-    let thr = AppConfig.TRIG_THRESHOLD;
 
     for (let i = 0; i < n; i++) {
       let ck = clockCh ? clockCh[i] : 0;
       let rs = resetCh ? resetCh[i] : 0;
-      if (prevR < thr && rs >= thr) {
+      let onR = AppConfig.schmitt(prevR, rs);
+      let onC = AppConfig.schmitt(prevC, ck);
+      if (onR && !prevR) {
         step = 0;
         changed = true;
-      } else if (prevC < thr && ck >= thr) {
+      } else if (onC && !prevC) {
         step = (step + 1) % steps;
         changed = true;
       }
-      prevC = ck;
-      prevR = rs;
+      prevC = onC;
+      prevR = onR;
       let src = this.src[step];
       out[i] = src ? src[i] : 0;
     }
 
-    this.prevClock = prevC;
-    this.prevReset = prevR;
+    this.clockOn = prevC;
+    this.resetOn = prevR;
     this.step = step;
     if (changed) this.postStep();
     if (this.sab) {

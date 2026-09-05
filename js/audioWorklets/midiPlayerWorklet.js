@@ -26,8 +26,8 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     this.noteHz = [0];
     this.activeNote = [-1];
     this.gateHigh = [0];
-    this.prevTrig = 0;
-    this.prevStop = 0;
+    this.playOn = 0;
+    this.stopOn = 0;
     this.port.onmessage = (e) => this.onMessage(e.data || {});
   }
 
@@ -121,11 +121,13 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
 
     for (let i = 0; i < n; i++) {
       let stopIn = stopCh ? stopCh[i] : 0;
-      if (stopIn > 0 && this.prevStop <= 0) this.stopPlayback(true);
-      this.prevStop = stopIn;
+      let stopOn = AppConfig.schmitt(this.stopOn, stopIn);
+      if (stopOn && !this.stopOn) this.stopPlayback(true);
+      this.stopOn = stopOn;
       let trigIn = playCh ? playCh[i] : 0;
-      if (trigIn > 0 && this.prevTrig <= 0 && !this.playing) this.startPlayback();
-      this.prevTrig = trigIn;
+      let playOn = AppConfig.schmitt(this.playOn, trigIn);
+      if (playOn && !this.playOn && !this.playing) this.startPlayback();
+      this.playOn = playOn;
 
       if (this.playing) {
         this.tickFrac += ticksPerSample;

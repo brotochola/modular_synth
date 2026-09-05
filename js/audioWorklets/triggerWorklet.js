@@ -3,7 +3,7 @@ class TriggerWorklet extends AudioWorkletProcessor {
     super();
     AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "trigger");
-    this.prevValues = new Float32Array(16);
+    this.trigOn = new Float32Array(16);
     this.counts = new Float32Array(16);
   }
 
@@ -14,19 +14,18 @@ class TriggerWorklet extends AudioWorkletProcessor {
       if (!input || !input.length) continue;
       let inputChannel = input[0];
       if (!inputChannel || !inputChannel.length) continue;
-      let lastVal = this.prevValues[p];
+      let on = this.trigOn[p];
       let fired = false;
-      let prev = lastVal;
       for (let i = 0; i < inputChannel.length; i++) {
-        let current = inputChannel[i];
-        if (!fired && AppConfig.isRising(prev, current)) fired = true;
-        prev = current;
+        let next = AppConfig.schmitt(on, inputChannel[i]);
+        if (!fired && next && !on) fired = true;
+        on = next;
       }
+      this.trigOn[p] = on;
       if (fired) {
         this.counts[p] += 1;
         if (sab) sab.setSlot(p, this.counts[p]);
       }
-      this.prevValues[p] = prev;
     }
     if (sab) {
       AppConfig.sabWriteGraphPeaks(sab, inputs, null);

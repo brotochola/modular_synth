@@ -405,11 +405,11 @@ class Component {
     if (!led) return;
     let kind = this.getJackKind(name);
     if (kind == "trig") {
-      if (!this._jackLedPrev) this._jackLedPrev = {};
-      let prev = this._jackLedPrev[name] || 0;
-      if (AppConfig.isRising(prev, level))
-        flashLedTrig(led, AppConfig.LED_FLASH_MS);
-      this._jackLedPrev[name] = level;
+      if (!this._jackLedOn) this._jackLedOn = {};
+      let on = this._jackLedOn[name] || 0;
+      let next = AppConfig.schmitt(on, level);
+      if (next && !on) flashLedTrig(led, AppConfig.LED_FLASH_MS);
+      this._jackLedOn[name] = next;
     } else {
       setLedBipolar(led, level);
     }
@@ -422,11 +422,11 @@ class Component {
     if (!led) return;
     kind = kind || this.getOutputKind(i);
     if (kind == "trig") {
-      if (!this._outLedPrev) this._outLedPrev = {};
-      let prev = this._outLedPrev[i] || 0;
-      if (AppConfig.isRising(prev, level))
-        flashLedTrig(led, AppConfig.LED_FLASH_MS);
-      this._outLedPrev[i] = level;
+      if (!this._outLedOn) this._outLedOn = {};
+      let on = this._outLedOn[i] || 0;
+      let next = AppConfig.schmitt(on, level);
+      if (next && !on) flashLedTrig(led, AppConfig.LED_FLASH_MS);
+      this._outLedOn[i] = next;
     } else {
       setLedBipolar(led, level);
     }
@@ -442,7 +442,7 @@ class Component {
     if (!this.outputLedElements) return;
     let led = this.outputLedElements[outIndex];
     if (led) setLedBipolar(led, 0);
-    if (this._outLedPrev) this._outLedPrev[outIndex] = 0;
+    if (this._outLedOn) this._outLedOn[outIndex] = 0;
   }
 
   syncOutputConnected(outIndex) {

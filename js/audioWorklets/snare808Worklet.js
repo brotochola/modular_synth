@@ -43,7 +43,7 @@ class Snare808Worklet extends AudioWorkletProcessor {
     super();
     AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "snare808");
-    this.prevTrig = 0;
+    this.trigOn = 0;
     this.playhead = 1e9;
     this.lut = new Float32Array(0);
     this.lutLen = 0;
@@ -137,19 +137,19 @@ class Snare808Worklet extends AudioWorkletProcessor {
     let trigs = parameters.trigger;
     let aTrig = trigs.length > 1;
     let trig0 = trigs[0];
-    let prev = this.prevTrig;
+    let prev = this.trigOn;
     let play = this.playhead;
     let lut = this.lut;
     let len = this.lutLen;
-    let thr = AppConfig.TRIG_THRESHOLD;
     let n = output.length;
     for (let i = 0; i < n; i++) {
       let trig = aTrig ? trigs[i] : trig0;
-      if (prev < thr && trig >= thr) play = 0;
+      let on = AppConfig.schmitt(prev, trig);
+      if (on && !prev) play = 0;
       output[i] = play < len ? lut[play++] : 0;
-      prev = trig;
+      prev = on;
     }
-    this.prevTrig = prev;
+    this.trigOn = prev;
     this.playhead = play;
     if (this.sab) {
       AppConfig.sabWriteGraphPeaks(this.sab, inputs, parameters);
