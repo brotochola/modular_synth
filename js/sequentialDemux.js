@@ -4,6 +4,7 @@ class SequentialDemux extends Component {
     super(app, serializedData);
     this.infoText =
       "Sequential demux (1→4). Rising clock advances which output gets the signal; other outs stay 0. Reset jumps to out 1. Steps locks the ring to 2, 3, or 4. Patch BPM into signal and a slower clock into clock to send phrases to one sequencer then another.";
+    this.jackKinds = { in_0: "trig", in_1: "trig" };
     this.steps = serializedData?.steps || 4;
     this.valuesToSave = ["steps"];
     this.outputLabels = ["1", "2", "3", "4"];

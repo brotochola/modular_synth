@@ -20,6 +20,7 @@ class Sequencer extends Component {
     this.numberOfSteps = AppConfig.SEQ_STEPS;
     this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
+    this.jackKinds = { in_0: "trig" };
     this.outputLabels = ["relative note", "gate", "Hz", "trigger"];
     this.outputKinds = { 0: "cv", 1: "gate", 2: "cv", 3: "trig" };
     this.createSyncToggle();

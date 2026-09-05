@@ -25,8 +25,7 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     this.voiceCount = 1;
     this.noteHz = [0];
     this.activeNote = [-1];
-    this.gateSamplesLeft = [0];
-    this.gateLen = AppConfig.trigPulseSamples(sampleRate);
+    this.gateHigh = [0];
     this.prevTrig = 0;
     this.prevStop = 0;
     this.port.onmessage = (e) => this.onMessage(e.data || {});
@@ -37,7 +36,7 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     this.voiceCount = count;
     this.noteHz = new Array(count).fill(0);
     this.activeNote = new Array(count).fill(-1);
-    this.gateSamplesLeft = new Array(count).fill(0);
+    this.gateHigh = new Array(count).fill(0);
   }
 
   onMessage(d) {
@@ -64,7 +63,7 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     for (let v = 0; v < this.voiceCount; v++) {
       this.noteHz[v] = 0;
       this.activeNote[v] = -1;
-      this.gateSamplesLeft[v] = 0;
+      this.gateHigh[v] = 0;
     }
     this.playing = true;
   }
@@ -74,7 +73,7 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     for (let v = 0; v < this.voiceCount; v++) {
       this.noteHz[v] = 0;
       this.activeNote[v] = -1;
-      this.gateSamplesLeft[v] = 0;
+      this.gateHigh[v] = 0;
     }
     this.eventIndex = 0;
     this.tick = 0;
@@ -92,11 +91,12 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
     if (ev.type == 1) {
       this.noteHz[v] = this.noteToHz(ev.note);
       this.activeNote[v] = ev.note;
-      this.gateSamplesLeft[v] = this.gateLen;
+      this.gateHigh[v] = 1;
     } else if (ev.type == 0) {
       if (this.activeNote[v] == ev.note || this.activeNote[v] < 0) {
         this.noteHz[v] = 0;
         this.activeNote[v] = -1;
+        this.gateHigh[v] = 0;
       }
     }
   }
@@ -145,6 +145,7 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
           for (let v = 0; v < vc; v++) {
             this.noteHz[v] = 0;
             this.activeNote[v] = -1;
+            this.gateHigh[v] = 0;
           }
           if (this.sab) this.sab.setEnded(true);
         }
@@ -154,14 +155,7 @@ class MidiFilePlayerWorklet extends AudioWorkletProcessor {
         let noteOut = noteOuts[v];
         let trigOut = trigOuts[v];
         if (noteOut) noteOut[i] = this.noteHz[v] || 0;
-        if (trigOut) {
-          if (this.gateSamplesLeft[v] > 0) {
-            trigOut[i] = 1;
-            this.gateSamplesLeft[v]--;
-          } else {
-            trigOut[i] = 0;
-          }
-        }
+        if (trigOut) trigOut[i] = this.gateHigh[v] || 0;
       }
     }
     if (this.sab) {

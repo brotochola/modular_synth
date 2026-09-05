@@ -82,6 +82,7 @@ class Component {
       let keys = Object.keys(this.serializedData.audioParams);
       for (let key of keys) {
         if (key.startsWith("in")) continue;
+        if (this.isTrigOrGateJack(key)) continue;
         let val = this.serializedData.audioParams[key];
         let param = this.node[key];
         if (!(param instanceof AudioParam) && this.node.parameters) {
@@ -371,6 +372,11 @@ class Component {
     if (String(name).startsWith("in_")) return "audio";
     if ((this.namedAudioInputs || []).includes(name)) return "audio";
     return "cv";
+  }
+
+  isTrigOrGateJack(name) {
+    let kind = this.getJackKind(name);
+    return kind == "trig" || kind == "gate";
   }
 
   getOutputKind(i) {
@@ -724,7 +730,7 @@ class Component {
         !(this.customAudioTriggers || []).includes(inp) &&
         !(this.customAudioParams || []).includes(inp);
 
-      if (isAudioParam && widgetMode !== "fader") {
+      if (isAudioParam && widgetMode !== "fader" && !this.isTrigOrGateJack(inp)) {
         let limits = this.getParamInputLimits(inp);
         let currentVal = 0;
         if (this.node.parameters && this.node.parameters.get(inp)) {
@@ -1285,6 +1291,7 @@ class Component {
     }
     for (let audioParam of this.audioParams || []) {
       if (audioParam.startsWith("in")) continue;
+      if (this.isTrigOrGateJack(audioParam)) continue;
       let param = this.node && this.node[audioParam];
       if (!(param instanceof AudioParam) && this.node?.parameters) {
         param = this.node.parameters.get(audioParam);

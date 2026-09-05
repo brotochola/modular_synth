@@ -4,6 +4,7 @@ class SequentialSwitch extends Component {
     super(app, serializedData);
     this.infoText =
       "Sequential switch (4→1). Rising clock advances which signal input is passed through. Reset jumps to step 1. Steps select locks the ring to 2, 3, or 4. Patch Poly Seq / BPM into clock for round-robin routing.";
+    this.jackKinds = { in_0: "trig", in_1: "trig" };
     this.steps = serializedData?.steps || 4;
     this.valuesToSave = ["steps"];
     this.createDisplay();

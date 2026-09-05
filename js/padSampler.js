@@ -4,6 +4,16 @@ class PadSampler extends Component {
     super(app, serializedData);
     this.infoText =
       "Pad sampler. Load one audio sample, then fire it from the play button or from any of the trigger inputs. Each hit plays the loaded buffer; useful for drums and one-shots.";
+    this.jackKinds = {
+      in_0: "trig",
+      in_1: "trig",
+      in_2: "trig",
+      in_3: "trig",
+      in_4: "trig",
+      in_5: "trig",
+      in_6: "trig",
+      in_7: "trig",
+    };
 
     this.createNode();
     this.createInputFile();

@@ -16,6 +16,7 @@ class PolySequencer extends Component {
     this.numberOfSteps = AppConfig.SEQ_STEPS;
     this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
+    this.jackKinds = { in_0: "trig" };
     this.outputLabels = ["1", "2", "3", "4", "5", "6", "7", "8"];
     this.outputKinds = {
       0: "trig",

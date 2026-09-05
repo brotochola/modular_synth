@@ -33,6 +33,8 @@ class KeyboardComponent extends Component {
       "m",
     ];
     this.letters = this.outputLabels;
+    this.outputKinds = {};
+    for (let i = 0; i < this.outputLabels.length; i++) this.outputKinds[i] = "gate";
     this.valuesToSave = ["sourceUserID"];
     this.hideOutputActivityLeds = true;
     this.putEvents();

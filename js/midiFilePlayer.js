@@ -3,15 +3,15 @@ class MidiFilePlayer extends Component {
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "MIDI file player. Load a .mid; each MIDI channel with notes gets a note (Hz) + trigger pair. If only one channel but many tracks, splits by track. Play via button or rising trigger; stop input ends playback. Rate scales tempo.";
+      "MIDI file player. Load a .mid; each MIDI channel with notes gets a note (Hz) + gate pair (high while the note is held). If only one channel but many tracks, splits by track. Play via button or rising trigger; stop input ends playback. Rate scales tempo.";
     this.playing = false;
     this.voices = [{ id: "ch1", label: "ch1" }];
     this.namedAudioInputs = ["trigger", "stop"];
     this.uiParamWidgets = { in_0: "none", in_1: "none" };
     this.jackKinds = { trigger: "trig", stop: "trig" };
     this.valuesToSave = ["audioEncoding", "base64", "filename", "voiceLabels"];
-    this.outputLabels = ["ch1 note", "ch1 trig"];
-    this.outputKinds = { 0: "cv", 1: "trig" };
+    this.outputLabels = ["ch1 note", "ch1 gate"];
+    this.outputKinds = { 0: "cv", 1: "gate" };
 
     this.createInputFile();
     this.createPlayButton();
@@ -153,15 +153,14 @@ class MidiFilePlayer extends Component {
     this.outputKinds = {};
     for (let v of this.voices || []) {
       this.outputLabels.push(v.label + " note");
-      this.outputLabels.push(v.label + " trig");
+      this.outputLabels.push(v.label + " gate");
     }
     if (!this.outputLabels.length) {
-      this.outputLabels = ["note", "trigger"];
+      this.outputLabels = ["note", "gate"];
     }
     for (let i = 0; i < this.outputLabels.length; i++) {
       let lab = String(this.outputLabels[i]).toLowerCase();
-      this.outputKinds[i] =
-        lab.indexOf("trig") >= 0 || lab == "trigger" ? "trig" : "cv";
+      this.outputKinds[i] = lab.indexOf("gate") >= 0 ? "gate" : "cv";
     }
     this.voiceLabels = (this.voices || []).map((v) => v.label);
     this.putLabels();
