@@ -22,6 +22,7 @@ class App {
     "Poly Seq": ["poly-sequencer"],
     Mixer: ["mixer"],
     Noise: ["white-noise"],
+    Perlin: ["perlin"],
     Mulberry32: ["mulberry32"],
     "808 Kick": ["kick808"],
     "808 Snare": ["snare808"],
@@ -2367,6 +2368,9 @@ class App {
   addNoise() {
     this.components.push(new NoiseGenWithWorklet(this));
   }
+  addPerlin() {
+    this.components.push(new PerlinNoise(this));
+  }
   addMulberry32() {
     this.components.push(new Mulberry32(this));
   }
@@ -3094,6 +3098,7 @@ App.COMPONENT_CLASSES = {
   Reverb,
   Distortion,
   NoiseGenWithWorklet,
+  PerlinNoise,
   Mulberry32,
   CustomProcessorComponent,
   Mixer,
@@ -3160,6 +3165,7 @@ App.COMPONENT_TONE = {
   Cowbell808: "source",
   ScanlineSynth: "source",
   NoiseGenWithWorklet: "source",
+  PerlinNoise: "source",
   Mulberry32: "source",
   ConstantValueNode: "source",
   Drawer: "source",

@@ -806,6 +806,10 @@ component.NoiseGenWithWorklet icon:after {
   content: "👾";
 }
 
+component.PerlinNoise icon:after {
+  content: "\1F32B";
+}
+
 component.Mouse icon:after {
   content: "🖱️";
 }
@@ -2145,6 +2149,12 @@ component .deleteButton:hover {
   height: 100%;
 }
 component.ScanlineSynth canvas.scanlineCanvas {
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  background: #000;
+}
+component.PerlinNoise canvas.perlinCanvas {
   width: 100%;
   height: auto;
   image-rendering: pixelated;
