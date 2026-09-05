@@ -884,7 +884,7 @@ component.NumberDisplayComponent {
 component.memorycomponent {
   height: auto;
   min-height: 56px;
-  width: 170px;
+  width: 221px;
 }
 
 component.JoystickComponent {
@@ -1699,8 +1699,13 @@ component input.outputButton.jack {
   padding: 0;
   cursor: pointer;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 50%, #0a0c0b 38%, #1a2220 42%, #2a3330 55%, #1a2220 70%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    #0a0c0b 38%,
+    #1a2220 42%,
+    #2a3330 55%,
+    #1a2220 70%
+  );
   border: 2px solid #3a4540;
   box-shadow:
     inset 0 1px 3px rgba(0, 0, 0, 0.8),
@@ -1810,8 +1815,13 @@ component button.input.jack {
   height: 18px;
   padding: 0;
   border-radius: 50%;
-  background:
-    radial-gradient(circle at 50% 50%, #0a0c0b 38%, #1a2220 42%, #2a3330 55%, #1a2220 70%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    #0a0c0b 38%,
+    #1a2220 42%,
+    #2a3330 55%,
+    #1a2220 70%
+  );
   border: 2px solid #3a4540;
   box-shadow:
     inset 0 1px 3px rgba(0, 0, 0, 0.8),
@@ -1823,8 +1833,13 @@ component button.input.jack {
 
 component button.input.jack:hover {
   border-color: var(--accent);
-  background:
-    radial-gradient(circle at 50% 50%, #0a0c0b 38%, #1a2220 42%, #2a3330 55%, #1a2220 70%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    #0a0c0b 38%,
+    #1a2220 42%,
+    #2a3330 55%,
+    #1a2220 70%
+  );
   color: transparent;
 }
 
@@ -1952,6 +1967,7 @@ component.countercomponent .display {
 component.memorycomponent .display {
   margin-right: 0px;
   text-align: right;
+  max-width: 80px;
 }
 
 /* component.JoystickComponent input.outputButton:after {
@@ -2588,7 +2604,9 @@ component.drawer canvas {
   background: rgb(40, 220, 80);
   border-color: rgb(220, 80);
   opacity: 1;
-  box-shadow: 0 0 14px rgb(40, 220, 80), 0 0 3px #fff;
+  box-shadow:
+    0 0 14px rgb(40, 220, 80),
+    0 0 3px #fff;
 }
 
 component.oscillator {

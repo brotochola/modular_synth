@@ -10,17 +10,16 @@ class MemoryComponent extends Component {
   }
 
   createNode() {
-    this.app.loadWorklet("js/audioWorklets/memoryWorklet.js")
-      .then(() => {
-        this.node = this.makeWorklet("memory-worklet", {
-          numberOfInputs: 1,
-          numberOfOutputs: 1,
-        });
-
-        this.node.onprocessorerror = (e) => {
-          console.error(e);
-        };
+    this.app.loadWorklet("js/audioWorklets/memoryWorklet.js").then(() => {
+      this.node = this.makeWorklet("memory-worklet", {
+        numberOfInputs: 1,
+        numberOfOutputs: 1,
       });
+
+      this.node.onprocessorerror = (e) => {
+        console.error(e);
+      };
+    });
   }
 
   onSabTick() {
@@ -29,6 +28,6 @@ class MemoryComponent extends Component {
     let v = this.sabBlock.getSlot(0);
     if (v === this.savedValue) return;
     this.savedValue = v;
-    this.display.innerHTML = v;
+    this.display.innerHTML = v.toFixed(3);
   }
 }

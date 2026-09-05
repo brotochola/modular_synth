@@ -1,12 +1,16 @@
 class Midi extends Component {
   static name = "MIDI";
   static MAX_OUTS = 31;
+  static CC_START = 10;
   static BASE_KEYS = [
     "freq1",
     "freq2",
     "freq3",
     "freq4",
-    "velocity",
+    "vel1",
+    "vel2",
+    "vel3",
+    "vel4",
     "modWheel",
     "pitchBend",
   ];
@@ -15,27 +19,31 @@ class Midi extends Component {
     "freq2",
     "freq3",
     "freq4",
-    "velocity",
+    "vel1",
+    "vel2",
+    "vel3",
+    "vel4",
     "mod",
     "pitch",
   ];
 
+  static shiftOldOut(idx) {
+    idx = parseInt(idx, 10) || 0;
+    if (idx >= 7) return idx + 3;
+    if (idx === 5) return 8;
+    if (idx === 6) return 9;
+    return idx;
+  }
+
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "Hardware MIDI in. Notes map to freq1–4 + velocity; mod wheel and pitch bend are always available. Pads and CCs appear as new outputs when you touch them.";
+      "Hardware MIDI in. Notes map to freq1–4 + vel1–4; mod wheel and pitch bend are always available. Pads and CCs appear as new outputs when you touch them.";
     this.notesOn = {};
     this.outputLabels = Midi.BASE_LABELS.slice();
     while (this.outputLabels.length < Midi.MAX_OUTS) this.outputLabels.push("");
-    this.outputKinds = {
-      0: "cv",
-      1: "cv",
-      2: "cv",
-      3: "cv",
-      4: "cv",
-      5: "cv",
-      6: "cv",
-    };
+    this.outputKinds = {};
+    for (let i = 0; i < Midi.BASE_KEYS.length; i++) this.outputKinds[i] = "cv";
     if (!this.visibleOutputs) {
       this.visibleOutputs = {};
       for (let i = 0; i < Midi.BASE_KEYS.length; i++) {
@@ -117,8 +125,71 @@ class Midi extends Component {
   }
 
   updateUI() {
+    this.migrateOldOutputs();
     this.syncOutputsUI();
     this.restoreSavedControlChanges();
+  }
+
+  migrateOldOutputs() {
+    let vo = this.visibleOutputs;
+    if (!vo) {
+      vo = this.visibleOutputs = {};
+      for (let i = 0; i < Midi.BASE_KEYS.length; i++) {
+        vo[Midi.BASE_KEYS[i]] = { numOfOutput: i };
+      }
+      return;
+    }
+    if (vo.vel1) return;
+    let isOld = vo.velocity || (vo.modWheel && vo.modWheel.numOfOutput === 5);
+    if (!isOld) return;
+    if (vo.velocity) {
+      vo.vel1 = vo.velocity;
+      delete vo.velocity;
+    } else {
+      vo.vel1 = { numOfOutput: 4 };
+    }
+    vo.vel2 = { numOfOutput: 5 };
+    vo.vel3 = { numOfOutput: 6 };
+    vo.vel4 = { numOfOutput: 7 };
+    if (vo.modWheel && vo.modWheel.numOfOutput === 5) {
+      vo.modWheel = { numOfOutput: 8 };
+    }
+    if (vo.pitchBend && vo.pitchBend.numOfOutput === 6) {
+      vo.pitchBend = { numOfOutput: 9 };
+    }
+    for (let key of Object.keys(vo)) {
+      if (key.indexOf("control_") !== 0 && key.indexOf("pad_") !== 0) continue;
+      let idx = vo[key].numOfOutput;
+      if (idx >= 7) vo[key] = { numOfOutput: idx + 3 };
+    }
+    let saved =
+      this.controlChangesToBeSaved ||
+      (this.serializedData || {}).controlChangesToBeSaved;
+    if (saved) {
+      let next = {};
+      for (let k of Object.keys(saved)) {
+        let n = Number(k) || 0;
+        next[n >= 7 ? n + 3 : n] = saved[k];
+      }
+      this.controlChangesToBeSaved = next;
+      if (this.serializedData) this.serializedData.controlChangesToBeSaved = next;
+    }
+    this._outShift = !!(this.app && this.app.bulkLoading);
+    if (!this._outShift) {
+      let conns = (this.serializedData || {}).connections;
+      if (Array.isArray(conns)) {
+        for (let c of conns) {
+          if (c && c.from === this.id) {
+            c.numberOfOutput = Midi.shiftOldOut(c.numberOfOutput);
+          }
+        }
+      }
+    }
+  }
+
+  connect(compo, input, numberOfOutput) {
+    if (this._outShift) numberOfOutput = Midi.shiftOldOut(numberOfOutput);
+    super.connect(compo, input, numberOfOutput);
   }
 
   restoreSavedControlChanges() {
@@ -149,7 +220,11 @@ class Midi extends Component {
 
   addToVisibleOutputs(key) {
     if (this.visibleOutputs[key]) return;
-    let numOfOutput = Object.keys(this.visibleOutputs).length;
+    let numOfOutput = Midi.CC_START;
+    for (let k of Object.keys(this.visibleOutputs)) {
+      let idx = this.visibleOutputs[k].numOfOutput;
+      if (idx >= numOfOutput) numOfOutput = idx + 1;
+    }
     if (numOfOutput >= Midi.MAX_OUTS) return;
     this.visibleOutputs[key] = { numOfOutput };
     this.syncOutputsUI();
@@ -203,7 +278,10 @@ class Midi extends Component {
     this.pushMidi(AppConfig.SAB_EVT_NOTE, note, vel, 0);
     if (velocity) this.notesOn[note] = velocity;
     else delete this.notesOn[note];
-    if (velocity) this.flashOutput(4);
+    if (velocity) {
+      let held = Math.min(Object.keys(this.notesOn).length, 4);
+      this.flashOutput(3 + held);
+    }
   }
 
   onSabTick() {
@@ -213,7 +291,7 @@ class Midi extends Component {
     let ccIdx = sab.getNote();
     let v = sab.getSlot(16 + (ccIdx & 15));
     if (!this.controlChangesToBeSaved) this.controlChangesToBeSaved = {};
-    if (ccIdx >= 7) this.controlChangesToBeSaved[ccIdx] = v;
+    if (ccIdx >= Midi.CC_START) this.controlChangesToBeSaved[ccIdx] = v;
   }
 
   createNode() {

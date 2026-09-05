@@ -2544,6 +2544,9 @@ class App {
     for (let conn of conns) {
       this.addSerializedConnection(conn);
     }
+    for (let c of this.components) {
+      if (c._outShift) c._outShift = false;
+    }
   }
 
   async loadSamplePatch(path) {

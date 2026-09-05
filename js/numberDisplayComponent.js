@@ -14,11 +14,16 @@ class NumberDisplayComponent extends Component {
       .then(() => {
         this.node = this.makeWorklet("number-display", {
           numberOfInputs: 1,
-          numberOfOutputs: 0,
+          numberOfOutputs: 1,
         });
         this.node.onprocessorerror = (e) => {
           console.error(e);
         };
+        // ponytail: 0-output worklet is not pulled. Silent tap keeps process() running.
+        this.silentGain = this.app.actx.createGain();
+        this.silentGain.gain.value = 0;
+        this.node.connect(this.silentGain);
+        this.silentGain.connect(this.app.actx.destination);
       });
   }
 
