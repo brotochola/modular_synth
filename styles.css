@@ -1069,6 +1069,9 @@ component.Clave808 icon:after {
 component.Tom808 icon:after {
   content: "\1F941";
 }
+component.HandDrum icon:after {
+  content: "\1F44A";
+}
 component.Freeverb icon:after {
   content: "\1F30A";
 }
@@ -1268,6 +1271,26 @@ component.Mixer {
   width: 260px;
   height: auto;
   min-height: 200px;
+}
+
+component.Mixer .mixerChannelBtns {
+  display: flex;
+  gap: 2px;
+  margin-left: 4px;
+  flex-shrink: 0;
+}
+
+component.Mixer .mixerChBtn {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  font-size: 13px;
+  line-height: 16px;
+  cursor: pointer;
+}
+
+component.Mixer .mixer-strip-hidden {
+  display: none;
 }
 
 component.Mixer .inputsDiv {
@@ -1857,7 +1880,18 @@ component.Arpeggiator .display {
 component.PolySequencer {
   width: 340px;
   min-height: 180px;
+  max-width: min(92vw, 1100px);
   overflow: visible;
+}
+
+component.PolySequencer .polyStepsSelect {
+  max-width: 58px;
+  margin-left: 4px;
+}
+
+component.PolySequencer .seqGridWrap {
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 component.PolySequencer .component-body,
@@ -1943,6 +1977,10 @@ component.PolySequencer .seqLane {
   gap: 1px;
   align-items: center;
   width: max-content;
+}
+
+component.PolySequencer .seqButton.seqBarStart {
+  border-left-color: var(--accent);
 }
 
 component.PolySequencer .seqLane .outputJackRow.polySeqOut {
@@ -3028,7 +3066,8 @@ component.Wavefolder {
 component.Cymbal808,
 component.Rim808,
 component.Clave808,
-component.Tom808 {
+component.Tom808,
+component.HandDrum {
   height: auto;
   min-height: 100px;
   width: 175px;

@@ -4,6 +4,7 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
     AppConfig.bindProcessorSab(this, options);
     if (globalThis.AudioProfile) AudioProfile.attach(this, "poly-sequencer");
     this.sequence = null;
+    this.nSteps = AppConfig.SEQ_STEPS;
     this.bpm = 0;
     this.durationOfOneNote = 0;
     this.durationOfLoop = 0;
@@ -18,17 +19,25 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
     this.outCh = new Array(8);
     this.port.onmessage = (e) => {
       let d = e.data || {};
-      if (d.seq != null) this.sequence = d.seq;
+      if (d.seq != null) {
+        this.sequence = d.seq;
+        this.nSteps = d.seq.length || this.nSteps;
+      }
+      if (d.steps != null) {
+        let n = Math.round(Number(d.steps));
+        if (n > 0) this.nSteps = n;
+      }
+      this.applyBpm(this.bpm, true);
     };
-    this.applyBpm(AppConfig.FALLBACK_BPM);
+    this.applyBpm(AppConfig.FALLBACK_BPM, true);
   }
 
-  applyBpm(bpm) {
+  applyBpm(bpm, force) {
     if (!(bpm > 0)) return;
-    if (bpm === this.bpm && this.durationOfLoop) return;
+    if (!force && bpm === this.bpm && this.durationOfLoop) return;
     this.bpm = bpm;
     this.durationOfOneNote = (60000 / bpm) * AppConfig.SEQ_STEP_QUARTER;
-    this.durationOfLoop = this.durationOfOneNote * AppConfig.SEQ_STEPS;
+    this.durationOfLoop = this.durationOfOneNote * (this.nSteps || 16);
   }
 
   readControl() {
@@ -37,6 +46,14 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
     this.applyBpm(sab.getBpm());
     this.clockSkew = sab.getSlot(0);
     this.syncToBeat = sab.getSlot(1) > 0.5;
+    let steps = sab.getSlot(2);
+    if (steps >= 16) {
+      let n = Math.round(steps);
+      if (n !== this.nSteps) {
+        this.nSteps = n;
+        this.applyBpm(this.bpm, true);
+      }
+    }
     if (this.syncToBeat) this.externalClock = false;
   }
 
@@ -58,6 +75,7 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
   process(inputs, outputs) {
     this.readControl();
     if (!this.durationOfLoop) return true;
+    let nSteps = this.nSteps || 16;
     let clockChannel = inputs[0] && inputs[0][0];
     let n = 128;
     for (let o = 0; o < 8; o++) {
@@ -75,7 +93,7 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
             this.externalClock = true;
             this.currentNote = 0;
           } else {
-            this.currentNote = (this.currentNote + 1) % AppConfig.SEQ_STEPS;
+            this.currentNote = (this.currentNote + 1) % nSteps;
           }
           this.postPlayhead();
         }
@@ -88,7 +106,7 @@ class PolySequencerWorklet extends AudioWorkletProcessor {
       let phase =
         ((tMs % this.durationOfLoop) + this.durationOfLoop) %
         this.durationOfLoop;
-      this.currentNote = Math.floor(phase / this.durationOfOneNote);
+      this.currentNote = Math.floor(phase / this.durationOfOneNote) % nSteps;
       this.postPlayhead();
     }
 

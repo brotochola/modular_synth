@@ -1,24 +1,35 @@
 class Mixer extends Component {
   static name = "Mixer";
+  static MAX_CHANNELS = 8;
+  static MIN_CHANNELS = 2;
+
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "Four-channel mixer. Each channel: audio in on top, level fader below (g0…g3), plus master. Patch into g0…g3 to automate levels.";
-    this.gainNames = ["g0", "g1", "g2", "g3", "master"];
-    this.channelGains = ["g0", "g1", "g2", "g3"];
-    // Skip default param rows — channel strips own the jacks + faders
-    this.uiParamWidgets = {
-      g0: "none",
-      g1: "none",
-      g2: "none",
-      g3: "none",
-      master: "none",
-      in_0: "none",
-      in_1: "none",
-      in_2: "none",
-      in_3: "none",
-    };
+      "Mixer. Each channel: audio in on top, level fader below (g0…), plus master. + / − add or hide strips (2–8). Unused inputs stay silent. Patch into g0… to automate levels.";
+    this.valuesToSave = ["channels"];
+    let ch = serializedData && serializedData.channels;
+    this.channels = Mixer.clampChannels(ch == null ? 4 : ch);
+    this.gainNames = [];
+    this.channelGains = [];
+    this.uiParamWidgets = { master: "none" };
+    for (let i = 0; i < Mixer.MAX_CHANNELS; i++) {
+      let g = "g" + i;
+      this.gainNames.push(g);
+      this.channelGains.push(g);
+      this.uiParamWidgets[g] = "none";
+      this.uiParamWidgets["in_" + i] = "none";
+    }
+    this.gainNames.push("master");
+    this.createChannelButtons();
     this.createNode();
+  }
+
+  static clampChannels(n) {
+    n = Number(n) || 4;
+    if (n < Mixer.MIN_CHANNELS) n = Mixer.MIN_CHANNELS;
+    if (n > Mixer.MAX_CHANNELS) n = Mixer.MAX_CHANNELS;
+    return n;
   }
 
   getParamInputLimits(name) {
@@ -28,12 +39,59 @@ class Mixer extends Component {
     return super.getParamInputLimits(name);
   }
 
+  createChannelButtons() {
+    if (this.channelBtns) return;
+    this.channelBtns = document.createElement("div");
+    this.channelBtns.className = "mixerChannelBtns";
+    let minus = document.createElement("button");
+    minus.type = "button";
+    minus.className = "mixerChBtn";
+    minus.textContent = "−";
+    minus.title = "Fewer channels";
+    minus.onclick = (e) => {
+      e.stopPropagation();
+      this.setChannelCount(this.channels - 1);
+    };
+    let plus = document.createElement("button");
+    plus.type = "button";
+    plus.className = "mixerChBtn";
+    plus.textContent = "+";
+    plus.title = "More channels";
+    plus.onclick = (e) => {
+      e.stopPropagation();
+      this.setChannelCount(this.channels + 1);
+    };
+    this.channelBtns.appendChild(minus);
+    this.channelBtns.appendChild(plus);
+    if (this.headerLeft) this.headerLeft.appendChild(this.channelBtns);
+    else (this.main || this.container).appendChild(this.channelBtns);
+  }
+
+  setChannelCount(n) {
+    n = Mixer.clampChannels(n);
+    if (n === this.channels) return;
+    this.channels = n;
+    this.applyChannelVisibility();
+    this.quickSave();
+  }
+
+  applyChannelVisibility() {
+    if (!this.faders) return;
+    let strips = this.faders.querySelectorAll(".mixer-strip:not(.mixer-strip-master)");
+    for (let i = 0; i < strips.length; i++) {
+      strips[i].classList.toggle("mixer-strip-hidden", i >= this.channels);
+    }
+    this.container.style.width = 48 * (this.channels + 1) + 28 + "px";
+  }
+
   createNode() {
     this.app.loadWorklet("js/audioWorklets/mixerWorklet.js").then(() => {
+      let parameterData = { master: 1 };
+      for (let i = 0; i < Mixer.MAX_CHANNELS; i++) parameterData["g" + i] = 1;
       this.node = this.makeWorklet("mixer-worklet", {
-        numberOfInputs: 4,
+        numberOfInputs: Mixer.MAX_CHANNELS,
         numberOfOutputs: 1,
-        parameterData: { g0: 1, g1: 1, g2: 1, g3: 1, master: 1 },
+        parameterData,
       });
       this.node.onprocessorerror = (e) => {
         console.error(e);
@@ -46,7 +104,6 @@ class Mixer extends Component {
     this.createChannelStrips();
   }
 
-  /** Build jack row (LED + hole + label) and register in inputElements */
   makeJack(name, label) {
     let wrap = document.createElement("div");
     wrap.className = "jack-row";
@@ -96,7 +153,6 @@ class Mixer extends Component {
     if (!this.sliders) return;
     for (let name of this.gainNames) {
       if (gains[name] == null) continue;
-      // Don't fight the pointer while user drags that fader
       let slider = this.sliders[name];
       if (slider && document.activeElement === slider.range) continue;
       this.setGainDisplay(name, gains[name]);
@@ -105,7 +161,6 @@ class Mixer extends Component {
 
   createChannelStrips() {
     if (this.faders) return;
-    // Drop empty default rows for skipped widgets
     if (this.inputsDiv) this.inputsDiv.innerHTML = "";
 
     this.faders = document.createElement("div");
@@ -113,7 +168,7 @@ class Mixer extends Component {
     this.sliders = {};
     this.gainLabels = {};
 
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < Mixer.MAX_CHANNELS; i++) {
       let gainName = this.channelGains[i];
       let inName = "in_" + i;
       let strip = document.createElement("div");
@@ -142,7 +197,6 @@ class Mixer extends Component {
       this.faders.appendChild(strip);
     }
 
-    // Master strip — spacer (no audio in) + CV jack + fader
     let masterStrip = document.createElement("div");
     masterStrip.className = "mixer-strip mixer-strip-master";
     let spacer = document.createElement("div");
@@ -167,6 +221,7 @@ class Mixer extends Component {
 
     (this.main || this.body || this.container).appendChild(this.faders);
     this.syncFadersFromParams();
+    this.applyChannelVisibility();
     this.createJackActivityMonitor();
   }
 
@@ -174,13 +229,11 @@ class Mixer extends Component {
     super.onSabTick();
     let sab = this.sabBlock;
     if (!sab || !this.sliders) return;
-    this.applyLiveGains({
-      g0: sab.getSlot(0),
-      g1: sab.getSlot(1),
-      g2: sab.getSlot(2),
-      g3: sab.getSlot(3),
-      master: sab.getSlot(4),
-    });
+    let gains = { master: sab.getSlot(8) };
+    for (let i = 0; i < Mixer.MAX_CHANNELS; i++) {
+      gains["g" + i] = sab.getSlot(i);
+    }
+    this.applyLiveGains(gains);
   }
 
   onFaderInput(name, val) {
@@ -200,6 +253,8 @@ class Mixer extends Component {
   }
 
   updateUI() {
+    this.channels = Mixer.clampChannels(this.channels);
+    this.applyChannelVisibility();
     this.syncFadersFromParams();
   }
 

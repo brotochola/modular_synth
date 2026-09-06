@@ -33,6 +33,7 @@ class App {
     "808 Rim": ["rim808"],
     "808 Clave": ["clave808"],
     "808 Tom": ["tom808"],
+    "Hand Drum": ["hand-drum"],
     Scanline: ["scanline"],
     "Image Maker": ["image-maker"],
     "Image Player": ["image-player"],
@@ -2454,6 +2455,9 @@ class App {
   addTom808() {
     this.components.push(new Tom808(this));
   }
+  addHandDrum() {
+    this.components.push(new HandDrum(this));
+  }
   addFreeverb() {
     this.components.push(new Freeverb(this));
   }
@@ -3344,6 +3348,7 @@ App.COMPONENT_CLASSES = {
   Rim808,
   Clave808,
   Tom808,
+  HandDrum,
   EnvelopeGenerator,
   ConstantValueNode,
   Mouse,
@@ -3398,6 +3403,7 @@ App.COMPONENT_TONE = {
   Rim808: "source",
   Clave808: "source",
   Tom808: "source",
+  HandDrum: "source",
   ScanlineSynth: "source",
   NoiseGenWithWorklet: "source",
   PerlinNoise: "source",
@@ -3498,6 +3504,7 @@ App.MODULE_CATALOG = [
   { title: "808 Rim", tone: "source", add: "addRim808" },
   { title: "808 Clave", tone: "source", add: "addClave808" },
   { title: "808 Tom", tone: "source", add: "addTom808" },
+  { title: "Hand Drum", tone: "source", add: "addHandDrum" },
   { title: "Scanline", tone: "source", add: "addScanline" },
   { title: "MIDI Player", tone: "media", add: "addMidiPlayer" },
   { title: "Audio Player", tone: "media", add: "addAudioPlayer" },

@@ -1,19 +1,23 @@
 class PolySequencer extends Component {
   static name = "Poly Seq";
+  static STEP_OPTIONS = [16, 32, 64, 128];
+
   constructor(app, serializedData) {
     super(app, serializedData);
     let pulseMs = Math.round(AppConfig.TRIG_PULSE_SEC * 1000);
     this.infoText =
-      "Polyphonic trigger sequencer. 8 lanes × 16 steps. Click toggles a cell. One trigger output per lane (~" +
+      "Polyphonic trigger sequencer. 8 lanes. Step count 16 / 32 / 64 / 128 (16ths). Click toggles a cell. One trigger output per lane (~" +
       pulseMs +
       "ms pulse on each on-step, including consecutive). Rising clock advances; no clock / sync uses BPM 16ths. Sync checkbox forces project BPM phase and ignores clock.";
-    this.valuesToSave = ["sequence", "syncToBeat"];
+    this.valuesToSave = ["sequence", "syncToBeat", "numberOfSteps"];
     this.syncToBeat =
       serializedData && serializedData.syncToBeat !== undefined
         ? !!serializedData.syncToBeat
         : false;
     this.numberOfLanes = 8;
-    this.numberOfSteps = AppConfig.SEQ_STEPS;
+    this.numberOfSteps = PolySequencer.clampSteps(
+      serializedData && serializedData.numberOfSteps,
+    );
     this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
     this.jackKinds = { in_0: "trig" };
@@ -29,8 +33,19 @@ class PolySequencer extends Component {
       7: "trig",
     };
     this.createSyncToggle();
+    this.createStepsSelect();
     this.createNode();
     this.createbuttons();
+  }
+
+  static clampSteps(n) {
+    n = Number(n) || 16;
+    let opts = PolySequencer.STEP_OPTIONS;
+    let best = opts[0];
+    for (let i = 0; i < opts.length; i++) {
+      if (Math.abs(opts[i] - n) < Math.abs(best - n)) best = opts[i];
+    }
+    return best;
   }
 
   createSyncToggle() {
@@ -55,6 +70,50 @@ class PolySequencer extends Component {
     else (this.main || this.container).appendChild(this.toggleWrap);
   }
 
+  createStepsSelect() {
+    this.stepsSelect = document.createElement("select");
+    this.stepsSelect.classList.add("type", "ui-select", "polyStepsSelect");
+    this.stepsSelect.title = "Steps (16ths per loop)";
+    for (let n of PolySequencer.STEP_OPTIONS) {
+      let opt = document.createElement("option");
+      opt.value = String(n);
+      opt.textContent = n;
+      this.stepsSelect.appendChild(opt);
+    }
+    this.stepsSelect.value = String(this.numberOfSteps);
+    this.stepsSelect.onclick = (e) => e.stopPropagation();
+    this.stepsSelect.onchange = () => {
+      this.setStepCount(Number(this.stepsSelect.value));
+    };
+    if (this.headerLeft) this.headerLeft.appendChild(this.stepsSelect);
+    else (this.main || this.container).appendChild(this.stepsSelect);
+  }
+
+  setStepCount(n) {
+    n = PolySequencer.clampSteps(n);
+    if (n === this.numberOfSteps) return;
+    this.resizeSequence(n);
+    this.numberOfSteps = n;
+    this.rebuildGrid();
+    this.quickSave();
+  }
+
+  resizeSequence(n) {
+    if (!Array.isArray(this.sequence)) {
+      this.sequence = objectToArray(this.sequence);
+    }
+    let old = this.sequence || [];
+    let next = [];
+    for (let j = 0; j < n; j++) {
+      let col = [];
+      for (let i = 0; i < this.numberOfLanes; i++) {
+        col[i] = !!(old[j] && old[j][i]);
+      }
+      next[j] = col;
+    }
+    this.sequence = next;
+  }
+
   initSequence() {
     this.sequence = [];
     for (let j = 0; j < this.numberOfSteps; j++) {
@@ -66,19 +125,29 @@ class PolySequencer extends Component {
   }
 
   createbuttons() {
+    if (!this.seqGridWrap) {
+      this.seqGridWrap = document.createElement("div");
+      this.seqGridWrap.classList.add("seqGridWrap");
+      if (this.main) this.main.appendChild(this.seqGridWrap);
+      else if (this.body) this.body.appendChild(this.seqGridWrap);
+      else this.container.appendChild(this.seqGridWrap);
+    }
     this.buttonsContainer = document.createElement("div");
     this.buttonsContainer.classList.add("buttonsContainer");
     this.laneRows = [];
+    let cols = "repeat(" + this.numberOfSteps + ", 15px) auto";
 
     for (let i = 0; i < this.numberOfLanes; i++) {
       let row = document.createElement("div");
       row.classList.add("seqLane");
       row.setAttribute("lane", i);
+      row.style.gridTemplateColumns = cols;
       for (let j = 0; j < this.numberOfSteps; j++) {
         let button = document.createElement("button");
         button.setAttribute("lane", i);
         button.setAttribute("time", j);
         button.classList.add("seqButton");
+        if (j % 16 === 0) button.classList.add("seqBarStart");
         button.onclick = (e) => {
           this.handleClickOnSeqButton(e);
         };
@@ -87,13 +156,30 @@ class PolySequencer extends Component {
       this.laneRows[i] = row;
       this.buttonsContainer.appendChild(row);
     }
-    if (this.main) {
-      this.main.appendChild(this.buttonsContainer);
-    } else if (this.body) {
-      this.body.appendChild(this.buttonsContainer);
-    } else {
-      this.container.appendChild(this.buttonsContainer);
+    this.seqGridWrap.appendChild(this.buttonsContainer);
+    this.applyModuleWidth();
+  }
+
+  applyModuleWidth() {
+    let w = 36 + this.numberOfSteps * 16 + 52;
+    if (w > 1100) w = 1100;
+    this.container.style.width = w + "px";
+  }
+
+  rebuildGrid() {
+    if (this.seqGridWrap) this.seqGridWrap.innerHTML = "";
+    this.buttonsContainer = null;
+    this.laneRows = [];
+    this.outputLedElements = [];
+    this.createbuttons();
+    if (this.ready && this.node) {
+      this.createOutputButton();
+      for (let i = 0; i < this.numberOfLanes; i++) {
+        this.syncOutputConnected(i);
+      }
+      if (this.app && this.app.updateAllLines) this.app.updateAllLines();
     }
+    this.updateUI();
   }
 
   createOutputButton() {
@@ -167,15 +253,26 @@ class PolySequencer extends Component {
   }
 
   updateUI() {
+    this.numberOfSteps = PolySequencer.clampSteps(this.numberOfSteps);
     if (!Array.isArray(this.sequence)) {
       this.sequence = objectToArray(this.sequence);
+    }
+    if (this.sequence.length !== this.numberOfSteps) {
+      this.resizeSequence(this.numberOfSteps);
     }
     for (let j = 0; j < this.numberOfSteps; j++) {
       if (!Array.isArray(this.sequence[j])) {
         this.sequence[j] = objectToArray(this.sequence[j]);
       }
     }
-    this.container.querySelectorAll("button.seqButton").forEach((button) => {
+    let buttons = this.container.querySelectorAll("button.seqButton");
+    if (buttons.length !== this.numberOfSteps * this.numberOfLanes) {
+      this.rebuildGrid();
+      return;
+    }
+    if (this.stepsSelect) this.stepsSelect.value = String(this.numberOfSteps);
+    this.applyModuleWidth();
+    buttons.forEach((button) => {
       button.classList.remove("active");
     });
 
@@ -211,7 +308,7 @@ class PolySequencer extends Component {
         seq[j][i] = this.sequence[j] && this.sequence[j][i] ? 1 : 0;
       }
     }
-    this.node.port.postMessage({ seq: seq });
+    this.node.port.postMessage({ seq: seq, steps: this.numberOfSteps });
     this.writeSabControl();
   }
 
@@ -221,6 +318,7 @@ class PolySequencer extends Component {
     sab.setBpm(this.app.bpm || 120);
     sab.setSlot(0, this.clockSkew || this.app.clockSkew || 0);
     sab.setSlot(1, this.syncToBeat ? 1 : 0);
+    sab.setSlot(2, this.numberOfSteps || 16);
     sab.publish();
   }
 
@@ -236,31 +334,28 @@ class PolySequencer extends Component {
   }
 
   createNode() {
-    this.app
-      .loadWorklet("js/audioWorklets/polySequencerWorklet.js")
-      .then(() => {
-        this.node = this.makeWorklet("poly-sequencer-worklet",
-          {
-            numberOfInputs: 1,
-            numberOfOutputs: 8,
-            outputChannelCount: [1, 1, 1, 1, 1, 1, 1, 1],
-          },
-        );
-        this.silentGain = this.app.actx.createGain();
-        this.silentGain.gain.value = 0;
-        this.node.connect(this.silentGain);
-        this.silentGain.connect(this.app.actx.destination);
-
-        this.node.onprocessorerror = (e) => {
-          console.error(e);
-        };
-
-        this.sendToWorklet();
+    this.app.loadWorklet("js/audioWorklets/polySequencerWorklet.js").then(() => {
+      this.node = this.makeWorklet("poly-sequencer-worklet", {
+        numberOfInputs: 1,
+        numberOfOutputs: 8,
+        outputChannelCount: [1, 1, 1, 1, 1, 1, 1, 1],
       });
+      this.silentGain = this.app.actx.createGain();
+      this.silentGain.gain.value = 0;
+      this.node.connect(this.silentGain);
+      this.silentGain.connect(this.app.actx.destination);
+
+      this.node.onprocessorerror = (e) => {
+        console.error(e);
+      };
+
+      this.sendToWorklet();
+    });
   }
 
   serialize() {
     let obj = super.serialize();
+    obj.numberOfSteps = this.numberOfSteps;
     if (this.sequence)
       obj.sequence = arrayToObject(
         this.sequence.map((k) => k.map((b) => (b ? 1 : 0))),
