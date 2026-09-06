@@ -1,0 +1,1192 @@
+{
+  "bpm": 96,
+  "outputX": "1960px",
+  "outputY": "820px",
+  "components": [
+    {
+      "id": "txt",
+      "constructor": "Text",
+      "type": "Text",
+      "createdBy": "user",
+      "x": "500px",
+      "y": "460px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "valuesToSave": [
+        "text"
+      ],
+      "text": "NIGHT BUS — drums + bass + lead\nHit Play. Phaser on hats, Moog bass, folded lead, Freeverb on the bus."
+    },
+    {
+      "id": "poly",
+      "constructor": "PolySequencer",
+      "type": "PolySequencer",
+      "createdBy": "user",
+      "x": "500px",
+      "y": "640px",
+      "audioParams": {},
+      "node": {},
+      "connections": [],
+      "valuesToSave": [
+        "sequence",
+        "syncToBeat"
+      ],
+      "sequence": {
+        "0": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          0,
+          1,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          1,
+          0,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          1,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          0,
+          1,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "15": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "syncToBeat": true
+    },
+    {
+      "id": "seq_bass",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "500px",
+      "y": "1040px",
+      "audioParams": {
+        "baseHz": 55
+      },
+      "node": {},
+      "connections": [],
+      "valuesToSave": [
+        "sequence",
+        "syncToBeat"
+      ],
+      "sequence": {
+        "0": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "4": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "9": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "13": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "15": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "syncToBeat": true
+    },
+    {
+      "id": "seq_lead",
+      "constructor": "Sequencer",
+      "type": "Sequencer",
+      "createdBy": "user",
+      "x": "500px",
+      "y": "1440px",
+      "audioParams": {
+        "baseHz": 220
+      },
+      "node": {},
+      "connections": [],
+      "valuesToSave": [
+        "sequence",
+        "syncToBeat"
+      ],
+      "sequence": {
+        "0": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "1": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "2": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "3": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "4": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "5": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "6": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "7": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "8": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0
+        ],
+        "9": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "10": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "11": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "12": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1
+        ],
+        "13": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "14": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "15": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ]
+      },
+      "syncToBeat": true
+    },
+    {
+      "id": "kick",
+      "constructor": "Kick808",
+      "type": "Kick808",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "520px",
+      "audioParams": {
+        "pitch": 46,
+        "punch": 360,
+        "decay": 0.55,
+        "click": 0.28
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "snare",
+      "constructor": "Snare808",
+      "type": "Snare808",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "760px",
+      "audioParams": {
+        "pitch": 175,
+        "tone": 0.4,
+        "snappy": 0.65,
+        "decay": 0.2
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "hat",
+      "constructor": "HiHat808",
+      "type": "HiHat808",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "1000px",
+      "audioParams": {
+        "decay": 0.18,
+        "tone": 8000
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "rim",
+      "constructor": "Rim808",
+      "type": "Rim808",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "520px",
+      "audioParams": {
+        "pitch": 480,
+        "snap": 0.5,
+        "decay": 0.06
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "clave",
+      "constructor": "Clave808",
+      "type": "Clave808",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "760px",
+      "audioParams": {
+        "pitch": 2400,
+        "decay": 0.045
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "hat_fx",
+      "constructor": "Phaser",
+      "type": "Phaser",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "1000px",
+      "audioParams": {
+        "rate": 0.35,
+        "depth": 0.8,
+        "feedback": 0.3,
+        "mix": 0.55
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "osc_bass",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "1240px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "square"
+      },
+      "connections": []
+    },
+    {
+      "id": "ladder",
+      "constructor": "MoogLadder",
+      "type": "MoogLadder",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "1240px",
+      "audioParams": {
+        "cutoff": 600,
+        "res": 0.45,
+        "drive": 1.2
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "env_bass",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "1480px",
+      "audioParams": {
+        "attack": 0.02,
+        "attackcurve": 0.4,
+        "decay": 0.3,
+        "sustain": 0.4,
+        "release": 0.2
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "amp_bass",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1260px",
+      "y": "1240px",
+      "audioParams": {
+        "gain": 0
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "osc_lead",
+      "constructor": "Oscillator",
+      "type": "Oscillator",
+      "createdBy": "user",
+      "x": "820px",
+      "y": "1720px",
+      "audioParams": {
+        "detune": 0,
+        "frequency": 0
+      },
+      "node": {
+        "type": "triangle"
+      },
+      "connections": []
+    },
+    {
+      "id": "fold",
+      "constructor": "Wavefolder",
+      "type": "Wavefolder",
+      "createdBy": "user",
+      "x": "1040px",
+      "y": "1720px",
+      "audioParams": {
+        "gain": 1.8,
+        "offset": 0.1,
+        "mix": 0.4
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "env_lead",
+      "constructor": "EnvelopeGenerator",
+      "type": "EnvelopeGenerator",
+      "createdBy": "user",
+      "x": "1260px",
+      "y": "1480px",
+      "audioParams": {
+        "attack": 0.05,
+        "attackcurve": 0.5,
+        "decay": 0.4,
+        "sustain": 0.2,
+        "release": 0.35
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "amp_lead",
+      "constructor": "Amp",
+      "type": "Amp",
+      "createdBy": "user",
+      "x": "1260px",
+      "y": "1720px",
+      "audioParams": {
+        "gain": 0
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "mix_a",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1500px",
+      "y": "560px",
+      "audioParams": {
+        "g0": 0.7,
+        "g1": 0.5,
+        "g2": 0.3,
+        "g3": 0.35,
+        "master": 0.9
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "mix_b",
+      "constructor": "Mixer",
+      "type": "Mixer",
+      "createdBy": "user",
+      "x": "1500px",
+      "y": "1000px",
+      "audioParams": {
+        "g0": 0.85,
+        "g1": 0.4,
+        "g2": 0.65,
+        "g3": 0.45,
+        "master": 0.8
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "verb",
+      "constructor": "Freeverb",
+      "type": "Freeverb",
+      "createdBy": "user",
+      "x": "1780px",
+      "y": "820px",
+      "audioParams": {
+        "size": 0.6,
+        "damp": 0.45,
+        "wet": 0.35,
+        "width": 1
+      },
+      "node": {},
+      "connections": []
+    },
+    {
+      "id": "merge",
+      "constructor": "Merger",
+      "type": "Merger",
+      "createdBy": "user",
+      "x": "1780px",
+      "y": "1100px",
+      "audioParams": {},
+      "node": {},
+      "connections": []
+    }
+  ],
+  "connections": [
+    {
+      "from": "poly",
+      "to": "kick",
+      "audioParam": "trigger",
+      "numberOfOutput": 0,
+      "id": "n01"
+    },
+    {
+      "from": "poly",
+      "to": "snare",
+      "audioParam": "trigger",
+      "numberOfOutput": 1,
+      "id": "n02"
+    },
+    {
+      "from": "poly",
+      "to": "hat",
+      "audioParam": "trigger",
+      "numberOfOutput": 2,
+      "id": "n03"
+    },
+    {
+      "from": "poly",
+      "to": "rim",
+      "audioParam": "trigger",
+      "numberOfOutput": 3,
+      "id": "n04"
+    },
+    {
+      "from": "poly",
+      "to": "clave",
+      "audioParam": "trigger",
+      "numberOfOutput": 4,
+      "id": "n05"
+    },
+    {
+      "from": "hat",
+      "to": "hat_fx",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n06"
+    },
+    {
+      "from": "kick",
+      "to": "mix_a",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n07"
+    },
+    {
+      "from": "snare",
+      "to": "mix_a",
+      "audioParam": "in_1",
+      "numberOfOutput": 0,
+      "id": "n08"
+    },
+    {
+      "from": "hat_fx",
+      "to": "mix_a",
+      "audioParam": "in_2",
+      "numberOfOutput": 0,
+      "id": "n09"
+    },
+    {
+      "from": "rim",
+      "to": "mix_a",
+      "audioParam": "in_3",
+      "numberOfOutput": 0,
+      "id": "n10"
+    },
+    {
+      "from": "seq_bass",
+      "to": "osc_bass",
+      "audioParam": "frequency",
+      "numberOfOutput": 2,
+      "id": "n11"
+    },
+    {
+      "from": "seq_bass",
+      "to": "env_bass",
+      "audioParam": "gate",
+      "numberOfOutput": 1,
+      "id": "n12"
+    },
+    {
+      "from": "osc_bass",
+      "to": "ladder",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n13"
+    },
+    {
+      "from": "ladder",
+      "to": "amp_bass",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n14"
+    },
+    {
+      "from": "env_bass",
+      "to": "amp_bass",
+      "audioParam": "gain",
+      "numberOfOutput": 0,
+      "id": "n15"
+    },
+    {
+      "from": "seq_lead",
+      "to": "osc_lead",
+      "audioParam": "frequency",
+      "numberOfOutput": 2,
+      "id": "n16"
+    },
+    {
+      "from": "seq_lead",
+      "to": "env_lead",
+      "audioParam": "gate",
+      "numberOfOutput": 1,
+      "id": "n17"
+    },
+    {
+      "from": "osc_lead",
+      "to": "fold",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n18"
+    },
+    {
+      "from": "fold",
+      "to": "amp_lead",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n19"
+    },
+    {
+      "from": "env_lead",
+      "to": "amp_lead",
+      "audioParam": "gain",
+      "numberOfOutput": 0,
+      "id": "n20"
+    },
+    {
+      "from": "mix_a",
+      "to": "mix_b",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n21"
+    },
+    {
+      "from": "clave",
+      "to": "mix_b",
+      "audioParam": "in_1",
+      "numberOfOutput": 0,
+      "id": "n22"
+    },
+    {
+      "from": "amp_bass",
+      "to": "mix_b",
+      "audioParam": "in_2",
+      "numberOfOutput": 0,
+      "id": "n23"
+    },
+    {
+      "from": "amp_lead",
+      "to": "mix_b",
+      "audioParam": "in_3",
+      "numberOfOutput": 0,
+      "id": "n24"
+    },
+    {
+      "from": "mix_b",
+      "to": "verb",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n25"
+    },
+    {
+      "from": "verb",
+      "to": "merge",
+      "audioParam": "in_0",
+      "numberOfOutput": 0,
+      "id": "n26"
+    },
+    {
+      "from": "verb",
+      "to": "merge",
+      "audioParam": "in_1",
+      "numberOfOutput": 1,
+      "id": "n27"
+    },
+    {
+      "from": "merge",
+      "to": "output",
+      "audioParam": "in",
+      "numberOfOutput": 0,
+      "id": "n28"
+    }
+  ]
+}
