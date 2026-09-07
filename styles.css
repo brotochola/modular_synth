@@ -856,6 +856,7 @@ component {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  z-index: 2;
 }
 
 component.tone-source {
@@ -962,6 +963,13 @@ component.grabbed {
 .component-header .header-left .bpmRateSelect {
   flex-shrink: 0;
   max-width: 90px;
+}
+
+.component-header .header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
 }
 
 .component-body {
@@ -1273,24 +1281,8 @@ component.Mixer {
   min-height: 200px;
 }
 
-component.Mixer .mixerChannelBtns {
-  display: flex;
-  gap: 2px;
-  margin-left: 4px;
-  flex-shrink: 0;
-}
-
-component.Mixer .mixerChBtn {
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  font-size: 13px;
-  line-height: 16px;
-  cursor: pointer;
-}
-
-component.Mixer .mixer-strip-hidden {
-  display: none;
+component.Mixer .mixerChSelect {
+  max-width: 72px;
 }
 
 component.Mixer .inputsDiv {
@@ -2488,6 +2480,52 @@ component.rackcover {
   background-position: calc(100% - var(--posX)) calc(100% - var(--posY));
   background-image: url(aluminium.jpg);
   backdrop-filter: none;
+}
+
+component.Mat {
+  z-index: 0;
+  resize: both;
+  min-width: 200px;
+  min-height: 160px;
+  width: 360px;
+  height: 240px;
+  box-shadow: none;
+  border: 2px dashed color-mix(in srgb, var(--mat-color, #4a5c48) 65%, #fff);
+  background: var(--mat-color, #4a5c48);
+  backdrop-filter: none;
+  overflow: hidden;
+}
+
+component.Mat .inputsDiv,
+component.Mat .component-main {
+  display: none;
+}
+
+component.Mat .matColor {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: 1px solid var(--panel-edge);
+  background: transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.selection-box {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  z-index: 1000;
+  display: none;
+  border: 1px solid var(--accent, #7ec8a3);
+  background: color-mix(in srgb, var(--accent, #7ec8a3) 18%, transparent);
+}
+
+.selection-box.visible {
+  display: block;
 }
 
 component .deleteButton {

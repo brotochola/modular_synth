@@ -1,19 +1,32 @@
 class Mixer extends Component {
   static name = "Mixer";
-  static MAX_CHANNELS = 8;
-  static MIN_CHANNELS = 2;
+  static CHANNELS = [4, 8, 16];
 
   constructor(app, serializedData) {
     super(app, serializedData);
     this.infoText =
-      "Mixer. Each channel: audio in on top, level fader below (g0…), plus master. + / − add or hide strips (2–8). Unused inputs stay silent. Patch into g0… to automate levels.";
+      "Mixer. Each channel: audio in on top, level fader below (g0…), plus master. Channel count 4 / 8 / 16 rebuilds the node — unused strips are not kept. Patch into g0… to automate levels.";
     this.valuesToSave = ["channels"];
     let ch = serializedData && serializedData.channels;
     this.channels = Mixer.clampChannels(ch == null ? 4 : ch);
+    this._nodeEpoch = 0;
+    this.createChannelSelect();
+    this.createNode();
+  }
+
+  static clampChannels(n) {
+    n = Number(n) || 4;
+    if (n <= 4) return 4;
+    if (n <= 8) return 8;
+    return 16;
+  }
+
+  setupGainNames() {
+    let n = this.channels;
     this.gainNames = [];
     this.channelGains = [];
     this.uiParamWidgets = { master: "none" };
-    for (let i = 0; i < Mixer.MAX_CHANNELS; i++) {
+    for (let i = 0; i < n; i++) {
       let g = "g" + i;
       this.gainNames.push(g);
       this.channelGains.push(g);
@@ -21,82 +34,135 @@ class Mixer extends Component {
       this.uiParamWidgets["in_" + i] = "none";
     }
     this.gainNames.push("master");
-    this.createChannelButtons();
-    this.createNode();
-  }
-
-  static clampChannels(n) {
-    n = Number(n) || 4;
-    if (n < Mixer.MIN_CHANNELS) n = Mixer.MIN_CHANNELS;
-    if (n > Mixer.MAX_CHANNELS) n = Mixer.MAX_CHANNELS;
-    return n;
   }
 
   getParamInputLimits(name) {
-    if (this.gainNames.includes(name)) {
+    if (this.gainNames && this.gainNames.includes(name)) {
       return { min: 0, max: 2, step: 0.01 };
     }
     return super.getParamInputLimits(name);
   }
 
-  createChannelButtons() {
-    if (this.channelBtns) return;
-    this.channelBtns = document.createElement("div");
-    this.channelBtns.className = "mixerChannelBtns";
-    let minus = document.createElement("button");
-    minus.type = "button";
-    minus.className = "mixerChBtn";
-    minus.textContent = "−";
-    minus.title = "Fewer channels";
-    minus.onclick = (e) => {
-      e.stopPropagation();
-      this.setChannelCount(this.channels - 1);
+  createChannelSelect() {
+    if (this.chSelect) return;
+    this.chSelect = document.createElement("select");
+    this.chSelect.className = "type ui-select mixerChSelect";
+    this.chSelect.title = "Channel count";
+    for (let n of Mixer.CHANNELS) {
+      let opt = document.createElement("option");
+      opt.value = n;
+      opt.textContent = n + " ch";
+      this.chSelect.appendChild(opt);
+    }
+    this.chSelect.value = String(this.channels);
+    this.chSelect.onclick = (e) => e.stopPropagation();
+    this.chSelect.onchange = () => {
+      this.setChannelCount(Number(this.chSelect.value));
     };
-    let plus = document.createElement("button");
-    plus.type = "button";
-    plus.className = "mixerChBtn";
-    plus.textContent = "+";
-    plus.title = "More channels";
-    plus.onclick = (e) => {
-      e.stopPropagation();
-      this.setChannelCount(this.channels + 1);
-    };
-    this.channelBtns.appendChild(minus);
-    this.channelBtns.appendChild(plus);
-    if (this.headerLeft) this.headerLeft.appendChild(this.channelBtns);
-    else (this.main || this.container).appendChild(this.channelBtns);
+    if (this.headerLeft) this.headerLeft.appendChild(this.chSelect);
+    else (this.main || this.container).appendChild(this.chSelect);
+  }
+
+  readGains() {
+    let o = {};
+    if (!this.node || !this.node.parameters) return o;
+    this.node.parameters.forEach((p, name) => {
+      o[name] = p.value;
+    });
+    return o;
+  }
+
+  dropExtraConnections(n) {
+    if (!this.app || !this.app.getAllConnections) return;
+    let sources = [];
+    let list = this.app.getAllConnections().slice();
+    for (let i = 0; i < list.length; i++) {
+      let conn = list[i];
+      if (conn.to !== this) continue;
+      let p = conn.audioParam;
+      if (p === "master") continue;
+      let idx = -1;
+      if (String(p).indexOf("in_") === 0) idx = parseInt(p.slice(3), 10);
+      else if (/^g\d+$/.test(p)) idx = parseInt(p.slice(1), 10);
+      if (!(idx >= n)) continue;
+      if (sources.indexOf(conn.from) < 0) sources.push(conn.from);
+      conn.remove();
+    }
+    for (let i = 0; i < sources.length; i++) {
+      if (sources[i].quickSave) sources[i].quickSave();
+    }
+  }
+
+  makeMixerNode(n, gains) {
+    n = Mixer.clampChannels(n);
+    let parameterData = { master: 1 };
+    for (let i = 0; i < n; i++) parameterData["g" + i] = 1;
+    if (gains) {
+      for (let k in parameterData) {
+        if (gains[k] != null) parameterData[k] = Number(gains[k]);
+      }
+    }
+    return this.makeWorklet("mixer-worklet-" + n, {
+      numberOfInputs: n,
+      numberOfOutputs: 1,
+      parameterData,
+      processorOptions: { channels: n },
+    });
+  }
+
+  replaceNode(gains) {
+    let n = this.channels;
+    let epoch = ++this._nodeEpoch;
+    this.app.loadWorklet("js/audioWorklets/mixerWorklet.js").then(() => {
+      if (epoch !== this._nodeEpoch) return;
+      if (this.node) {
+        try {
+          this.node.disconnect();
+        } catch (e) {}
+      }
+      this.node = this.makeMixerNode(n, gains);
+      this.node.parent = this;
+      this.node.onprocessorerror = (e) => {
+        console.error(e);
+      };
+      this._peakParamKeys = null;
+      if (this.ready) {
+        this.rebuildStrips();
+        this.resetMyConnections();
+      }
+    });
+  }
+
+  createNode() {
+    this.setupGainNames();
+    this.replaceNode();
+  }
+
+  rebuildGraph(extraGains) {
+    this.dropExtraConnections(this.channels);
+    let saved = this.readGains();
+    if (extraGains) {
+      for (let k in extraGains) {
+        if (extraGains[k] != null) saved[k] = extraGains[k];
+      }
+    }
+    this.setupGainNames();
+    this.replaceNode(saved);
   }
 
   setChannelCount(n) {
     n = Mixer.clampChannels(n);
-    if (n === this.channels) return;
+    if (this.chSelect) this.chSelect.value = String(n);
+    if (n === this.channels && this.node && this.node.numberOfInputs === n) {
+      return;
+    }
     this.channels = n;
-    this.applyChannelVisibility();
+    this.rebuildGraph();
     this.quickSave();
   }
 
-  applyChannelVisibility() {
-    if (!this.faders) return;
-    let strips = this.faders.querySelectorAll(".mixer-strip:not(.mixer-strip-master)");
-    for (let i = 0; i < strips.length; i++) {
-      strips[i].classList.toggle("mixer-strip-hidden", i >= this.channels);
-    }
+  resize() {
     this.container.style.width = 48 * (this.channels + 1) + 28 + "px";
-  }
-
-  createNode() {
-    this.app.loadWorklet("js/audioWorklets/mixerWorklet.js").then(() => {
-      let parameterData = { master: 1 };
-      for (let i = 0; i < Mixer.MAX_CHANNELS; i++) parameterData["g" + i] = 1;
-      this.node = this.makeWorklet("mixer-worklet", {
-        numberOfInputs: Mixer.MAX_CHANNELS,
-        numberOfOutputs: 1,
-        parameterData,
-      });
-      this.node.onprocessorerror = (e) => {
-        console.error(e);
-      };
-    });
   }
 
   createInputButtons() {
@@ -159,6 +225,34 @@ class Mixer extends Component {
     }
   }
 
+  clearMixerJacks() {
+    if (this.inputElements) {
+      for (let k of Object.keys(this.inputElements)) {
+        if (k === "master" || k.startsWith("in_") || /^g\d+$/.test(k)) {
+          delete this.inputElements[k];
+        }
+      }
+    }
+    this.jackActivityNames = [];
+    this.sliders = {};
+    this.gainLabels = {};
+  }
+
+  refreshAudioParams() {
+    this.audioParams = [];
+    for (let i = 0; i < this.channels; i++) this.audioParams.push("in_" + i);
+    for (let i = 0; i < this.gainNames.length; i++) {
+      this.audioParams.push(this.gainNames[i]);
+    }
+  }
+
+  rebuildStrips() {
+    if (this.faders && this.faders.parentNode) this.faders.remove();
+    this.faders = null;
+    this.clearMixerJacks();
+    this.createChannelStrips();
+  }
+
   createChannelStrips() {
     if (this.faders) return;
     if (this.inputsDiv) this.inputsDiv.innerHTML = "";
@@ -167,8 +261,9 @@ class Mixer extends Component {
     this.faders.className = "faders mixer-strips";
     this.sliders = {};
     this.gainLabels = {};
+    let n = this.channels;
 
-    for (let i = 0; i < Mixer.MAX_CHANNELS; i++) {
+    for (let i = 0; i < n; i++) {
       let gainName = this.channelGains[i];
       let inName = "in_" + i;
       let strip = document.createElement("div");
@@ -220,8 +315,9 @@ class Mixer extends Component {
     this.faders.appendChild(masterStrip);
 
     (this.main || this.body || this.container).appendChild(this.faders);
+    this.refreshAudioParams();
     this.syncFadersFromParams();
-    this.applyChannelVisibility();
+    this.resize();
     this.createJackActivityMonitor();
   }
 
@@ -229,8 +325,9 @@ class Mixer extends Component {
     super.onSabTick();
     let sab = this.sabBlock;
     if (!sab || !this.sliders) return;
-    let gains = { master: sab.getSlot(8) };
-    for (let i = 0; i < Mixer.MAX_CHANNELS; i++) {
+    let n = this.channels;
+    let gains = { master: sab.getSlot(n) };
+    for (let i = 0; i < n; i++) {
       gains["g" + i] = sab.getSlot(i);
     }
     this.applyLiveGains(gains);
@@ -254,7 +351,12 @@ class Mixer extends Component {
 
   updateUI() {
     this.channels = Mixer.clampChannels(this.channels);
-    this.applyChannelVisibility();
+    if (this.chSelect) this.chSelect.value = String(this.channels);
+    if (this.node && this.node.numberOfInputs !== this.channels) {
+      this.rebuildGraph(this.serializedData && this.serializedData.audioParams);
+      return;
+    }
+    this.resize();
     this.syncFadersFromParams();
   }
 
@@ -266,3 +368,9 @@ class Mixer extends Component {
     }
   }
 }
+
+(function mixerClampCheck() {
+  if (Mixer.clampChannels(2) !== 4) throw new Error("mixer clamp 2");
+  if (Mixer.clampChannels(5) !== 8) throw new Error("mixer clamp 5");
+  if (Mixer.clampChannels(9) !== 16) throw new Error("mixer clamp 16");
+})();

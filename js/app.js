@@ -201,17 +201,57 @@ class App {
         if (e.key == "Escape") {
           this.clearCableGhost();
           this.closeFooterDrops();
+          this.makeAllComponentsInactive();
           return;
         }
-        if (e.key == "Delete") {
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "a") {
           if (typing) return;
-          for (let c of this.components.filter((k) => k.active)) {
-            c.remove();
-            this.saveListOfComponentsInFirestore();
-            break;
-          }
-
-          this.updateAllLines();
+          e.preventDefault();
+          this.selectAllComponents();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "c") {
+          if (typing) return;
+          e.preventDefault();
+          this.copySelection();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "x") {
+          if (typing) return;
+          e.preventDefault();
+          this.cutSelection();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "v") {
+          if (typing) return;
+          e.preventDefault();
+          this.pasteFromClipboard();
+          return;
+        }
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() == "d") {
+          if (typing) return;
+          e.preventDefault();
+          this.duplicateSelection();
+          return;
+        }
+        if (e.key == "Delete" || e.key == "Backspace") {
+          if (typing) return;
+          e.preventDefault();
+          this.deleteSelection();
+        } else if (
+          e.key == "ArrowLeft" ||
+          e.key == "ArrowRight" ||
+          e.key == "ArrowUp" ||
+          e.key == "ArrowDown"
+        ) {
+          if (typing) return;
+          let selected = this.getSelectedComponents();
+          if (!selected.length) return;
+          e.preventDefault();
+          let step = e.shiftKey ? 10 : 1;
+          let dx = e.key == "ArrowLeft" ? -step : e.key == "ArrowRight" ? step : 0;
+          let dy = e.key == "ArrowUp" ? -step : e.key == "ArrowDown" ? step : 0;
+          this.nudgeSelection(dx, dy);
         } else if (e.key == " ") {
           if (typing) return;
           if (this.buttonsContainer && this.buttonsContainer.contains(e.target)) return;
@@ -487,6 +527,8 @@ class App {
     this.onRemoteCursor = (msg) => this.applyRemoteCursor(msg);
     this.onRemoteDrag = (msg) => this.applyRemoteDrag(msg, false);
     this.onRemoteDragEnd = (msg) => this.applyRemoteDrag(msg, true);
+    this.onRemoteDragGroup = (msg) => this.applyRemoteDragGroup(msg, false);
+    this.onRemoteDragGroupEnd = (msg) => this.applyRemoteDragGroup(msg, true);
   }
 
   bindLocalCursorBroadcast() {
@@ -568,6 +610,39 @@ class App {
     if (isEnd) this.clearLiveDrag(componentId, x, y);
   }
 
+  broadcastDragItems(items, isEnd) {
+    if (!items || !items.length) return;
+    if (items.length == 1) {
+      this.broadcastLocalDrag(items[0].id, items[0].x, items[0].y, isEnd);
+      return;
+    }
+    if (this.syncingRemote) return;
+    let msg = {
+      type: isEnd ? "dragGroupEnd" : "dragGroup",
+      userID: this.userID,
+      sessionID: this.sessionID,
+      items,
+    };
+    if (this.hasOpenRtc()) {
+      if (!isEnd) {
+        let now = performance.now();
+        if (now - (this._lastDragSentAt || 0) < 50) {
+          this._pendingDragMsg = msg;
+          return;
+        }
+        this._lastDragSentAt = now;
+        this._pendingDragMsg = null;
+      } else if (this._pendingDragMsg) {
+        this._pendingDragMsg = null;
+      }
+      this.rtcInstance.sendMessage(msg);
+    }
+    if (isEnd) {
+      let last = items[items.length - 1];
+      this.clearLiveDrag(last.id, last.x, last.y);
+    }
+  }
+
   queueLivePresence(fields) {
     if (!this.patchName) return;
     this._pendingLive = Object.assign(this._pendingLive || {}, fields);
@@ -644,6 +719,23 @@ class App {
         this.applyRemoteDrag(dragMsg, true);
       }
     });
+  }
+
+  applyRemoteDragGroup(msg, isEnd) {
+    if (!msg || !Array.isArray(msg.items)) return;
+    for (let item of msg.items) {
+      if (!item) continue;
+      this.applyRemoteDrag(
+        {
+          userID: msg.userID,
+          sessionID: msg.sessionID,
+          componentId: item.id,
+          x: item.x,
+          y: item.y,
+        },
+        isEnd,
+      );
+    }
   }
 
   hueFromUserId(userID) {
@@ -2058,19 +2150,32 @@ class App {
       this._pendingDragComp = null;
       return;
     }
+    if (comp._dragClientX == null || comp._dragClientY == null) {
+      this._pendingDragComp = null;
+      return;
+    }
     this._pendingDragComp = null;
     let rack = this._rackRect || this.container.getBoundingClientRect();
     let s = this._rackScale != null ? this._rackScale : this.scale || 1;
     let x = (comp._dragClientX - rack.left) / s - comp._grabX;
     let y = (comp._dragClientY - rack.top) / s - comp._grabY;
-    comp.container.style.left = x + "px";
-    comp.container.style.top = y + "px";
-    comp.container.style.setProperty("--posX", comp.container.style.left);
-    comp.container.style.setProperty("--posY", comp.container.style.top);
-    this.markEndpointsDirty(comp.id);
-    if (!this.syncingRemote) {
-      this.broadcastLocalDrag(comp.id, x, y, false);
+    let dx = x - (comp._dragOriginX || 0);
+    let dy = y - (comp._dragOriginY || 0);
+    let group =
+      this._dragGroup && this._dragGroup.length ? this._dragGroup : [comp];
+    let items = [];
+    for (let c of group) {
+      if (!c || !c.container) continue;
+      let nx = (c._dragOriginX || 0) + dx;
+      let ny = (c._dragOriginY || 0) + dy;
+      c.container.style.left = nx + "px";
+      c.container.style.top = ny + "px";
+      c.container.style.setProperty("--posX", c.container.style.left);
+      c.container.style.setProperty("--posY", c.container.style.top);
+      this.markEndpointsDirty(c.id);
+      items.push({ id: c.id, x: nx, y: ny });
     }
+    if (!this.syncingRemote) this.broadcastDragItems(items, false);
   }
   drawLine() {
     this.markCablesDirty();
@@ -2130,6 +2235,234 @@ class App {
     }
   }
 
+  isOutputComponent(c) {
+    return !!(c && (c.id == "output" || (c.type || "").toLowerCase() == "output"));
+  }
+
+  isMat(c) {
+    return !!(c && (c.type == "Mat" || (typeof Mat != "undefined" && c instanceof Mat)));
+  }
+
+  getSelectedComponents() {
+    return (this.components || []).filter((c) => c && c.active);
+  }
+
+  selectAllComponents() {
+    this.makeAllComponentsInactive();
+    for (let c of this.components || []) {
+      if (this.isOutputComponent(c)) continue;
+      c.setActive(true);
+    }
+  }
+
+  collectMatRiders(mat) {
+    let seen = new Set([mat]);
+    let queue = [mat];
+    while (queue.length) {
+      let m = queue.pop();
+      let mr = m.layoutRect();
+      for (let c of this.components || []) {
+        if (seen.has(c) || this.isOutputComponent(c)) continue;
+        if (!rectsOverlap(mr, c.layoutRect())) continue;
+        seen.add(c);
+        if (this.isMat(c)) queue.push(c);
+      }
+    }
+    seen.delete(mat);
+    return [...seen];
+  }
+
+  buildDragGroup(leader) {
+    if (this.isOutputComponent(leader)) return [leader];
+    let set = new Set();
+    if (this.isMat(leader)) {
+      set.add(leader);
+      for (let c of this.collectMatRiders(leader)) set.add(c);
+      if (leader.active) {
+        for (let c of this.getSelectedComponents()) set.add(c);
+      }
+    } else if (leader.active) {
+      for (let c of this.getSelectedComponents()) set.add(c);
+      set.add(leader);
+    } else {
+      set.add(leader);
+    }
+    return [...set].filter((c) => c && !this.isOutputComponent(c));
+  }
+
+  beginDragGroup(leader) {
+    let group = this.buildDragGroup(leader);
+    this._dragGroup = group;
+    this._dragLeader = leader;
+    let hue = this.hueFromUserId(this.userID);
+    for (let c of group) {
+      c._dragOriginX = parseFloat(c.container.style.left) || 0;
+      c._dragOriginY = parseFloat(c.container.style.top) || 0;
+      c.container.classList.add("grabbed");
+      c.container.style.setProperty("--grab-hue", hue);
+    }
+  }
+
+  dragGroupItems() {
+    let items = [];
+    for (let c of this._dragGroup || []) {
+      if (!c || !c.container) continue;
+      items.push({
+        id: c.id,
+        x: parseFloat(c.container.style.left) || 0,
+        y: parseFloat(c.container.style.top) || 0,
+      });
+    }
+    return items;
+  }
+
+  endDragGroup() {
+    let group = this._dragGroup || [];
+    let leader = this._dragLeader;
+    this.cacheRackRect();
+    this.flushPendingComponentDrag();
+    if (!this.syncingRemote) this.broadcastDragItems(this.dragGroupItems(), true);
+    this._suppressHistory = true;
+    for (let c of group) {
+      if (!c || !c.container) continue;
+      if (c._dragging) continue;
+      c.container.classList.remove("grabbed");
+      c.container.style.removeProperty("--grab-hue");
+    }
+    if (leader && leader.container) {
+      leader.container.classList.remove("grabbed");
+      leader.container.style.removeProperty("--grab-hue");
+    }
+    for (let i = 0; i < group.length; i++) {
+      if (i == group.length - 1) this._suppressHistory = false;
+      if (group[i] && group[i].quickSave) group[i].quickSave();
+    }
+    this._suppressHistory = false;
+    this._dragGroup = null;
+    this._dragLeader = null;
+    this.updateAllLines();
+  }
+
+  deleteSelection() {
+    let list = this.getSelectedComponents().filter(
+      (c) => !this.isOutputComponent(c),
+    );
+    if (!list.length) return;
+    this._suppressHistory = true;
+    for (let c of list) c.remove();
+    this._suppressHistory = false;
+    this.saveListOfComponentsInFirestore();
+    this.updateAllLines();
+    this.afterEdit();
+  }
+
+  nudgeSelection(dx, dy) {
+    let list = this.getSelectedComponents();
+    if (!list.length) return;
+    for (let c of list) {
+      let x = (parseFloat(c.container.style.left) || 0) + dx;
+      let y = (parseFloat(c.container.style.top) || 0) + dy;
+      c.container.style.left = x + "px";
+      c.container.style.top = y + "px";
+      c.container.style.setProperty("--posX", c.container.style.left);
+      c.container.style.setProperty("--posY", c.container.style.top);
+      this.markEndpointsDirty(c.id);
+    }
+    this.updateAllLines();
+    clearTimeout(this._nudgeSaveTimer);
+    this._nudgeSaveTimer = setTimeout(() => {
+      this._suppressHistory = true;
+      for (let i = 0; i < list.length; i++) {
+        if (i == list.length - 1) this._suppressHistory = false;
+        list[i].quickSave();
+      }
+      this._suppressHistory = false;
+    }, 200);
+  }
+
+  copySelection() {
+    let comps = this.getSelectedComponents().filter(
+      (c) => !this.isOutputComponent(c),
+    );
+    if (!comps.length) return null;
+    let ids = new Set(comps.map((c) => c.id));
+    let components = comps.map((c) => {
+      let obj = c.serialize();
+      obj.connections = [];
+      return obj;
+    });
+    let connections = [];
+    let seen = {};
+    for (let c of comps) {
+      for (let conn of c.connections || []) {
+        if (!ids.has(conn.from.id) || !ids.has(conn.to.id)) continue;
+        let ser = conn.serialize();
+        let k =
+          ser.from + ">" + ser.to + ":" + ser.audioParam + "#" + ser.numberOfOutput;
+        if (seen[k]) continue;
+        seen[k] = true;
+        connections.push(ser);
+      }
+    }
+    let payload = { v: 1, components, connections };
+    this._clipboard = payload;
+    this._pasteBurst = 0;
+    try {
+      navigator.clipboard.writeText(JSON.stringify(payload));
+    } catch (e) {}
+    return payload;
+  }
+
+  cutSelection() {
+    if (!this.copySelection()) return;
+    this.deleteSelection();
+  }
+
+  duplicateSelection() {
+    let payload = this.copySelection();
+    if (!payload) return;
+    this.pastePayload(payload);
+  }
+
+  async pasteFromClipboard() {
+    let payload = this._clipboard;
+    try {
+      let text = await navigator.clipboard.readText();
+      let parsed = JSON.parse(text);
+      if (parsed && parsed.v == 1 && Array.isArray(parsed.components)) {
+        payload = parsed;
+      }
+    } catch (e) {}
+    this.pastePayload(payload);
+  }
+
+  pastePayload(payload) {
+    if (!payload || !Array.isArray(payload.components) || !payload.components.length) {
+      return;
+    }
+    this._pasteBurst = (this._pasteBurst || 0) + 1;
+    let offset = 24 * this._pasteBurst;
+    let remapped = remapClipboardPayload(payload, offset, offset);
+    this._suppressHistory = true;
+    let newIds = remapped.components.map((c) => c.id);
+    for (let comp of remapped.components) {
+      comp.createdBy = this.userID;
+      this.addSerializedComponent(comp);
+    }
+    this.whenAllComponentsReady().then(() => {
+      for (let conn of remapped.connections) this.addSerializedConnection(conn);
+      this.makeAllComponentsInactive();
+      for (let id of newIds) {
+        let c = this.getComponentByID(id);
+        if (c) c.setActive(true);
+      }
+      this._suppressHistory = false;
+      this.updateAllLines();
+      this.afterEdit();
+      this.saveListOfComponentsInFirestore();
+    });
+  }
+
   createMainContainer(elem) {
     this.appEl = elem;
     this.container = document.createElement("div");
@@ -2143,51 +2476,129 @@ class App {
     this.SAVE_PREFIX = "modular_synth_";
 
     elem.addEventListener("pointerdown", (e) => {
-      if (e.button != 0) return;
       if (
         e.target.closest(
-          "component, footer, .buttons, .historyPanel, .cablePanel, .perfPanel, .messageBox",
+          "footer, .buttons, .historyPanel, .cablePanel, .perfPanel, .messageBox, .paletteOverlay",
         )
       )
         return;
-      this.makeAllComponentsInactive();
-      this.clearCableGhost();
-      this.closeFooterDrops();
-      this._panning = true;
-      this._panStartX = e.clientX;
-      this._panStartY = e.clientY;
-      this._panLeft = parseFloat(this.container.style.left);
-      this._panTop = parseFloat(this.container.style.top);
-      if (isNaN(this._panLeft) || isNaN(this._panTop)) {
-        let cs = getComputedStyle(this.container);
-        if (isNaN(this._panLeft)) this._panLeft = parseFloat(cs.left) || 0;
-        if (isNaN(this._panTop)) this._panTop = parseFloat(cs.top) || 0;
+      if (e.button == 1 || e.button == 2) {
+        this.startPan(e, elem);
+        return;
       }
-      this._panCurLeft = this._panLeft;
-      this._panCurTop = this._panTop;
-      this._canvasRect = this.canvas.getBoundingClientRect();
-      this.postCableWorker({ type: "pause" });
-      elem.setPointerCapture(e.pointerId);
+      if (e.button != 0) return;
+      if (e.target.closest("component")) return;
+      this.startMarquee(e, elem);
     });
 
     elem.addEventListener("pointermove", (e) => {
-      if (!this._panning) return;
-      let dx = e.clientX - this._panStartX;
-      let dy = e.clientY - this._panStartY;
-      this._panCurLeft = this._panLeft + dx;
-      this._panCurTop = this._panTop + dy;
-      let s = this.scale || 1;
-      let tx = "translate(" + dx + "px," + dy + "px)";
-      this.container.style.transform = tx + " scale(" + s + ")";
-      this.canvas.style.transform = tx;
+      if (this._panning) this.movePan(e);
+      else if (this._marquee) this.moveMarquee(e);
     });
 
-    elem.addEventListener("pointerup", (e) => this.endPan(e));
-    elem.addEventListener("pointercancel", (e) => this.endPan(e));
+    elem.addEventListener("pointerup", (e) => this.endAppPointer(e));
+    elem.addEventListener("pointercancel", (e) => this.endAppPointer(e));
+    elem.addEventListener("auxclick", (e) => {
+      if (e.button == 1) e.preventDefault();
+    });
 
     let box = this.container.getBoundingClientRect();
     this.updateCarpetParallax(box.x, box.y);
     this.updateCarpetScale();
+  }
+  startPan(e, elem) {
+    e.preventDefault();
+    this.clearCableGhost();
+    this.closeFooterDrops();
+    this._panning = true;
+    this._panStartX = e.clientX;
+    this._panStartY = e.clientY;
+    this._panLeft = parseFloat(this.container.style.left);
+    this._panTop = parseFloat(this.container.style.top);
+    if (isNaN(this._panLeft) || isNaN(this._panTop)) {
+      let cs = getComputedStyle(this.container);
+      if (isNaN(this._panLeft)) this._panLeft = parseFloat(cs.left) || 0;
+      if (isNaN(this._panTop)) this._panTop = parseFloat(cs.top) || 0;
+    }
+    this._panCurLeft = this._panLeft;
+    this._panCurTop = this._panTop;
+    this._canvasRect = this.canvas.getBoundingClientRect();
+    this.postCableWorker({ type: "pause" });
+    elem.setPointerCapture(e.pointerId);
+  }
+  movePan(e) {
+    let dx = e.clientX - this._panStartX;
+    let dy = e.clientY - this._panStartY;
+    this._panCurLeft = this._panLeft + dx;
+    this._panCurTop = this._panTop + dy;
+    let s = this.scale || 1;
+    let tx = "translate(" + dx + "px," + dy + "px)";
+    this.container.style.transform = tx + " scale(" + s + ")";
+    this.canvas.style.transform = tx;
+  }
+  endAppPointer() {
+    if (this._panning) this.endPan();
+    else if (this._marquee) this.endMarquee();
+  }
+  ensureSelectionBox() {
+    if (this._selectionBox) return this._selectionBox;
+    let box = document.createElement("div");
+    box.className = "selection-box";
+    this.appEl.appendChild(box);
+    this._selectionBox = box;
+    return box;
+  }
+  startMarquee(e, elem) {
+    e.preventDefault();
+    this.clearCableGhost();
+    this.closeFooterDrops();
+    this._marquee = {
+      x0: e.clientX,
+      y0: e.clientY,
+      additive: !!e.shiftKey,
+      moved: false,
+    };
+    let box = this.ensureSelectionBox();
+    box.style.left = e.clientX + "px";
+    box.style.top = e.clientY + "px";
+    box.style.width = "0px";
+    box.style.height = "0px";
+    box.classList.add("visible");
+    elem.setPointerCapture(e.pointerId);
+  }
+  moveMarquee(e) {
+    let m = this._marquee;
+    if (!m) return;
+    let x1 = Math.min(m.x0, e.clientX);
+    let y1 = Math.min(m.y0, e.clientY);
+    let w = Math.abs(e.clientX - m.x0);
+    let h = Math.abs(e.clientY - m.y0);
+    if (w > 4 || h > 4) m.moved = true;
+    let box = this.ensureSelectionBox();
+    box.style.left = x1 + "px";
+    box.style.top = y1 + "px";
+    box.style.width = w + "px";
+    box.style.height = h + "px";
+  }
+  endMarquee() {
+    let m = this._marquee;
+    this._marquee = null;
+    if (this._selectionBox) this._selectionBox.classList.remove("visible");
+    if (!m) return;
+    if (!m.moved) {
+      if (!m.additive) this.makeAllComponentsInactive();
+      return;
+    }
+    let x1 = parseFloat(this._selectionBox.style.left) || 0;
+    let y1 = parseFloat(this._selectionBox.style.top) || 0;
+    let w = parseFloat(this._selectionBox.style.width) || 0;
+    let h = parseFloat(this._selectionBox.style.height) || 0;
+    let box = { x: x1, y: y1, w, h };
+    if (!m.additive) this.makeAllComponentsInactive();
+    for (let c of this.components || []) {
+      if (this.isOutputComponent(c)) continue;
+      if (rectsOverlap(box, c.screenRect())) c.setActive(true);
+    }
   }
   endPan() {
     if (!this._panning) return;
@@ -2251,6 +2662,9 @@ class App {
   }
   addRackCover() {
     this.components.push(new RackCover(this));
+  }
+  addMat() {
+    this.components.push(new Mat(this));
   }
 
   addConstantValueNode() {
@@ -3163,7 +3577,7 @@ class App {
   }
 
   afterEdit() {
-    if (this.bulkLoading || this.restoringHistory || this.syncingRemote) return;
+    if (this.bulkLoading || this.restoringHistory || this.syncingRemote || this._suppressHistory) return;
     if (!this.history.length) this.initHistory();
     let now = this.clonePatch(this.serialize());
     let current = this.history[this.historyIndex];
@@ -3376,6 +3790,7 @@ App.COMPONENT_CLASSES = {
   BPMOutputComponent,
   Text,
   RackCover,
+  Mat,
   Drawer,
   PadSampler,
   Recorder,
@@ -3465,6 +3880,7 @@ App.COMPONENT_TONE = {
   Shader: "visual",
   Text: "meta",
   RackCover: "meta",
+  Mat: "meta",
   Merger: "meta",
   Output: "meta",
 };
@@ -3559,6 +3975,7 @@ App.MODULE_CATALOG = [
   { title: "Shader", tone: "visual", add: "addShader" },
   { title: "Text", tone: "meta", add: "addText" },
   { title: "Rack Cover", tone: "meta", add: "addRackCover" },
+  { title: "Mat", tone: "meta", add: "addMat" },
 ];
 
 for (let key of Object.keys(App.COMPONENT_CLASSES)) {

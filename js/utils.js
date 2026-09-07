@@ -489,3 +489,61 @@ function interpolateNullsCircular(array) {
 function getOneInX(arr, num) {
   return arr.filter((k, i) => i % num == 0);
 }
+
+function rectsOverlap(a, b) {
+  return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+function remapClipboardPayload(payload, dx, dy) {
+  payload = payload || {};
+  let idMap = {};
+  let components = (payload.components || []).map((c) => {
+    let copy = JSON.parse(JSON.stringify(c));
+    let oldId = copy.id;
+    let prefix = String(copy.constructor || copy.type || "comp")
+      .toLowerCase()
+      .substring(0, 7);
+    copy.id = prefix + "_" + makeid(8);
+    if (oldId) idMap[oldId] = copy.id;
+    copy.x = (parseFloat(copy.x) || 0) + dx + "px";
+    copy.y = (parseFloat(copy.y) || 0) + dy + "px";
+    copy.connections = [];
+    return copy;
+  });
+  let connections = (payload.connections || [])
+    .map((c) => ({
+      from: idMap[c.from],
+      to: idMap[c.to],
+      audioParam: c.audioParam,
+      numberOfOutput: c.numberOfOutput,
+    }))
+    .filter((c) => c.from && c.to);
+  return { components, connections, idMap };
+}
+
+// ponytail: AABB + id remap self-check. Upgrade = formal test if paste grows.
+(function clipboardGeomCheck() {
+  let hit = rectsOverlap({ x: 0, y: 0, w: 10, h: 10 }, { x: 9, y: 9, w: 10, h: 10 });
+  let miss = rectsOverlap({ x: 0, y: 0, w: 10, h: 10 }, { x: 11, y: 0, w: 10, h: 10 });
+  let origId = "oscilla_aaaaaaaa";
+  let remapped = remapClipboardPayload(
+    {
+      components: [{ id: origId, constructor: "Oscillator", type: "Oscillator", x: "10px", y: "20px" }],
+      connections: [{ from: origId, to: origId, audioParam: "in", numberOfOutput: 0 }],
+    },
+    24,
+    24,
+  );
+  let newId = remapped.components[0] && remapped.components[0].id;
+  let ok =
+    hit &&
+    !miss &&
+    newId &&
+    newId != origId &&
+    remapped.components[0].x == "34px" &&
+    remapped.components[0].y == "44px" &&
+    remapped.connections[0] &&
+    remapped.connections[0].from == newId &&
+    remapped.connections[0].to == newId;
+  if (!ok) console.error("clipboardGeomCheck failed");
+})();

@@ -270,6 +270,14 @@ class RTCForUsersData {
       if (this.app.onRemoteDragEnd) this.app.onRemoteDragEnd(msg);
       return;
     }
+    if (msg.type == "dragGroup") {
+      if (this.app.onRemoteDragGroup) this.app.onRemoteDragGroup(msg);
+      return;
+    }
+    if (msg.type == "dragGroupEnd") {
+      if (this.app.onRemoteDragGroupEnd) this.app.onRemoteDragGroupEnd(msg);
+      return;
+    }
     if (msg.type == "cableParams") {
       if (this.app.applyCableParamsFromPeer) {
         this.app.applyCableParamsFromPeer(msg.cables);

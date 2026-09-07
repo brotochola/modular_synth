@@ -998,22 +998,61 @@ class Component {
     return !!el.closest("button, input, select, textarea, outputs, canvas");
   }
 
+  isResizeCorner(e) {
+    let resize = getComputedStyle(this.container).resize;
+    if (!resize || resize == "none") return false;
+    let r = this.container.getBoundingClientRect();
+    let s = this.app.scale || 1;
+    let pad = 18 * s;
+    return e.clientX > r.right - pad && e.clientY > r.bottom - pad;
+  }
+
+  isOutputComponent() {
+    return this.id == "output" || this.type.toLowerCase() == "output";
+  }
+
+  layoutRect() {
+    return {
+      x: parseFloat(this.container.style.left) || 0,
+      y: parseFloat(this.container.style.top) || 0,
+      w: this.container.offsetWidth || 0,
+      h: this.container.offsetHeight || 0,
+    };
+  }
+
+  screenRect() {
+    let r = this.container.getBoundingClientRect();
+    return { x: r.left, y: r.top, w: r.width, h: r.height };
+  }
+
+  setActive(on) {
+    this.active = !!on;
+    this.container.classList.toggle("active", this.active);
+  }
+
+  selectForPointer(additive) {
+    if (additive) {
+      this.setActive(!this.active);
+      return;
+    }
+    if (this.active) return;
+    this.app.makeAllComponentsInactive();
+    this.setActive(true);
+  }
+
   onPointerDown(e) {
     if (e.button != 0) return;
     if (this.isDragIgnoreTarget(e.target)) return;
+    if (this.isResizeCorner(e)) return;
     e.stopPropagation();
     e.preventDefault();
-    this.toggleActive();
+    this.selectForPointer(e.shiftKey);
     let s = this.app.scale || 1;
     let el = this.container.getBoundingClientRect();
     this._dragging = true;
     this._grabX = (e.clientX - el.left) / s;
     this._grabY = (e.clientY - el.top) / s;
-    this.container.classList.add("grabbed");
-    this.container.style.setProperty(
-      "--grab-hue",
-      this.app.hueFromUserId(this.app.userID),
-    );
+    this.app.beginDragGroup(this);
     this.container.setPointerCapture(e.pointerId);
   }
 
@@ -1032,15 +1071,7 @@ class Component {
       this.app.flushPendingComponentDrag();
     }
     this._dragging = false;
-    this.container.classList.remove("grabbed");
-    this.container.style.removeProperty("--grab-hue");
-    let x = parseFloat(this.container.style.left) || 0;
-    let y = parseFloat(this.container.style.top) || 0;
-    if (!this.app.syncingRemote) {
-      this.app.broadcastLocalDrag(this.id, x, y, true);
-    }
-    this.quickSave();
-    this.app.updateAllLines();
+    this.app.endDragGroup();
   }
 
   createContainer() {
@@ -1189,18 +1220,10 @@ class Component {
 
   toggleActive() {
     if (this.active) {
-      for (let c of this.app.components) {
-        c.active = false;
-        c.container.classList.remove("active");
-      }
-      this.active = false;
+      this.app.makeAllComponentsInactive();
     } else {
-      for (let c of this.app.components) {
-        c.active = false;
-        c.container.classList.remove("active");
-      }
-      this.container.classList.add("active");
-      this.active = true;
+      this.app.makeAllComponentsInactive();
+      this.setActive(true);
     }
   }
   createDisplay() {
