@@ -164,7 +164,10 @@ async function getDocFromFirebase(name) {
   ret.outputX = loadadDoc.outputX;
   ret.outputY = loadadDoc.outputY;
   ret.playing = loadadDoc.playing;
-  ret.beatOriginMs = loadadDoc.beatOriginMs;
+  if ("beatOriginMs" in loadadDoc) ret.beatOriginMs = loadadDoc.beatOriginMs;
+  if (loadadDoc.pausedMusicalSec != null) {
+    ret.pausedMusicalSec = loadadDoc.pausedMusicalSec;
+  }
 
   docs.forEach((doc) => {
     ret.components.push(doc.data());

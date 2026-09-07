@@ -103,6 +103,11 @@ class App {
     this.admin = !!getParameterByName("admin");
 
     this.playButton = document.querySelector(".play");
+    this.stopButton = document.querySelector(".stop");
+    this.bpmInput = document.querySelector("#bpmButton");
+    this.transportBarVal = document.querySelector(".transportBarVal");
+    this.transportBeatVal = document.querySelector(".transportBeatVal");
+    this.transportDots = document.querySelectorAll(".transportDots i");
     this.sysStatusEl = document.querySelector(".sysStatus");
 
     this.components = [];
@@ -137,6 +142,9 @@ class App {
     this._prevSessionLabels = {};
     this.playing = false;
     this.beatOriginMs = null;
+    this.pausedMusicalSec = 0;
+    this._hudBar = -1;
+    this._hudBeat = -1;
     this.clockOffsetMs = 0;
     this._clockOffsetSamples = [];
     this._timeSyncTimer = null;
@@ -165,7 +173,10 @@ class App {
     this.addEventsToDropFile();
     this.initHistory();
 
+    this.bindTransportUi();
     this.putBPMInButton();
+    this.updateTransportUi();
+    this.updateTransportPos(true);
 
     this.generateUserAndSessionIDs();
     this.createInstanceOfRTCConnectionForUsers();
@@ -401,12 +412,19 @@ class App {
     this.refreshClockSkew();
   }
 
+  getMusicalSec() {
+    if (this.playing && this.beatOriginMs != null) {
+      return Math.max(0, (this.adminNowMs() - this.beatOriginMs) / 1000);
+    }
+    return Math.max(0, this.pausedMusicalSec || 0);
+  }
+
   refreshClockSkew() {
     if (this.beatOriginMs == null || !this.playing) {
       this.pushClockSkew(0);
       return;
     }
-    let transportSec = (this.adminNowMs() - this.beatOriginMs) / 1000;
+    let transportSec = this.getMusicalSec();
     let skew = transportSec - this.actx.currentTime;
     this.pushClockSkew(skew);
   }
@@ -420,7 +438,12 @@ class App {
   }
 
   computeBeatOriginMs() {
-    return this.adminNowMs() - this.actx.currentTime * 1000;
+    return this.adminNowMs() - this.getMusicalSec() * 1000;
+  }
+
+  restampBeatOriginFromAudio() {
+    let musicalSec = this.actx.currentTime + (this.clockSkew || 0);
+    this.beatOriginMs = this.adminNowMs() - musicalSec * 1000;
   }
 
   publishTransport(fromRemote) {
@@ -429,6 +452,7 @@ class App {
       type: "transport",
       playing: !!this.playing,
       beatOriginMs: this.beatOriginMs,
+      pausedMusicalSec: this.pausedMusicalSec || 0,
       bpm: this.bpm,
       userID: this.userID,
       sessionID: this.sessionID,
@@ -439,6 +463,7 @@ class App {
       putTransportInFireStore(this.patchName, {
         playing: !!this.playing,
         beatOriginMs: this.beatOriginMs,
+        pausedMusicalSec: this.pausedMusicalSec || 0,
         bpm: this.bpm,
         sessionID: this.sessionID,
         userID: this.userID,
@@ -451,7 +476,8 @@ class App {
     if (this._beatPublishTimer) return;
     this._beatPublishTimer = setInterval(() => {
       if (!this.playing) return;
-      this.beatOriginMs = this.computeBeatOriginMs();
+      this.restampBeatOriginFromAudio();
+      this.refreshClockSkew();
       this.publishTransport(false);
     }, 5000);
   }
@@ -463,11 +489,30 @@ class App {
     }
   }
 
+  canConductTransport() {
+    let remoteAdmin = (this.connectedUsers || []).some(
+      (u) => u && u.admin && u.sessionID != this.sessionID,
+    );
+    return this.admin || !this.patchName || !remoteAdmin;
+  }
+
   applyTransport(opts) {
     opts = opts || {};
     let playing = !!opts.playing;
     let fromRemote = !!opts.fromRemote;
     let prev = this.playing;
+    let prevPaused = this.pausedMusicalSec || 0;
+
+    if (
+      "pausedMusicalSec" in opts &&
+      opts.pausedMusicalSec != null &&
+      !isNaN(opts.pausedMusicalSec)
+    ) {
+      this.pausedMusicalSec = Math.max(0, Number(opts.pausedMusicalSec));
+    } else if (prev && !playing) {
+      this.pausedMusicalSec = this.getMusicalSec();
+    }
+
     this.playing = playing;
     if (opts.bpm != null && !isNaN(opts.bpm)) {
       this.bpm = opts.bpm;
@@ -476,11 +521,14 @@ class App {
       }
       this.putBPMInButton();
     }
-    if (opts.beatOriginMs != null) this.beatOriginMs = opts.beatOriginMs;
+    if ("beatOriginMs" in opts) {
+      this.beatOriginMs = opts.beatOriginMs == null ? null : opts.beatOriginMs;
+    }
 
     if (playing) {
-      if (this.admin && !fromRemote && this.beatOriginMs == null) {
-        this.beatOriginMs = this.computeBeatOriginMs();
+      if (!fromRemote && this.beatOriginMs == null) {
+        this.beatOriginMs =
+          this.adminNowMs() - (this.pausedMusicalSec || 0) * 1000;
       }
       this.ensureAudioProfile();
       let resumeResult = this.actx.resume();
@@ -489,18 +537,24 @@ class App {
           this.showMessage("Click ▶ to unlock audio");
         });
       }
-      if (this.playButton) this.playButton.innerHTML = " ■ ";
       if (this.admin && !fromRemote) this.startBeatPublishLoop();
     } else {
       this.actx.suspend();
-      if (this.playButton) this.playButton.innerHTML = " ▶ ";
       if (this.admin) this.stopBeatPublishLoop();
+      if ((this.pausedMusicalSec || 0) === 0) this.resetTransportDisplays();
     }
 
     this.refreshClockSkew();
+    this.updateTransportUi();
+    this.updateTransportPos(true);
 
-    if (fromRemote && prev != playing) {
-      this.showMessage(playing ? "Admin: play" : "Admin: pause");
+    if (fromRemote) {
+      if (playing && !prev) this.showMessage("Admin: play");
+      else if (!playing && (prev || prevPaused !== (this.pausedMusicalSec || 0))) {
+        this.showMessage(
+          (this.pausedMusicalSec || 0) === 0 ? "Admin: stop" : "Admin: pause",
+        );
+      }
     }
     if (this.admin && !fromRemote) this.publishTransport(false);
   }
@@ -1077,13 +1131,16 @@ class App {
     if (loaded) {
       this.loadFromFile(loaded);
       await this.whenAllComponentsReady();
-      if (loaded.playing != null || loaded.beatOriginMs != null) {
-        this.applyTransport({
+      if (loaded.playing != null || loaded.beatOriginMs != null || loaded.pausedMusicalSec != null) {
+        let tOpts = {
           playing: !!loaded.playing,
-          beatOriginMs: loaded.beatOriginMs,
           bpm: loaded.bpm,
           fromRemote: true,
-        });
+        };
+        if ("beatOriginMs" in loaded) tOpts.beatOriginMs = loaded.beatOriginMs;
+        if (loaded.pausedMusicalSec != null)
+          tOpts.pausedMusicalSec = loaded.pausedMusicalSec;
+        this.applyTransport(tOpts);
       }
     }
 
@@ -1258,14 +1315,15 @@ class App {
     }
     if (e.cables) this.applyCableParams(e.cables);
 
-    if (e.playing != null || e.beatOriginMs != null) {
-      this.applyTransport({
+    if (e.playing != null || e.beatOriginMs != null || e.pausedMusicalSec != null) {
+      let tOpts = {
         playing: e.playing != null ? e.playing : this.playing,
-        beatOriginMs:
-          e.beatOriginMs != null ? e.beatOriginMs : this.beatOriginMs,
-        bpm: e.bpm,
         fromRemote: true,
-      });
+      };
+      if ("beatOriginMs" in e) tOpts.beatOriginMs = e.beatOriginMs;
+      if (e.pausedMusicalSec != null) tOpts.pausedMusicalSec = e.pausedMusicalSec;
+      if (e.bpm != null) tOpts.bpm = e.bpm;
+      this.applyTransport(tOpts);
     }
 
     this.updateAllLines();
@@ -1311,8 +1369,67 @@ class App {
     };
   }
   putBPMInButton() {
-    (document.querySelector("#bpmButton") || {}).innerHTML =
-      "BPM (" + this.bpm + ")";
+    let el = this.bpmInput || document.querySelector("#bpmButton");
+    if (!el) return;
+    if (el.tagName === "INPUT") el.value = String(this.bpm);
+    else el.innerHTML = "BPM (" + this.bpm + ")";
+  }
+
+  bindTransportUi() {
+    let el = this.bpmInput;
+    if (!el || el.tagName !== "INPUT") return;
+    el.addEventListener("change", () => this.changeBPM(el.value));
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        el.blur();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        this.putBPMInButton();
+        el.blur();
+      }
+    });
+  }
+
+  static barBeatFromSec(sec, bpm) {
+    let beats = Math.max(0, (sec || 0) * ((bpm > 0 ? bpm : 120) / 60));
+    return {
+      bar: Math.floor(beats / 4) + 1,
+      beat: Math.floor(beats % 4) + 1,
+    };
+  }
+
+  updateTransportUi() {
+    if (this.playButton) {
+      this.playButton.innerHTML = this.playing ? "⏸" : "▶";
+      this.playButton.title = this.playing ? "Pause" : "Play";
+      this.playButton.classList.toggle("on", !!this.playing);
+    }
+    if (this.stopButton) {
+      let stopped = !this.playing && (this.pausedMusicalSec || 0) === 0;
+      this.stopButton.disabled = stopped;
+    }
+  }
+
+  updateTransportPos(force) {
+    let pos = App.barBeatFromSec(this.getMusicalSec(), this.bpm);
+    if (!force && pos.bar === this._hudBar && pos.beat === this._hudBeat) return;
+    this._hudBar = pos.bar;
+    this._hudBeat = pos.beat;
+    if (this.transportBarVal) this.transportBarVal.textContent = String(pos.bar);
+    if (this.transportBeatVal) this.transportBeatVal.textContent = String(pos.beat);
+    if (this.transportDots && this.transportDots.length) {
+      for (let i = 0; i < this.transportDots.length; i++) {
+        this.transportDots[i].classList.toggle("on", i === pos.beat - 1);
+      }
+    }
+  }
+
+  resetTransportDisplays() {
+    for (let c of this.components || []) {
+      if (c && c.resetTransportDisplay instanceof Function)
+        c.resetTransportDisplay();
+    }
   }
   createCanvasOnTop() {
     this.canvas = document.createElement("canvas");
@@ -1400,6 +1517,7 @@ class App {
       this.runCableFrame(dt);
       this.tickSabUi();
       if (typeof tickLedFlashes === "function") tickLedFlashes();
+      this.updateTransportPos();
       let frameMs = performance.now() - t0;
       let fpsInst = dt > 0 ? 1 / dt : 60;
       this._sysFrameMs += (frameMs - this._sysFrameMs) * 0.15;
@@ -2220,12 +2338,9 @@ class App {
   getNextBeat() {
     let bpm = this.bpm || ((globalThis.AppConfig && AppConfig.FALLBACK_BPM) || 120);
     let barSec = (60 / bpm) * 4;
-    if (this.beatOriginMs != null && this.playing) {
-      let transportSec = (this.adminNowMs() - this.beatOriginMs) / 1000;
-      let phase = ((transportSec % barSec) + barSec) % barSec;
-      return barSec - phase;
-    }
-    return barSec - (this.actx.currentTime % barSec);
+    let transportSec = this.getMusicalSec();
+    let phase = ((transportSec % barSec) + barSec) % barSec;
+    return barSec - phase;
   }
 
   makeAllComponentsInactive() {
@@ -3167,16 +3282,25 @@ class App {
     this.loadFromFile(JSON.parse(localStorage[this.SAVE_PREFIX + name]));
   }
 
-  changeBPM() {
-    let val = prompt("bpm");
-    val = parseInt(val);
-    if (isNaN(val)) return;
+  changeBPM(raw) {
+    let el = this.bpmInput || document.querySelector("#bpmButton");
+    let val = parseInt(raw != null ? raw : el && el.value, 10);
+    if (isNaN(val) || val < 1) {
+      this.putBPMInButton();
+      return;
+    }
+    val = Math.min(999, val);
+    if (val === this.bpm) {
+      this.putBPMInButton();
+      return;
+    }
     this.bpm = val;
     putBPMInFireStore(this.patchName, this.bpm);
     for (let c of this.components) {
       c.updateBPM();
     }
     this.putBPMInButton();
+    this.updateTransportPos(true);
     this.afterEdit();
   }
 
@@ -3227,13 +3351,12 @@ class App {
   }
 
   play() {
-    let remoteAdmin = (this.connectedUsers || []).some(
-      (u) => u && u.admin && u.sessionID != this.sessionID,
-    );
-    let canConduct = this.admin || !this.patchName || !remoteAdmin;
-    if (canConduct) {
+    if (this.canConductTransport()) {
       let next = !this.playing;
-      if (next) this.beatOriginMs = this.computeBeatOriginMs();
+      if (next) {
+        this.beatOriginMs =
+          this.adminNowMs() - (this.pausedMusicalSec || 0) * 1000;
+      }
       this.applyTransport({ playing: next, fromRemote: false });
       return;
     }
@@ -3246,11 +3369,25 @@ class App {
           this.showMessage("Click ▶ to unlock audio");
         });
       }
-      if (this.playButton) this.playButton.innerHTML = " ■ ";
       this.refreshClockSkew();
+      this.updateTransportUi();
     } else {
       this.showMessage("Waiting for admin play");
     }
+  }
+
+  stop() {
+    if (!this.canConductTransport()) {
+      this.showMessage("Waiting for admin play");
+      return;
+    }
+    if (!this.playing && (this.pausedMusicalSec || 0) === 0) return;
+    this.applyTransport({
+      playing: false,
+      beatOriginMs: null,
+      pausedMusicalSec: 0,
+      fromRemote: false,
+    });
   }
 
   openButtons() {
@@ -3985,3 +4122,18 @@ for (let key of Object.keys(App.COMPONENT_CLASSES)) {
 if (LerpComponent.name != "lerp" || LerpComponent.classKey != "LerpComponent") {
   console.error("component title/classKey mismatch");
 }
+
+// ponytail: 4/4 bar/beat from musical seconds. Upgrade = transport integration test.
+(function transportPosSelfCheck() {
+  function pos(sec, bpm) {
+    return App.barBeatFromSec(sec, bpm);
+  }
+  let a = pos(0, 120);
+  let b = pos(0.5, 120);
+  let c = pos(2, 120);
+  let d = pos(2.5, 120);
+  if (a.bar !== 1 || a.beat !== 1) console.error("transport pos 0s", a);
+  if (b.bar !== 1 || b.beat !== 2) console.error("transport pos 0.5s", b);
+  if (c.bar !== 2 || c.beat !== 1) console.error("transport pos 2s", c);
+  if (d.bar !== 2 || d.beat !== 2) console.error("transport pos 2.5s", d);
+})();

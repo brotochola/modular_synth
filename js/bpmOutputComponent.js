@@ -88,6 +88,17 @@ class BPMOutputComponent extends Component {
     flashLed(this.displayLed, AppConfig.LED_FLASH_BPM_MS);
   }
 
+  resetTransportDisplay() {
+    this.val = 0;
+    this._lastSabNote = 0;
+    if (this.display) this.display.innerHTML = 0;
+    let sab = this.sabBlock;
+    if (sab) {
+      sab.setNote(0);
+      sab.publish();
+    }
+  }
+
   loadFromSerializedData(cb) {
     super.loadFromSerializedData(cb);
     if (this.rateSelect) this.rateSelect.value = String(this.rate);

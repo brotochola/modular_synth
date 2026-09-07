@@ -9,21 +9,23 @@ class Sequencer extends Component {
     this.infoText =
       "Step sequencer. 16 steps × 13 semitones grid. Rising clock advances the playhead; no clock / sync uses project BPM 16ths. Outputs: relative note, gate (held while step on), Hz, and trigger (~" +
       pulseMs +
-      "ms pulse on each on-step, including consecutive). Sync checkbox forces project BPM phase and ignores clock. Draw notes on the grid; sequence saves with the patch.";
+      "ms pulse on each on-step, including consecutive). Sync checkbox forces project BPM phase and ignores clock. Rec + record jack (Hz) overdubs the current step, quantized to the grid vs baseHz; silence leaves the step. Draw notes on the grid; sequence saves with the patch.";
     this.valuesToSave = ["sequence", "syncToBeat"];
     this.syncToBeat =
       serializedData && serializedData.syncToBeat !== undefined
         ? !!serializedData.syncToBeat
         : false;
+    this.recording = false;
 
     this.numberOfSemitones = 13;
     this.numberOfSteps = AppConfig.SEQ_STEPS;
     this.playheadStep = 0;
     if (!this.sequence) this.initSequence();
-    this.jackKinds = { in_0: "trig" };
+    this.jackKinds = { in_0: "trig", in_1: "cv" };
     this.outputLabels = ["relative note", "gate", "Hz", "trigger"];
     this.outputKinds = { 0: "cv", 1: "gate", 2: "cv", 3: "trig" };
     this.createSyncToggle();
+    this.createRecToggle();
     this.createNode();
     this.createbuttons();
   }
@@ -48,6 +50,27 @@ class Sequencer extends Component {
     this.toggleWrap.appendChild(this.syncLabel);
     if (this.headerLeft) this.headerLeft.appendChild(this.toggleWrap);
     else (this.main || this.container).appendChild(this.toggleWrap);
+  }
+
+  createRecToggle() {
+    this.recWrap = document.createElement("div");
+    this.recWrap.classList.add("moduleToggles", "seqRecToggle");
+    this.recLabel = document.createElement("label");
+    this.recLabel.title =
+      "Overdub current step from record jack (Hz). Silence leaves the step.";
+    this.recCheck = document.createElement("input");
+    this.recCheck.type = "checkbox";
+    this.recCheck.checked = false;
+    this.recCheck.onchange = () => {
+      this.recording = !!this.recCheck.checked;
+      this.recWrap.classList.toggle("on", this.recording);
+      this.writeSabControl();
+    };
+    this.recLabel.appendChild(this.recCheck);
+    this.recLabel.appendChild(document.createTextNode("rec"));
+    this.recWrap.appendChild(this.recLabel);
+    if (this.headerLeft) this.headerLeft.appendChild(this.recWrap);
+    else (this.main || this.container).appendChild(this.recWrap);
   }
   initSequence() {
     this.sequence = [];
@@ -100,13 +123,29 @@ class Sequencer extends Component {
 
   putLabels() {
     super.putLabels();
-    let clockBtn = this.container.querySelector("button.in_0");
-    if (!clockBtn) return;
+    this.labelJack("in_0", "clock");
+    this.labelJack("in_1", "record");
+  }
+
+  labelJack(cls, name) {
+    let btn = this.container.querySelector("button." + cls);
+    if (!btn) return;
     let lab =
-      clockBtn.parentElement &&
-      clockBtn.parentElement.querySelector(".jack-label");
-    if (lab) lab.textContent = "clock";
-    clockBtn.title = "clock";
+      btn.parentElement && btn.parentElement.querySelector(".jack-label");
+    if (lab) lab.textContent = name;
+    btn.title = name;
+  }
+
+  applyRecordedStep(step, semitone) {
+    if (step < 0 || step >= this.numberOfSteps) return;
+    if (semitone < 0 || semitone >= this.numberOfSemitones) return;
+    if (!this.sequence[step]) return;
+    for (let v = 0; v < this.sequence[step].length; v++) {
+      this.sequence[step][v] = false;
+    }
+    this.sequence[step][semitone] = true;
+    this.quickSave();
+    this.updateUI();
   }
 
   handleClickOnSeqButton(e) {
@@ -173,6 +212,7 @@ class Sequencer extends Component {
     sab.setSlot(16, this.clockSkew || this.app.clockSkew || 0);
     sab.setSlot(17, this.syncToBeat ? 1 : 0);
     sab.setSlot(18, 1);
+    sab.setSlot(19, this.recording ? 1 : 0);
     sab.publish();
   }
 
@@ -206,7 +246,7 @@ class Sequencer extends Component {
   createNode() {
     this.app.loadWorklet("js/audioWorklets/sequencerWorklet.js").then(() => {
       this.node = this.makeWorklet("sequencer-worklet", {
-        numberOfInputs: 1,
+        numberOfInputs: 2,
         numberOfOutputs: 4,
         outputChannelCount: [1, 1, 1, 1],
       });
@@ -217,6 +257,11 @@ class Sequencer extends Component {
 
       this.node.onprocessorerror = (e) => {
         console.error(e);
+      };
+      this.node.port.onmessage = (e) => {
+        let d = e.data || {};
+        if (d.recStep == null || d.semitone == null) return;
+        this.applyRecordedStep(d.recStep | 0, d.semitone | 0);
       };
 
       this.sendToWorklet();
@@ -232,3 +277,17 @@ class Sequencer extends Component {
     return obj;
   }
 }
+
+// ponytail: pitch snap self-check. Ceiling = this 13-cell wrap.
+(function sequencerRecSelfCheck() {
+  if (hzToSeqSemitone(220, 220) !== 0) {
+    console.error("seq rec self-check fail unison", hzToSeqSemitone(220, 220));
+  }
+  if (hzToSeqSemitone(440, 220) !== 12) {
+    console.error("seq rec self-check fail octave", hzToSeqSemitone(440, 220));
+  }
+  let one = 220 * Math.pow(2, 1 / 12);
+  if (hzToSeqSemitone(one, 220) !== 1) {
+    console.error("seq rec self-check fail semitone", hzToSeqSemitone(one, 220));
+  }
+})();

@@ -248,12 +248,15 @@ class RTCForUsersData {
           ? !!msg.playing
           : msg.action == "play";
       if (this.app.applyTransport) {
-        this.app.applyTransport({
+        let tOpts = {
           playing,
-          beatOriginMs: msg.beatOriginMs,
           bpm: msg.bpm,
           fromRemote: true,
-        });
+        };
+        if ("beatOriginMs" in msg) tOpts.beatOriginMs = msg.beatOriginMs;
+        if (msg.pausedMusicalSec != null) tOpts.pausedMusicalSec = msg.pausedMusicalSec;
+        else if (msg.action == "stop") tOpts.pausedMusicalSec = 0;
+        this.app.applyTransport(tOpts);
       }
       return;
     }

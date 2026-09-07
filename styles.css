@@ -1800,6 +1800,7 @@ component.PolySequencer {
 }
 
 component.Sequencer .seqSyncToggle,
+component.Sequencer .seqRecToggle,
 component.PolySequencer .seqSyncToggle,
 component.Arpeggiator .seqSyncToggle {
   display: flex;
@@ -1823,7 +1824,15 @@ component.Arpeggiator .seqSyncToggle.on {
     0 0 6px var(--accent-dim);
 }
 
+component.Sequencer .seqRecToggle.on {
+  border-color: #c22;
+  box-shadow:
+    inset 0 0 6px rgba(204, 34, 34, 0.45),
+    0 0 6px rgba(204, 34, 34, 0.35);
+}
+
 component.Sequencer .seqSyncToggle label,
+component.Sequencer .seqRecToggle label,
 component.PolySequencer .seqSyncToggle label,
 component.Arpeggiator .seqSyncToggle label {
   display: flex;
@@ -1841,13 +1850,22 @@ component.Arpeggiator .seqSyncToggle label {
   white-space: nowrap;
 }
 
+component.Sequencer .seqRecToggle label {
+  color: #c22;
+}
+
 component.Sequencer .seqSyncToggle.on label,
 component.PolySequencer .seqSyncToggle.on label,
 component.Arpeggiator .seqSyncToggle.on label {
   opacity: 1;
 }
 
+component.Sequencer .seqRecToggle.on label {
+  opacity: 1;
+}
+
 component.Sequencer .seqSyncToggle input,
+component.Sequencer .seqRecToggle input,
 component.PolySequencer .seqSyncToggle input,
 component.Arpeggiator .seqSyncToggle input {
   width: 11px;
@@ -1855,6 +1873,10 @@ component.Arpeggiator .seqSyncToggle input {
   margin: 0;
   accent-color: var(--accent);
   cursor: pointer;
+}
+
+component.Sequencer .seqRecToggle input {
+  accent-color: #c22;
 }
 
 component.Arpeggiator {
@@ -2801,6 +2823,122 @@ button.play {
   border-color: var(--accent-dim);
 }
 
+button.play.on {
+  background: rgba(93, 255, 194, 0.12);
+}
+
+button.stop {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--accent);
+  border-color: var(--accent-dim);
+}
+
+footer .transport {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+footer .transportBpm {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 6px 0 8px;
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 10px;
+  letter-spacing: 0.4px;
+  color: var(--ink);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+footer .transportBpm span {
+  opacity: 0.65;
+}
+
+footer .transportBpm input,
+footer #bpmButton[type="number"] {
+  width: 40px;
+  height: 22px;
+  min-height: 22px;
+  padding: 0 2px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--accent);
+  font-size: 12px;
+  letter-spacing: 0.3px;
+  text-align: right;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+footer .transportBpm input::-webkit-outer-spin-button,
+footer .transportBpm input::-webkit-inner-spin-button,
+footer #bpmButton[type="number"]::-webkit-outer-spin-button,
+footer #bpmButton[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+footer .transportPos {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 26px;
+  padding: 0 8px;
+  border: 1px solid var(--panel-edge);
+  border-radius: var(--radius);
+  background: rgba(0, 0, 0, 0.55);
+  font-variant-numeric: tabular-nums;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+footer .transportMetric {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 4px;
+}
+
+footer .transportLabel {
+  font-size: 9px;
+  letter-spacing: 0.6px;
+  opacity: 0.55;
+}
+
+footer .transportBarVal,
+footer .transportBeatVal {
+  color: var(--accent);
+  font-size: 12px;
+  min-width: 1.2em;
+}
+
+footer .transportDots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+footer .transportDots i {
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid var(--panel-edge);
+}
+
+footer .transportDots i.on {
+  background: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 8px var(--accent-dim);
+}
+
 .seqButton {
   /* sized under component.Sequencer .seqButton — keep fallback tiny */
   width: 12px;
@@ -2882,6 +3020,22 @@ component.drawer canvas {
   footer select {
     min-height: 40px;
     font-size: 14px;
+  }
+  footer .transport {
+    flex: 1 1 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  footer .transportBpm,
+  footer .transportPos {
+    height: 40px;
+  }
+  footer .transportBpm input,
+  footer #bpmButton[type="number"] {
+    height: 36px;
+    min-height: 36px;
+    font-size: 14px;
+    width: 48px;
   }
   button.openButtons {
     font-size: 16px;

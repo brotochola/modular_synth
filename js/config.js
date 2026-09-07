@@ -11,6 +11,8 @@
     /** Fraction of a quarter note per sequencer step (0.25 = 16th). */
     SEQ_STEP_QUARTER: 0.25,
     ONE_SEMITONE: 1.059463,
+    /** Record jack: ignore CV below this (Hz). Silence does not overwrite. */
+    SEQ_REC_HZ_MIN: 1,
 
     // --- Triggers / clocks ---
     /** Standard trig / clock pulse width (seconds). ~10ms. */

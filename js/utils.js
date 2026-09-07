@@ -398,6 +398,14 @@ function midi2Freq(midiNote) {
   return Math.pow(2, (midiNote - 69) / 12) * concertPitch;
 }
 
+/** Grid index 0..12 vs baseHz. Exact +12 stays 12; other octaves fold. -1 if unusable. */
+function hzToSeqSemitone(hz, baseHz) {
+  if (!(hz > 0) || !(baseHz > 0)) return -1;
+  let s = Math.round(12 * Math.log2(hz / baseHz));
+  if (s === 12) return 12;
+  return ((s % 12) + 12) % 12;
+}
+
 function generateAnArrayWithRandomValues(length, val) {
   let arr = [];
   for (i = 0; i < length; i++) {

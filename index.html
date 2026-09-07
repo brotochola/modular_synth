@@ -178,14 +178,23 @@
 
         <!-- <button onclick="app.loadFromFireStore()">📂 load from firestore</button> -->
 
-        <!-- <button onclick="app.stop()" class="stop"> ■ </button> -->
-
-        <button onclick="app.changeBPM()" id="bpmButton">BPM</button>
         <button onclick="app.openCables()" class="openCables">Cables</button>
         <button onclick="app.undo()" class="undo" disabled>Undo</button>
         <button onclick="app.redo()" class="redo" disabled>Redo</button>
         <button onclick="app.openHistory()" class="openHistory">History</button>
-        <button onclick="app.play()" class="play"> ▶ </button>
+        <div class="transport">
+            <label class="transportBpm" title="Tempo">
+                <span>BPM</span>
+                <input id="bpmButton" type="number" min="1" max="999" step="1" value="100" inputmode="numeric">
+            </label>
+            <div class="transportPos" title="4/4 position">
+                <span class="transportMetric"><span class="transportLabel">BAR</span><span class="transportBarVal">1</span></span>
+                <span class="transportMetric"><span class="transportLabel">BEAT</span><span class="transportBeatVal">1</span></span>
+                <span class="transportDots" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+            </div>
+            <button type="button" onclick="app.play()" class="play" title="Play">▶</button>
+            <button type="button" onclick="app.stop()" class="stop" title="Stop and reset" disabled>■</button>
+        </div>
         <div class="patchName"></div>
 
     </footer>

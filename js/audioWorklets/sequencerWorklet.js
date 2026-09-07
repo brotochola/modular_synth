@@ -1,3 +1,10 @@
+function hzToSeqSemitone(hz, baseHz) {
+  if (!(hz > 0) || !(baseHz > 0)) return -1;
+  let s = Math.round(12 * Math.log2(hz / baseHz));
+  if (s === 12) return 12;
+  return ((s % 12) + 12) % 12;
+}
+
 class SequencerWorklet extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
@@ -27,6 +34,8 @@ class SequencerWorklet extends AudioWorkletProcessor {
     this.syncToBeat = false;
     this.clockOn = 0;
     this.clockSkew = 0;
+    this.recording = false;
+    this.lastRecordedStep = -1;
     this.pulseRemaining = 0;
     this.pulseLength = AppConfig.trigPulseSamples(sampleRate);
     this.port.onmessage = (e) => {
@@ -53,6 +62,9 @@ class SequencerWorklet extends AudioWorkletProcessor {
     this.applyBpm(sab.getBpm());
     this.clockSkew = sab.getSlot(16);
     this.syncToBeat = sab.getSlot(17) > 0.5;
+    let rec = sab.getSlot(19) > 0.5;
+    if (rec && !this.recording) this.lastRecordedStep = this.currentNote;
+    this.recording = rec;
     if (this.syncToBeat) this.externalClock = false;
     if (sab.getSlot(18) < 0.5) return;
     for (let i = 0; i < AppConfig.SEQ_STEPS; i++) {
@@ -72,6 +84,18 @@ class SequencerWorklet extends AudioWorkletProcessor {
     if (seq[this.currentNote]) this.pulseRemaining = this.pulseLength;
   }
 
+  maybeRecord(recordChannel, baseHz) {
+    if (!this.recording) return;
+    if (this.currentNote === this.lastRecordedStep) return;
+    this.lastRecordedStep = this.currentNote;
+    let hz = 0;
+    if (recordChannel && recordChannel.length) hz = recordChannel[0];
+    if (!(hz > AppConfig.SEQ_REC_HZ_MIN)) return;
+    let s = hzToSeqSemitone(hz, baseHz);
+    if (s < 0) return;
+    this.port.postMessage({ recStep: this.currentNote, semitone: s });
+  }
+
   process(inputs, outputs, parameters) {
     this.readControl();
     if (!this.durationOfLoop) return true;
@@ -87,6 +111,8 @@ class SequencerWorklet extends AudioWorkletProcessor {
       (trigChannel && trigChannel.length) ||
       128;
     let clockChannel = inputs[0] && inputs[0][0];
+    let recordChannel = inputs[1] && inputs[1][0];
+    let baseHz = (parameters.baseHz && parameters.baseHz[0]) || 440;
 
     if (clockChannel && clockChannel.length && !this.syncToBeat) {
       for (let i = 0; i < clockChannel.length; ++i) {
@@ -100,6 +126,7 @@ class SequencerWorklet extends AudioWorkletProcessor {
             this.currentNote = (this.currentNote + 1) % AppConfig.SEQ_STEPS;
           }
           this.postPlayhead();
+          this.maybeRecord(recordChannel, baseHz);
         }
         this.clockOn = on;
       }
@@ -111,6 +138,7 @@ class SequencerWorklet extends AudioWorkletProcessor {
         ((tMs % this.durationOfLoop) + this.durationOfLoop) % this.durationOfLoop;
       this.currentNote = Math.floor(phase / this.durationOfOneNote);
       this.postPlayhead();
+      this.maybeRecord(recordChannel, baseHz);
     }
 
     this.armTrigIfNeeded(seq);
